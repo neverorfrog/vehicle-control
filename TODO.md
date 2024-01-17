@@ -1,0 +1,4 @@
+- Arbritrary initial position for simulation
+- Finish Track model
+- Implement Track plotting
+- Bicycle kinematic and dynamic model

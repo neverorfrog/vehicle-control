@@ -1,12 +1,14 @@
 import sys
 sys.path.append("..")
 
-from controllers.control import *
+from simulation.simulation import *
 from modeling import *
 from modeling.trajectory import *
+from controllers.controller import *
 
 model = DifferentialDrive()
-loop = Control(model, dt=0.1)
+controller = Controller()
+loop = Simulation(model, controller, dt=0.1)
 reference = Circle()
 
 # The output will be a state/input trajectory

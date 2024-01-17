@@ -2,8 +2,9 @@ import sys
 sys.path.append("..")
 
 from modeling.kin_model import *
+from controllers.controller import Controller
 import numpy as np
-from controllers.control import Control
+from simulation.simulation import Simulation
 
 # Simulation of the system by recursively calling the discrete time dynamics
 # functions with constant velocity (both translational and rotational). This
@@ -25,8 +26,9 @@ def simulate():
     u_traj[:,0] *= 1 # translational velocity
     u_traj[:,1] *= NUMBER_OF_TURNS # rotational velocity (factor is number of turns)
 
-    # # forward simulation
-    loop = Control(model, dt)
+    # forward simulation
+    controller = Controller() #stub
+    loop = Simulation(model, controller, dt)
     for k in range(N):
         q_k = q_traj[k, :]
         u_k = u_traj[k, :]

@@ -2,13 +2,13 @@ import sys
 sys.path.append("..")
 
 from modeling.kin_model import *
-from typing import Tuple
+from controllers.controller import Controller
 import numpy as np
 
-class Control():   
-    
-    def __init__(self, model: Model, dt):
+class Simulation():   
+    def __init__(self, model: Model, controller: Controller, dt):
         self.model = model
+        self.controller = controller
         self.discrete_ode = ca.Function('discrete_ode', [model.q,model.u], [model.RK4(dt)])
         self.dt = dt
          
@@ -32,7 +32,6 @@ class Control():
         # control loop initialization
         arrived = False
         self.T = reference.T if T is None else T
-        self.forced_termination = True if T is not None else False
         self.threshold = threshold
         q_k = q_traj[-1]
         qd_k = qd_traj[-1]
@@ -40,35 +39,10 @@ class Control():
         while True:
             time.append(time[-1] + self.dt)
             if arrived or time[-1] >= T: break
-            u_k, arrived = self.command(q_k, qd_k, time[-1], reference)
+            u_k, arrived = self.controller.command(q_k, qd_k, time[-1], reference)
             q_k, qd_k = self.step(q_k,u_k)
             q_traj.append(q_k)
             qd_traj.append(qd_k)
             u_traj.append(u_k)
            
         return np.array(q_traj), np.array(u_traj)
-         
-    def command(self, q_k, qd_k, t_k, reference) -> Tuple[np.ndarray, bool]:
-        '''
-        Given the reference and current state
-        Outputs the control action given a certain control law
-        '''
-        return np.ones((2)), False
-            
-    def set_gains(self, kp = None, kd = None):
-        if kp is not None:
-            self.kp = kp
-        if kd is not None:
-            self.kd = kd
-            
-    def set_dt(self, dt):
-        self.dt = dt
-        
-    def check_termination(self, e, ed):
-        e = np.abs(e)
-        ed = np.abs(ed)
-        position_ok = all(e < self.threshold) == True
-        velocity_ok = all(ed < self.threshold) == True
-        time_ok = self.t[-1] >= self.T
-        if self.forced_termination: return time_ok
-        return time_ok and position_ok and velocity_ok

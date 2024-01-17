@@ -2,14 +2,14 @@ import sys
 sys.path.append("..")
 
 from modeling.kin_model import *
-from controllers.control import Control
 from typing import Tuple
 import numpy as np
+from controllers.controller import Controller
 
-class DFL(Control):
-    def __init__(self, model: Model, dt):
-        super().__init__(model, dt) 
-        self.v_k = 0.001 #initial condition for integrator     
+class DFL(Controller):
+    def __init__(self):
+        self.v_k = 0.01 #initial condition for integrator 
+        self.dt = 0.01 #for integration from acceleration to velocity    
                  
     def command(self, q_k, qd_k, t_k, reference) -> Tuple[np.ndarray, bool]:
         
