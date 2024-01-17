@@ -45,16 +45,6 @@ class Control():
         u_traj = np.array(u_traj)
         
         return q_traj, u_traj
-    
-    def check_termination(self, e, ed):
-        # Termination condition check
-        e = np.abs(e)
-        ed = np.abs(ed)
-        position_ok = all(e < self.threshold) == True
-        velocity_ok = all(ed < self.threshold) == True
-        time_ok = self.t[-1] >= self.T
-        if self.forced_termination: return time_ok
-        return time_ok and position_ok and velocity_ok
          
     def feedback(self) -> Tuple[np.ndarray, bool]:
         '''Needs to be implemented by subclasses'''
