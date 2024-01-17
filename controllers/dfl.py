@@ -1,18 +1,17 @@
 import sys
 sys.path.append("..")
 
-from simulation.model import *
+from modeling.kin_model import *
 from controllers.control import Control
 from typing import Tuple
 import numpy as np
-from controllers.trajectory import *
 
 class DFL(Control):
     def __init__(self, model: Model, dt):
         super().__init__(model, dt) 
         self.v_k = 0.001 #initial condition for integrator     
                  
-    def command(self, q_k, qd_k, t_k, reference: Trajectory) -> Tuple[np.ndarray, bool]:
+    def command(self, q_k, qd_k, t_k, reference) -> Tuple[np.ndarray, bool]:
         
         ref_k = reference.update(t_k)
         

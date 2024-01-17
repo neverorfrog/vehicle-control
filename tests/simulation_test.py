@@ -1,7 +1,7 @@
 import sys
 sys.path.append("..")
 
-from simulation.model import *
+from modeling.kin_model import *
 import numpy as np
 from controllers.control import Control
 
@@ -30,7 +30,8 @@ def simulate():
     for k in range(N):
         q_k = q_traj[k, :]
         u_k = u_traj[k, :]
-        q_traj[[k+1],:] = loop.step(q_k,u_k)
+        next_q, next_qd = loop.step(q_k,u_k)
+        q_traj[[k+1],:] = next_q
         
     # assert to test simulation result
     expected_final_state = [q_traj[0,0], q_traj[0,1], 2 * ca.pi * NUMBER_OF_TURNS]
@@ -39,7 +40,7 @@ def simulate():
     return q_traj, u_traj, N
 
 # Now this trajectory will be animated
-from simulation.utils import animate
+from simulation.plotting import animate
 q_traj, u_traj, N = simulate()
 animation = animate(q_traj, u_traj, state_labels=['x','y','theta'], input_labels=['v','w'])
 

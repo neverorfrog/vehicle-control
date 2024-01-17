@@ -1,7 +1,7 @@
 import sys
 sys.path.append("..")
 
-from simulation.model import *
+from modeling.kin_model import *
 from typing import Tuple
 import numpy as np
 
