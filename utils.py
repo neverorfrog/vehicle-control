@@ -38,6 +38,7 @@ def RK4(state, input, state_dot, dt, integration_steps=1):
         
 import numpy as np
 from matplotlib.gridspec import GridSpec
+from collections import deque
 
 def animate(state_traj, input_traj, state_labels, input_labels):
     # simulation params
@@ -51,13 +52,21 @@ def animate(state_traj, input_traj, state_labels, input_labels):
     ax_small1 = plt.subplot(grid[0, 1])
     ax_small2 = plt.subplot(grid[1, 1])
     
+    # last w trajectory points
+    window_size = 100
+    x_window = deque(maxlen=window_size)
+    y_window = deque(maxlen=window_size)
+    
     def update(i):
         ax_large.cla()
-        ax_large.axis((-5, 5, -2, 2))
+        ax_large.axis((-5, 5, -5, 5))
         ax_large.set_aspect('equal')
+        ax_large.grid()
         
         x,y,theta = state_traj[:,i]
-        r = 0.1
+        r = 0.2
+        x_window.append(x)
+        y_window.append(y)
         
         # Plot circular shape
         circle = plt.Circle(xy=(x,y), radius=r, edgecolor='b', facecolor='none', lw=2)
@@ -66,7 +75,9 @@ def animate(state_traj, input_traj, state_labels, input_labels):
         line_length = 1.5 * r
         line_end_x = x + line_length * np.cos(theta)
         line_end_y = y + line_length * np.sin(theta)
-        ax_large.plot([x, line_end_x], [y, line_end_y], color='r', lw=2)
+        ax_large.plot([x, line_end_x], [y, line_end_y], color='r', lw=3)
+        # Plot last window points
+        ax_large.plot(x_window,y_window)
         
         ax_small1.cla()
         ax_small1.axis((0, N, -state_max*1.1, state_max*1.1))
