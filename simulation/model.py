@@ -1,5 +1,5 @@
 import casadi as ca
-from utils import RK4, Parameters
+from simulation.utils import RK4, Parameters
 
 class Model(Parameters):
     """

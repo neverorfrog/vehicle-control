@@ -1,7 +1,7 @@
 import sys
 sys.path.append("..")
 
-from model import *
+from simulation.model import *
 import numpy as np
 
 # Simulation of the system by recursively calling the discrete time dynamics
@@ -40,7 +40,7 @@ def simulate():
 
 # Now this trajectory will be animated
 
-from utils import animate
+from simulation.utils import animate
 
 state_traj, input_traj, N = simulate()
 animation = animate(state_traj, input_traj, state_labels=['x','y','theta'], input_labels=['v','w'])
