@@ -1,15 +1,16 @@
 import casadi as ca
 
 class Model():
-    """
+    '''
         Defines the ODE of a dynamic system
         q (state), u (input):    casadi expression that have been used to define the dynamics qd
         qd (state_dot):          casadi expr defining the rhs of the ode 
-    """
+    '''
     def __init__(self, q, u, qd):
         self.q = q; self.u = u; self.qd = qd
         self.q_len = q.shape[0]
         self.u_len = u.shape[0]
+        self.transition_function = ca.Function('qdot', [q, u], [qd])
         
     def RK4(self,dt,integration_steps=10):
         '''
@@ -18,25 +19,17 @@ class Model():
         N_steps:        number of integration steps per integration interval, default:1
         '''
         h = dt/integration_steps
-        current_state = self.q
-        transition_function = ca.Function('xdot', [self.q, self.u], [self.qd])
+        current_q = self.q
         
         for _ in range(integration_steps):
-            k_1 = transition_function(current_state, self.u)
-            k_2 = transition_function(current_state + (dt/2)*k_1, self.u)
-            k_3 = transition_function(current_state + (dt/2)*k_2, self.u)
-            k_4 = transition_function(current_state + dt*k_3, self.u)
-
-            current_state += (1/6) * (k_1 + 2 * k_2 + 2 * k_3 + k_4) * h
-
-        return current_state 
+            k_1 = self.transition_function(current_q, self.u)
+            k_2 = self.transition_function(current_q + (dt/2)*k_1, self.u)
+            k_3 = self.transition_function(current_q + (dt/2)*k_2, self.u)
+            k_4 = self.transition_function(current_q + dt*k_3, self.u)
+            current_q += (1/6) * (k_1 + 2 * k_2 + 2 * k_3 + k_4) * h
+        return current_q
         
 class DifferentialDrive(Model):
-    """
-        Defines the ODE of a differential drive
-        q (state), u (input):    casadi expression that have been used to define the dynamics qd
-        qd (state_dot):      casadi expr defining the rhs of the ode 
-    """
     def __init__(self):
         # Variables
         x = ca.SX.sym('x') # q 1
