@@ -33,25 +33,49 @@ def RK4(state, input, state_dot, dt, integration_steps=1):
 
         current_state += (1/6) * (k_1 + 2 * k_2 + 2 * k_3 + k_4) * h
 
-    return current_state
+    return current_state  
+        
+import numpy as np
+from matplotlib.gridspec import GridSpec
 
-def plot_trajectory(state_traj, input_traj, state_labels, input_labels):
-    
-    plt.figure(figsize=(3, 10))
-
+def animate(state_traj, input_traj, state_labels, input_labels):
+    # simulation params
     N = input_traj.shape[1]
-    ts = np.arange(0, N+1)
-    state_len = state_traj.shape[0]
-    input_len = input_traj.shape[0]
+    state_max = max(state_traj.min(), state_traj.max(), key=abs)
+    input_max = max(input_traj.min(), input_traj.max(), key=abs)
+    
+    # figure params
+    grid = GridSpec(2, 2, width_ratios=[3, 1])
+    ax_large = plt.subplot(grid[:, 0])
+    ax_small1 = plt.subplot(grid[0, 1])
+    ax_small2 = plt.subplot(grid[1, 1])
+    
+    def update(i):
+        ax_large.cla()
+        ax_large.axis((-5, 5, -2, 2))
+        ax_large.set_aspect('equal')
+        
+        x,y,theta = state_traj[:,i]
+        r = 0.1
+        
+        # Plot circular shape
+        circle = plt.Circle(xy=(x,y), radius=r, edgecolor='b', facecolor='none', lw=2)
+        ax_large.add_patch(circle)
 
-    for j in range(state_len):
-        plt.subplot(state_len+input_len, 1, j+1)
-        plt.plot(ts, state_traj[j, :].T, '-', alpha=0.7)
-        plt.ylabel(rf'${state_labels[j]}_k$')
-        plt.grid()
+        # Plot directional tick
+        line_length = 1.5 * r
+        line_end_x = x + line_length * np.cos(theta)
+        line_end_y = y + line_length * np.sin(theta)
+        ax_large.plot([x, line_end_x], [y, line_end_y], color='r', lw=2)
+        
+        ax_small1.cla()
+        ax_small1.axis((0, N, -state_max*1.1, state_max*1.1))
+        ax_small1.plot(state_traj[:, :i].T, '-', alpha=0.7,label=state_labels)
+        ax_small1.legend()
 
-    for j in range(state_len, state_len+input_len):
-        plt.subplot(state_len+input_len, 1, j+1)
-        plt.step(ts[:-1], input_traj[j-state_len,:].T, alpha=0.7)
-        plt.ylabel(rf'${input_labels[j-state_len]}_k$')
-        plt.grid()
+        ax_small2.cla()
+        ax_small2.axis((0, N, -input_max*1.1, input_max*1.1))
+        ax_small2.plot(input_traj[:, :i].T, '-', alpha=0.7,label=input_labels)
+        ax_small2.legend()
+
+    return update
