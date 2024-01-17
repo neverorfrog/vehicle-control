@@ -1,5 +1,6 @@
 import inspect
 from math import sqrt
+from matplotlib.animation import FuncAnimation
 import matplotlib.pyplot as plt
 import numpy as np
 import matplotlib
@@ -61,7 +62,6 @@ def animate(state_traj, input_traj, state_labels, input_labels):
         # Plot circular shape
         circle = plt.Circle(xy=(x,y), radius=r, edgecolor='b', facecolor='none', lw=2)
         ax_large.add_patch(circle)
-
         # Plot directional tick
         line_length = 1.5 * r
         line_end_x = x + line_length * np.cos(theta)
@@ -78,4 +78,6 @@ def animate(state_traj, input_traj, state_labels, input_labels):
         ax_small2.plot(input_traj[:, :i].T, '-', alpha=0.7,label=input_labels)
         ax_small2.legend()
 
-    return update
+    animation = FuncAnimation(fig=plt.gcf(), func=update, frames=N+1, repeat=True, interval=0.01)
+    plt.show()  
+    return animation

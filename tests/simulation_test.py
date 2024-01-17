@@ -38,4 +38,11 @@ def simulate():
     
     return state_traj, input_traj, N
 
+# Now this trajectory will be animated
+
+from utils import animate
+
+state_traj, input_traj, N = simulate()
+animation = animate(state_traj, input_traj, state_labels=['x','y','theta'], input_labels=['v','w'])
+
     
