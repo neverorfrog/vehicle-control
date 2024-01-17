@@ -1,47 +1,59 @@
 import casadi as ca
-from simulation.utils import RK4, Parameters
 
-class Model(Parameters):
+class Model():
     """
         Defines the ODE of a dynamic system
-        state, input:   casadi expression that have been used to define the dynamics state_dot
-        state_dot:      casadi expr defining the rhs of the ode 
+        q (state), u (input):    casadi expression that have been used to define the dynamics qd
+        qd (state_dot):          casadi expr defining the rhs of the ode 
     """
-    def __init__(self, state, input, state_dot, dt, integration_steps):
-        self.save_parameters()
-        self.state_len = state.shape[0]
-        self.input_len = input.shape[0]
-        self.discrete_ode = ca.Function(
-            'discrete_ode', 
-            [state, input], 
-            [RK4(state,input,state_dot,dt,integration_steps)])
+    def __init__(self, q, u, qd):
+        self.q = q; self.u = u; self.qd = qd
+        self.q_len = q.shape[0]
+        self.u_len = u.shape[0]
         
-    def step(self, state_k, input_k):
-        """
-            - Given current (kth) state and input
-            - Applies it for dt (given in Model construction)
-            - Return numpy array of next state
-        """
-        return self.discrete_ode(state_k,input_k).full()
+    def RK4(self,dt,integration_steps=10):
+        '''
+        RK4 integrator
+        dt:             integration interval
+        N_steps:        number of integration steps per integration interval, default:1
+        '''
+        h = dt/integration_steps
+        current_state = self.q
+        transition_function = ca.Function('xdot', [self.q, self.u], [self.qd])
+        
+        for _ in range(integration_steps):
+            k_1 = transition_function(current_state, self.u)
+            k_2 = transition_function(current_state + (dt/2)*k_1, self.u)
+            k_3 = transition_function(current_state + (dt/2)*k_2, self.u)
+            k_4 = transition_function(current_state + dt*k_3, self.u)
+
+            current_state += (1/6) * (k_1 + 2 * k_2 + 2 * k_3 + k_4) * h
+
+        return current_state 
         
 class DifferentialDrive(Model):
-    def __init__(self, params: dict):
+    """
+        Defines the ODE of a differential drive
+        q (state), u (input):    casadi expression that have been used to define the dynamics qd
+        qd (state_dot):      casadi expr defining the rhs of the ode 
+    """
+    def __init__(self):
         # Variables
-        x = ca.SX.sym('x') # state 1
-        y = ca.SX.sym('y') # state 2
-        theta = ca.SX.sym('theta') # state 3
-        state = ca.vertcat(x,y,theta)
-        v = ca.SX.sym('v') # input 1
-        w = ca.SX.sym('w') # input 2
-        input = ca.vertcat(v,w)
+        x = ca.SX.sym('x') # q 1
+        y = ca.SX.sym('y') # q 2
+        theta = ca.SX.sym('theta') # q 3
+        q = ca.vertcat(x,y,theta)
+        v = ca.SX.sym('v') # u 1
+        w = ca.SX.sym('w') # u 2
+        u = ca.vertcat(v,w)
         
         # ODE
         x_dot = v * ca.cos(theta)
         y_dot = v * ca.sin(theta)
         theta_dot = w
-        state_dot = ca.vertcat(x_dot, y_dot, theta_dot)
+        qd = ca.vertcat(x_dot, y_dot, theta_dot)
         
-        super().__init__(state,input,state_dot,dt=params['dt'],integration_steps=params['integration_steps'])
+        super().__init__(q,u,qd)
   
 from enum import Enum
 class Traction(Enum):
@@ -49,18 +61,18 @@ class Traction(Enum):
     FW = 2
 
 class Bicycle(Model):
-    def __init__(self, params: dict, traction: Traction):
+    def __init__(self, traction: Traction):
         # Variables
-        x = ca.SX.sym('x') # state 1
-        y = ca.SX.sym('y') # state 2
-        theta = ca.SX.sym('theta') # state 3
-        phi = ca.SX.sym('phi') # state 4
-        state = ca.vertcat(x,y,theta,phi)
+        x = ca.SX.sym('x') # q 1
+        y = ca.SX.sym('y') # q 2
+        theta = ca.SX.sym('theta') # q 3
+        phi = ca.SX.sym('phi') # q 4
+        q = ca.vertcat(x,y,theta,phi)
         
-        # TODO
-        v = ca.SX.sym('v') # input 1
-        w = ca.SX.sym('w') # input 2
-        input = ca.vertcat(v,w)
+        # TODO Implement bicicyle kinematic model
+        v = ca.SX.sym('v') # u 1
+        w = ca.SX.sym('w') # u 2
+        u = ca.vertcat(v,w)
         
         if traction is Traction.FW:
             print("ciao")
