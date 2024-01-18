@@ -15,8 +15,8 @@ class DFL(Controller):
         
         ref_k = reference.update(t_k)
         
-        e_p = ref_k['p'] - q_k[:-1]
-        e_d = ref_k['pd'] - qd_k[:-1]
+        e_p = ref_k['p'] - q_k[:2]
+        e_d = ref_k['pd'] - qd_k[:2]
         u_k = ref_k['pdd'] + e_p*self.kp + e_d*self.kd
         
         theta = q_k[2]
