@@ -7,7 +7,7 @@ class Controller():
         Given the reference and current state
         Outputs the control action given a certain control law
         '''
-        return np.ones((2)), False
+        return np.array([1.0,0]), False
             
     def set_gains(self, kp = None, kd = None):
         if kp is not None:

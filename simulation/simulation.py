@@ -22,9 +22,9 @@ class Simulation():
         next_qd = self.robot.transition_function(next_q, u_k).full().squeeze()
         return next_q, next_qd
         
-    def run(self, reference, threshold = 0.01, T = None) -> None: 
+    def run(self, reference, threshold = 0.01, T = None, q0 : np.ndarray = None) -> None: 
         # for offline plotting
-        q_traj = [np.zeros((self.robot.q_len))]
+        q_traj = [np.zeros((self.robot.q_len))] if q0 is None else [q0]
         qd_traj = [np.zeros((self.robot.q_len))]
         u_traj = []
         time = [0]

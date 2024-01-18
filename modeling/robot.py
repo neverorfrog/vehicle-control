@@ -2,10 +2,12 @@ import casadi as ca
 from matplotlib import pyplot as plt
 from matplotlib.axes import Axes
 import numpy as np
+from modeling.util import *
+from matplotlib.transforms import Affine2D
 
 class Robot():
     '''
-        Defines the ODE of a dynamic system
+        Defines the ODE
         q (state), u (input):    casadi expression that have been used to define the dynamics qd
         qd (state_dot):          casadi expr defining the rhs of the ode 
     '''
@@ -78,6 +80,12 @@ class DifferentialDrive(Robot):
         line_end_y = y + line_length * np.sin(theta)
         axis.plot([x, line_end_x], [y, line_end_y], color='r', lw=3)
         
+        # Draw two wheels as rectangles
+        wheel_angle = wrap(theta-np.pi/2)
+        wheel_right = plt.Rectangle((x+np.cos(wheel_angle)*r, y+np.sin(wheel_angle)*r),width=0.05,height=0.15,angle=np.rad2deg(wheel_angle),facecolor='black')
+        axis.add_patch(wheel_right)
+        wheel_left = plt.Rectangle((x-np.cos(wheel_angle)*r, y-np.sin(wheel_angle)*r),width=0.05,height=0.15,angle=np.rad2deg(wheel_angle),facecolor='black')
+        axis.add_patch(wheel_left)
         return x,y  
         
 from enum import Enum
@@ -93,11 +101,13 @@ class Bicycle(Robot):
         theta = ca.SX.sym('theta') # q 3
         phi = ca.SX.sym('phi') # q 4
         q = ca.vertcat(x,y,theta,phi)
+        self.state_labels=['x','y','theta','phi']
         
         v = ca.SX.sym('v') # u 1
         w = ca.SX.sym('w') # u 2
         u = ca.vertcat(v,w)
-        
+        self.input_labels=['v','w']
+
         if traction is Traction.FW:
             print("TODO")
         elif traction is Traction.RW:
@@ -107,3 +117,33 @@ class Bicycle(Robot):
             phi_dot = w
         qd = ca.vertcat(x_dot, y_dot, theta_dot, phi_dot)
         super().__init__(q,u,qd)
+        
+    def plot(self, axis: Axes, q):
+        x,y,theta,phi = q
+        r = 0.2
+        
+        # Draw the bicycle as a rectangle
+        width = 0.5
+        height = 0.5
+        angle = wrap(theta-np.pi/2)
+        rectangle = plt.Rectangle((x-np.cos(angle)*width/2-np.cos(theta)*2*width/3, y-np.sin(angle)*height/2-np.sin(theta)*2*height/3),
+                                  width,height,edgecolor='black',alpha=0.7, angle=np.rad2deg(angle), rotation_point='xy')
+        axis.add_patch(rectangle)
+        
+        # Plot directional tick
+        line_length = 1.5 * r
+        line_end_x = x + line_length * np.cos(theta)
+        line_end_y = y + line_length * np.sin(theta)
+        axis.plot([x, line_end_x], [y, line_end_y], color='r', lw=3)
+        
+        # Draw four wheels as rectangles
+        wheel_angle = wrap(theta+phi-np.pi/2)
+        wheel_right_front = plt.Rectangle((x+np.cos(angle)*r, y+np.sin(angle)*r),width=0.05,height=0.15,angle=np.rad2deg(wheel_angle),facecolor='black')
+        axis.add_patch(wheel_right_front)
+        wheel_left_front = plt.Rectangle((x-np.cos(angle)*r, y-np.sin(angle)*r),width=0.05,height=0.15,angle=np.rad2deg(wheel_angle),facecolor='black')
+        axis.add_patch(wheel_left_front)
+        wheel_right_back = plt.Rectangle((x+np.cos(angle)*r-np.cos(theta)*2*width/3, y+np.sin(angle)*r-np.sin(theta)*2*height/3),width=0.05,height=0.15,angle=np.rad2deg(wheel_angle),facecolor='black')
+        axis.add_patch(wheel_right_back)
+        wheel_left_back = plt.Rectangle((x-np.cos(angle)*r-np.cos(theta)*2*width/3, y-np.sin(angle)*r-np.sin(theta)*2*height/3),width=0.05,height=0.15,angle=np.rad2deg(wheel_angle),facecolor='black')
+        axis.add_patch(wheel_left_back)
+        return x,y  
