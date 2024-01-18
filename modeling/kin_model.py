@@ -1,4 +1,3 @@
-from collections import deque
 import casadi as ca
 from matplotlib import pyplot as plt
 from matplotlib.axes import Axes
@@ -16,7 +15,7 @@ class Model():
         self.u_len = u.shape[0]
         self.transition_function = ca.Function('qdot', [q, u], [qd])
         
-    def plot(axis: Axes, q):
+    def plot(self, axis: Axes, q):
         '''Plots the actual shape of the robot'''
         pass
         
@@ -40,7 +39,7 @@ class Model():
 # Every model has to define
 # q, u, qd by passing it to super() constructor
 # q_labels, u_labels (for plotting purposes)
-# a plot function for the actual robot visualization
+# a plot function for the actual robot visualization that returns the plotted position
         
 class DifferentialDrive(Model):
     def __init__(self):
@@ -65,10 +64,9 @@ class DifferentialDrive(Model):
         
         super().__init__(q,u,qd)
     
-    def plot(self, axis: Axes, q, window: deque):
+    def plot(self, axis: Axes, q):
         x,y,theta = q
         r = 0.2
-        window.append([x,y])
         
         # Plot circular shape
         circle = plt.Circle(xy=(x,y), radius=r, edgecolor='b', facecolor='none', lw=2)
@@ -80,10 +78,7 @@ class DifferentialDrive(Model):
         line_end_y = y + line_length * np.sin(theta)
         axis.plot([x, line_end_x], [y, line_end_y], color='r', lw=3)
         
-        # Plot last window points
-        window_np = np.array(window)
-        axis.plot(window_np[:,0],window_np[:,1])
-        
+        return x,y  
         
 from enum import Enum
 class Traction(Enum):

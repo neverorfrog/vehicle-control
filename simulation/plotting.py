@@ -27,7 +27,12 @@ def animate(state_traj, input_traj, model: Model):
         ax_large.cla()
         ax_large.axis((-5, 5, -5, 5))
         ax_large.set_aspect('equal')
-        model.plot(ax_large, state_traj[i,:], window)
+        x,y = model.plot(ax_large, state_traj[i,:])
+        
+        # Plot last window points
+        window.append([x,y])
+        window_np = np.array(window)
+        ax_large.plot(window_np[:,0],window_np[:,1])
         ax_large.grid()
         
         ax_small1.cla()
