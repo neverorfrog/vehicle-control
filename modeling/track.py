@@ -1,7 +1,6 @@
-# taken from https://github.com/urosolia/RacingLMPC/blob/master/src/fnc/simulator/Track.py
+# adapted from https://github.com/urosolia/RacingLMPC/blob/master/src/fnc/simulator/Track.py
 from matplotlib.axes import Axes
 import numpy as np
-import matplotlib.pyplot as plt
 from modeling.trajectory import Trajectory
 from modeling.util import *
 

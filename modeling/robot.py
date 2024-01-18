@@ -3,7 +3,6 @@ from matplotlib import pyplot as plt
 from matplotlib.axes import Axes
 import numpy as np
 from modeling.util import *
-from matplotlib.transforms import Affine2D
 
 class Robot():
     '''

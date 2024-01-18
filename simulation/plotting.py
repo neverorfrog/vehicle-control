@@ -1,5 +1,4 @@
-#inspired by https://github.com/DIAG-Robotics-Lab/underactuated
-
+#adapted from https://github.com/DIAG-Robotics-Lab/underactuated
 from collections import deque
 from matplotlib.animation import FuncAnimation
 import matplotlib.pyplot as plt

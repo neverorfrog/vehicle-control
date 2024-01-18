@@ -14,8 +14,6 @@ controller.set_gains(kp=[1,1],kd=[1,1])
 loop = Simulation(robot, controller, dt=0.05)
 reference = Track(freq=0.05)
 
-# TODO complete test (track reference)
-
 # The output will be a state/input trajectory
 q_traj, u_traj, ref_traj = loop.run(reference=reference, T = 10*ca.pi, q0 = q0)
 from simulation.plotting import animate
