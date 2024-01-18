@@ -1,28 +1,37 @@
 # taken from https://github.com/urosolia/RacingLMPC/blob/master/src/fnc/simulator/Track.py
-
 import numpy as np
-import numpy.linalg as la
 import matplotlib.pyplot as plt
 from util import *
 
+# A track is specified by a series of segments defined as the tuple [length,
+# radius of curvature]. Given these segments we compute the (x, y) points of the
+# track and the angle of the tangent vector (psi) at these points. For each
+# segment we compute the (x, y, psi) coordinate at the last point of the
+# segment. Furthermore, we compute also the cumulative s at the starting point
+# of the segment at signed curvature In the end each segment will be defined by
+# a tuple point_tangent = [x, y, psi, cumulative s, segment length, signed curvature]
+ippodromo = lambda curve_length: np.array([
+                [3.0, 0], 
+                [curve_length, curve_length / np.pi],
+                [3.0, 0],
+                [curve_length, curve_length / np.pi]]) 
+
+goggle = lambda curve_length: np.array([
+                [1.0, 0],
+                [curve_length, curve_length / np.pi],
+                # Note s = 1 * np.pi / 2 and r = -1 ---> Angle spanned = np.pi / 2
+                [curve_length / 2, -curve_length / np.pi],
+                [curve_length, curve_length / np.pi],
+                [curve_length / np.pi * 2, 0],
+                [curve_length / 2, curve_length / np.pi]])
+
 class Track():
-    def __init__(self):
+    def __init__(self, freq=0.5):
         self.half_width = 0.4
         self.slack = 0.45
         curve_length = 4.5
-        self.spec = np.array([[1.0, 0], # [length, radius of curvature]
-                         [curve_length, curve_length / np.pi],
-                         # Note s = 1 * np.pi / 2 and r = -1 ---> Angle spanned = np.pi / 2
-                         [curve_length / 2, -curve_length / np.pi],
-                         [curve_length, curve_length / np.pi],
-                         [curve_length / np.pi * 2, 0],
-                         [curve_length / 2, curve_length / np.pi]])        
-        # Now given the above segments we compute the (x, y) points of the track and
-        # the angle of the tangent vector (psi) at these points. For each segment we
-        # compute the (x, y, psi) coordinate at the last point of the segment.
-        # Furthermore, we compute also the cumulative s at the starting point of the
-        # segment at signed curvature 
-        # point_tangent = [x, y, psi, cumulative s, segment length, signed curvature]
+        self.freq = freq
+        self.spec = ippodromo(curve_length)       
         point_tangent = np.zeros((self.spec.shape[0] + 1, 6))
         for i in range(0, self.spec.shape[0]):
             if self.spec[i, 1] == 0.0: # current segment is a straight line
@@ -43,7 +52,12 @@ class Track():
         # wrapping up
         self.track_length = point_tangent[-1, 3] + point_tangent[-1, 4] 
         self.point_tangent = point_tangent
-                
+    
+    def update(self,t): # TODO
+        p = self.getGlobalPosition(t/self.T * self.track_length, 0)
+        pd = 0
+        pdd = 0
+        return {'p': p, 'pd':pd , 'pdd':pdd}    
         
     def straight_line(self,i, point_tangent):
         l = self.spec[i, 0] # Length of the segments
@@ -88,7 +102,7 @@ class Track():
         return new_line
     
     def getGlobalPosition(self, s, ey):
-        """coordinate transformation from curvilinear reference frame (e, ey) to inertial reference frame (X, Y)
+        """coordinate transformation from curvilinear reference frame (s, ey) to inertial reference frame (X, Y)
         (s, ey): position in the curvilinear reference frame
         """
 
@@ -98,8 +112,9 @@ class Track():
 
         # Compute the segment in which system is evolving
         point_tangent = self.point_tangent
-        index = np.all([[s >= point_tangent[:, 3]], [s < point_tangent[:, 3] + point_tangent[:, 4]]], axis=0)
-        i = int(np.where(np.squeeze(index))[0][0])
+        conditions = np.array([ [s >= point_tangent[:, 3]] , [s < point_tangent[:, 3] + point_tangent[:, 4]] ]).squeeze()
+        index = np.where(np.all(conditions, axis = 0))[0]
+        i = 0 if len(index) < 1 else int(index.item()) # TODO better solution?
         
         if point_tangent[i, 5] == 0.0:  # If segment is a straight line
             # Extract the first final and initial point of the segment
@@ -119,39 +134,34 @@ class Track():
         else:
             r = 1 / point_tangent[i, 5]  # Extract curvature
             ang = point_tangent[i - 1, 2]  # Extract angle of the tangent at the initial point (i-1)
+            
             # Compute the center of the arc
             direction = sign(r)
-
-            CenterX = point_tangent[i - 1, 0] \
-                      + np.abs(r) * np.cos(ang + direction * np.pi / 2)  # x coordinate center of circle
-            CenterY = point_tangent[i - 1, 1] \
-                      + np.abs(r) * np.sin(ang + direction * np.pi / 2)  # y coordinate center of circle
-
+            center_x = point_tangent[i - 1, 0] + np.abs(r) * np.cos(ang + direction * np.pi / 2)  # x coordinate center of circle
+            center_y = point_tangent[i - 1, 1] + np.abs(r) * np.sin(ang + direction * np.pi / 2)  # y coordinate center of circle
+            
             spanAng = (s - point_tangent[i, 3]) / (np.pi * np.abs(r)) * np.pi
-
             angleNormal = wrap((direction * np.pi / 2 + ang))
             angle = -(np.pi - np.abs(angleNormal)) * (sign(angleNormal))
-
-            x = CenterX + (np.abs(r) - direction * ey) * np.cos(
-                angle + direction * spanAng)  # x coordinate of the last point of the segment
-            y = CenterY + (np.abs(r) - direction * ey) * np.sin(
-                angle + direction * spanAng)  # y coordinate of the last point of the segment
+            x = center_x + (np.abs(r) - direction * ey) * np.cos(angle + direction * spanAng)  # x coordinate of the last point of the segment
+            y = center_y + (np.abs(r) - direction * ey) * np.sin(angle + direction * spanAng)  # y coordinate of the last point of the segment
         return x,y
     
 if __name__ == "__main__":
     track = Track()
-    Points = int(np.floor(10 * (track.point_tangent[-1, 3] + track.point_tangent[-1, 4])))
-    Points1 = np.zeros((Points, 2))
-    Points2 = np.zeros((Points, 2))
-    Points0 = np.zeros((Points, 2))
-    for i in range(0, int(Points)):
-        Points1[i, :] = track.getGlobalPosition(i * 0.1, track.half_width)
-        Points2[i, :] = track.getGlobalPosition(i * 0.1, -track.half_width)
-        Points0[i, :] = track.getGlobalPosition(i * 0.1, 0)
+    # global_pos = track.update(6.05) 
+    points = int(np.floor(10 * (track.point_tangent[-1, 3] + track.point_tangent[-1, 4])))
+    right_limit_points = np.zeros((points, 2))
+    left_limit_points = np.zeros((points, 2))
+    center_points = np.zeros((points, 2))
+    for i in range(0, int(points)):
+        left_limit_points[i, :] = track.getGlobalPosition(i * 0.1, track.half_width)
+        right_limit_points[i, :] = track.getGlobalPosition(i * 0.1, -track.half_width)
+        center_points[i, :] = track.getGlobalPosition(i * 0.1, 0)
         
     plt.figure()
     plt.plot(track.point_tangent[:, 0], track.point_tangent[:, 1], 'o')
-    plt.plot(Points0[:, 0], Points0[:, 1], '--')
-    plt.plot(Points1[:, 0], Points1[:, 1], '-b')
-    plt.plot(Points2[:, 0], Points2[:, 1], '-b')
+    plt.plot(center_points[:, 0], center_points[:, 1], '--')
+    plt.plot(left_limit_points[:, 0], left_limit_points[:, 1], '-b')
+    plt.plot(right_limit_points[:, 0], right_limit_points[:, 1], '-b')
     plt.show()

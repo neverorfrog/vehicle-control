@@ -9,7 +9,7 @@ class Trajectory():
             t, time, s
         Outputs
             flat_output, a dict describing the present desired flat outputs with keys
-                p_d,        position, m
+                p_d,     position, m
                 pd_d,    velocity, m/s
                 pdd_d,   acceleration, m/s**2
         '''
@@ -39,4 +39,4 @@ class Circle(Trajectory):
                             self.radius*self.omega*np.cos(self.omega*t)])
         pdd   = np.array([-self.radius*((self.omega)**2)*np.cos(self.omega*t),
                             -self.radius*((self.omega)**2)*np.sin(self.omega*t)])
-        return { 'p': p, 'pd':pd , 'pdd':pdd}
+        return {'p': p, 'pd':pd , 'pdd':pdd}
