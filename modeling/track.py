@@ -1,7 +1,8 @@
 # taken from https://github.com/urosolia/RacingLMPC/blob/master/src/fnc/simulator/Track.py
+from matplotlib.axes import Axes
 import numpy as np
 import matplotlib.pyplot as plt
-from util import *
+from modeling.util import *
 
 # A track is specified by a series of segments defined as the tuple [length,
 # radius of curvature]. Given these segments we compute the (x, y) points of the
@@ -147,21 +148,23 @@ class Track():
             y = center_y + (np.abs(r) - direction * ey) * np.sin(angle + direction * spanAng)  # y coordinate of the last point of the segment
         return x,y
     
+    def plot(self, axis: Axes):
+        points = int(np.floor(10 * (self.point_tangent[-1, 3] + self.point_tangent[-1, 4])))
+        right_limit_points = np.zeros((points, 2))
+        left_limit_points = np.zeros((points, 2))
+        center_points = np.zeros((points, 2))
+        for i in range(0, int(points)):
+            left_limit_points[i, :] = self.getGlobalPosition(i * 0.1, self.half_width)
+            right_limit_points[i, :] = self.getGlobalPosition(i * 0.1, -self.half_width)
+            center_points[i, :] = self.getGlobalPosition(i * 0.1, 0)
+            
+        axis.plot(self.point_tangent[:, 0], self.point_tangent[:, 1], 'o')
+        axis.plot(center_points[:, 0], center_points[:, 1], '--')
+        axis.plot(left_limit_points[:, 0], left_limit_points[:, 1], '-b')
+        axis.plot(right_limit_points[:, 0], right_limit_points[:, 1], '-b')
+        
+    
 if __name__ == "__main__":
     track = Track()
     # global_pos = track.update(6.05) 
-    points = int(np.floor(10 * (track.point_tangent[-1, 3] + track.point_tangent[-1, 4])))
-    right_limit_points = np.zeros((points, 2))
-    left_limit_points = np.zeros((points, 2))
-    center_points = np.zeros((points, 2))
-    for i in range(0, int(points)):
-        left_limit_points[i, :] = track.getGlobalPosition(i * 0.1, track.half_width)
-        right_limit_points[i, :] = track.getGlobalPosition(i * 0.1, -track.half_width)
-        center_points[i, :] = track.getGlobalPosition(i * 0.1, 0)
-        
-    plt.figure()
-    plt.plot(track.point_tangent[:, 0], track.point_tangent[:, 1], 'o')
-    plt.plot(center_points[:, 0], center_points[:, 1], '--')
-    plt.plot(left_limit_points[:, 0], left_limit_points[:, 1], '-b')
-    plt.plot(right_limit_points[:, 0], right_limit_points[:, 1], '-b')
-    plt.show()
+   

@@ -4,6 +4,7 @@ sys.path.append("..")
 from modeling.robot import *
 from controllers.controller import Controller
 import numpy as np
+from modeling.util import wrap
 
 class Simulation():   
     def __init__(self, robot: Robot, controller: Controller, dt):
@@ -19,6 +20,7 @@ class Simulation():
             - Return numpy array of next q
         """
         next_q = self.discrete_ode(q_k,u_k).full().squeeze()
+        next_q[2] = wrap(next_q[2]) # TODO better solution?
         next_qd = self.robot.transition_function(next_q, u_k).full().squeeze()
         return next_q, next_qd
         

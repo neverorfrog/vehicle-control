@@ -6,8 +6,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.gridspec import GridSpec
 from modeling.robot import Robot
+from modeling.track import Track
 
-def animate(state_traj, input_traj, robot: Robot):
+def animate(state_traj, input_traj, robot: Robot, track: Track = None):
     # simulation params
     N = input_traj.shape[0]
     state_max = max(state_traj.min(), state_traj.max(), key=abs)
@@ -34,6 +35,10 @@ def animate(state_traj, input_traj, robot: Robot):
         window_np = np.array(window)
         ax_large.plot(window_np[:,0],window_np[:,1])
         ax_large.grid()
+        
+        # Plot track
+        if track is not None:
+            track.plot(ax_large)
         
         ax_small1.cla()
         ax_small1.axis((0, N, -state_max*1.1, state_max*1.1))
