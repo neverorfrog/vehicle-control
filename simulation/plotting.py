@@ -5,9 +5,9 @@ from matplotlib.animation import FuncAnimation
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.gridspec import GridSpec
-from modeling.kin_model import Model
+from modeling.robot import Robot
 
-def animate(state_traj, input_traj, model: Model):
+def animate(state_traj, input_traj, robot: Robot):
     # simulation params
     N = input_traj.shape[0]
     state_max = max(state_traj.min(), state_traj.max(), key=abs)
@@ -27,7 +27,7 @@ def animate(state_traj, input_traj, model: Model):
         ax_large.cla()
         ax_large.axis((-5, 5, -5, 5))
         ax_large.set_aspect('equal')
-        x,y = model.plot(ax_large, state_traj[i,:])
+        x,y = robot.plot(ax_large, state_traj[i,:])
         
         # Plot last window points
         window.append([x,y])
@@ -37,12 +37,12 @@ def animate(state_traj, input_traj, model: Model):
         
         ax_small1.cla()
         ax_small1.axis((0, N, -state_max*1.1, state_max*1.1))
-        ax_small1.plot(state_traj[:i, :], '-', alpha=0.7,label=model.state_labels)
+        ax_small1.plot(state_traj[:i, :], '-', alpha=0.7,label=robot.state_labels)
         ax_small1.legend()
 
         ax_small2.cla()
         ax_small2.axis((0, N, -input_max*1.1, input_max*1.1))
-        ax_small2.plot(input_traj[:i, :], '-', alpha=0.7,label=model.input_labels)
+        ax_small2.plot(input_traj[:i, :], '-', alpha=0.7,label=robot.input_labels)
         ax_small2.legend()
 
     animation = FuncAnimation(fig=plt.gcf(), func=update, frames=N+1, repeat=True, interval=0.01)

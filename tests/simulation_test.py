@@ -1,7 +1,7 @@
 import sys
 sys.path.append("..")
 
-from modeling.kin_model import *
+from modeling.robot import *
 from controllers.controller import Controller
 import numpy as np
 from simulation.simulation import Simulation
@@ -15,10 +15,10 @@ from simulation.simulation import Simulation
 dt = 0.1
 
 def simulate():
-    model = DifferentialDrive()
+    robot = DifferentialDrive()
     N = int(ca.floor((2*ca.pi)/dt)) # number of steps (enough to do a full turn)
-    q_traj  = np.zeros((N+1, model.q_len)) # preallocate array for the state trajectory
-    u_traj  = np.ones((N, model.u_len)) # define (constant) action trajectory
+    q_traj  = np.zeros((N+1, robot.q_len)) # preallocate array for the state trajectory
+    u_traj  = np.ones((N, robot.u_len)) # define (constant) action trajectory
     q_traj[0, :]  = np.array([0., -0.5, 0.]) # initial state
     
     # # Arbitrary velocity
@@ -28,7 +28,7 @@ def simulate():
 
     # forward simulation
     controller = Controller() #stub
-    loop = Simulation(model, controller, dt)
+    loop = Simulation(robot, controller, dt)
     for k in range(N):
         q_k = q_traj[k, :]
         u_k = u_traj[k, :]

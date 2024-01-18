@@ -1,31 +1,31 @@
 import sys
 sys.path.append("..")
 
-from modeling.kin_model import *
+from modeling.robot import *
 from controllers.controller import Controller
 import numpy as np
 
 class Simulation():   
-    def __init__(self, model: Model, controller: Controller, dt):
-        self.model = model
+    def __init__(self, robot: Robot, controller: Controller, dt):
+        self.robot = robot
         self.controller = controller
-        self.discrete_ode = ca.Function('discrete_ode', [model.q,model.u], [model.RK4(dt)])
+        self.discrete_ode = ca.Function('discrete_ode', [robot.q,robot.u], [robot.RK4(dt)])
         self.dt = dt
          
     def step(self, q_k, u_k):
         """
             - Given current (kth) q and u
-            - Applies it for dt (given in Model construction)
+            - Applies it for dt (given in Robot construction)
             - Return numpy array of next q
         """
         next_q = self.discrete_ode(q_k,u_k).full().squeeze()
-        next_qd = self.model.transition_function(next_q, u_k).full().squeeze()
+        next_qd = self.robot.transition_function(next_q, u_k).full().squeeze()
         return next_q, next_qd
         
     def run(self, reference, threshold = 0.01, T = None) -> None: 
         # for offline plotting
-        q_traj = [np.zeros((self.model.q_len))]
-        qd_traj = [np.zeros((self.model.q_len))]
+        q_traj = [np.zeros((self.robot.q_len))]
+        qd_traj = [np.zeros((self.robot.q_len))]
         u_traj = []
         time = [0]
         

@@ -3,7 +3,7 @@ from matplotlib import pyplot as plt
 from matplotlib.axes import Axes
 import numpy as np
 
-class Model():
+class Robot():
     '''
         Defines the ODE of a dynamic system
         q (state), u (input):    casadi expression that have been used to define the dynamics qd
@@ -36,12 +36,12 @@ class Model():
             current_q += (1/6) * (k_1 + 2 * k_2 + 2 * k_3 + k_4) * h
         return current_q
     
-# Every model has to define
+# Every robot has to define
 # q, u, qd by passing it to super() constructor
 # q_labels, u_labels (for plotting purposes)
 # a plot function for the actual robot visualization that returns the plotted position
         
-class DifferentialDrive(Model):
+class DifferentialDrive(Robot):
     def __init__(self):
         # state
         x = ca.SX.sym('x') # q 1
@@ -85,7 +85,7 @@ class Traction(Enum):
     RW = 1
     FW = 2
 
-class Bicycle(Model):
+class Bicycle(Robot):
     def __init__(self, l: float = 0.5, traction: Traction = Traction.RW):
         # Variables
         x = ca.SX.sym('x') # q 1

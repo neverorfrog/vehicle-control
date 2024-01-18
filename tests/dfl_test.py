@@ -6,10 +6,10 @@ from modeling import *
 from modeling.trajectory import *
 from controllers.dfl import DFL
 
-model = DifferentialDrive()
+robot = DifferentialDrive()
 controller = DFL()
 controller.set_gains(kp=[1,1],kd=[1,1])
-loop = Simulation(model, controller, dt=0.05)
+loop = Simulation(robot, controller, dt=0.05)
 reference = Circle(freq=0.1)
 
 # The output will be a state/input trajectory

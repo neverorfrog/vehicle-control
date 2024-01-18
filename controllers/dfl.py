@@ -1,7 +1,7 @@
 import sys
 sys.path.append("..")
 
-from modeling.kin_model import *
+from modeling.robot import *
 from typing import Tuple
 import numpy as np
 from controllers.controller import Controller
