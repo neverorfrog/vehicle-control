@@ -28,6 +28,7 @@ class Simulation():
         # for offline plotting
         q_traj = [np.zeros((self.robot.q_len))] if q0 is None else [q0]
         qd_traj = [np.zeros((self.robot.q_len))]
+        ref_traj = [reference.update(0)['p']]
         u_traj = []
         time = [0]
         
@@ -41,10 +42,16 @@ class Simulation():
         while True:
             time.append(time[-1] + self.dt)
             if arrived or time[-1] >= T: break
-            u_k, arrived = self.controller.command(q_k, qd_k, time[-1], reference)
+            ref_k = reference.update(time[-1])
+            
+            #applying control signal
+            u_k, arrived = self.controller.command(q_k, qd_k, ref_k)
             q_k, qd_k = self.step(q_k,u_k)
+            
+            #logging
             q_traj.append(q_k)
             qd_traj.append(qd_k)
             u_traj.append(u_k)
+            ref_traj.append(ref_k['p'])
            
-        return np.array(q_traj), np.array(u_traj)
+        return np.array(q_traj), np.array(u_traj), np.array(ref_traj)

@@ -2,6 +2,7 @@
 from matplotlib.axes import Axes
 import numpy as np
 import matplotlib.pyplot as plt
+from modeling.trajectory import Trajectory
 from modeling.util import *
 
 # A track is specified by a series of segments defined as the tuple [length,
@@ -26,7 +27,7 @@ goggle = lambda curve_length: np.array([
                 [curve_length / np.pi * 2, 0],
                 [curve_length / 2, curve_length / np.pi]])
 
-class Track():
+class Track(Trajectory):
     def __init__(self, freq=0.5):
         self.half_width = 0.4
         self.slack = 0.45
@@ -55,7 +56,7 @@ class Track():
         self.point_tangent = point_tangent
     
     def update(self,t): # TODO
-        p = self.getGlobalPosition(t/self.T * self.track_length, 0)
+        p = self.getGlobalPosition(t * self.freq * self.track_length, 0)
         pd = 0
         pdd = 0
         return {'p': p, 'pd':pd , 'pdd':pdd}    
@@ -146,7 +147,7 @@ class Track():
             angle = -(np.pi - np.abs(angleNormal)) * (sign(angleNormal))
             x = center_x + (np.abs(r) - direction * ey) * np.cos(angle + direction * spanAng)  # x coordinate of the last point of the segment
             y = center_y + (np.abs(r) - direction * ey) * np.sin(angle + direction * spanAng)  # y coordinate of the last point of the segment
-        return x,y
+        return np.array([x,y])
     
     def plot(self, axis: Axes):
         points = int(np.floor(10 * (self.point_tangent[-1, 3] + self.point_tangent[-1, 4])))

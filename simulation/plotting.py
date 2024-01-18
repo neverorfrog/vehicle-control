@@ -8,7 +8,7 @@ from matplotlib.gridspec import GridSpec
 from modeling.robot import Robot
 from modeling.track import Track
 
-def animate(state_traj, input_traj, robot: Robot, track: Track = None):
+def animate(state_traj, input_traj, ref_traj, robot: Robot, track: Track = None):
     # simulation params
     N = input_traj.shape[0]
     state_max = max(state_traj.min(), state_traj.max(), key=abs)
@@ -23,6 +23,7 @@ def animate(state_traj, input_traj, robot: Robot, track: Track = None):
     # last w trajectory points
     window_size = 100
     window = deque(maxlen=window_size)
+    ref_window = deque(maxlen=window_size)
     
     def update(i):
         ax_large.cla()
@@ -32,8 +33,11 @@ def animate(state_traj, input_traj, robot: Robot, track: Track = None):
         
         # Plot last window points
         window.append([x,y])
+        ref_window.append(ref_traj[i,:])
         window_np = np.array(window)
-        ax_large.plot(window_np[:,0],window_np[:,1])
+        ref_window_np = np.array(ref_window)
+        ax_large.plot(window_np[:,0],window_np[:,1],"k")
+        ax_large.plot(ref_window_np[:,0],ref_window_np[:,1],"b")
         ax_large.grid()
         
         # Plot track

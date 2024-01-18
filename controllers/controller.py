@@ -2,11 +2,15 @@ import numpy as np
 from typing import Tuple
 
 class Controller():
-    def command(self, q_k, qd_k, t_k, reference) -> Tuple[np.ndarray, bool]:
-        '''
-        - Given the reference and current state
-        - Outputs the control action given a certain control law
-        '''
+    def command(self, q_k, qd_k, ref_k) -> Tuple[np.ndarray, bool]:
+        """Compute the control actions
+        Args:
+            q_k (np.array): current state
+            qd_k (np.array): current derivative of the state
+            ref_k (dict): current reference 
+        Returns:
+            (np.array, bool): control actions and terminated condition
+        """
         return np.array([1.0,0]), False
             
     def set_gains(self, kp = None, kd = None):
