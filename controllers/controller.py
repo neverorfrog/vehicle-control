@@ -4,8 +4,8 @@ from typing import Tuple
 class Controller():
     def command(self, q_k, qd_k, t_k, reference) -> Tuple[np.ndarray, bool]:
         '''
-        Given the reference and current state
-        Outputs the control action given a certain control law
+        - Given the reference and current state
+        - Outputs the control action given a certain control law
         '''
         return np.array([1.0,0]), False
             
