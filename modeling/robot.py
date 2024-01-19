@@ -94,6 +94,8 @@ class Traction(Enum):
 
 class Bicycle(Robot):
     def __init__(self, l: float = 0.5, traction: Traction = Traction.RW):
+        self.l = l
+        self.traction = traction
         # Variables
         x = ca.SX.sym('x') # q 1
         y = ca.SX.sym('y') # q 2
