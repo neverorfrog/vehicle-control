@@ -48,7 +48,7 @@ class Simulation():
             ref_k = self.reference.update(time[-1])
             
             # applying control signal
-            u_k = self.controller.command(q_k, qd_k, ref_k)
+            u_k = self.controller.command(q_k, qd_k, time[-1], self.reference)
             q_k, qd_k = self.step(q_k,u_k)
             
             # logging

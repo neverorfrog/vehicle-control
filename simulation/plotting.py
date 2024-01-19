@@ -54,6 +54,6 @@ def animate(state_traj, input_traj, ref_traj, robot: Robot, track: Track = None)
         ax_small2.plot(input_traj[:i, :], '-', alpha=0.7,label=robot.input_labels)
         ax_small2.legend()
 
-    animation = FuncAnimation(fig=plt.gcf(), func=update, frames=N+1, repeat=False, interval=0.01)
+    animation = FuncAnimation(fig=plt.gcf(), func=update, frames=N+1, repeat=True, interval=0.01)
     plt.show()  
     return animation
