@@ -162,9 +162,4 @@ class Track(Trajectory):
         axis.plot(center_points[:, 0], center_points[:, 1], '--')
         axis.plot(left_limit_points[:, 0], left_limit_points[:, 1], '-b')
         axis.plot(right_limit_points[:, 0], right_limit_points[:, 1], '-b')
-        
-    
-if __name__ == "__main__":
-    track = Track()
-    # global_pos = track.update(6.05) 
    

@@ -5,7 +5,6 @@ from modeling.robot import *
 from typing import Tuple
 import numpy as np
 from controllers.controller import Controller
-from modeling.trajectory import Trajectory
 from numpy import sin,cos,tan
 
 class FBL(Controller):

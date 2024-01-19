@@ -17,7 +17,7 @@ loop = Simulation(dt=0.1, robot=robot, controller=controller, reference=track)
 
 q_traj, u_traj, ref_traj = loop.run(
     T = 50, 
-    q0 = np.array([0,0,0,0]),
-    qd0=np.array([0,0,0,0]))
+    q0 = np.array([0,0,0,np.pi/6]),
+    qd0=np.array([-1,0,0,3]))
 
 animation = animate(q_traj, u_traj, ref_traj, robot, track)
