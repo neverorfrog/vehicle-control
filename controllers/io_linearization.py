@@ -68,8 +68,9 @@ class BicycleFBL(Controller):
 
 # TODO acceleration input works well that way?
 class DFBL(Controller):
-    def __init__(self):
-        self.v_k = 0.1 #initial condition for integrator 
+    def __init__(self, kp: np.ndarray, kd: np.ndarray):
+        super().__init__(kp, kd)
+        self.v_k = 0.05 #initial condition for integrator 
         self.dt = 0.01 #for integration from acceleration to velocity    
                  
     def command(self, q_k, qd_k, ref_k) -> Tuple[np.ndarray]:
