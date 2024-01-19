@@ -22,8 +22,10 @@ class MPC(Controller):
         
         
         # -------------------- Decision Variables with Initialization ---------------------
-        self.X = self.opti.variable(model.q_len, self.N+1) # predicte state trajectory
-        self.U = self.opti.variable(model.u_len, self.N)   # predicted control trajectory
+        self.X = self.opti.variable(model.q_len, self.N+1) # predicte state trajectory var
+        self.U = self.opti.variable(model.u_len, self.N)   # predicted control trajectory var
+        self.X_pred = np.zeros((model.q_len, self.N+1)) # actual predicte state trajectory
+        self.U_pred = np.zeros((model.u_len, self.N))   # actual predicted control trajectory
         self.x0 = self.opti.parameter(model.q_len)
         self.opti.subject_to(self.X[:,0] == self.x0) # constraint on initial state
         self.x = self.X[0,:]
@@ -40,8 +42,9 @@ class MPC(Controller):
             
             
         # -------------------- Input Constraints ------------------------------------------
-        self.v_max = 2.0
-        self.w_max = 2.0
+        self.v_max = 10.0
+        self.w_max = 10.0
+        self.u_k = np.array([0., 0.])
         for k in range(self.N): # loop over control intervals
             #linear velocity
             self.opti.subject_to(self.U[0,k] <= self.v_max)
@@ -59,13 +62,19 @@ class MPC(Controller):
         for k in range(1, self.N):
             ref_k = self.ref[:,k-1]
             cost =  self.wpos*ca.sumsqr(self.X[0,:]-ref_k[0]) + self.wpos*ca.sumsqr(self.X[1,:]-ref_k[1])
-        cost += self.wu*ca.sumsqr(self.U[:,0]) + self.wu*ca.sumsqr(self.U[:,1])
+        # cost += self.wu*ca.sumsqr(self.U[:,0]) + self.wu*ca.sumsqr(self.U[:,1])
         self.opti.minimize(cost)
         
         
         
     def command(self, q_k, qd_k, t_k, reference: Trajectory):
-        self.opti.set_value(self.x0, q_k) # every horizon, the current state is the initial predictions
+        
+        # every new horizon, the current state is the initial prediction
+        self.opti.set_value(self.x0, q_k) 
+        self.opti.set_initial(self.U, self.U_pred)
+        self.opti.set_initial(self.X, self.X_pred)
+        
+        # obtaining reference TODO solution that does not need time
         ref = np.zeros([2,self.N+1])
         for j in range(self.N):
             t_j = t_k + self.dt 
@@ -74,6 +83,6 @@ class MPC(Controller):
         
         self.opti.set_value(self.ref, ref)
         sol = self.opti.solve()
-        v = sol.value(self.U)[0]
-        w = sol.value(self.U)[1]
-        return np.array([v[0],w[0]])
+        self.U_pred = sol.value(self.U)
+        self.X_pred = sol.value(self.X)
+        return np.array([self.U_pred[0][0],self.U_pred[1][0]])
