@@ -55,7 +55,7 @@ class Track(Trajectory):
         self.point_tangent = point_tangent
     
     def update(self,t): # TODO
-        p = self.getGlobalPosition(t * self.freq * self.track_length, 0)
+        p = self.get_global_position(t * self.freq * self.track_length, 0)
         pd = 0
         pdd = 0
         return {'p': p, 'pd':pd , 'pdd':pdd}    
@@ -102,7 +102,7 @@ class Track(Trajectory):
         
         return new_line
     
-    def getGlobalPosition(self, s, ey):
+    def get_global_position(self, s, ey):
         """coordinate transformation from curvilinear reference frame (s, ey) to inertial reference frame (X, Y)
         (s, ey): position in the curvilinear reference frame
         """
@@ -148,15 +148,35 @@ class Track(Trajectory):
             y = center_y + (np.abs(r) - direction * ey) * np.sin(angle + direction * spanAng)  # y coordinate of the last point of the segment
         return np.array([x,y])
     
+    def get_curvature(self, s):
+        """curvature computation
+        s: curvilinear abscissa at which the curvature has to be evaluated
+        """
+        point_tangent = self.point_tangent
+        track_length = point_tangent[-1,3]+point_tangent[-1,4]
+
+        # In case on a lap after the first one
+        while (s > track_length):
+            s = s - track_length
+
+        # Given s \in [0, TrackLength] compute the curvature
+        # Compute the segment in which system is evolving
+        index = np.all([[s >= point_tangent[:, 3]], [s < point_tangent[:, 3] + point_tangent[:, 4]]], axis=0)
+
+        i = int(np.where(np.squeeze(index))[0])
+        curvature = self.PointAndTangent[i, 5]
+
+        return curvature
+    
     def plot(self, axis: Axes):
         points = int(np.floor(10 * (self.point_tangent[-1, 3] + self.point_tangent[-1, 4])))
         right_limit_points = np.zeros((points, 2))
         left_limit_points = np.zeros((points, 2))
         center_points = np.zeros((points, 2))
         for i in range(0, int(points)):
-            left_limit_points[i, :] = self.getGlobalPosition(i * 0.1, self.half_width)
-            right_limit_points[i, :] = self.getGlobalPosition(i * 0.1, -self.half_width)
-            center_points[i, :] = self.getGlobalPosition(i * 0.1, 0)
+            left_limit_points[i, :] = self.get_global_position(i * 0.1, self.half_width)
+            right_limit_points[i, :] = self.get_global_position(i * 0.1, -self.half_width)
+            center_points[i, :] = self.get_global_position(i * 0.1, 0)
             
         axis.plot(self.point_tangent[:, 0], self.point_tangent[:, 1], 'o')
         axis.plot(center_points[:, 0], center_points[:, 1], '--')
