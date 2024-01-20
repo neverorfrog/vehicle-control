@@ -9,7 +9,6 @@ from modeling.robot import *
 import casadi as ca
 import numpy as np
 from controllers.controller import Controller
-from numpy import sin,cos,tan
 
 class MPC(Controller):
     def __init__(self, horizon, dt, model: Robot):
@@ -28,9 +27,6 @@ class MPC(Controller):
         self.U_pred = np.zeros((model.u_len, self.N))   # actual predicted control trajectory
         self.x0 = self.opti.parameter(model.q_len)
         self.opti.subject_to(self.X[:,0] == self.x0) # constraint on initial state
-        self.x = self.X[0,:]
-        self.y = self.X[1,:]
-        self.theta = self.X[2,:]
         
         
         # -------------------- Model Constraints (ODE) ------------------------------------
@@ -68,8 +64,7 @@ class MPC(Controller):
         
         
     def command(self, q_k, qd_k, t_k, reference: Trajectory):
-        
-        # every new horizon, the current state is the initial prediction
+        # every new horizon, the current state (and the last prediction) is the initial prediction
         self.opti.set_value(self.x0, q_k) 
         self.opti.set_initial(self.U, self.U_pred)
         self.opti.set_initial(self.X, self.X_pred)
@@ -80,8 +75,9 @@ class MPC(Controller):
             t_j = t_k + self.dt 
             ref_j = reference.update(t_j)
             ref[:,j] = ref_j['p']
-        
         self.opti.set_value(self.ref, ref)
+        
+        # obtaining the solution by solving the NLP
         sol = self.opti.solve()
         self.U_pred = sol.value(self.U)
         self.X_pred = sol.value(self.X)

@@ -46,12 +46,12 @@ def animate(state_traj, input_traj, ref_traj, robot: Robot, track: Track = None)
         
         ax_small1.cla()
         ax_small1.axis((0, N, -state_max*1.1, state_max*1.1))
-        ax_small1.plot(state_traj[:i, :], '-', alpha=0.7,label=robot.state_labels)
+        ax_small1.plot(state_traj[:i, :3], '-', alpha=0.7,label=['x','y',r'$\theta$'])
         ax_small1.legend()
 
         ax_small2.cla()
         ax_small2.axis((0, N, -input_max*1.1, input_max*1.1))
-        ax_small2.plot(input_traj[:i, :], '-', alpha=0.7,label=robot.input_labels)
+        ax_small2.plot(input_traj[:i, :2], '-', alpha=0.7,label=['v','w'])
         ax_small2.legend()
 
     animation = FuncAnimation(fig=plt.gcf(), func=update, frames=N+1, repeat=True, interval=0.01)
