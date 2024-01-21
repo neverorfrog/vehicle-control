@@ -3,10 +3,10 @@ sys.path.append("..")
 
 from simulation.simulation import *
 from modeling.track import *
-from modeling.bicycle import Bicycle
 from modeling.trajectory import *
 from controllers.io_linearization import BicycleFBL
 from simulation.plotting import animate
+from modeling.robot import *
 
 track = Track(freq=0.03)
 robot = Bicycle(track)
