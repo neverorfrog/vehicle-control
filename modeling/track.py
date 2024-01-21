@@ -102,20 +102,24 @@ class Track(Trajectory):
         
         return new_line
     
+    def get_index(self, s):
+        '''Compute the segment in which system is evolving'''
+        conditions = np.array([ [s >= self.point_tangent[:, 3]] , [s < self.point_tangent[:, 3] + self.point_tangent[:, 4]] ]).squeeze()
+        index = np.where(np.all(conditions, axis = 0))[0]
+        i = 0 if len(index) < 1 else int(index.item()) # TODO better solution?
+        return i
+        
+    
     def get_global_position(self, s, ey):
         """coordinate transformation from curvilinear reference frame (s, ey) to inertial reference frame (X, Y)
         (s, ey): position in the curvilinear reference frame
         """
-
+        point_tangent = self.point_tangent
+        
         # wrap s along the track
         while (s > self.track_length):
             s = s - self.track_length
-
-        # Compute the segment in which system is evolving
-        point_tangent = self.point_tangent
-        conditions = np.array([ [s >= point_tangent[:, 3]] , [s < point_tangent[:, 3] + point_tangent[:, 4]] ]).squeeze()
-        index = np.where(np.all(conditions, axis = 0))[0]
-        i = 0 if len(index) < 1 else int(index.item()) # TODO better solution?
+        i = self.get_index(s)
         
         if point_tangent[i, 5] == 0.0:  # If segment is a straight line
             # Extract the first final and initial point of the segment
@@ -152,20 +156,10 @@ class Track(Trajectory):
         """curvature computation
         s: curvilinear abscissa at which the curvature has to be evaluated
         """
-        point_tangent = self.point_tangent
-        track_length = point_tangent[-1,3]+point_tangent[-1,4]
-
-        # In case on a lap after the first one
-        while (s > track_length):
-            s = s - track_length
-
-        # Given s \in [0, TrackLength] compute the curvature
-        # Compute the segment in which system is evolving
-        index = np.all([[s >= point_tangent[:, 3]], [s < point_tangent[:, 3] + point_tangent[:, 4]]], axis=0)
-
-        i = int(np.where(np.squeeze(index))[0])
-        curvature = self.PointAndTangent[i, 5]
-
+        while (s > self.track_length):
+            s = s - self.track_length
+        i = self.get_index(s)
+        curvature = self.point_tangent[i, 5]
         return curvature
     
     def plot(self, axis: Axes):
