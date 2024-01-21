@@ -28,6 +28,7 @@ class Robot():
         '''
         h = dt/integration_steps
         current_q = self.q
+        print(current_q)
         
         for _ in range(integration_steps):
             k_1 = self.transition_function(current_q, self.u)
