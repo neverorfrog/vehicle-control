@@ -108,7 +108,6 @@ class Track(Trajectory):
         index = np.where(np.all(conditions, axis = 0))[0]
         i = 0 if len(index) < 1 else int(index.item()) # TODO better solution?
         return i
-        
     
     def get_global_position(self, s, ey):
         """coordinate transformation from curvilinear reference frame (s, ey) to inertial reference frame (X, Y)
@@ -156,6 +155,7 @@ class Track(Trajectory):
         """curvature computation
         s: curvilinear abscissa at which the curvature has to be evaluated
         """
+        print(s)
         while (s > self.track_length):
             s = s - self.track_length
         i = self.get_index(s)
