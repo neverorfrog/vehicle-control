@@ -40,17 +40,16 @@ class Car():
         self.u_len = 2
 
         # --- Differential equations describing the model ----------------------
-        k = ca.MX.sym('k') # curvature (where do we compute it?)
+        self.k = ca.MX.sym('k') # curvature (where do we compute it?)
         v_dot       = self.a
         psi_dot     = self.v * tan(self.delta) / self.l
         t_dot       = 1
         ey_dot      = self.v * sin(self.epsi)
-        s_dot       = (self.v * cos(self.epsi)) / (1 - self.ey*k)
-        epsi_dot    = psi_dot - s_dot * k
+        s_dot       = (self.v * cos(self.epsi)) / (1 - self.ey*self.k)
+        epsi_dot    = psi_dot - s_dot * self.k
         delta_dot   = self.w
         self.qd     = ca.vertcat(v_dot,psi_dot,t_dot,ey_dot,epsi_dot,delta_dot,s_dot)
-        
-        self.ode = ca.Function('ode', [self.q, self.u], [self.qd], {'allow_free': True})
+        self.ode = ca.Function('ode', [self.q, self.u, self.k], [self.qd])
     
     def integrate(self,h):
         '''
@@ -58,11 +57,10 @@ class Car():
         h: integration interval
         '''
         q = self.q
-        
-        qd_1 = self.ode(q, self.u)
-        qd_2 = self.ode(q + (h/2)*qd_1, self.u)
-        qd_3 = self.ode(q + (h/2)*qd_2, self.u)
-        qd_4 = self.ode(q + h*qd_3, self.u)
+        qd_1 = self.ode(q, self.u, self.k)
+        qd_2 = self.ode(q + (h/2)*qd_1, self.u, self.k)
+        qd_3 = self.ode(q + (h/2)*qd_2, self.u, self.k)
+        qd_4 = self.ode(q + h*qd_3, self.u, self.k)
         q += (1/6) * (qd_1 + 2 * qd_2 + 2 * qd_3 + qd_4) * h
         
         return q
@@ -95,4 +93,4 @@ class Car():
         axis.add_patch(wheel_right_back)
         wheel_left_back = plt.Rectangle((x-np.cos(angle)*r-np.cos(psi)*2*width/3, y-np.sin(angle)*r-np.sin(psi)*2*height/3),width=0.05,height=0.15,angle=np.rad2deg(wheel_angle),facecolor='black')
         axis.add_patch(wheel_left_back)
-        return x,y  
+        return x,y      

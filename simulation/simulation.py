@@ -16,16 +16,16 @@ class RacingSimulation():
         self.controller = controller
         self.dt = dt
         self.pos = np.array([0,0]) # initial condition for plotting stuff
-        self.transition = ca.Function('transition', [self.car.q, self.car.u], [self.car.integrate(self.dt)])
+        self.transition = ca.Function('transition', [self.car.q, self.car.u, self.car.k], [self.car.integrate(self.dt)])
          
-    def step(self, q_k: dict, u_k):
+    def step(self, q_k: dict, u_k, curvature):
         """
             - Given current (kth) q and u
             - Applies it for dt (given in Robot construction)
             - Return numpy array of next q
         """
         q_k = np.array(list(q_k.values())) # going to integrate, so we need array
-        next_q = self.transition(q_k,u_k).full().squeeze() # result of integration
+        next_q = self.transition(q_k,u_k,curvature).full().squeeze() # result of integration
         next_q = dict(zip(self.car.q_keys, next_q)) # everywhere else than integration dict is better
         curvature = self.car.track.get_curvature(next_q['s']) # curvature is not a continuous function of s
         return next_q, curvature
@@ -51,9 +51,11 @@ class RacingSimulation():
             if time[-1] >= T: break
             
             # applying control signal
-            q_k = np.array(list(q_k.values()))
-            u_k = self.controller.command(q_k, curvature) # returns a_k, w_k
-            q_k, curvature = self.step(q_k,u_k)
+            u_k = self.controller.command(np.array(list(q_k.values())), curvature) # returns a_k, w_k
+            
+            print(u_k)
+            
+            q_k, curvature = self.step(q_k,u_k,curvature)
             
             # logging
             q_traj.append(self.extract_pose(q_k))

@@ -1,5 +1,6 @@
 import numpy as np
 
+
 def computeAngle(point1, origin, point2):
     # The orientation of this angle matches that of the coordinate system. Tha is why a minus sign is needed
     v1 = np.array(point1) - np.array(origin)
