@@ -64,6 +64,14 @@ class Car():
         q += (1/6) * (qd_1 + 2 * qd_2 + 2 * qd_3 + qd_4) * h
         
         return q
+    
+    def extract_pose(self, q = None):
+        if q is None: return np.array([0,0,0,0])
+        pos = self.car.track.get_global_position(q['s'],q['ey'])
+        pos_dot = (pos - self.pos)/self.dt
+        psi = atan2(pos_dot[1], pos_dot[0])
+        self.pos = pos
+        return np.array([self.pos[0], self.pos[1], psi, q['delta']])
         
     def plot(self, axis: Axes, q):
         x,y,psi,delta = q

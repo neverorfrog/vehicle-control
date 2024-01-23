@@ -31,7 +31,7 @@ def step( q_k, u_k):
 T=10
 q0 = np.array([10,0,0,0,0,0,0])
 qd0=np.array([0,0,0,0])
-dt = 0.25
+dt = 0.01
 q_traj = [q0]
 qd_traj = [qd0]
 u_traj = []
@@ -69,7 +69,7 @@ while True:
     #ref_traj.append(ref_k['p'])
 q_traj = np.array(q_traj)
 u_traj = np.array(u_traj)
-animation = animate(np.array(q_traj), np.array(u_traj), np.array(q_traj), robot, track)
+animation = animate(np.array(q_traj), np.array(u_traj), robot, track)
 print(q_traj.shape)
 print("Ux_TRAJ:", q_traj[:,0])
 print("___________________________________")

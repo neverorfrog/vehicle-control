@@ -29,36 +29,27 @@ class RacingSimulation():
         next_q = dict(zip(self.car.q_keys, next_q)) # everywhere else than integration dict is better
         curvature = self.car.track.get_curvature(next_q['s']) # curvature is not a continuous function of s
         return next_q, curvature
-    
-    def extract_pose(self, q):
-        pos = self.car.track.get_global_position(q['s'],q['ey'])
-        pos_dot = (pos - self.pos)/self.dt
-        psi = atan2(pos_dot[1], pos_dot[0])
-        self.pos = pos
-        return np.array([self.pos[0], self.pos[1], psi, q['delta']])
         
-    def run(self, q0 : dict, T: float): 
+    def run(self, q0 : dict, T: float):
+         
         # for offline plotting
-        q_traj = [np.array([0,0,0,0])] # TODO hardcodato
-        time = [0]
+        q_traj = [self.car.extract_pose()] # extract pose without arguments gives all zeros
         u_traj = []
         
         # control loop
         q_k = q0
         curvature = 0 # TODO hardcodato
         while True:
-            time.append(time[-1] + self.dt)
-            if time[-1] >= T: break
+            if q_k['t'] >= T: break
+            
+            # computing control signal
+            u_k = self.controller.command(np.array(list(q_k.values())), curvature)
             
             # applying control signal
-            u_k = self.controller.command(np.array(list(q_k.values())), curvature) # returns a_k, w_k
-            
-            print(u_k)
-            
             q_k, curvature = self.step(q_k,u_k,curvature)
             
             # logging
-            q_traj.append(self.extract_pose(q_k))
+            q_traj.append(self.car.extract_pose(q_k))
             u_traj.append(u_k)
         
         return np.array(q_traj), np.array(u_traj)

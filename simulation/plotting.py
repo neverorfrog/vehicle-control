@@ -12,7 +12,7 @@ def animate(state_traj, input_traj, robot: Robot, track: Track = None):
     N = input_traj.shape[0]
     state_max = max(state_traj.min(), state_traj.max(), key=abs)
     input_max = max(input_traj.min(), input_traj.max(), key=abs)
-    pos_max = max(state_traj[:-1].min(), state_traj[:-1].max(), key=abs)
+    # pos_max = max(state_traj[:-1].min(), state_traj[:-1].max(), key=abs)
     
     # figure params
     grid = GridSpec(2, 2, width_ratios=[2, 1])
@@ -42,7 +42,7 @@ def animate(state_traj, input_traj, robot: Robot, track: Track = None):
         
         ax_small1.cla()
         ax_small1.axis((0, N, -state_max*1.1, state_max*1.1))
-        ax_small1.plot(state_traj[:i, :4], '-', alpha=0.7,label=['x','y',r'$\psi$',r'$\delta$'])
+        ax_small1.plot(state_traj[:i, :3], '-', alpha=0.7,label=['x','y',r'$\psi$'])
         ax_small1.legend()
 
         ax_small2.cla()

@@ -20,35 +20,35 @@ class RacingMPC(Controller):
         self.opti.solver("ipopt", p_opts, s_opts)
         
         # -------------------- Decision Variables with Initialization ---------------------
-        self.X = self.opti.variable(car.q_len, self.N+1) # predicte state trajectory var
-        self.U = self.opti.variable(car.u_len, self.N)   # predicted control trajectory var
-        self.X_pred = np.zeros((car.q_len, self.N+1)) # actual predicte state trajectory
-        self.U_pred = np.zeros((car.u_len, self.N))   # actual predicted control trajectory
-        self.x0 = self.opti.parameter(car.q_len)
-        self.opti.subject_to(self.X[:,0] == self.x0) # constraint on initial state
+        # self.X = self.opti.variable(car.q_len, self.N+1) # predicte state trajectory var
+        # self.U = self.opti.variable(car.u_len, self.N)   # predicted control trajectory var
+        # self.X_pred = np.zeros((car.q_len, self.N+1)) # actual predicte state trajectory
+        # self.U_pred = np.zeros((car.u_len, self.N))   # actual predicted control trajectory
+        # self.x0 = self.opti.parameter(car.q_len)
+        # self.opti.subject_to(self.X[:,0] == self.x0) # constraint on initial state
         
         # -------------------- Model Constraints (ODE) ------------------------------------
-        self.propagate_model(car)
+        # self.propagate_model(car)
             
         # -------------------- Cost Function -----------------------------------------------
-        cost = self.X[2,-1] # time to arrive at last planning step
-        ws = 10
-        cost += ws * ca.sumsqr(self.X[3,:])
-        wu = 10
-        cost += wu*ca.sumsqr(self.U[:,0]) + wu*ca.sumsqr(self.U[:,1])
-        self.opti.minimize(cost)
+        # cost = self.X[2,-1] # time to arrive at last planning step
+        # ws = 10
+        # cost += ws * ca.sumsqr(self.X[3,:])
+        # wu = 10
+        # cost += wu*ca.sumsqr(self.U[:,0]) + wu*ca.sumsqr(self.U[:,1])
+        # self.opti.minimize(cost)
             
         # -------------------- Input Constraints ------------------------------------------
-        self.a_max = 10.0
-        self.w_max = 10.0
-        self.u_k = np.array([0., 0.])
-        for k in range(self.N): # loop over control intervals
-            #linear acceleration
-            self.opti.subject_to(self.U[0,k] <= self.a_max)
-            self.opti.subject_to(self.U[0,k] >= -self.a_max)
-            #angular velocity
-            self.opti.subject_to(self.U[1,k] <= self.w_max)
-            self.opti.subject_to(self.U[1,k] >= -self.w_max)
+        # self.a_max = 10.0
+        # self.w_max = 10.0
+        # self.u_k = np.array([0., 0.])
+        # for k in range(self.N): # loop over control intervals
+        #     #linear acceleration
+        #     self.opti.subject_to(self.U[0,k] <= self.a_max)
+        #     self.opti.subject_to(self.U[0,k] >= -self.a_max)
+        #     #angular velocity
+        #     self.opti.subject_to(self.U[1,k] <= self.w_max)
+        #     self.opti.subject_to(self.U[1,k] >= -self.w_max)
         
     def integrate(self,car: Car,h):
         '''
@@ -93,15 +93,15 @@ class RacingMPC(Controller):
     def command(self, q_k, curvature):
         # q_k -> {'v', 'psi', 't', 'ey', 'epsi', 'delta', 's', 'k'}
         # every new horizon, the current state (and the last prediction) is the initial prediction
-        self.opti.set_value(self.x0, q_k) 
-        self.opti.set_value(self.k, curvature)
-        self.opti.set_initial(self.U, self.U_pred)
-        self.opti.set_initial(self.X, self.X_pred)
+        # self.opti.set_value(self.x0, q_k) 
+        # self.opti.set_value(self.k, curvature)
+        # self.opti.set_initial(self.U, self.U_pred)
+        # self.opti.set_initial(self.X, self.X_pred)
         
         # obtaining the solution by solving the NLP
-        sol = self.opti.solve()
+        # sol = self.opti.solve()
         # self.U_pred = sol.value(self.U)
         # self.X_pred = sol.value(self.X)
         # print(self.opti.debug.value)
         # return np.array([self.U_pred[0][0],self.U_pred[1][0]])
-        return np.array([0.04,0.5])        
+        return np.array([0.5,0])        

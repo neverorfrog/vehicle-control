@@ -155,7 +155,6 @@ class Track(Trajectory):
         """curvature computation
         s: curvilinear abscissa at which the curvature has to be evaluated
         """
-        print(s)
         while (s > self.track_length):
             s = s - self.track_length
         i = self.get_index(s)
