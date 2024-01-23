@@ -5,7 +5,6 @@ from modeling.robot import *
 from controllers.controller import Controller
 import numpy as np
 from modeling.track import Track
-from modeling.trajectory import Trajectory
 from modeling.util import wrap
 from modeling.car import Car
 from casadi import atan2

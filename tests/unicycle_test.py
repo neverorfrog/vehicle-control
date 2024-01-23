@@ -4,7 +4,6 @@ sys.path.append("..")
 from simulation.simulation import *
 from modeling import *
 from modeling.track import *
-from modeling.trajectory import *
 from controllers.io_linearization import FBL
 from simulation.plotting import animate
 from modeling.unicycle import Unicycle
