@@ -8,6 +8,7 @@ from modeling.state import SpatialState, TemporalState
 from modeling.track import Track, Waypoint
 from modeling.util import wrap
 import casadi as ca
+from modeling.util import integrate
 
 class Bicycle():
     def __init__(self, track: Track, length, dt):
@@ -40,55 +41,66 @@ class Bicycle():
                                        reference_waypoint=self.current_waypoint)
         
         # Initialize dynamic model
-        self._init_ode()
+        self._init_temporal_ode()
+        self._init_spatial_ode()
         
-    def _init_ode(self):
-        # ----------- Input Variables ------------------------------------------
+    def _init_temporal_ode(self):
+        '''Differential equations describing the temporal model'''
+        
+        # Input variables
         v = ca.SX.sym('v') # driving acceleration
         w = ca.SX.sym('w') # steering angle rate
-        delta = ca.SX.sym('delta') # steering angle (fictituous input)
         kappa = ca.SX.sym('kappa') # the curvature is treated as an input (fictituous input)
-        self.u = ca.vertcat(v,w,delta,kappa)
+        input = ca.vertcat(v,w,kappa)
 
-        # --- Differential equations describing the temporal model ---------------
-        tq = self.temporal_state.state_sym
+        # State and auxiliary variables
+        state = self.temporal_state.state_sym
         psi = self.temporal_state['psi']
         ey = self.spatial_state[0]
         epsi = self.spatial_state[1]
+        delta = self.temporal_state['delta']
+        
+        # ODE
         x_dot = v * ca.cos(psi)
         y_dot = v * ca.sin(psi)
-        psi_dot = v / self.length * ca.tan(self.temporal_state['delta'])
+        psi_dot = v / self.length * ca.tan(delta)
         delta_dot = w
         s_dot = (v * np.cos(epsi)) / (1 - ey * kappa)
-        tqd = ca.vertcat(x_dot, y_dot, psi_dot, delta_dot, s_dot)
-        tode = ca.Function('ode', [tq, self.u], [tqd])
-        self.t_transition = ca.Function('ttransition', [tq, self.u], [self.integrate(tq,tode,self.dt)])
+        state_dot = ca.vertcat(x_dot, y_dot, psi_dot, delta_dot, s_dot)
+        ode = ca.Function('ode', [state, input], [state_dot])
         
-        # --- Differential equations describing the spatial model -----------------
-        sq = self.spatial_state.state_sym
+        # wrapping up
+        integrator = integrate(state,input,ode,self.dt)
+        self.t_transition = ca.Function('t_transition', [state, input], [integrator])
+        
+    
+    def _init_spatial_ode(self):
+        '''Differential equations describing the spatial model'''
+        
+        # input variables
+        v = ca.SX.sym('v') # driving acceleration
+        w = ca.SX.sym('w') # steering angle rate
+        kappa = ca.SX.sym('kappa') # the curvature is treated as an input (fictituous input)
+        delta = ca.SX.sym('delta') # steering angle (fictituous input)
+        ds = ca.SX.sym('ds') # fictituous input
+        input = ca.vertcat(v,w,kappa,delta,ds)
+        
+        # state and auxiliary variables
+        state = self.spatial_state.state_sym
         ey = self.spatial_state['ey'] # need them in variable format
         epsi = self.spatial_state['epsi']
-        # t = self.spatial_state['t']
-        s_dot = (v * np.cos(epsi)) / (1 - ey * kappa)
+        t = self.spatial_state['t']
+        
+        # ODE
         ey_prime = (1 - ey * kappa) * ca.tan(epsi)
         epsi_prime = (self.length * ca.tan(delta)) * ((1 - ey * kappa) / (np.cos(epsi))) - kappa
-        # t_prime = (1 - ey * kappa) / (v * np.cos(epsi))
-        sqd = ca.vertcat(ey_prime, epsi_prime)
-        sode = ca.Function('ode', [sq, self.u], [sqd])
-        self.s_transition = ca.Function('stransition', [sq, self.u], [self.integrate(sq,sode,self.dt)])
+        t_prime = (1 - ey * kappa) / (v * np.cos(epsi))
+        state_prime = ca.vertcat(ey_prime, epsi_prime, t_prime)
+        ode = ca.Function('ode', [state, input], [state_prime])
         
-    def integrate(self,q,ode,h):
-        '''
-        RK4 integrator
-        h: integration interval
-        '''
-        qd_1 = ode(q, self.u)
-        qd_2 = ode(q + (h/2)*qd_1, self.u)
-        qd_3 = ode(q + (h/2)*qd_2, self.u)
-        qd_4 = ode(q + h*qd_3, self.u)
-        newq = q + (1/6) * (qd_1 + 2 * qd_2 + 2 * qd_3 + qd_4) * h
-        return newq
-        
+        # wrapping up
+        integrator = integrate(state, input, ode, h=ds)
+        self.s_transition = ca.Function('stransition', [state,input], [integrator])
         
     def drive(self, u):
         """
@@ -99,8 +111,12 @@ class Bicycle():
         next_tstate = ca.DM(self.t_transition(self.temporal_state.state, u)).full().squeeze()
         self.temporal_state = TemporalState(*next_tstate)
         
-        next_sstate = ca.DM(self.s_transition(self.spatial_state.state, u)).full().squeeze()
+        ds = 0.03 * self.temporal_state[-1]
+        
+        next_sstate = ca.DM(self.s_transition(self.spatial_state.state, u, ds)).full().squeeze()
         self.spatial_state = SpatialState(*next_sstate)
+        
+        print(self.spatial_state)
         
         self.set_waypoint()
 

@@ -92,9 +92,9 @@ class SpatialState(State):
         :param e_psi: yaw angle relative to path | [rad]
         :param t: time | [s]
         """
-        self._state = np.array([ey,epsi])
-        self._state_sym = ca.vertcat(ca.SX.sym('ey'),ca.SX.sym('epsi'))
-        self._members = ['ey', 'epsi']
+        self._state = np.array([ey,epsi,t])
+        self._state_sym = ca.vertcat(ca.SX.sym('ey'),ca.SX.sym('epsi'), ca.SX.sym('t'))
+        self._members = ['ey', 'epsi','t']
     
     @property
     def state(self): return self._state
@@ -110,4 +110,4 @@ class SpatialState(State):
         return cls(*args, **kwargs)
 
     def __str__(self):
-        return f'ey: {self.state[0]}, epsi: {self.state[1]}'
+        return f'ey: {self.state[0]}, epsi: {self.state[1]}, t: {self.state[2]}'
