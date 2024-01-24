@@ -14,8 +14,8 @@ class RacingMPC(Controller):
         self.dt = dt
         self.car = car
         self.horizon = horizon
-        ns = 4
-        na = 3
+        ns = 5
+        na = 4
         # -------------------- Decision Variables with Initialization ---------------------
         # optimization variables
         s_traj = ca.SX.sym('s_traj', ns*(horizon+1), 1)
@@ -36,19 +36,46 @@ class RacingMPC(Controller):
             state_next = s[n+1]
             
             # add stage cost to objective
-            # cost += ca.sumsqr(state[0],state[1]) # stage cost
-            print(ca.sumsqr(state))
+            cost += ca.sumsqr(state[:3]) # stage cost
 
             # add continuity contraint
             constraints += [state_next - car.t_transition(state, action)]
             
-        # -------------------- Cost Function ----------------------------------------------
-            
-        # -------------------- Input Constraints ------------------------------------------
+        # continuity constraints and bounds on u
+        constraints = ca.vertcat(*constraints, a_traj)
+        
+        # set upper and lower bounds 
+        # zeros for continuity constraints, a_max/a_min for control bounds
+        self.ubg = ca.vertcat(np.zeros((ns*(horizon+1))), np.ones((horizon*na)))
+        self.lbg = ca.vertcat(np.zeros((ns*(horizon+1))), np.ones((horizon*na)))
+        
+        # initialize current solution guess
+        self.s_current = np.zeros((ns*(horizon+1), 1))
+        self.a_current = np.zeros((na*horizon, 1))
+
+        self.ocp = {'f': cost, 'x': ca.vertcat(s_traj, a_traj), 'g': constraints, 'p':s0_bar}
+        self.solver = ca.nlpsol('solver', 'ipopt', self.ocp)
         
         
-    def command(self):
-        return np.array([1,0,self.car.current_waypoint.kappa])  
+    def command(self,s0):
+        # solve the NLP
+        sol = self.solver(x0=ca.vertcat(self.s_current, self.a_current), lbg=self.lbg, ubg=self.ubg, p=s0)
+        
+        w_opt = sol['x'].full()
+        
+        ns = 5
+        na = 4
+
+        s_opt = w_opt[:(self.horizon+1)*ns]
+        a_opt = w_opt[(self.horizon+1)*ns:]
+
+        cost = sol['f'].full()
+
+        self.s_current = s_opt
+        self.a_current = a_opt
+
+        a0_opt = a_opt[:na].squeeze()
+        return a0_opt
     
 if __name__ =="__main__":
     # Create reference path

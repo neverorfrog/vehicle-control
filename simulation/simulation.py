@@ -1,7 +1,6 @@
 import sys
 sys.path.append("..")
 
-from modeling.robot import *
 from controllers.controller import Controller
 import numpy as np
 from modeling.track import Track

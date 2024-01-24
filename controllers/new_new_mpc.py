@@ -14,13 +14,14 @@ class RacingMPC(Controller):
         self.dt = dt
         self.car = car
         self.horizon = horizon
+        ns = 5 # number of states
+        ni = 4 # number of inputs
         # -------------------- Optimizer Initialization ----------------------------------
         self.opti = ca.Opti()
         p_opts = dict(print_time=False, verbose=False) 
         s_opts = dict(print_level=0)
         self.opti.solver("ipopt", p_opts, s_opts)
-        ns = 5 # number of states
-        ni = 4 # number of inputs
+        
         # -------------------- Decision Variables with Initialization ---------------------
         self.S = self.opti.variable(ns, horizon+1) # predicted state trajectory var
         self.I = self.opti.variable(ni, horizon)   # predicted control trajectory var
@@ -37,7 +38,7 @@ class RacingMPC(Controller):
             state_next = self.S[:,n+1]
             
             # add stage cost to objective
-            cost += ca.sumsqr(state[:2]) # stage cost (make x and y zero)
+            cost += ca.sumsqr(state[:2]) # stage cost (make x and y and psi zero)
 
             # add continuity contraint
             self.opti.subject_to(state_next == car.t_transition(state,input))
@@ -45,10 +46,10 @@ class RacingMPC(Controller):
         self.opti.minimize(cost)
             
         # -------------------- Input Constraints ------------------------------------------
-        self.v_max = 1.0
-        self.v_min = -1.0
-        self.w_max = 1.0
-        self.w_min = -1.0
+        self.v_max = 2.0
+        self.v_min = -2.0
+        self.w_max = 2.0
+        self.w_min = -2.0
         for n in range(horizon): # loop over control intervals
             self.opti.subject_to(self.I[0,n] <= self.v_max)
             self.opti.subject_to(self.I[0,n] >= self.v_min)
@@ -63,7 +64,7 @@ class RacingMPC(Controller):
         sol = self.opti.solve()
         self.I_pred = sol.value(self.I)
         self.S_pred = sol.value(self.S)
-        print(self.opti.debug.value)
+        # print(self.opti.debug.value)
         delta = self.S_pred[3,-1]
         return np.array([self.I_pred[0][0], self.I_pred[1][0], delta, self.car.current_waypoint.kappa])
     

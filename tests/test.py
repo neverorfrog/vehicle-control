@@ -1,4 +1,5 @@
 import sys
+import time
 sys.path.append("..")
 
 from modeling.state import TemporalState
@@ -9,6 +10,8 @@ from modeling.bicycle import Bicycle
 from simulation.simulation import RacingSimulation
 from simulation.plotting import animate
 from controllers.new_new_mpc import RacingMPC
+# from controllers.new_mpc import RacingMPC
+
 
 import casadi as ca
 
@@ -21,7 +24,7 @@ if __name__ == "__main__":
     
     # Bicycle model
     car = Bicycle(track, length=0.2, dt=0.05)
-    car.temporal_state = TemporalState(x = 2, y = 2)
+    car.temporal_state = TemporalState(x = 2, y = 4, psi = 3)
 
     # Logging containers
     s_traj = [car.temporal_state]
@@ -29,15 +32,18 @@ if __name__ == "__main__":
     
     # control loop
     dt = 0.01
-    T = 1
-    controller = RacingMPC(horizon = 10, dt = 0.01, car = car)
+    T = 5
+    controller = RacingMPC(horizon = 5, dt = 0.01, car = car)
     t = 0.0
     s_k = s_traj[0]
+    elapsed = []
     while t < T:
         t += dt
         
         # computing control signal
+        start = time.time()
         i_k = controller.command(s_k)
+        elapsed.append(time.time() - start)
         
         # applying control signal
         s_k = car.drive(i_k)
@@ -45,6 +51,7 @@ if __name__ == "__main__":
         # logging
         s_traj.append(s_k)
         i_traj.append(i_k)
-        
+    
+    print(np.mean(elapsed))    
     animate(np.array(s_traj), np.array(i_traj), car, track)
     
