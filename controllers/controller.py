@@ -1,8 +1,6 @@
 import numpy as np
 from typing import Tuple
 
-from modeling.trajectory import Trajectory
-
 class Controller():
     def __init__(self, kp: np.ndarray, kd: np.ndarray):
         self.kp = kp
