@@ -45,9 +45,10 @@ class Bicycle():
     def _init_ode(self):
         # ----------- Input Variables ------------------------------------------
         v = ca.SX.sym('v') # driving acceleration
-        delta = ca.SX.sym('delta') # steering angle rate
-        kappa = ca.SX.sym('kappa') # the curvature is treated as an input
-        self.u = ca.vertcat(v,delta,kappa)
+        w = ca.SX.sym('w') # steering angle rate
+        delta = ca.SX.sym('delta') # steering angle (fictituous input)
+        kappa = ca.SX.sym('kappa') # the curvature is treated as an input (fictituous input)
+        self.u = ca.vertcat(v,w,delta,kappa)
 
         # --- Differential equations describing the temporal model ---------------
         tq = self.temporal_state.state_sym
@@ -56,18 +57,18 @@ class Bicycle():
         epsi = self.spatial_state[1]
         x_dot = v * ca.cos(psi)
         y_dot = v * ca.sin(psi)
-        psi_dot = v / self.length * ca.tan(delta)
+        psi_dot = v / self.length * ca.tan(self.temporal_state['delta'])
+        delta_dot = w
         s_dot = (v * np.cos(epsi)) / (1 - ey * kappa)
-        tqd = ca.vertcat(x_dot, y_dot, psi_dot, s_dot)
+        tqd = ca.vertcat(x_dot, y_dot, psi_dot, delta_dot, s_dot)
         tode = ca.Function('ode', [tq, self.u], [tqd])
         self.t_transition = ca.Function('ttransition', [tq, self.u], [self.integrate(tq,tode,self.dt)])
         
-        # --- Differential equations describing the temporal model -----------------
-        # sq = self.spatial_state.state_sym
+        # --- Differential equations describing the spatial model -----------------
+        sq = self.spatial_state.state_sym
         ey = self.spatial_state['ey'] # need them in variable format
         epsi = self.spatial_state['epsi']
         # t = self.spatial_state['t']
-        sq = ca.vertcat(ey,epsi)
         s_dot = (v * np.cos(epsi)) / (1 - ey * kappa)
         ey_prime = (1 - ey * kappa) * ca.tan(epsi)
         epsi_prime = (self.length * ca.tan(delta)) * ((1 - ey * kappa) / (np.cos(epsi))) - kappa
@@ -85,9 +86,6 @@ class Bicycle():
         qd_2 = ode(q + (h/2)*qd_1, self.u)
         qd_3 = ode(q + (h/2)*qd_2, self.u)
         qd_4 = ode(q + h*qd_3, self.u)
-        # evaluator = ca.Function('evaluator', [q, self.u], [qd_1])
-        # print(evaluator)
-        # exit(evaluator(self.spatial_state.state, np.array([0,0,0])))
         newq = q + (1/6) * (qd_1 + 2 * qd_2 + 2 * qd_3 + qd_4) * h
         return newq
         
@@ -95,29 +93,17 @@ class Bicycle():
     def drive(self, u):
         """
         Drive.
-        :param u: input vector containing [v, delta]
+        :param u: input vector containing [v, delta, kappa]
         """
 
-        # Get input signals
-        # v, delta = u
-
-        # # Compute temporal state derivatives
-        # x_dot = v * np.cos(self.temporal_state['psi'])
-        # y_dot = v * np.sin(self.temporal_state['psi'])
-        # psi_dot = v / self.length * np.tan(delta)
-        # temporal_derivatives = np.array([x_dot, y_dot, psi_dot])
-
-        # Update state
-        next_tstate = self.t_transition(self.temporal_state.state, u).full().squeeze()
+        next_tstate = ca.DM(self.t_transition(self.temporal_state.state, u)).full().squeeze()
         self.temporal_state = TemporalState(*next_tstate)
         
         next_sstate = ca.DM(self.s_transition(self.spatial_state.state, u)).full().squeeze()
         self.spatial_state = SpatialState(*next_sstate)
         
-        # Compute velocity along path
-        # s_dot = 1 / (1 - self.spatial_state['ey'] * self.current_waypoint.kappa) * v * np.cos(self.spatial_state['epsi'])
-        # Update distance travelled along reference path
-        # self.s += s_dot * self.dt
+        self.set_waypoint()
+
         return self.temporal_state
         
     def s2t(self, reference_waypoint: Waypoint, reference_state):
@@ -146,14 +132,13 @@ class Bicycle():
         ey = np.cos(reference_waypoint.psi) * (reference_state[1] - reference_waypoint.y) - \
                 np.sin(reference_waypoint.psi) * (reference_state[0] - reference_waypoint.x)
         epsi = wrap(reference_state[2] - reference_waypoint.psi)
-        # time state can be set to zero since it's only relevant for the MPC prediction horizon
-        return SpatialState(ey, epsi, 0)
+        return SpatialState(ey, epsi)
     
-    def get_current_waypoint(self) -> Waypoint:
+    def set_waypoint(self) -> Waypoint:
         """
         Get closest waypoint on reference path based on car's current location.
         """
-        s = self.temporal_state[3]
+        s = self.temporal_state[-1]
         # Compute cumulative path length
         length_cum = np.cumsum(self.track.segment_lengths)
         # Get first index with distance larger than distance traveled by car so far
@@ -172,10 +157,10 @@ class Bicycle():
         else:
             self.wp_id = prev_wp_id
             self.current_waypoint = self.track.waypoints[prev_wp_id]
-        return self.current_waypoint
+
     
     def plot(self, axis: Axes, q = None):
-        x,y,psi,s = self.temporal_state.state if q is None else q
+        x,y,psi,delta,s = self.temporal_state.state if q is None else q
         r = self.length / 2
         
         # Draw the bicycle as a rectangle
@@ -195,7 +180,7 @@ class Bicycle():
         # Draw four wheels as rectangles
         wheel_width = self.length / 10
         wheel_height = self.length / 4
-        wheel_angle = wrap(psi-np.pi/2)
+        wheel_angle = wrap(psi+delta-np.pi/2)
         wheel_right_front = plt.Rectangle((x+np.cos(angle)*r, y+np.sin(angle)*r),width=wheel_width,height=wheel_height,angle=np.rad2deg(wheel_angle),facecolor='black')
         axis.add_patch(wheel_right_front)
         wheel_left_front = plt.Rectangle((x-np.cos(angle)*r, y-np.sin(angle)*r),width=wheel_width,height=wheel_height,angle=np.rad2deg(wheel_angle),facecolor='black')

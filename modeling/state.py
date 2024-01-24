@@ -55,7 +55,7 @@ class State(ABC):
         return self.__class__.create(*new_state)
 
 class TemporalState(State):
-    def __init__(self, x = 0.0, y = 0.0, psi = 0.0, s = 0.0):
+    def __init__(self, x = 0.0, y = 0.0, psi = 0.0, delta = 0.0, s = 0.0):
         """
         Temporal State Vector containing car pose (x, y, psi)
         :param x: x position in global coordinate system | [m]
@@ -63,9 +63,9 @@ class TemporalState(State):
         :param psi: yaw angle | [rad]
         :param delta: steering angle | [rad]
         """
-        self._state = np.array([x,y,psi,s])
-        self._state_sym = ca.vertcat(ca.SX.sym('x'),ca.SX.sym('y'),ca.SX.sym('psi'), ca.SX.sym('s'))
-        self._members = ['x', 'y', 'psi', 's']
+        self._state = np.array([x,y,psi,delta,s])
+        self._state_sym = ca.vertcat(ca.SX.sym('x'),ca.SX.sym('y'),ca.SX.sym('psi'), ca.SX.sym('delta'), ca.SX.sym('s'))
+        self._members = ['x', 'y', 'psi', 'delta','s']
     
     @property
     def state(self): return self._state
@@ -81,7 +81,7 @@ class TemporalState(State):
         return cls(*args, **kwargs)
 
     def __str__(self):
-        return f'x: {self.state[0]}, y: {self.state[1]}, psi: {self.state[2]}, s: {self.state[3]}'
+        return f'x: {self.state[0]}, y: {self.state[1]}, psi: {self.state[2]}, psi: {self.state[3]}, s: {self.state[4]}'
     
 class SpatialState(State):
     def __init__(self, ey=0.0, epsi=0.0, t=0.0):
