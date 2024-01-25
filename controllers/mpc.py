@@ -1,5 +1,5 @@
 # inspired by https://github.com/giulioturrisi/Differential-Drive-Robot/blob/main/python_scripts/controllers/casadi_nmpc.py
-from modeling.racing_car import RacingCar
+from modeling.racing_car import KinematicCar
 import casadi as ca
 from modeling.track import Track
 import numpy as np
@@ -7,7 +7,7 @@ from casadi import cos, sin, tan
 from controllers.controller import Controller
 
 class RacingMPC(Controller):
-    def __init__(self, horizon, dt, car: RacingCar):
+    def __init__(self, horizon, dt, car: KinematicCar):
         self.dt = dt
         self.car = car
         self.horizon = horizon
@@ -26,6 +26,8 @@ class RacingMPC(Controller):
         self.I_pred = np.zeros((ni, horizon))   # actual predicted control trajectory
         self.s0 = self.opti.parameter(ns) # initial state
         self.opti.subject_to(self.S[:,0] == self.s0) # constraint on initial state
+        # self.opti.subject_to(self.S[:2,horizon] == np.array([1,0])) 
+        # self.opti.subject_to(self.S[2,horizon] == 0)
         self.kappa = self.opti.parameter(1) # local curvature
         self.ey = self.opti.parameter(1)
         self.epsi = self.opti.parameter(1)
@@ -38,7 +40,7 @@ class RacingMPC(Controller):
             state_next = self.S[:,n+1]
             
             # add stage cost to objective
-            cost += ca.sumsqr(state[:2]) # stage cost (make x and y and psi zero)
+            # cost += ca.sumsqr(input[:2]) # stage cost (make x and y and psi zero)
 
             # add continuity contraint
             self.opti.subject_to(state_next == car.t_transition(state,input,self.kappa))
@@ -67,13 +69,4 @@ class RacingMPC(Controller):
         self.S_pred = sol.value(self.S)
         # print(self.opti.debug.value)
         delta = self.S_pred[3,-1]
-        return np.array([self.I_pred[0][0], self.I_pred[1][0]])
-    
-if __name__ =="__main__":
-    # Create reference path
-    wp = np.array([[-2,0],[2,0],[2,2],[-2,2],[-2,0],[0,0]])
-    track = Track(wp_x=wp[:,0], wp_y=wp[:,1], resolution=0.05,smoothing=15, width=0.15)
-    
-    # Bicycle model
-    car = RacingCar(track, length=0.5, dt=0.05)
-    controller = RacingMPC(4,0.1,car)     
+        return np.array([self.I_pred[0][0], self.I_pred[1][0]])  

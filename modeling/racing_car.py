@@ -1,20 +1,19 @@
 # inspired by https://github.com/matssteinweg/Multi-Purpose-MPC
 
-import math
 from matplotlib import pyplot as plt
 from matplotlib.axes import Axes
 import numpy as np
-from modeling.state import RacingCarState
+from modeling.state import KinematicCarState
 from modeling.track import Track, Waypoint
 from modeling.util import wrap
 import casadi as ca
 from modeling.util import integrate
 from casadi import sin,cos,tan
 
-class RacingCar():
+class KinematicCar():
     def __init__(self, track: Track, length, dt):
         """
-        Bicycle Model.
+        Kinematic Bicycle Model
         :param track: reference path object to follow
         :param length: length of car in m
         :param width: width of car in m
@@ -32,7 +31,7 @@ class RacingCar():
         # Initialize state
         self.wp_id = 0
         self.current_waypoint: Waypoint = self.track.waypoints[self.wp_id]
-        self.state: RacingCarState = RacingCarState()
+        self.state: KinematicCarState = KinematicCarState()
         
         # Initialize dynamic model
         self._init_temporal_ode()
@@ -103,8 +102,10 @@ class RacingCar():
         kappa = self.current_waypoint.kappa
 
         next_state = ca.DM(self.t_transition(self.state.values, u, kappa)).full().squeeze()
-        self.state = RacingCarState(*next_state)
+        self.state = KinematicCarState(*next_state)
         self.set_waypoint()
+        
+        print(self.track_error(self.current_waypoint))
         
         # ds = 0.03 * self.temporal_state[-1]
         
@@ -138,6 +139,16 @@ class RacingCar():
         else:
             self.wp_id = prev_wp_id
             self.current_waypoint = self.track.waypoints[prev_wp_id]
+            
+    def track_error(self, waypoint: Waypoint):
+        """
+        Based on current waypoint (gotten with s) and actual current x,y position,
+        :return Spatial State representing the error wrt the current reference waypoint
+        """
+        x,y,psi = self.state.values[:3]
+        ey = np.cos(waypoint.psi) * (y - waypoint.y) - np.sin(waypoint.psi) * (x - waypoint.x)
+        epsi = wrap(psi - waypoint.psi)
+        return ey, epsi
 
     
     def plot(self, axis: Axes, q = None):

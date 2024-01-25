@@ -1,8 +1,6 @@
 from matplotlib.axes import Axes
 import numpy as np
 import math
-from skimage.draw import line_aa
-import matplotlib.pyplot as plt
 from modeling.util import wrap
 
 # Colors
@@ -213,7 +211,7 @@ class Track:
         wp_y = np.array([wp.y for wp in self.waypoints])
         
         # Plot waypoints
-        axis.scatter(wp_x, wp_y, s=10)
+        axis.scatter(wp_x, wp_y, s=3)
         
         # Get x and y locations of border cells for left and right bound
         lb_x = np.array([wp.lb[0] for wp in self.waypoints])
@@ -237,10 +235,3 @@ class Track:
         
         axis.plot(rb_x, rb_y, color='red')
         axis.plot(lb_x, lb_y, color='red')
-    
-
-# Specify waypoints
-# wp_x = [-0.75, -0.25, -0.25, 0.25, 0.25, 1.25, 1.25, 0.75, 0.75, 1.25,
-#         1.25, -0.75, -0.75, -0.25]
-# wp_y = [-1.5, -1.5, -0.5, -0.5, -1.5, -1.5, -1, -1, -0.5, -0.5, 0, 0,
-#         -1.5, -1.5]

@@ -61,7 +61,7 @@ class State(ABC):
         new_state = self.state + tobesummed
         return self.__class__.create(*new_state)
 
-class RacingCarState(State):
+class KinematicCarState(State):
     def __init__(self, x = 0.0, y = 0.0, psi = 0.0, delta = 0.0, s = 0.0, ey = 0.0, epsi = 0.0, t = 0.0):
         """
         State Vector containing car pose (x, y, psi)

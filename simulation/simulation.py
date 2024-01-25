@@ -1,11 +1,11 @@
 import time
 from controllers.controller import Controller
 import numpy as np
-from modeling.racing_car import RacingCar
+from modeling.racing_car import KinematicCar
 import logging
 
 class RacingSimulation():   
-    def __init__(self, car: RacingCar, controller: Controller):
+    def __init__(self, car: KinematicCar, controller: Controller):
         self.car = car
         self.controller = controller
         logging.basicConfig(

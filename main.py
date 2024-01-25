@@ -1,10 +1,10 @@
 import sys
 sys.path.append(".")
 
-from modeling.state import RacingCarState
+from modeling.state import KinematicCarState
 import numpy as np
 from modeling.track import Track
-from modeling.racing_car import RacingCar
+from modeling.racing_car import KinematicCar
 from simulation.simulation import RacingSimulation
 from simulation.plotting import animate
 from controllers.mpc import RacingMPC
@@ -14,13 +14,13 @@ wp = np.array([[-2,0],[2,0],[2,2],[-2,2],[-2,0],[-0.5,0]])
 track = Track(wp_x=wp[:,0], wp_y=wp[:,1], resolution=0.03,smoothing=25,width=0.4)
 
 # Bicycle model
-car = RacingCar(track, length=0.2, dt=0.05)
-car.state = RacingCarState(x = 2, y = 2, psi = 3)
+car = KinematicCar(track, length=0.2, dt=0.05)
+car.state = KinematicCarState(x = -1, y = 0.2, psi = np.pi/6)
 
 # MPC controller
-controller = RacingMPC(horizon = 5, dt = 0.03, car = car)
+controller = RacingMPC(horizon = 30, dt = 0.03, car = car)
 
 # Simulation
 simulation = RacingSimulation(car, controller)   
-s_traj, i_traj = simulation.run(N = 50)
+s_traj, i_traj = simulation.run(N = 150)
 animate(np.array(s_traj), np.array(i_traj), car, track)   
