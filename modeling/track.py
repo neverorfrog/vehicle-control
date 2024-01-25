@@ -1,3 +1,5 @@
+# inspired by https://github.com/matssteinweg/Multi-Purpose-MPC
+
 from matplotlib.axes import Axes
 import numpy as np
 import math
@@ -179,8 +181,7 @@ class Track:
         
     def _compute_length(self):
         """
-        Compute length of center-line path as sum of euclidean distance between
-        waypoints.
+        Compute length of center-line path as sum of euclidean distance between waypoints.
         :return: length of center-line path in m
         """
         distance = lambda wp_id: self.waypoints[wp_id+1] - self.waypoints[wp_id]

@@ -26,8 +26,8 @@ class RacingMPC(Controller):
         self.I_pred = np.zeros((ni, horizon))   # actual predicted control trajectory
         self.s0 = self.opti.parameter(ns) # initial state
         self.opti.subject_to(self.S[:,0] == self.s0) # constraint on initial state
-        # self.opti.subject_to(self.S[:2,horizon] == np.array([1,0])) 
-        # self.opti.subject_to(self.S[2,horizon] == 0)
+        self.opti.subject_to(self.S[:2,horizon] == np.array([1,0])) 
+        self.opti.subject_to(self.S[2,horizon] == 0)
         self.kappa = self.opti.parameter(1) # local curvature
         self.ey = self.opti.parameter(1)
         self.epsi = self.opti.parameter(1)

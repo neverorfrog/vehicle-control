@@ -15,7 +15,7 @@ track = Track(wp_x=wp[:,0], wp_y=wp[:,1], resolution=0.03,smoothing=25,width=0.4
 
 # Bicycle model
 car = KinematicCar(track, length=0.2, dt=0.05)
-car.state = KinematicCarState(x = -1, y = 0.2, psi = np.pi/6)
+car.state = KinematicCarState(x = -1.24812, y = 0.2, psi = np.pi/6)
 
 # MPC controller
 controller = RacingMPC(horizon = 30, dt = 0.03, car = car)

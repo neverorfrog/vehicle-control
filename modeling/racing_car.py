@@ -32,6 +32,7 @@ class KinematicCar():
         self.wp_id = 0
         self.current_waypoint: Waypoint = self.track.waypoints[self.wp_id]
         self.state: KinematicCarState = KinematicCarState()
+        self.update_track_error()
         
         # Initialize dynamic model
         self._init_temporal_ode()
@@ -95,17 +96,19 @@ class KinematicCar():
         
     def drive(self, u):
         """
-        Drive.
-        :param u: input vector containing [v, delta, kappa]
+        :param u: input vector containing [v, w]
         """
         
         kappa = self.current_waypoint.kappa
 
         next_state = ca.DM(self.t_transition(self.state.values, u, kappa)).full().squeeze()
         self.state = KinematicCarState(*next_state)
-        self.set_waypoint()
-        
-        print(self.track_error(self.current_waypoint))
+        self.update_waypoint()
+        # print(f"s: {self.state[4]}, total length: {self.track.length}")
+        # print(f"psidot: {u[0] / self.length * tan(self.state[3])}")
+        # print(f"ey: {self.state[5]}")
+        # print(f"epsi: {self.state[6]}")
+        self.update_track_error()
         
         # ds = 0.03 * self.temporal_state[-1]
         
@@ -116,7 +119,7 @@ class KinematicCar():
         
         return self.state
     
-    def set_waypoint(self) -> Waypoint:
+    def update_waypoint(self) -> Waypoint:
         """
         Get closest waypoint on reference path based on car's current location.
         """
@@ -140,15 +143,17 @@ class KinematicCar():
             self.wp_id = prev_wp_id
             self.current_waypoint = self.track.waypoints[prev_wp_id]
             
-    def track_error(self, waypoint: Waypoint):
+    def update_track_error(self):
         """
         Based on current waypoint (gotten with s) and actual current x,y position,
         :return Spatial State representing the error wrt the current reference waypoint
         """
+        waypoint = self.current_waypoint
         x,y,psi = self.state.values[:3]
         ey = np.cos(waypoint.psi) * (y - waypoint.y) - np.sin(waypoint.psi) * (x - waypoint.x)
         epsi = wrap(psi - waypoint.psi)
-        return ey, epsi
+        self.state[5] = ey # TODO hardcodato
+        self.state[6] = epsi # TODO hardcodato
 
     
     def plot(self, axis: Axes, q = None):

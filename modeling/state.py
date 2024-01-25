@@ -41,9 +41,9 @@ class State(ABC):
 
     def __setitem__(self, key: Union[int, str], value):
         if isinstance(key, int):
-            self.state[key] = value
+            self.values[key] = value
         elif isinstance(key, str):
-            self.state_sym[self.keys.index(key)] = value
+            self.syms[self.keys.index(key)] = value
 
     def __len__(self):
         return len(self.values)
