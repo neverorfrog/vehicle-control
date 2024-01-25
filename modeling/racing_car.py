@@ -73,7 +73,7 @@ class KinematicCar():
         """
         
         kappa = self.current_waypoint.kappa
-
+        
         next_state = self.transition(self.state.values, u, kappa).full().squeeze()
         self.state = KinematicCarState(*next_state)
         self.update_waypoint()
@@ -82,13 +82,6 @@ class KinematicCar():
         # print(f"ey: {self.state[5]}")
         # print(f"epsi: {self.state[6]}")
         self.update_track_error()
-        
-        # ds = 0.03 * self.temporal_state[-1]
-        
-        # next_sstate = ca.DM(self.s_transition(self.spatial_state.state, u, kappa, delta, ds)).full().squeeze()
-        # self.spatial_state = SpatialState(*next_sstate)
-        
-        # print(self.spatial_state)
         
         return self.state
     
@@ -122,7 +115,8 @@ class KinematicCar():
         :return Spatial State representing the error wrt the current reference waypoint
         """
         waypoint = self.current_waypoint
-        x,y,psi = self.state.values[:3]
+        x,y = self.state.values[:2]
+        psi = self.state.psi
         ey = np.cos(waypoint.psi) * (y - waypoint.y) - np.sin(waypoint.psi) * (x - waypoint.x)
         epsi = wrap(psi - waypoint.psi)
         self.state.ey = ey 

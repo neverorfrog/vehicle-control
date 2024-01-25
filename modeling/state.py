@@ -79,6 +79,12 @@ class KinematicCarState(State):
         self._syms = ca.vertcat(*[ca.SX.sym(self._keys[i]) for i in range(len(self._keys))])
      
     @property
+    def x(self): return self.values[0] 
+      
+    @property
+    def y(self): return self.values[1]
+    
+    @property
     def v(self): return self.values[2] 
       
     @property

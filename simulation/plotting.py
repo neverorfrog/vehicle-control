@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
 from modeling.track import Track
 
-def animate(state_traj, input_traj, robot, track: Track = None):
+def animate(state_traj, input_traj, state_preds, robot, track: Track = None):
     # simulation params
     N = input_traj.shape[0]
     state_max = max(state_traj.min(), state_traj.max(), key=abs)
@@ -28,6 +28,12 @@ def animate(state_traj, input_traj, robot, track: Track = None):
         # Plot track
         if track is not None:
             track.plot(ax_large, display_drivable_area=False)
+            
+        # Plot state predictions of MPC
+        if i < len(input_traj):
+            preds = state_preds[i,:,:]
+            ax_large.plot(preds[0,:], preds[1,:],"go")
+            
         
         ax_small1.cla()
         ax_small1.axis((0, N, -state_max*1.1, state_max*1.1))

@@ -15,31 +15,44 @@ class RacingSimulation():
             format='%(message)s'
         )
         
-    def run(self, N: int):
+    def run(self):
         
         # Initiating Simulation
-        s_traj = [self.car.state] # state trajectory (logging)
-        i_traj = [] # input trajectory (logging)
-        s_k = s_traj[0]
+        state_traj = [self.car.state] # state trajectory (logging)
+        action_traj = [] # input trajectory (logging)
+        state = state_traj[0]
         elapsed = []
+        state_preds = []
+        
+        s = 0
         
         # Starting Simulation
-        for _ in range(N):
+        while True:
+            if s > self.car.track.length - 0.1: break
             # computing control signal
             start = time.time()
-            i_k = self.controller.command(s_k)
+            action, state_prediction = self.controller.command(state)
+            
+            state_preds.append(state_prediction)
+            
+            # print(f"Input: {action}")
+            
             elapsed.append(time.time() - start)
             
             # applying control signal
-            s_k = self.car.drive(i_k)
+            state = self.car.drive(action)
+            
+            s = state.s
+            
+            # print(f"State: {state}")
             
             logging.info(self.car.state)
             logging.info(self.car.current_waypoint)
             
             # logging
-            s_traj.append(s_k)
-            i_traj.append(i_k)
+            state_traj.append(state)
+            action_traj.append(action)
         
-        logging.info(f"Mean time per horizon: {np.mean(elapsed)}")
+        print(f"Mean time per horizon: {np.mean(elapsed)}")
         logging.shutdown()
-        return np.array(s_traj), np.array(i_traj)
+        return np.array(state_traj), np.array(action_traj), np.array(state_preds)
