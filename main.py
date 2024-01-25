@@ -15,12 +15,12 @@ track = Track(wp_x=wp[:,0], wp_y=wp[:,1], resolution=0.03,smoothing=25,width=0.4
 
 # Bicycle model
 car = KinematicCar(track, length=0.2, dt=0.05)
-car.state = KinematicCarState(x = -1.24812, y = 0.2, psi = np.pi/6)
+car.state = KinematicCarState(x = -1.24812, y = 0.2, psi = np.pi/6, v=5)
 
 # MPC controller
-controller = RacingMPC(horizon = 30, dt = 0.03, car = car)
+controller = RacingMPC(horizon = 3, dt = 0.03, car = car)
 
 # Simulation
 simulation = RacingSimulation(car, controller)   
-s_traj, i_traj = simulation.run(N = 150)
-animate(np.array(s_traj), np.array(i_traj), car, track)   
+s_traj, i_traj = simulation.run(N = 80)
+# animate(np.array(s_traj), np.array(i_traj), car, track)   

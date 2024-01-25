@@ -35,73 +35,46 @@ class KinematicCar():
         self.update_track_error()
         
         # Initialize dynamic model
-        self._init_temporal_ode()
-        # self._init_spatial_ode()
+        self._init_ode()
         
-    def _init_temporal_ode(self):
+        
+    def _init_ode(self):
         '''Differential equations describing the temporal model'''
         
         # Input variables
-        v = ca.SX.sym('v') # driving acceleration
+        a = ca.SX.sym('a') # driving acceleration
         w = ca.SX.sym('w') # steering angle rate
-        input = ca.vertcat(v,w)
+        input = ca.vertcat(a,w)
 
         # State and auxiliary variables
-        x,y,psi,delta,s,ey,epsi,t = self.state.variables
+        x,y,v,psi,delta,s,ey,epsi,t = self.state.variables
         kappa = ca.SX.sym('kappa')
         
         # ODE
         x_dot = v * cos(psi)
         y_dot = v * sin(psi)
+        v_dot = a
         psi_dot = v / self.length * tan(delta)
         delta_dot = w
         s_dot = (v * cos(epsi)) / (1 - ey * kappa)
-        ey_dot = v * sin(epsi)
+        ey_dot = v * sin(epsi) 
         epsi_dot = psi_dot - s_dot * kappa
         t_dot = 1
-        state_dot = ca.vertcat(x_dot, y_dot, psi_dot, delta_dot, s_dot, ey_dot, epsi_dot, t_dot)
+        state_dot = ca.vertcat(x_dot, y_dot, v_dot, psi_dot, delta_dot, s_dot, ey_dot, epsi_dot, t_dot)
         ode = ca.Function('ode', [self.state.syms,input], [state_dot],{'allow_free':True})
         
         # wrapping up
         integrator = integrate(self.state.syms,input,ode,self.dt)
-        self.t_transition = ca.Function('t_transition', [self.state.syms,input,kappa], [integrator])
-        
-    
-    def _init_spatial_ode(self):
-        '''Differential equations describing the spatial model'''
-        
-        # input variables
-        v = ca.SX.sym('v') # driving acceleration
-        w = ca.SX.sym('w') # steering angle rate
-        input = ca.vertcat(v,w)
-        
-        # state and auxiliary variables
-        state = self.spatial_state.state_sym
-        ey = self.spatial_state['ey'] # need them in variable format
-        epsi = self.spatial_state['epsi']
-        kappa = ca.SX.sym('kappa') 
-        delta = ca.SX.sym('delta') # steering angle 
-        ds = ca.SX.sym('ds') 
-        
-        # ODE
-        ey_prime = (1 - ey * kappa) * ca.tan(epsi)
-        epsi_prime = (self.length * ca.tan(delta)) * ((1 - ey * kappa) / (np.cos(epsi))) - kappa
-        t_prime = (1 - ey * kappa) / (v * np.cos(epsi))
-        state_prime = ca.vertcat(ey_prime, epsi_prime, t_prime)
-        ode = ca.Function('ode', [state, input], [state_prime],{'allow_free':True})
-        
-        # wrapping up
-        integrator = integrate(state, input, ode, h=ds)
-        self.s_transition = ca.Function('s_transition', [state,input,kappa,delta,ds], [integrator])
+        self.transition = ca.Function('t_transition', [self.state.syms,input,kappa], [integrator])
         
     def drive(self, u):
         """
-        :param u: input vector containing [v, w]
+        :param u: input vector containing [a, w]
         """
         
         kappa = self.current_waypoint.kappa
 
-        next_state = ca.DM(self.t_transition(self.state.values, u, kappa)).full().squeeze()
+        next_state = self.transition(self.state.values, u, kappa).full().squeeze()
         self.state = KinematicCarState(*next_state)
         self.update_waypoint()
         # print(f"s: {self.state[4]}, total length: {self.track.length}")
@@ -152,12 +125,12 @@ class KinematicCar():
         x,y,psi = self.state.values[:3]
         ey = np.cos(waypoint.psi) * (y - waypoint.y) - np.sin(waypoint.psi) * (x - waypoint.x)
         epsi = wrap(psi - waypoint.psi)
-        self.state[5] = ey # TODO hardcodato
-        self.state[6] = epsi # TODO hardcodato
+        self.state.ey = ey 
+        self.state.epsi = epsi 
 
     
     def plot(self, axis: Axes, q = None):
-        x,y,psi,delta,_,_,_,_ = self.state.values if q is None else q
+        x,y,v,psi,delta,_,_,_,_ = self.state.values if q is None else q
         r = self.length / 2
         
         # Draw the bicycle as a rectangle
