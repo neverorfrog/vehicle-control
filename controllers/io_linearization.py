@@ -1,9 +1,4 @@
-import sys
-
 from modeling.trajectory import Trajectory
-sys.path.append("..")
-
-from modeling.robot import *
 from typing import Tuple
 import numpy as np
 from controllers.controller import Controller
