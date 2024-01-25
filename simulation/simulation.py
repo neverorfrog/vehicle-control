@@ -2,11 +2,18 @@ import time
 from controllers.controller import Controller
 import numpy as np
 from modeling.racing_car import RacingCar
+import logging
 
 class RacingSimulation():   
     def __init__(self, car: RacingCar, controller: Controller):
         self.car = car
         self.controller = controller
+        logging.basicConfig(
+            filename="test.log", 
+            filemode='w', 
+            level=logging.INFO, 
+            format='%(message)s'
+        )
         
     def run(self, N: int):
         
@@ -26,9 +33,13 @@ class RacingSimulation():
             # applying control signal
             s_k = self.car.drive(i_k)
             
+            logging.info(self.car.state)
+            logging.info(self.car.current_waypoint)
+            
             # logging
             s_traj.append(s_k)
             i_traj.append(i_k)
         
-        print(f"Mean time per horizon: {np.mean(elapsed)}")
+        logging.info(f"Mean time per horizon: {np.mean(elapsed)}")
+        logging.shutdown()
         return np.array(s_traj), np.array(i_traj)

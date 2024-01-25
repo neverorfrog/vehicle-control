@@ -3,6 +3,7 @@ import numpy as np
 import math
 from skimage.draw import line_aa
 import matplotlib.pyplot as plt
+from modeling.util import wrap
 
 # Colors
 DRIVABLE_AREA = '#BDC3C7'
@@ -30,17 +31,20 @@ class Waypoint:
         self.v_ref = None
 
         # Information about drivable area at waypoint
-        # upper and lower bound of drivable area orthogonal to
-        # waypoint orientation.
-        # Upper bound: free drivable area to the left of center-line in m
-        # Lower bound: free drivable area to the right of center-line in m
+        # left and right bound of drivable area orthogonal to
+        # waypoint orientation. Track is anticlockwise.
+        # Left bound: free drivable area to the left of center-line in m
+        # Right bound: free drivable area to the right of center-line in m
         self.lb = None
-        self.ub = None
-        self.static_border_cells = None
-        self.dynamic_border_cells = None
+        self.rb = None
+        
+    def __iter__(self):
+        yield self.x
+        yield self.y
+        yield self.psi
         
     def __str__(self):
-        return f"Waypoint(x={self.x}, y={self.y}, psi={self.psi}, kappa={self.kappa})"
+        return f"Waypoint(x={self.x}, y={self.y}, psi={self.psi}, kappa={self.kappa}, v_ref={self.v_ref})"
 
     def __sub__(self, other):
         """
@@ -53,21 +57,21 @@ class Waypoint:
     
 
 class Track:
-    def __init__(self, wp_x, wp_y, resolution, smoothing, width):
+    def __init__(self, wp_x, wp_y, resolution, smoothing, width = 0.4):
         """
         Track object. Create a reference trajectory from specified
         corner points with given resolution. Smoothing around corners can be
         applied. Waypoints represent center-line of the path with specified
-        maximum width to both sides.
+        maximum width to both sides. By default the track is anticlockwise.
         :param map: map object on which path will be placed
         :param wp_x: x coordinates of corner points in global coordinates
         :param wp_y: y coordinates of corner points in global coordinates
         :param resolution: resolution of the path in m/wp
         :param smoothing: number of waypoints used for smoothing the
         path by averaging neighborhood of waypoints
-        :param max_width: maximum width of path to both sides in m
+        :param width: width of path to both sides in m
         """
-        
+        self.width = width
         # Precision
         self.eps = 1e-12
         # Resolution of the path
@@ -78,7 +82,7 @@ class Track:
         self.waypoints = self._construct_path(wp_x, wp_y)
         # Number of waypoints
         self.n_waypoints = len(self.waypoints)
-        # Length of path
+        # Length and width of path
         self.length, self.segment_lengths = self._compute_length()
         
         
@@ -141,7 +145,7 @@ class Track:
 
             # Angle ahead
             psi = np.arctan2(dif_ahead[1], dif_ahead[0])
-
+            
             # Distance to next waypoint
             dist_ahead = np.linalg.norm(dif_ahead, 2)
 
@@ -149,21 +153,32 @@ class Track:
             x, y = current_wp[0], current_wp[1]
 
             # Compute local curvature at waypoint
-            # first waypoint
-            if wp_id == 0:
+            if wp_id == 0: # first waypoint
                 kappa = 0
             else:
                 prev_wp = np.array(waypoint_coordinates[wp_id - 1])
                 dif_behind = current_wp - prev_wp
                 angle_behind = np.arctan2(dif_behind[1], dif_behind[0])
-                angle_dif = np.mod(psi - angle_behind + math.pi, 2 * math.pi) \
-                            - math.pi
+                angle_dif = np.mod(psi - angle_behind + math.pi, 2 * math.pi) - math.pi
                 kappa = angle_dif / (dist_ahead + self.eps)
 
-            waypoints.append(Waypoint(x, y, psi, kappa))
+            new_waypoint = Waypoint(x, y, psi, kappa)
+            new_waypoint.v_ref = 3 - kappa # reference velocity
+            self._set_bounds(new_waypoint) # set left and right bounds
+            waypoints.append(new_waypoint)
 
         return waypoints
     
+    def _set_bounds(self, waypoint: Waypoint):
+        x,y,psi = waypoint
+        orth_angle = wrap(psi+np.pi/2) #orthogonal angle to psi
+        lbx = x - np.cos(orth_angle) * self.width/2
+        rbx = x + np.cos(orth_angle) * self.width/2
+        lby = y - np.sin(orth_angle) * self.width/2
+        rby = y + np.sin(orth_angle) * self.width/2
+        waypoint.lb = np.array([lbx,lby])
+        waypoint.rb = np.array([rbx,rby])
+        
     def _compute_length(self):
         """
         Compute length of center-line path as sum of euclidean distance between
@@ -196,10 +211,32 @@ class Track:
         # Get x and y coordinates for all waypoints
         wp_x = np.array([wp.x for wp in self.waypoints])
         wp_y = np.array([wp.y for wp in self.waypoints])
-
+        
         # Plot waypoints
-        # colors = [wp.v_ref for wp in self.waypoints]
         axis.scatter(wp_x, wp_y, s=10)
+        
+        # Get x and y locations of border cells for left and right bound
+        lb_x = np.array([wp.lb[0] for wp in self.waypoints])
+        lb_y = np.array([wp.lb[1] for wp in self.waypoints])
+        rb_x = np.array([wp.rb[0] for wp in self.waypoints])
+        rb_y = np.array([wp.rb[1] for wp in self.waypoints])
+        
+        if display_drivable_area:
+            axis.quiver(wp_x, wp_y, lb_x - wp_x, lb_y - wp_y, scale=1,
+                    units='xy', width=0.2*self.resolution, color=DRIVABLE_AREA,
+                    headwidth=1, headlength=0)
+            axis.quiver(wp_x, wp_y, rb_x - wp_x, rb_y - wp_y, scale=1,
+                    units='xy', width=0.2*self.resolution, color=DRIVABLE_AREA,
+                    headwidth=1, headlength=0)
+        
+        # Closing the circuit
+        lb_x = np.array([wp.lb[0] for wp in self.waypoints] + [self.waypoints[0].lb[0]])
+        lb_y = np.array([wp.lb[1] for wp in self.waypoints] + [self.waypoints[0].lb[1]])
+        rb_x = np.array([wp.rb[0] for wp in self.waypoints] + [self.waypoints[0].rb[0]])
+        rb_y = np.array([wp.rb[1] for wp in self.waypoints] + [self.waypoints[0].rb[1]])
+        
+        axis.plot(rb_x, rb_y, color='red')
+        axis.plot(lb_x, lb_y, color='red')
     
 
 # Specify waypoints

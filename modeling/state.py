@@ -49,7 +49,7 @@ class State(ABC):
         return len(self.values)
     
     def __str__(self):
-        return dict(zip(self.keys, self.values)).__str__()
+        return {key: f"{value:.2f}" for key,value in dict(zip(self.keys, self.values)).items()}.__str__()
     
     def __add__(self, other):
         """

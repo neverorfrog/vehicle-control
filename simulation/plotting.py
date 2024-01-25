@@ -23,11 +23,11 @@ def animate(state_traj, input_traj, robot, track: Track = None):
         ax_large.set_aspect('equal')
         robot.plot(ax_large, state_traj[i,:])
         ax_large.plot(state_traj[:i, 0],state_traj[:i, 1],"k")
-        ax_large.grid()
+        # ax_large.grid()
         
         # Plot track
         if track is not None:
-            track.plot(ax_large)
+            track.plot(ax_large, display_drivable_area=False)
         
         ax_small1.cla()
         ax_small1.axis((0, N, -state_max*1.1, state_max*1.1))
