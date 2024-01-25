@@ -172,6 +172,3 @@ class RacingCar():
         axis.add_patch(wheel_left_back)
         
         return x,y
-    
-if __name__ == "__main__":
-    car = 0

@@ -1,8 +1,6 @@
 #adapted from https://github.com/DIAG-Robotics-Lab/underactuated
-from collections import deque
 from matplotlib.animation import FuncAnimation
 import matplotlib.pyplot as plt
-import numpy as np
 from matplotlib.gridspec import GridSpec
 from modeling.track import Track
 
@@ -23,9 +21,7 @@ def animate(state_traj, input_traj, robot, track: Track = None):
         ax_large.cla()
         # ax_large.axis((-pos_max, pos_max, -pos_max, pos_max))
         ax_large.set_aspect('equal')
-        x,y = robot.plot(ax_large, state_traj[i,:])
-        
-        # Plot last window points
+        robot.plot(ax_large, state_traj[i,:])
         ax_large.plot(state_traj[:i, 0],state_traj[:i, 1],"k")
         ax_large.grid()
         

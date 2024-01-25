@@ -1,7 +1,4 @@
 # inspired by https://github.com/giulioturrisi/Differential-Drive-Robot/blob/main/python_scripts/controllers/casadi_nmpc.py
-import sys
-sys.path.append("..")
-
 from modeling.racing_car import RacingCar
 import casadi as ca
 from modeling.track import Track
