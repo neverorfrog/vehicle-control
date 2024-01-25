@@ -1,66 +1,58 @@
-import sys
-
-sys.path.append("..")
-
-from modeling.robot import *
+import time
 from controllers.controller import Controller
 import numpy as np
-from modeling.trajectory import Trajectory
-from modeling.util import wrap
+from modeling.racing_car import KinematicCar
+import logging
 
-class Simulation():   
-    def __init__(self, dt: float, robot: Robot, controller: Controller, reference: Trajectory, threshold = 0.01):
-        self.robot = robot
+class RacingSimulation():   
+    def __init__(self, car: KinematicCar, controller: Controller):
+        self.car = car
         self.controller = controller
-        self.reference = reference
-        self.threshold = threshold
-        self.discrete_ode = ca.Function('discrete_ode', [robot.q,robot.u], [robot.RK4(dt)])
-        self.dt = dt
-         
-    def step(self, q_k, u_k):
-        """
-            - Given current (kth) q and u
-            - Applies it for dt (given in Robot construction)
-            - Return numpy array of next q
-        """
-        next_q = self.discrete_ode(q_k,u_k).full().squeeze()
-        next_q[2] = wrap(next_q[2]) # TODO better solution to normalize angles?
-        next_qd = self.robot.transition_function(next_q, u_k).full().squeeze()
-        return next_q, next_qd
+        logging.basicConfig(
+            filename="test.log", 
+            filemode='w', 
+            level=logging.INFO, 
+            format='%(message)s'
+        )
         
-    def run(self, q0 : np.ndarray, qd0 : np.ndarray, T: float): 
-        # for offline plotting
-        q_traj = [q0]
-        qd_traj = [qd0]
-        ref_traj = [self.reference.update(0)['p']]
-        u_traj = []
-        time = [0]
+    def run(self):
         
-        # control loop initialization
-        q_k = q_traj[-1]
-        qd_k = qd_traj[-1]
-        # control loop
+        # Initiating Simulation
+        state_traj = [self.car.state] # state trajectory (logging)
+        action_traj = [] # input trajectory (logging)
+        state = state_traj[0]
+        elapsed = []
+        state_preds = []
+        
+        s = 0
+        
+        # Starting Simulation
         while True:
-            time.append(time[-1] + self.dt)
-            if time[-1] >= T: break
+            if s > self.car.track.length - 0.1: break
+            # computing control signal
+            start = time.time()
+            action, state_prediction = self.controller.command(state)
             
-            # getting reference
-            ref_k = self.reference.update(time[-1])
+            state_preds.append(state_prediction)
+            
+            # print(f"Input: {action}")
+            
+            elapsed.append(time.time() - start)
             
             # applying control signal
-            u_k = self.controller.command(q_k, qd_k, time[-1], self.reference)
-            q_k, qd_k = self.step(q_k,u_k)
+            state = self.car.drive(action)
+            
+            s = state.s
+            
+            # print(f"State: {state}")
+            
+            logging.info(self.car.state)
+            logging.info(self.car.current_waypoint)
             
             # logging
-            q_traj.append(q_k)
-            qd_traj.append(qd_k)
-            u_traj.append(u_k)
-            ref_traj.append(ref_k['p'])
+            state_traj.append(state)
+            action_traj.append(action)
         
-        return np.array(q_traj), np.array(u_traj), np.array(ref_traj)
-    
-    # TODO make use of this function (not just use time to check for termination)
-    def check_termination(self, e, ed):
-        position_ok = all(np.abs(e) < self.threshold) == True
-        velocity_ok = all(np.abs(ed) < self.threshold) == True
-        return position_ok and velocity_ok
+        print(f"Mean time per horizon: {np.mean(elapsed)}")
+        logging.shutdown()
+        return np.array(state_traj), np.array(action_traj), np.array(state_preds)

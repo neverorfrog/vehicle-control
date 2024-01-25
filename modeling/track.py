@@ -1,185 +1,238 @@
-# adapted from https://github.com/urosolia/RacingLMPC/blob/master/src/fnc/simulator/Track.py
+# inspired by https://github.com/matssteinweg/Multi-Purpose-MPC
+
 from matplotlib.axes import Axes
 import numpy as np
-from modeling.trajectory import Trajectory
-from modeling.util import *
+import math
+from modeling.util import wrap
 
-# A track is specified by a series of segments defined as the tuple [length,
-# radius of curvature]. Given these segments we compute the (x, y) points of the
-# track and the angle of the tangent vector (psi) at these points. For each
-# segment we compute the (x, y, psi) coordinate at the last point of the
-# segment. Furthermore, we compute also the cumulative s at the starting point
-# of the segment at signed curvature In the end each segment will be defined by
-# a tuple point_tangent = [x, y, psi, cumulative s, segment length, signed curvature]
-ippodromo = lambda curve_length: np.array([
-                [3.0, 0], 
-                [curve_length, curve_length / np.pi],
-                [3.0, 0],
-                [curve_length, curve_length / np.pi]]) 
+# Colors
+DRIVABLE_AREA = '#BDC3C7'
+WAYPOINTS = '#D0D3D4'
+PATH_CONSTRAINTS = '#F5B041'
 
-goggle = lambda curve_length: np.array([
-                [1.0, 0],
-                [curve_length, curve_length / np.pi],
-                # Note s = 1 * np.pi / 2 and r = -1 ---> Angle spanned = np.pi / 2
-                [curve_length / 2, -curve_length / np.pi],
-                [curve_length, curve_length / np.pi],
-                [curve_length / np.pi * 2, 0],
-                [curve_length / 2, curve_length / np.pi]])
+class Waypoint:
+    def __init__(self, x, y, psi, kappa):
+        """
+        Waypoint object containing x, y location in global coordinate system,
+        orientation of waypoint psi and local curvature kappa. Waypoint further
+        contains an associated reference velocity computed by the speed profile
+        and a path width specified by upper and lower bounds.
+        :param x: x position in global coordinate system | [m]
+        :param y: y position in global coordinate system | [m]
+        :param psi: orientation of waypoint | [rad]
+        :param kappa: local curvature | [1 / m]
+        """
+        self.x = x
+        self.y = y
+        self.psi = psi
+        self.kappa = kappa
 
-class Track(Trajectory):
-    def __init__(self, freq=0.5):
-        self.half_width = 0.4
-        self.slack = 0.45
-        curve_length = 4.5
-        self.freq = freq
-        self.spec = ippodromo(curve_length)       
-        point_tangent = np.zeros((self.spec.shape[0] + 1, 6))
-        for i in range(0, self.spec.shape[0]):
-            if self.spec[i, 1] == 0.0: # current segment is a straight line
-                point_tangent[i, :] = self.straight_line(i, point_tangent)
-            else:   
-                point_tangent[i, :] = self.curved_line(i, point_tangent)
-          
-        # last segment  
-        xs = point_tangent[-2, 0]
-        ys = point_tangent[-2, 1]
-        xf = 0
-        yf = 0
-        psif = 0
-        l = np.sqrt((xf - xs) ** 2 + (yf - ys) ** 2)
-        new_line = np.array([xf, yf, psif, point_tangent[-2, 3] + point_tangent[-2, 4], l, 0])
-        point_tangent[-1, :] = new_line
+        # Reference velocity at this waypoint according to speed profile
+        self.v_ref = None
+
+        # Information about drivable area at waypoint
+        # left and right bound of drivable area orthogonal to
+        # waypoint orientation. Track is anticlockwise.
+        # Left bound: free drivable area to the left of center-line in m
+        # Right bound: free drivable area to the right of center-line in m
+        self.lb = None
+        self.rb = None
         
-        # wrapping up
-        self.track_length = point_tangent[-1, 3] + point_tangent[-1, 4] 
-        self.point_tangent = point_tangent
+    def __iter__(self):
+        yield self.x
+        yield self.y
+        yield self.psi
+        
+    def __str__(self):
+        return f"Waypoint(x={self.x}, y={self.y}, psi={self.psi}, kappa={self.kappa}, v_ref={self.v_ref})"
+
+    def __sub__(self, other):
+        """
+        Overload subtract operator. Difference of two waypoints is equal to
+        their euclidean distance.
+        :param other: subtrahend
+        :return: euclidean distance between two waypoints
+        """
+        return ((self.x - other.x)**2 + (self.y - other.y)**2)**0.5
     
-    def update(self,t): # TODO
-        p = self.get_global_position(t * self.freq * self.track_length, 0)
-        pd = 0
-        pdd = 0
-        return {'p': p, 'pd':pd , 'pdd':pdd}    
-        
-    def straight_line(self,i, point_tangent):
-        l = self.spec[i, 0] # Length of the segments
-        
-        ang = 0 if i == 0 else point_tangent[i - 1, 2] # Angle of the tangent vector at the starting point of the segment
-        x = (0 if i == 0 else point_tangent[i-1, 0]) + l * np.cos(ang) # x coordinate of the last point of the segment
-        y = (0 if i == 0 else point_tangent[i-1, 1]) + l * np.sin(ang) # y coordinate of the last point of the segment
-        psi = ang  # Angle of the tangent vector at the last point of the segment
-        
-        if i == 0:
-            new_line = np.array([x, y, psi, point_tangent[i, 3], l, 0])
-        else:
-            new_line = np.array([x, y, psi, point_tangent[i-1, 3] + point_tangent[i-1, 4], l, 0])
-        
-        return new_line
-    
-    def curved_line(self,i, point_tangent):
-        l = self.spec[i, 0]                 # Length of the segment
-        r = self.spec[i, 1]                 # Radius of curvature
-        direction = 1 if r >= 0 else -1  
-        ang = 0 if i == 0 else point_tangent[i - 1, 2] # Angle of the tangent vector at the starting point of the segment
-        
-        center_x = (0 if i == 0 else point_tangent[i-1, 0]) + \
-            np.abs(r) * np.cos(ang + direction * np.pi / 2) # x coordinate center of circle
-        center_y = (0 if i == 0 else point_tangent[i-1, 1]) + \
-            np.abs(r) * np.sin(ang + direction * np.pi / 2) # y coordinate center of circle
-        
 
-        spanAng = l / np.abs(r)  # Angle spanned by the circle
-        psi = wrap(ang + spanAng * np.sign(r))  # Angle of the tangent vector at the last point of the segment
-
-        angleNormal = wrap((direction * np.pi / 2 + ang))
-        angle = -(np.pi - np.abs(angleNormal)) * (sign(angleNormal))
-        x = center_x + np.abs(r) * np.cos(angle + direction * spanAng)  # x coordinate of the last point of the segment
-        y = center_y + np.abs(r) * np.sin(angle + direction * spanAng)  # y coordinate of the last point of the segment
-
-        if i == 0:
-            new_line = np.array([x, y, psi, point_tangent[i, 3], l, 1 / r])
-        else:
-            new_line = np.array([x, y, psi, point_tangent[i-1, 3] + point_tangent[i-1, 4], l, 1 / r])
+class Track:
+    def __init__(self, wp_x, wp_y, resolution, smoothing, width = 0.4):
+        """
+        Track object. Create a reference trajectory from specified
+        corner points with given resolution. Smoothing around corners can be
+        applied. Waypoints represent center-line of the path with specified
+        maximum width to both sides. By default the track is anticlockwise.
+        :param map: map object on which path will be placed
+        :param wp_x: x coordinates of corner points in global coordinates
+        :param wp_y: y coordinates of corner points in global coordinates
+        :param resolution: resolution of the path in m/wp
+        :param smoothing: number of waypoints used for smoothing the
+        path by averaging neighborhood of waypoints
+        :param width: width of path to both sides in m
+        """
+        self.width = width
+        # Precision
+        self.eps = 1e-12
+        # Resolution of the path
+        self.resolution = resolution
+        # Look ahead distance for path averaging
+        self.smoothing = smoothing
+        # List of waypoint objects
+        self.waypoints = self._construct_path(wp_x, wp_y)
+        # Number of waypoints
+        self.n_waypoints = len(self.waypoints)
+        # Length and width of path
+        self.length, self.segment_lengths = self._compute_length()
         
-        return new_line
-    
-    def get_global_position(self, s, ey):
-        """coordinate transformation from curvilinear reference frame (s, ey) to inertial reference frame (X, Y)
-        (s, ey): position in the curvilinear reference frame
+        
+    def _construct_path(self, wp_x, wp_y):
+        """
+        Construct path from given waypoints.
+        :param wp_x: x coordinates of waypoints in global coordinates
+        :param wp_y: y coordinates of waypoints in global coordinates
+        :return: list of waypoint objects
         """
 
-        # wrap s along the track
-        while (s > self.track_length):
-            s = s - self.track_length
-
-        # Compute the segment in which system is evolving
-        point_tangent = self.point_tangent
-        conditions = np.array([ [s >= point_tangent[:, 3]] , [s < point_tangent[:, 3] + point_tangent[:, 4]] ]).squeeze()
-        index = np.where(np.all(conditions, axis = 0))[0]
-        i = 0 if len(index) < 1 else int(index.item()) # TODO better solution?
+        # Number of intermediate waypoints between one waypoint and the other
+        distance = lambda i: np.sqrt((wp_x[i + 1] - wp_x[i]) ** 2 + (wp_y[i + 1] - wp_y[i]) ** 2)
+        n_wp = [int(distance(i)/self.resolution) for i in range(len(wp_x) - 1)]
         
-        if point_tangent[i, 5] == 0.0:  # If segment is a straight line
-            # Extract the first final and initial point of the segment
-            xf = point_tangent[i, 0]
-            yf = point_tangent[i, 1]
-            xs = point_tangent[i - 1, 0]
-            ys = point_tangent[i - 1, 1]
-            psi = point_tangent[i, 2]
+        # Construct waypoints with specified resolution
+        gp_x, gp_y = wp_x[-1], wp_y[-1]
+        x_list = lambda i: np.linspace(wp_x[i], wp_x[i+1], n_wp[i], endpoint=False).tolist()
+        wp_x = [x_list(i) for i in range(len(wp_x)-1)]
+        wp_x = [wp for segment in wp_x for wp in segment] + [gp_x]
+        y_list = lambda i: np.linspace(wp_y[i], wp_y[i + 1], n_wp[i], endpoint=False).tolist()
+        wp_y = [y_list(i) for i in range(len(wp_y) - 1)]
+        wp_y = [wp for segment in wp_y for wp in segment] + [gp_y]
 
-            # Compute the segment length
-            deltaL = point_tangent[i, 4]
-            reltaL = s - point_tangent[i, 3]
+        # Smooth path
+        wp_xs = []
+        wp_ys = []
+        for wp_id in range(self.smoothing, len(wp_x) - self.smoothing):
+            wp_xs.append(np.mean(wp_x[wp_id - self.smoothing : wp_id + self.smoothing + 1]))
+            wp_ys.append(np.mean(wp_y[wp_id - self.smoothing : wp_id + self.smoothing + 1]))
 
-            # Do the linear combination
-            x = (1 - reltaL / deltaL) * xs + reltaL / deltaL * xf + ey * np.cos(psi + np.pi / 2)
-            y = (1 - reltaL / deltaL) * ys + reltaL / deltaL * yf + ey * np.sin(psi + np.pi / 2)
-        else:
-            r = 1 / point_tangent[i, 5]  # Extract curvature
-            ang = point_tangent[i - 1, 2]  # Extract angle of the tangent at the initial point (i-1)
-            
-            # Compute the center of the arc
-            direction = sign(r)
-            center_x = point_tangent[i - 1, 0] + np.abs(r) * np.cos(ang + direction * np.pi / 2)  # x coordinate center of circle
-            center_y = point_tangent[i - 1, 1] + np.abs(r) * np.sin(ang + direction * np.pi / 2)  # y coordinate center of circle
-            
-            spanAng = (s - point_tangent[i, 3]) / (np.pi * np.abs(r)) * np.pi
-            angleNormal = wrap((direction * np.pi / 2 + ang))
-            angle = -(np.pi - np.abs(angleNormal)) * (sign(angleNormal))
-            x = center_x + (np.abs(r) - direction * ey) * np.cos(angle + direction * spanAng)  # x coordinate of the last point of the segment
-            y = center_y + (np.abs(r) - direction * ey) * np.sin(angle + direction * spanAng)  # y coordinate of the last point of the segment
-        return np.array([x,y])
+        # Construct list of waypoint objects
+        waypoints = list(zip(wp_xs, wp_ys))
+        
+        waypoints = self._construct_waypoints(waypoints)
+
+        return waypoints
     
-    def get_curvature(self, s):
-        """curvature computation
-        s: curvilinear abscissa at which the curvature has to be evaluated
+    def _construct_waypoints(self, waypoint_coordinates):
         """
-        point_tangent = self.point_tangent
-        track_length = point_tangent[-1,3]+point_tangent[-1,4]
+        Reformulate conventional waypoints (x, y) coordinates into waypoint
+        objects containing (x, y, psi, kappa, ub, lb)
+        :param waypoint_coordinates: list of (x, y) coordinates of waypoints in
+        global coordinates
+        :return: list of waypoint objects for entire reference path
+        """
 
-        # In case on a lap after the first one
-        while (s > track_length):
-            s = s - track_length
+        # List containing waypoint objects
+        waypoints = []
 
-        # Given s \in [0, TrackLength] compute the curvature
-        # Compute the segment in which system is evolving
-        index = np.all([[s >= point_tangent[:, 3]], [s < point_tangent[:, 3] + point_tangent[:, 4]]], axis=0)
+        # Iterate over all waypoints
+        for wp_id in range(len(waypoint_coordinates) - 1):
 
-        i = int(np.where(np.squeeze(index))[0])
-        curvature = self.PointAndTangent[i, 5]
+            # Get start and goal waypoints
+            current_wp = np.array(waypoint_coordinates[wp_id])
+            next_wp = np.array(waypoint_coordinates[wp_id + 1])
 
-        return curvature
-    
-    def plot(self, axis: Axes):
-        points = int(np.floor(10 * (self.point_tangent[-1, 3] + self.point_tangent[-1, 4])))
-        right_limit_points = np.zeros((points, 2))
-        left_limit_points = np.zeros((points, 2))
-        center_points = np.zeros((points, 2))
-        for i in range(0, int(points)):
-            left_limit_points[i, :] = self.get_global_position(i * 0.1, self.half_width)
-            right_limit_points[i, :] = self.get_global_position(i * 0.1, -self.half_width)
-            center_points[i, :] = self.get_global_position(i * 0.1, 0)
+            # Difference vector
+            dif_ahead = next_wp - current_wp
+
+            # Angle ahead
+            psi = np.arctan2(dif_ahead[1], dif_ahead[0])
             
-        axis.plot(self.point_tangent[:, 0], self.point_tangent[:, 1], 'o')
-        axis.plot(center_points[:, 0], center_points[:, 1], '--')
-        axis.plot(left_limit_points[:, 0], left_limit_points[:, 1], '-b')
-        axis.plot(right_limit_points[:, 0], right_limit_points[:, 1], '-b')
-   
+            # Distance to next waypoint
+            dist_ahead = np.linalg.norm(dif_ahead, 2)
+
+            # Get x and y coordinates of current waypoint
+            x, y = current_wp[0], current_wp[1]
+
+            # Compute local curvature at waypoint
+            if wp_id == 0: # first waypoint
+                kappa = 0
+            else:
+                prev_wp = np.array(waypoint_coordinates[wp_id - 1])
+                dif_behind = current_wp - prev_wp
+                angle_behind = np.arctan2(dif_behind[1], dif_behind[0])
+                angle_dif = np.mod(psi - angle_behind + math.pi, 2 * math.pi) - math.pi
+                kappa = angle_dif / (dist_ahead + self.eps)
+
+            new_waypoint = Waypoint(x, y, psi, kappa)
+            new_waypoint.v_ref = 3 - kappa # reference velocity
+            self._set_bounds(new_waypoint) # set left and right bounds
+            waypoints.append(new_waypoint)
+
+        return waypoints
+    
+    def _set_bounds(self, waypoint: Waypoint):
+        x,y,psi = waypoint
+        orth_angle = wrap(psi+np.pi/2) #orthogonal angle to psi
+        lbx = x - np.cos(orth_angle) * self.width/2
+        rbx = x + np.cos(orth_angle) * self.width/2
+        lby = y - np.sin(orth_angle) * self.width/2
+        rby = y + np.sin(orth_angle) * self.width/2
+        waypoint.lb = np.array([lbx,lby])
+        waypoint.rb = np.array([rbx,rby])
+        
+    def _compute_length(self):
+        """
+        Compute length of center-line path as sum of euclidean distance between waypoints.
+        :return: length of center-line path in m
+        """
+        distance = lambda wp_id: self.waypoints[wp_id+1] - self.waypoints[wp_id]
+        segment_lengths = [0.0] + [distance(wp_id) for wp_id in range(len(self.waypoints)-1)]
+        s = sum(segment_lengths)
+        return s, segment_lengths
+    
+    def get_waypoint(self, wp_id):
+        """
+        Get waypoint corresponding to wp_id
+        :param wp_id: unique waypoint ID
+        :return: waypoint object
+        """
+        if wp_id >= self.n_waypoints:
+            wp_id = np.mod(wp_id, self.n_waypoints)
+
+        return self.waypoints[wp_id]
+    
+    def plot(self, axis: Axes, display_drivable_area=True):
+        """
+        Display path object on current figure.
+        :param display_drivable_area: If True, display arrows indicating width
+        of drivable area
+        """
+
+        # Get x and y coordinates for all waypoints
+        wp_x = np.array([wp.x for wp in self.waypoints])
+        wp_y = np.array([wp.y for wp in self.waypoints])
+        
+        # Plot waypoints
+        axis.scatter(wp_x, wp_y, s=3)
+        
+        # Get x and y locations of border cells for left and right bound
+        lb_x = np.array([wp.lb[0] for wp in self.waypoints])
+        lb_y = np.array([wp.lb[1] for wp in self.waypoints])
+        rb_x = np.array([wp.rb[0] for wp in self.waypoints])
+        rb_y = np.array([wp.rb[1] for wp in self.waypoints])
+        
+        if display_drivable_area:
+            axis.quiver(wp_x, wp_y, lb_x - wp_x, lb_y - wp_y, scale=1,
+                    units='xy', width=0.2*self.resolution, color=DRIVABLE_AREA,
+                    headwidth=1, headlength=0)
+            axis.quiver(wp_x, wp_y, rb_x - wp_x, rb_y - wp_y, scale=1,
+                    units='xy', width=0.2*self.resolution, color=DRIVABLE_AREA,
+                    headwidth=1, headlength=0)
+        
+        # Closing the circuit
+        lb_x = np.array([wp.lb[0] for wp in self.waypoints] + [self.waypoints[0].lb[0]])
+        lb_y = np.array([wp.lb[1] for wp in self.waypoints] + [self.waypoints[0].lb[1]])
+        rb_x = np.array([wp.rb[0] for wp in self.waypoints] + [self.waypoints[0].rb[0]])
+        rb_y = np.array([wp.rb[1] for wp in self.waypoints] + [self.waypoints[0].rb[1]])
+        
+        axis.plot(rb_x, rb_y, color='red')
+        axis.plot(lb_x, lb_y, color='red')
