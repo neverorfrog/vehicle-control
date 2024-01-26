@@ -123,8 +123,11 @@ class KinematicCar():
         self.state.epsi = epsi 
 
     
-    def plot(self, axis: Axes, q = None):
-        x,y,v,psi,delta,_,_,_,_ = self.state.values if q is None else q
+    def plot(self, axis: Axes, state: KinematicCarState):
+        x = state.x
+        y = state.y
+        psi = state.psi
+        delta = state.delta
         r = self.length / 2
         
         # Draw the bicycle as a rectangle

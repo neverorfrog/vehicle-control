@@ -50,4 +50,4 @@ class RacingSimulation():
         
         print(f"Mean time per horizon: {np.mean(elapsed)}")
         logging.shutdown()
-        return np.array(state_traj), np.array(action_traj), np.array(state_preds)
+        return state_traj, action_traj, state_preds
