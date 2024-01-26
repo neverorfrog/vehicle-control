@@ -1,14 +1,13 @@
 import time
-from controllers.controller import Controller
+from controller.controller import Controller
 import numpy as np
-from modeling.kinematic_car import KinematicCar
+from model.kinematic_car import KinematicCar
 import logging
-from modeling.util import wrap
+from model.utils import wrap
 from matplotlib.animation import FuncAnimation
 import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
 import numpy as np
-from modeling.track import Track
 
 class RacingSimulation():   
     def __init__(self, car: KinematicCar, controller: Controller):

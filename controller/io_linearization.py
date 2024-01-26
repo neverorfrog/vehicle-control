@@ -1,7 +1,7 @@
-from modeling.trajectory import Trajectory
+from environment.trajectory import Trajectory
 from typing import Tuple
 import numpy as np
-from controllers.controller import Controller
+from controller.controller import Controller
 from numpy import sin,cos,tan
 
 class FBL(Controller):

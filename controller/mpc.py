@@ -1,12 +1,12 @@
 # inspired by https://github.com/giulioturrisi/Differential-Drive-Robot/blob/main/python_scripts/controllers/casadi_nmpc.py
 from matplotlib.pyplot import plot
-from modeling.kinematic_car import KinematicCar
+from model.kinematic_car import KinematicCar
 import casadi as ca
-from modeling.track import Track
+from environment.track import Track
 import numpy as np
 from casadi import cos, sin, tan
-from controllers.controller import Controller
-from modeling.util import integrate
+from controller.controller import Controller
+from model.utils import integrate
 
 class RacingMPC(Controller):
     def __init__(self, horizon, dt, car: KinematicCar):

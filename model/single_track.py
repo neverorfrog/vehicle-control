@@ -1,7 +1,7 @@
 import casadi as ca
 from matplotlib import pyplot as plt
 from matplotlib.axes import Axes
-from modeling.util import *
+from model.utils import *
 from collections import namedtuple
 
 class Robot():

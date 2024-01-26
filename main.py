@@ -1,12 +1,12 @@
 import sys
 sys.path.append(".")
 
-from modeling.state import KinematicCarState
+from model.state import KinematicCarState
 import numpy as np
-from modeling.track import Track
-from modeling.kinematic_car import KinematicCar
+from environment.track import Track
+from model.kinematic_car import KinematicCar
 from simulation.simulation import RacingSimulation
-from controllers.mpc import RacingMPC
+from controller.mpc import RacingMPC
 
 # Create reference path
 wp = np.array([[-2,0],[2,0],[2,2],[-2,2],[-2,0],[-0.5,0]])

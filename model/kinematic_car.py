@@ -3,11 +3,11 @@
 from matplotlib import pyplot as plt
 from matplotlib.axes import Axes
 import numpy as np
-from modeling.state import KinematicCarState
-from modeling.track import Track, Waypoint
-from modeling.util import wrap
+from model.state import KinematicCarState
+from environment.track import Track, Waypoint
+from model.utils import wrap
 import casadi as ca
-from modeling.util import integrate
+from model.utils import integrate
 from casadi import sin,cos,tan
 
 class KinematicCar():

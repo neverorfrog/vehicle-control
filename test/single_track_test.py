@@ -2,11 +2,11 @@ import sys
 sys.path.append("..")
 
 from simulation.simulation import *
-from modeling import *
-from modeling.track import *
-from modeling.trajectory import *
-from modeling.single_track import *
-from controllers.io_linearization import BicycleFBL
+from environment import *
+from environment.track import *
+from environment.trajectory import *
+from model.single_track import *
+from controller.io_linearization import BicycleFBL
 from simulation.plotting import animate
 
 wp = np.array([[-2,0],[2,0],[2,2],[-2,2],[-2,0],[-0.5,0]])
