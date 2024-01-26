@@ -5,9 +5,7 @@ from simulation.simulation import *
 from environment import *
 from environment.track import *
 from environment.trajectory import *
-from model.single_track import *
-from controller.io_linearization import BicycleFBL
-from simulation.plotting import animate
+from model.single_track_model import *
 
 wp = np.array([[-2,0],[2,0],[2,2],[-2,2],[-2,0],[-0.5,0]])
 reference = Track(wp_x=wp[:,0], wp_y=wp[:,1], resolution=0.03,smoothing=25,width=0.4)
@@ -48,11 +46,7 @@ discrete_ode = ca.Function('discrete_ode', [robot.q,robot.u], [robot.RK4(dt)])
 while True:
     time.append(time[-1] + dt)
     if time[-1] >= T: break
-    #ref_k = reference.update(time[-1])
-    
-    # getting reference
-    
-    # applying control signal
+
     if time[-1]<3:cmd = 1
     elif time[-1]<5.75 :cmd=-0
     else: cmd =0
@@ -67,7 +61,6 @@ while True:
     #ref_traj.append(ref_k['p'])
 q_traj = np.array(q_traj)
 u_traj = np.array(u_traj)
-animation = animate(state_traj = np.array(q_traj), input_traj = np.array(u_traj), robot=robot)
 print(q_traj.shape)
 print("Ux_TRAJ:", q_traj[:,0])
 print("___________________________________")
