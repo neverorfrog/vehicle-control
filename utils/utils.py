@@ -1,4 +1,11 @@
 import numpy as np
+import yaml
+
+# Load configuration from a YAML file
+def load_config(file_path):
+    with open(file_path, 'r') as file:
+        config = yaml.safe_load(file)
+    return config
 
 def integrate(q,u,ode,h):
     '''

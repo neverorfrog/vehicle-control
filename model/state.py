@@ -5,11 +5,11 @@ import numpy as np
 from abc import abstractmethod
 from abc import ABC
 import casadi as ca
-from casadi import cos, sin, tan
 
-class State(ABC):
+class FancyVector(ABC):
     """
-    Spatial State Vector - Abstract Base Class.
+    Abstract Base Class for States and Inputs
+    In general it holds values and casadi variables (that's why it's fancy)
     """
     
     @classmethod
@@ -57,11 +57,50 @@ class State(ABC):
         :param other: numpy array to be added to state vector
         """
         assert isinstance(other, (self.__class__)), "You can only sum two same states"
-        tobesummed = other.state if isinstance(other, State) else other
+        tobesummed = other.state if isinstance(other, FancyVector) else other
         new_state = self.state + tobesummed
         return self.__class__.create(*new_state)
+    
+class KinematicCarInput(FancyVector):
+    def __init__(self, a = 0.0, w = 0.0):
+        """
+        :param a: longitudinal acceleration | [m/s^2]
+        :param w: steering angle rate | [rad/s]
+        """
+        self._values = np.array([a,w])
+        self._keys = ['a','w']
+        self._syms = ca.vertcat(*[ca.SX.sym(self._keys[i]) for i in range(len(self._keys))])
+        
+    @property
+    def a(self): return self.values[0] 
+      
+    @property
+    def w(self): return self.values[1]
+    
+    @a.setter
+    def a(self,value: float): 
+        assert isinstance(value, float)
+        self.values[0] = value
+    
+    @w.setter
+    def w(self,value: float): 
+        assert isinstance(value, float)
+        self.values[1] = value
+        
+    @property
+    def values(self): return self._values
+    
+    @property
+    def syms(self): return self._syms
+    
+    @property
+    def keys(self): return self._keys
+    
+    @classmethod
+    def create(cls, *args, **kwargs):
+        return cls(*args, **kwargs)
 
-class KinematicCarState(State):
+class KinematicCarState(FancyVector):
     def __init__(self, x = 0.0, y = 0.0, v = 0.0, psi = 0.0, delta = 0.0, s = 0.0, ey = 0.0, epsi = 0.0, t = 0.0):
         """
         :param x: x position in global coordinate system | [m]
@@ -127,21 +166,23 @@ class KinematicCarState(State):
     def create(cls, *args, **kwargs):
         return cls(*args, **kwargs)
     
-class DynamicCarState(State):
-    def __init__(self, x = 0.0, y = 0.0, v = 0.0, psi = 0.0, delta = 0.0, s = 0.0, ey = 0.0, epsi = 0.0, t = 0.0):
+class SingleTrackState(FancyVector):
+    def __init__(self, x = 0.0, y = 0.0, ux = 0.0, uy = 0.0, psi = 0.0, delta = 0.0, r = 0.0, s = 0.0, ey = 0.0, epsi = 0.0, t = 0.0):
         """
         :param x: x position in global coordinate system | [m]
         :param y: y position in global coordinate system | [m]
-        :param v: velocity in global coordinate system | [m/s]
+        :param ux: longitudinal velocity in global coordinate system | [m/s]
+        :param uy: lateral velocity in global coordinate system | [m/s]
         :param psi: yaw angle | [rad]
         :param delta: steering angle | [rad]
+        :param r: yaw rate | [rad/s]
         :param s: curvilinear abscissa | [m]
         :param ey: orthogonal deviation from center-line | [m]
         :param epsi: yaw angle relative to path | [rad]
         :param t: time | [s]
         """
-        self._values = np.array([x,y,v,psi,delta,s,ey,epsi,t])
-        self._keys = ['x', 'y', 'v','psi','delta','s','ey','epsi','t']
+        self._values = np.array([x,y,ux,uy,psi,delta,r,s,ey,epsi,t])
+        self._keys = ['x','y','ux','uy','psi','delta','r','s','ey','epsi','t']
         self._syms = ca.vertcat(*[ca.SX.sym(self._keys[i]) for i in range(len(self._keys))])
      
     @property
@@ -151,31 +192,37 @@ class DynamicCarState(State):
     def y(self): return self.values[1]
     
     @property
-    def v(self): return self.values[2] 
-      
-    @property
-    def psi(self): return self.values[3]
+    def ux(self): return self.values[2] 
     
     @property
-    def delta(self): return self.values[4]
+    def uy(self): return self.values[3] 
       
     @property
-    def s(self): return self.values[5]
+    def psi(self): return self.values[4]
     
     @property
-    def ey(self): return self.values[6]
+    def delta(self): return self.values[5]
+    
+    @property
+    def r(self): return self.values[6]
+      
+    @property
+    def s(self): return self.values[7]
+    
+    @property
+    def ey(self): return self.values[8]
     
     @ey.setter
-    def ey(self, value): self.values[6] = value
+    def ey(self, value): self.values[8] = value
     
     @property
-    def epsi(self): return self.values[7]
+    def epsi(self): return self.values[9]
     
     @epsi.setter
-    def epsi(self, value): self.values[7] = value
+    def epsi(self, value): self.values[9] = value
     
     @property
-    def t(self): return self.values[8]
+    def t(self): return self.values[10]
     
     @property
     def values(self): return self._values

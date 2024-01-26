@@ -3,7 +3,7 @@
 from matplotlib.axes import Axes
 import numpy as np
 import math
-from model.utils import wrap
+from utils.utils import wrap
 
 # Colors
 DRIVABLE_AREA = '#BDC3C7'

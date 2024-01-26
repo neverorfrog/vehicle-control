@@ -1,7 +1,7 @@
 import sys
 sys.path.append("..")
 
-from simulation.simulation import *
+from simulation.simulator import *
 from environment import *
 from environment.track import *
 from environment.trajectory import *

@@ -1,13 +1,15 @@
+from signal import pause
 import time
 from controller.controller import Controller
 import numpy as np
 from model.kinematic_car import KinematicCar
 import logging
-from model.utils import wrap
+from utils.utils import wrap
 from matplotlib.animation import FuncAnimation
 import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
 import numpy as np
+from itertools import count, cycle
 
 class RacingSimulation():   
     def __init__(self, car: KinematicCar, controller: Controller):
@@ -20,7 +22,7 @@ class RacingSimulation():
             format='%(message)s'
         )
         
-    def run(self, animate: bool = True):
+    def run(self, N: int = None, animate: bool = True):
         
         # Logging containers
         state_traj = [self.car.state] # state trajectory (logging)
@@ -31,28 +33,33 @@ class RacingSimulation():
         # Initializing simulation
         state = state_traj[0] 
         s = 0
-        kappa = np.array([self.car.track.waypoints[i].kappa for i in range(self.controller.horizon)])
+        kappa = np.array([self.car.track.waypoints[i].kappa for i in range(self.controller.N)])
+        counter = count(start=0)
+        steps = N if N is not None else np.inf
         
         # Starting Simulation
-        while True:
-            if s > self.car.track.length: break
+        for n in cycle(counter):
+            if s > self.car.track.length or n >= steps: break
             # computing control signal
             start = time.time()
             action, state_prediction = self.controller.command(state, kappa)
-            elapsed.append(time.time() - start)
-            
-            # computing path geometry for next horizon
-            kappa = np.array([self.car.track.waypoints[i].kappa for i in range(self.controller.horizon)])
+            elapsed_time = time.time() - start
             
             # applying control signal
             state = self.car.drive(action)
             s = state.s
             state.psi = wrap(state.psi)
             
+            # computing path geometry for next horizon 
+            kappa = np.array([self.car.track.waypoints[(self.car.wp_id+i) % len(self.car.track.waypoints)].kappa for i in range(self.controller.N)])
+            # print(kappa)
+            # print(self.car.current_waypoint)
+            
             # logging
             state_traj.append(state)
             action_traj.append(action)
             state_preds.append(state_prediction)
+            elapsed.append(elapsed_time)
             logging.info(self.car.state)
             logging.info(self.car.current_waypoint)
         
@@ -81,20 +88,20 @@ class RacingSimulation():
         
         # fig titles
         lap_time = plt.gcf().text(0.4, 0.95, 'Laptime', fontsize=16, ha='center', va='center')
-        elapsed_time = plt.gcf().text(0.4, 0.85, 'Mean computation time', fontsize=16, ha='center', va='center')
+        elapsed_time = plt.gcf().text(0.4, 0.9, 'Mean computation time', fontsize=16, ha='center', va='center')
         
         def update(i):
             state = state_traj[i]
             
-            lap_time.set_text(f"Lap time: {state.t:.2f}") 
+            lap_time.set_text(f"Lap time: {state.t:.2f} s") 
             
-            if i%5 == 0:
-                elapsed_time.set_text(f"Mean computation time: {np.mean(elapsed[i-5:i]):.2f}")
+            if np.mod(i,5) == 0 and i > 0:
+                elapsed_time.set_text(f"Average computation time: {np.mean(elapsed[i-5:i])*1000:.2f} ms")
             
             ax_large.cla()
             ax_large.set_aspect('equal')
             self.car.plot(ax_large, state)
-            ax_large.plot(x_y[:i, 0],x_y[:i, 1],"k")
+            ax_large.plot(x_y[:i, 0],x_y[:i, 1],'-',alpha=0.7,color="k",linewidth=4)
             
             # Plot track
             if self.car.track is not None:

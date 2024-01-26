@@ -3,11 +3,11 @@
 from matplotlib import pyplot as plt
 from matplotlib.axes import Axes
 import numpy as np
-from model.state import KinematicCarState
+from model.state import KinematicCarInput, KinematicCarState
 from environment.track import Track, Waypoint
-from model.utils import wrap
+from utils.utils import wrap
 import casadi as ca
-from model.utils import integrate
+from utils.utils import integrate
 from casadi import sin,cos,tan
 
 class KinematicCar():
@@ -16,7 +16,6 @@ class KinematicCar():
         Kinematic Bicycle Model
         :param track: reference path object to follow
         :param length: length of car in m
-        :param width: width of car in m
         :param dt: sampling time of model
         """
         
@@ -28,11 +27,15 @@ class KinematicCar():
         self.track = track
         # Set sampling time
         self.dt = dt
+        
         # Initialize state
         self.wp_id = 0
         self.current_waypoint: Waypoint = self.track.waypoints[self.wp_id]
         self.state: KinematicCarState = KinematicCarState()
         self.update_track_error()
+        
+        # Initialize input (fictituous)
+        self.input: KinematicCarInput = KinematicCarInput()
         
         # Initialize dynamic model
         self._init_ode()
@@ -42,9 +45,7 @@ class KinematicCar():
         '''Differential equations describing the temporal model'''
         
         # Input variables
-        a = ca.SX.sym('a') # driving acceleration
-        w = ca.SX.sym('w') # steering angle rate
-        input = ca.vertcat(a,w)
+        a,w = self.input.variables
 
         # State and auxiliary variables
         x,y,v,psi,delta,s,ey,epsi,t = self.state.variables
@@ -61,28 +62,21 @@ class KinematicCar():
         epsi_dot = psi_dot - s_dot * kappa
         t_dot = 1
         state_dot = ca.vertcat(x_dot, y_dot, v_dot, psi_dot, delta_dot, s_dot, ey_dot, epsi_dot, t_dot)
-        ode = ca.Function('ode', [self.state.syms,input], [state_dot],{'allow_free':True})
+        ode = ca.Function('ode', [self.state.syms,self.input.syms], [state_dot],{'allow_free':True})
         
         # wrapping up
-        integrator = integrate(self.state.syms,input,ode,self.dt)
-        self.transition = ca.Function('transition', [self.state.syms,input,kappa], [integrator])
+        integrator = integrate(self.state.syms,self.input.syms,ode,self.dt)
+        self.transition = ca.Function('transition', [self.state.syms,self.input.syms,kappa], [integrator])
         
-    def drive(self, u):
+    def drive(self, input: KinematicCarInput):
         """
         :param u: input vector containing [a, w]
         """
-        
-        kappa = self.current_waypoint.kappa
-        
-        next_state = self.transition(self.state.values, u, kappa).full().squeeze()
+        next_state = self.transition(self.state.values, input.values, self.current_waypoint.kappa).full().squeeze()
         self.state = KinematicCarState(*next_state)
         self.update_waypoint()
-        # print(f"s: {self.state[4]}, total length: {self.track.length}")
-        # print(f"psidot: {u[0] / self.length * tan(self.state[3])}")
-        # print(f"ey: {self.state[5]}")
-        # print(f"epsi: {self.state[6]}")
         self.update_track_error()
-        
+        self.input = input
         return self.state
     
     def update_waypoint(self) -> Waypoint:
@@ -115,10 +109,9 @@ class KinematicCar():
         :return Spatial State representing the error wrt the current reference waypoint
         """
         waypoint = self.current_waypoint
-        x,y = self.state.values[:2]
-        psi = self.state.psi
-        ey = np.cos(waypoint.psi) * (y - waypoint.y) - np.sin(waypoint.psi) * (x - waypoint.x)
-        epsi = wrap(psi - waypoint.psi)
+        ey = np.cos(waypoint.psi) * (self.state.y - waypoint.y) - \
+             np.sin(waypoint.psi) * (self.state.x - waypoint.x)
+        epsi = wrap(self.state.psi - waypoint.psi)
         self.state.ey = ey 
         self.state.epsi = epsi 
 

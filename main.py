@@ -5,20 +5,30 @@ from model.state import KinematicCarState
 import numpy as np
 from environment.track import Track
 from model.kinematic_car import KinematicCar
-from simulation.simulation import RacingSimulation
-from controller.mpc import RacingMPC
+from simulation.simulator import RacingSimulation
+from controller.kinematic_mpc import RacingMPC
+from utils.utils import *
 
-# Create reference path
-wp = np.array([[-2,0],[2,0],[2,2],[-2,2],[-2,0],[-0.5,0]])
-track = Track(wp_x=wp[:,0], wp_y=wp[:,1], resolution=0.03,smoothing=25,width=0.4)
+# First (simpler) track
+config = load_config("config/ippodromo.yaml")
+
+# Second track
+# config = load_config("config/complicato.yaml")
+
+track = Track(wp_x=config['wp_x'], 
+              wp_y=config['wp_y'], 
+              resolution=config['resolution'],
+              smoothing=config['smoothing'],
+              width=config['width'])
 
 # Bicycle model
-car = KinematicCar(track, length=0.2, dt=0.05)
-car.state = KinematicCarState(x = -1.24812, v = 1)
+car = KinematicCar(track, length=0.2, dt=config['model_dt'])
+s0 = config['initial_state']
+car.state = KinematicCarState(x = s0['x'], y = s0['y'], v = s0['v'])
 
 # MPC controller
-controller = RacingMPC(horizon = 39, dt = 0.01, car = car)
+controller = RacingMPC(car=car, config=config)
 
-# Simulation
+# # Simulation
 simulation = RacingSimulation(car, controller)   
-simulation.run()
+simulation.run(N=160)
