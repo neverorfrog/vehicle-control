@@ -1,7 +1,7 @@
 import time
 from controllers.controller import Controller
 import numpy as np
-from modeling.racing_car import KinematicCar
+from modeling.kinematic_car import KinematicCar
 import logging
 
 class RacingSimulation():   
@@ -23,35 +23,30 @@ class RacingSimulation():
         state = state_traj[0]
         elapsed = []
         state_preds = []
-        
         s = 0
-        
+        kappa = np.array([self.car.track.waypoints[i].kappa for i in range(self.controller.horizon)])
         # Starting Simulation
         while True:
             if s > self.car.track.length - 0.1: break
             # computing control signal
             start = time.time()
-            action, state_prediction = self.controller.command(state)
-            
-            state_preds.append(state_prediction)
-            
-            # print(f"Input: {action}")
-            
+            action, state_prediction = self.controller.command(state, kappa)
             elapsed.append(time.time() - start)
+            
+            # computing path geometry for next horizon
+            kappa = np.array([self.car.track.waypoints[i].kappa for i in range(self.controller.horizon)])
             
             # applying control signal
             state = self.car.drive(action)
-            
             s = state.s
-            
-            # print(f"State: {state}")
-            
-            logging.info(self.car.state)
-            logging.info(self.car.current_waypoint)
             
             # logging
             state_traj.append(state)
             action_traj.append(action)
+            state_preds.append(state_prediction)
+            logging.info(self.car.state)
+            logging.info(self.car.current_waypoint)
+            
         
         print(f"Mean time per horizon: {np.mean(elapsed)}")
         logging.shutdown()

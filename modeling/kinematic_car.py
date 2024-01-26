@@ -65,7 +65,7 @@ class KinematicCar():
         
         # wrapping up
         integrator = integrate(self.state.syms,input,ode,self.dt)
-        self.transition = ca.Function('t_transition', [self.state.syms,input,kappa], [integrator])
+        self.transition = ca.Function('transition', [self.state.syms,input,kappa], [integrator])
         
     def drive(self, u):
         """

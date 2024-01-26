@@ -4,7 +4,7 @@ sys.path.append(".")
 from modeling.state import KinematicCarState
 import numpy as np
 from modeling.track import Track
-from modeling.racing_car import KinematicCar
+from modeling.kinematic_car import KinematicCar
 from simulation.simulation import RacingSimulation
 from simulation.plotting import animate
 from controllers.mpc import RacingMPC
@@ -18,7 +18,7 @@ car = KinematicCar(track, length=0.2, dt=0.05)
 car.state = KinematicCarState(x = -1.24812, v = 1)
 
 # MPC controller
-controller = RacingMPC(horizon = 43, dt = 0.01, car = car)
+controller = RacingMPC(horizon = 40, dt = 0.01, car = car)
 
 # Simulation
 simulation = RacingSimulation(car, controller)   

@@ -9,8 +9,9 @@ from modeling.single_track import *
 from controllers.io_linearization import BicycleFBL
 from simulation.plotting import animate
 
+wp = np.array([[-2,0],[2,0],[2,2],[-2,2],[-2,0],[-0.5,0]])
+reference = Track(wp_x=wp[:,0], wp_y=wp[:,1], resolution=0.03,smoothing=25,width=0.4)
 robot = SingleTrack()
-track = Track(freq=0.03)
 circle = Circle(freq = 0.02)
 # for offline plotting
 
@@ -41,9 +42,6 @@ time = [0]
 q_k = q_traj[-1]
 qd_k = qd_traj[-1]
 
-reference = Track(freq=0.03)
-ref_traj = [reference.update(0)['p']]
-
 discrete_ode = ca.Function('discrete_ode', [robot.q,robot.u], [robot.RK4(dt)])
 
 
@@ -69,7 +67,7 @@ while True:
     #ref_traj.append(ref_k['p'])
 q_traj = np.array(q_traj)
 u_traj = np.array(u_traj)
-animation = animate(np.array(q_traj), np.array(u_traj), np.array(q_traj), robot, track)
+animation = animate(state_traj = np.array(q_traj), input_traj = np.array(u_traj), robot=robot)
 print(q_traj.shape)
 print("Ux_TRAJ:", q_traj[:,0])
 print("___________________________________")

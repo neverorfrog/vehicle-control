@@ -1,10 +1,8 @@
 import casadi as ca
 from matplotlib import pyplot as plt
 from matplotlib.axes import Axes
-import numpy as np
 from modeling.util import *
 from collections import namedtuple
-#from robot import Robot
 
 class Robot():
     '''
@@ -42,6 +40,7 @@ class Robot():
 
 class SingleTrack(Robot):
     def __init__(self):
+        self.length = 0.4
         g = 9.88
         #velocity states
         Ux = ca.SX.sym('Ux') #longitudinal speed
@@ -54,7 +53,7 @@ class SingleTrack(Robot):
         d_psi = ca.SX.sym('d_psi') #difference in heading between vehicle and path
         delta = ca.SX.sym('delta') #front steer angle 
         q = ca.vertcat(Ux, Uy, r, s, e, d_psi, delta)
-        self.state_labels=['Ux', 'Uy','r','s', 'e','d_psi',  'delta']
+        self.state_labels=['Ux','Uy','r','s','e','d_psi','delta']
 
         #input
         Fx = ca.SX.sym('Fx') #longitudinal force command
@@ -157,25 +156,36 @@ class SingleTrack(Robot):
             )
         )
         return ca.Function("lateral_forces", [Uy, Ux, delta, r, Fx], [result])
+    
+def plot(self, axis: Axes, q = None):
+        x,y,v,psi,delta,_,_,_,_ = self.state.values if q is None else q
+        r = self.length / 2
         
-    def plot(self, axis: Axes, q):
-        _,_,_,s,e,theta,_ = q
-        r = 0.2
-        
-        # Plot circular shape
-        circle = plt.Circle(xy=(s,1), radius=r, edgecolor='b', facecolor='none', lw=2)
-        axis.add_patch(circle)
+        # Draw the bicycle as a rectangle
+        width = self.length
+        height = self.length
+        angle = wrap(psi-np.pi/2)
+        rectangle = plt.Rectangle((x-np.cos(angle)*width/2-np.cos(psi)*2*width/3, y-np.sin(angle)*height/2-np.sin(psi)*2*height/3),
+                                  width,height,edgecolor='black',alpha=0.7, angle=np.rad2deg(angle), rotation_point='xy')
+        axis.add_patch(rectangle)
         
         # Plot directional tick
         line_length = 1.5 * r
-        line_end_x = s + line_length * np.cos(theta)
-        line_end_y = e + line_length * np.sin(theta)
-        axis.plot([s, line_end_x], [e, line_end_y], color='r', lw=3)
+        line_end_x = x + line_length * np.cos(psi)
+        line_end_y = y + line_length * np.sin(psi)
+        axis.plot([x, line_end_x], [y, line_end_y], color='r', lw=3)
         
-        # Draw two wheels as rectangles
-        wheel_angle = wrap(theta-np.pi/2)
-        wheel_right = plt.Rectangle((s+np.cos(wheel_angle)*r, e+np.sin(wheel_angle)*r),width=0.05,height=0.15,angle=np.rad2deg(wheel_angle),facecolor='black')
-        axis.add_patch(wheel_right)
-        wheel_left = plt.Rectangle((s-np.cos(wheel_angle)*r, e-np.sin(wheel_angle)*r),width=0.05,height=0.15,angle=np.rad2deg(wheel_angle),facecolor='black')
-        axis.add_patch(wheel_left)
-        return s,e
+        # Draw four wheels as rectangles
+        wheel_width = self.length / 10
+        wheel_height = self.length / 4
+        wheel_angle = wrap(psi+delta-np.pi/2)
+        wheel_right_front = plt.Rectangle((x+np.cos(angle)*r, y+np.sin(angle)*r),width=wheel_width,height=wheel_height,angle=np.rad2deg(wheel_angle),facecolor='black')
+        axis.add_patch(wheel_right_front)
+        wheel_left_front = plt.Rectangle((x-np.cos(angle)*r, y-np.sin(angle)*r),width=wheel_width,height=wheel_height,angle=np.rad2deg(wheel_angle),facecolor='black')
+        axis.add_patch(wheel_left_front)
+        wheel_right_back = plt.Rectangle((x+np.cos(angle)*r-np.cos(psi)*width*0.6, y+np.sin(angle)*r-np.sin(psi)*height*0.6),width=wheel_width,height=wheel_height,angle=np.rad2deg(wheel_angle),facecolor='black')
+        axis.add_patch(wheel_right_back)
+        wheel_left_back = plt.Rectangle((x-np.cos(angle)*r-np.cos(psi)*width*0.6, y-np.sin(angle)*r-np.sin(psi)*height*0.6),width=wheel_width,height=wheel_height,angle=np.rad2deg(wheel_angle),facecolor='black')
+        axis.add_patch(wheel_left_back)
+        
+        return x,y

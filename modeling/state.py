@@ -123,3 +123,66 @@ class KinematicCarState(State):
     @classmethod
     def create(cls, *args, **kwargs):
         return cls(*args, **kwargs)
+    
+class DynamicCarState(State):
+    def __init__(self, x = 0.0, y = 0.0, v = 0.0, psi = 0.0, delta = 0.0, s = 0.0, ey = 0.0, epsi = 0.0, t = 0.0):
+        """
+        :param x: x position in global coordinate system | [m]
+        :param y: y position in global coordinate system | [m]
+        :param v: velocity in global coordinate system | [m/s]
+        :param psi: yaw angle | [rad]
+        :param delta: steering angle | [rad]
+        :param s: curvilinear abscissa | [m]
+        :param ey: orthogonal deviation from center-line | [m]
+        :param epsi: yaw angle relative to path | [rad]
+        :param t: time | [s]
+        """
+        self._values = np.array([x,y,v,psi,delta,s,ey,epsi,t])
+        self._keys = ['x', 'y', 'v','psi','delta','s','ey','epsi','t']
+        self._syms = ca.vertcat(*[ca.SX.sym(self._keys[i]) for i in range(len(self._keys))])
+     
+    @property
+    def x(self): return self.values[0] 
+      
+    @property
+    def y(self): return self.values[1]
+    
+    @property
+    def v(self): return self.values[2] 
+      
+    @property
+    def psi(self): return self.values[3]
+    
+    @property
+    def delta(self): return self.values[4]
+      
+    @property
+    def s(self): return self.values[5]
+    
+    @property
+    def ey(self): return self.values[6]
+    
+    @ey.setter
+    def ey(self, value): self.values[6] = value
+    
+    @property
+    def epsi(self): return self.values[7]
+    
+    @epsi.setter
+    def epsi(self, value): self.values[7] = value
+    
+    @property
+    def t(self): return self.values[8]
+    
+    @property
+    def values(self): return self._values
+    
+    @property
+    def syms(self): return self._syms
+    
+    @property
+    def keys(self): return self._keys
+    
+    @classmethod
+    def create(cls, *args, **kwargs):
+        return cls(*args, **kwargs)

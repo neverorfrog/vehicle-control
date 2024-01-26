@@ -1,6 +1,6 @@
 # inspired by https://github.com/giulioturrisi/Differential-Drive-Robot/blob/main/python_scripts/controllers/casadi_nmpc.py
 from matplotlib.pyplot import plot
-from modeling.racing_car import KinematicCar
+from modeling.kinematic_car import KinematicCar
 import casadi as ca
 from modeling.track import Track
 import numpy as np
@@ -30,7 +30,8 @@ class RacingMPC(Controller):
         # --------------------- Helper Variables ------------------------------------------
         self.s0 = self.opti.parameter(ns) # initial state
         self.opti.subject_to(self.state[:,0] == self.s0) # constraint on initial state
-        self.kappa = self.opti.parameter(1) # local curvature
+        self.kappa = self.opti.parameter(horizon) # local curvature
+        # self.opti.set_value(self.kappa, np.zeros(horizon))
         
         # -------------------- Model Constraints and Cost function ------------------------
         for n in range(horizon):
@@ -39,31 +40,40 @@ class RacingMPC(Controller):
             
         cost = 0
         for n in range(horizon):
+            
+            # extracting state
             state = self.state[:,n]
             input = self.action[:,n]
             state_next = self.state[:,n+1]
+            v = state[2] # TODO hardcodato
+            ey = state[5] # TODO hardcodato
+            epsi = state[6] # TODO hardcodato
             
             # add stage cost to objective
-            cost += 7*ca.sumsqr(state[5:7])
+            cost += 4*ca.sumsqr(ey - 0.3) # right bound
+            cost += 4*ca.sumsqr(ey + 0.3) # left bound
+            cost += ca.sumsqr(epsi - ca.pi/3) #
+            cost += ca.sumsqr(epsi + ca.pi/3) # 
+            cost += 5*ca.sumsqr(epsi) #
+            cost += ca.sumsqr(ey) # 
 
             # going on for dt and snapshot of how much the car moved
-            v = state[2] # TODO hardcodato
-            ey = state[6] # TODO hardcodato
-            epsi = state[7] # TODO hardcodato
-            # ds = self.dt * (v) #* np.cos(epsi)) #/ (1 - ey * self.kappa)
-            ds = self.dt
+            # self.ds = self.dt * ((v * np.cos(epsi)) / (1 - ey * self.kappa[n]))
+            self.ds = 0.01 # TODO bigger step breaks things
             
             # add continuity contraint on spatial dynamics
-            self.opti.subject_to(state_next == transition(state,input,self.kappa,ds))
+            self.opti.subject_to(state_next == transition(state,input,self.kappa[n],self.ds))
             
-        cost += 0.01*state[-1,-1] # final cost (minimize time)
+        cost += 0.01*state[-1,-1] # final cost (minimize time) # TODO bigger weight breaks things
+        cost += 10*ca.sumsqr(state[5]) # final cost (minimize terminal error)
+        cost += 10*ca.sumsqr(state[6]) # final cost (minimize terminal error)
         self.opti.minimize(cost)
             
         # -------------------- Model Constraints ------------------------------------------
-        self.a_max = 2
+        self.a_max = 1
         self.a_min = 0
-        self.w_max = 1
-        self.w_min = -1
+        self.w_max = 2
+        self.w_min = -1.5 # TODO lower value i
         for n in range(horizon): # loop over control intervals
             self.opti.subject_to(self.action[0,n] <= self.a_max)
             self.opti.subject_to(self.action[0,n] >= self.a_min)
@@ -104,23 +114,21 @@ class RacingMPC(Controller):
         
         return ns, ni, transition
         
-    def command(self, s_k):
+    def command(self, s_k, kappa):
         # every new horizon, the current state (and the last prediction) is the initial prediction
-        self.start(s_k)
-        
-        # print(self.opti.debug.value(self.s0,self.opti.initial()))
-        # print(self.opti.debug.value(self.state,self.opti.initial()))
-        
+        self.start(s_k, kappa)
         sol = self.opti.solve()
+        # print(self.opti.debug.value(self.ds))
         self.action_prediction = sol.value(self.action)
         self.state_prediction = sol.value(self.state)
         return np.array([self.action_prediction[0][0], self.action_prediction[1][0]]), self.state_prediction
     
-    def start(self, s_k):
+    def start(self, s_k, kappa):
         '''
         s_k is a state in its entirety. I need to extract relevant variables
         '''
         state = np.array([s_k.x, s_k.y, s_k.v, s_k.psi, s_k.delta, s_k.ey, s_k.epsi, s_k.t])
+        self.opti.set_value(self.kappa, kappa)
         self.opti.set_value(self.s0, state)
         self.opti.set_value(self.kappa, self.car.current_waypoint.kappa)
         self.opti.set_initial(self.action, self.action_prediction)
