@@ -6,7 +6,6 @@ import numpy as np
 from modeling.track import Track
 from modeling.kinematic_car import KinematicCar
 from simulation.simulation import RacingSimulation
-from simulation.plotting import animate
 from controllers.mpc import RacingMPC
 
 # Create reference path
@@ -18,9 +17,8 @@ car = KinematicCar(track, length=0.2, dt=0.05)
 car.state = KinematicCarState(x = -1.24812, v = 1)
 
 # MPC controller
-controller = RacingMPC(horizon = 40, dt = 0.01, car = car)
+controller = RacingMPC(horizon = 39, dt = 0.01, car = car)
 
 # Simulation
 simulation = RacingSimulation(car, controller)   
-state_traj, action_traj, state_preds = simulation.run()
-animate(state_traj, action_traj, state_preds, car, track)   
+simulation.run()

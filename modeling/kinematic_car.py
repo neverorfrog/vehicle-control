@@ -94,9 +94,9 @@ class KinematicCar():
         length_cum = np.cumsum(self.track.segment_lengths)
         # Get first index with distance larger than distance traveled by car so far
         greater_than_threshold = length_cum > s
-        next_wp_id = greater_than_threshold.searchsorted(True)
+        next_wp_id = (greater_than_threshold.searchsorted(True)) % len(length_cum)
         # Get previous index
-        prev_wp_id = next_wp_id - 1
+        prev_wp_id = (next_wp_id - 1) % len(length_cum)
 
         # Get distance traveled for both enclosing waypoints
         s_next = length_cum[next_wp_id]

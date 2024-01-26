@@ -90,6 +90,9 @@ class KinematicCarState(State):
     @property
     def psi(self): return self.values[3]
     
+    @psi.setter
+    def psi(self, value): self.values[3] = value
+    
     @property
     def delta(self): return self.values[4]
       

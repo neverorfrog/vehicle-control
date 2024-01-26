@@ -36,7 +36,7 @@ class RacingMPC(Controller):
         # -------------------- Model Constraints and Cost function ------------------------
         for n in range(horizon):
             state = self.state[:,n]
-            self.opti.subject_to(state[2] >= 1)
+            self.opti.subject_to(state[2] >= 1) # TODO without this, things break
             
         cost = 0
         for n in range(horizon):
@@ -64,16 +64,16 @@ class RacingMPC(Controller):
             # add continuity contraint on spatial dynamics
             self.opti.subject_to(state_next == transition(state,input,self.kappa[n],self.ds))
             
-        cost += 0.01*state[-1,-1] # final cost (minimize time) # TODO bigger weight breaks things
-        cost += 10*ca.sumsqr(state[5]) # final cost (minimize terminal error)
-        cost += 10*ca.sumsqr(state[6]) # final cost (minimize terminal error)
+        cost += 0.1*state[-1,-1] # final cost (minimize time) # TODO bigger weight breaks things
+        cost += 100*ca.sumsqr(state[5]) # final cost (minimize terminal error)
+        cost += 100*ca.sumsqr(state[6]) # final cost (minimize terminal error)
         self.opti.minimize(cost)
             
         # -------------------- Model Constraints ------------------------------------------
-        self.a_max = 1
-        self.a_min = 0
-        self.w_max = 2
-        self.w_min = -1.5 # TODO lower value i
+        self.a_max = 1 # TODO higher value breaks things
+        self.a_min = -0.1 # TODO higher value breaks things
+        self.w_max = 2 # TODO higher value breaks things
+        self.w_min = -1.5 # TODO lower value breaks things
         for n in range(horizon): # loop over control intervals
             self.opti.subject_to(self.action[0,n] <= self.a_max)
             self.opti.subject_to(self.action[0,n] >= self.a_min)
