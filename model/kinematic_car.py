@@ -40,6 +40,17 @@ class KinematicCar():
         # Initialize dynamic model
         self._init_ode()
         
+    def drive(self, input: KinematicCarInput):
+        """
+        :param input: input vector containing [a, w]
+        """
+        next_state = self.transition(self.state.values, input.values, self.current_waypoint.kappa).full().squeeze()
+        self.state = KinematicCarState(*next_state)
+        self.current_waypoint, self.wp_id = self.get_waypoint(self.state.s)
+        self.update_track_error()
+        self.input = input
+        return self.state
+        
         
     def _init_ode(self):
         '''Differential equations describing the temporal model'''
@@ -67,17 +78,6 @@ class KinematicCar():
         # wrapping up
         integrator = integrate(self.state.syms,self.input.syms,kappa,ode,self.dt)
         self.transition = ca.Function('transition', [self.state.syms,self.input.syms,kappa], [integrator])
-        
-    def drive(self, input: KinematicCarInput):
-        """
-        :param u: input vector containing [a, w]
-        """
-        next_state = self.transition(self.state.values, input.values, self.current_waypoint.kappa).full().squeeze()
-        self.state = KinematicCarState(*next_state)
-        self.current_waypoint, self.wp_id = self.get_waypoint(self.state.s)
-        self.update_track_error()
-        self.input = input
-        return self.state
     
     def get_waypoint(self, s) -> Waypoint:
         """
@@ -149,5 +149,3 @@ class KinematicCar():
         axis.add_patch(wheel_right_back)
         wheel_left_back = plt.Rectangle((x-np.cos(angle)*r-np.cos(psi)*width*0.6, y-np.sin(angle)*r-np.sin(psi)*height*0.6),width=wheel_width,height=wheel_height,angle=np.rad2deg(wheel_angle),facecolor='black')
         axis.add_patch(wheel_left_back)
-        
-        return x,y

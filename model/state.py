@@ -114,7 +114,7 @@ class KinematicCarState(FancyVector):
         :param t: time | [s]
         """
         self._values = np.array([x,y,v,psi,delta,s,ey,epsi,t])
-        self._keys = ['x', 'y', 'v','psi','delta','s','ey','epsi','t']
+        self._keys = ['x','y', 'v','psi','delta','s','ey','epsi','t']
         self._syms = ca.vertcat(*[ca.SX.sym(self._keys[i]) for i in range(len(self._keys))])
      
     @property
@@ -166,23 +166,62 @@ class KinematicCarState(FancyVector):
     def create(cls, *args, **kwargs):
         return cls(*args, **kwargs)
     
-class SingleTrackState(FancyVector):
-    def __init__(self, x = 0.0, y = 0.0, ux = 0.0, uy = 0.0, psi = 0.0, delta = 0.0, r = 0.0, s = 0.0, ey = 0.0, epsi = 0.0, t = 0.0):
+class DynamicCarInput(FancyVector):
+    def __init__(self, Fx = 0.0, w = 0.0):
+        """
+        :param a: longitudinal acceleration | [m/s^2]
+        :param w: steering angle rate | [rad/s]
+        """
+        self._values = np.array([Fx,w])
+        self._keys = ['fx','w']
+        self._syms = ca.vertcat(*[ca.SX.sym(self._keys[i]) for i in range(len(self._keys))])
+        
+    @property
+    def Fx(self): return self.values[0] 
+      
+    @property
+    def w(self): return self.values[1]
+    
+    @Fx.setter
+    def Fx(self,value: float): 
+        assert isinstance(value, float)
+        self.values[0] = value
+    
+    @w.setter
+    def w(self,value: float): 
+        assert isinstance(value, float)
+        self.values[1] = value
+        
+    @property
+    def values(self): return self._values
+    
+    @property
+    def syms(self): return self._syms
+    
+    @property
+    def keys(self): return self._keys
+    
+    @classmethod
+    def create(cls, *args, **kwargs):
+        return cls(*args, **kwargs)
+    
+class DynamicCarState(FancyVector):
+    def __init__(self, x = 0.0, y = 0.0, Ux = 0.0, Uy = 0.0, psi = 0.0, delta = 0.0, r = 0.0, s = 0.0, e = 0.0, d_psi = 0.0, t = 0.0):
         """
         :param x: x position in global coordinate system | [m]
         :param y: y position in global coordinate system | [m]
-        :param ux: longitudinal velocity in global coordinate system | [m/s]
-        :param uy: lateral velocity in global coordinate system | [m/s]
+        :param Ux: longitudinal velocity in global coordinate system | [m/s]
+        :param Uy: lateral velocity in global coordinate system | [m/s]
         :param psi: yaw angle | [rad]
         :param delta: steering angle | [rad]
         :param r: yaw rate | [rad/s]
         :param s: curvilinear abscissa | [m]
-        :param ey: orthogonal deviation from center-line | [m]
-        :param epsi: yaw angle relative to path | [rad]
+        :param e: orthogonal deviation from center-line | [m]
+        :param d_psi: yaw angle relative to path | [rad]
         :param t: time | [s]
         """
-        self._values = np.array([x,y,ux,uy,psi,delta,r,s,ey,epsi,t])
-        self._keys = ['x','y','ux','uy','psi','delta','r','s','ey','epsi','t']
+        self._values = np.array([x,y,Ux,Uy,psi,delta,r,s,e,d_psi,t])
+        self._keys = ['Ux','Uy','delta','r','s','ey','epsi','t']
         self._syms = ca.vertcat(*[ca.SX.sym(self._keys[i]) for i in range(len(self._keys))])
      
     @property
@@ -210,16 +249,16 @@ class SingleTrackState(FancyVector):
     def s(self): return self.values[7]
     
     @property
-    def ey(self): return self.values[8]
+    def e(self): return self.values[8]
     
-    @ey.setter
-    def ey(self, value): self.values[8] = value
+    @e.setter
+    def e(self, value): self.values[8] = value
     
     @property
-    def epsi(self): return self.values[9]
+    def d_psi(self): return self.values[9]
     
-    @epsi.setter
-    def epsi(self, value): self.values[9] = value
+    @d_psi.setter
+    def d_psi(self, value): self.values[9] = value
     
     @property
     def t(self): return self.values[10]

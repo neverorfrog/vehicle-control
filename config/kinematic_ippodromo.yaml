@@ -54,8 +54,8 @@ state_constraints:
 
 # prediction and control horizon
 horizon: 30
-mpc_dt: 0.006
+mpc_dt: 0.007
 model_dt: 0.05
 
 # simulation
-n_steps: 150
+n_steps: 50

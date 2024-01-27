@@ -9,7 +9,7 @@ from controller.kinematic_mpc import RacingMPC
 from utils.utils import *
 
 # First (simpler) track
-config = load_config("config/ippodromo.yaml")
+config = load_config("config/kinematic_ippodromo.yaml")
 
 # Second track
 # config = load_config("config/complicato.yaml")
@@ -30,4 +30,4 @@ controller = RacingMPC(car=car, config=config)
 
 # # Simulation
 simulation = RacingSimulation(car, controller)   
-simulation.run()
+simulation.run(N = config['n_steps'])
