@@ -33,21 +33,34 @@ class RacingMPC(Controller):
         self.opti.subject_to(self.state[:,0] == self.s0) # constraint on initial state
         self.kappa = self.opti.parameter(self.N) # local curvature
         
-        # -------------------- Model Constraints and Cost function ------------------------
-        cost_weights = config['cost_weights']
+        # -------------------- Model Constraints ----------------------------------
         state_constraints = config['state_constraints']
         
         for n in range(self.N):
             state = self.state[:,n]
-            self.opti.subject_to(state[2] >= state_constraints['v_min']) # TODO without this, things break
+            state_next = self.state[:,n+1]
+            input = self.action[:,n]
             
+            # state constraints
+            self.opti.subject_to(state[2] >= state_constraints['v_min']) # TODO without this, things break
+            # self.opti.subject_to(state[4] <= state_constraints['delta_max'])
+            # self.opti.subject_to(state[4] >= state_constraints['delta_min'])
+            
+            # continuity contraint on spatial dynamics
+            v = state[2]
+            ey = state[5] # TODO hardcodato
+            epsi = state[6]
+            self.opti.subject_to(self.ds[n] == self.dt * ((v * np.cos(epsi)) / (1 - ey * self.kappa[n]))) # going on for dt and snapshot of how much the car moved
+            # self.opti.subject_to(self.ds[n] == 0.06) # TODO bigger step breaks things
+            self.opti.subject_to(state_next == transition(state,input,self.kappa[n],self.ds[n]))
+            
+        # ------------------- Cost Function --------------------------------------
+            
+        cost_weights = config['cost_weights'] 
         cost = 0
         for n in range(self.N):
-            
-            # extracting state
             state = self.state[:,n]
             input = self.action[:,n]
-            state_next = self.state[:,n+1]
             ey = state[5] # TODO hardcodato
             
             # add stage cost to objective
@@ -58,15 +71,8 @@ class RacingMPC(Controller):
                        cost_weights['boundary']*(ey - state_constraints['ey_max'])**2, 0)
                 
             cost += cost_weights['deviation']*ey**2 
-
-            # going on for dt and snapshot of how much the car moved
-            v = state[2]
-            epsi = state[6]
-            self.opti.subject_to(self.ds[n] == 0.05)#self.dt * ((v * np.cos(epsi)) / (1 - ey * self.kappa[n])))
-            # self.ds = 0.005 # TODO bigger step breaks things
             
-            # add continuity contraint on spatial dynamics
-            self.opti.subject_to(state_next == transition(state,input,self.kappa[n],self.ds[n]))
+            cost += cost_weights['w']*input[1]**2
             
         cost += cost_weights['time']*state[-1,-1] # final cost (minimize time) # TODO bigger weight breaks things
         cost += cost_weights['ey']*state[5,-1]**2 # final cost (minimize terminal error)
@@ -134,6 +140,5 @@ class RacingMPC(Controller):
         state = np.array([s_k.x, s_k.y, s_k.v, s_k.psi, s_k.delta, s_k.ey, s_k.epsi, s_k.t])
         self.opti.set_value(self.kappa, kappa)
         self.opti.set_value(self.s0, state)
-        self.opti.set_value(self.kappa, self.car.current_waypoint.kappa)
         self.opti.set_initial(self.action, self.action_prediction)
         self.opti.set_initial(self.state, self.state_prediction)

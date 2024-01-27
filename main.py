@@ -30,4 +30,4 @@ controller = RacingMPC(car=car, config=config)
 
 # # Simulation
 simulation = RacingSimulation(car, controller)   
-simulation.run(config['n_steps'])
+simulation.run()
