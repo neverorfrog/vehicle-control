@@ -1,4 +1,3 @@
-# inspired by https://github.com/giulioturrisi/Differential-Drive-Robot/blob/main/python_scripts/controllers/casadi_nmpc.py
 from model.kinematic_car import KinematicCar
 import casadi as ca
 import numpy as np
@@ -43,15 +42,14 @@ class RacingMPC(Controller):
             
             # state constraints
             self.opti.subject_to(state[2] >= state_constraints['v_min']) # TODO without this, things break
-            # self.opti.subject_to(state[4] <= state_constraints['delta_max'])
-            # self.opti.subject_to(state[4] >= state_constraints['delta_min'])
+            self.opti.subject_to(state[4] <= state_constraints['delta_max'])
+            self.opti.subject_to(state[4] >= state_constraints['delta_min'])
             
             # continuity contraint on spatial dynamics
             v = state[2]
             ey = state[5] # TODO hardcodato
             epsi = state[6]
             self.opti.subject_to(self.ds[n] == self.dt * ((v * np.cos(epsi)) / (1 - ey * self.kappa[n]))) # going on for dt and snapshot of how much the car moved
-            # self.opti.subject_to(self.ds[n] == 0.06) # TODO bigger step breaks things
             self.opti.subject_to(state_next == transition(state,input,self.kappa[n],self.ds[n]))
             
         # ------------------- Cost Function --------------------------------------
