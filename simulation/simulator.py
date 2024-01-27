@@ -1,4 +1,3 @@
-from signal import pause
 import time
 from controller.controller import Controller
 import numpy as np
@@ -42,7 +41,7 @@ class RacingSimulation():
             if s > self.car.track.length or n >= steps: break
             # computing control signal
             start = time.time()
-            action, state_prediction = self.controller.command(state, kappa)
+            action, state_prediction, ds_traj = self.controller.command(state, kappa)
             elapsed_time = time.time() - start
             
             # applying control signal
@@ -50,8 +49,13 @@ class RacingSimulation():
             s = state.s
             state.psi = wrap(state.psi)
             
-            # computing path geometry for next horizon 
-            kappa = np.array([self.car.track.waypoints[(self.car.wp_id+i) % len(self.car.track.waypoints)].kappa for i in range(self.controller.N)])
+            # print(state_prediction[5,:])
+            
+            # computing path geometry for next horizon based on previous prediction positition ds_traj
+            s_traj = [self.car.state.s + np.sum(ds_traj[:i]) for i in range(len(ds_traj))]
+            kappa = np.array([self.car.get_waypoint(s_traj[i])[0].kappa for i in range(len(s_traj))])
+            # print(self.car.state.s+ds_traj)
+            # kappa = np.array([self.car.track.waypoints[(self.car.wp_id+i) % len(self.car.track.waypoints)].kappa for i in range(self.controller.N)])
             # print(kappa)
             # print(self.car.current_waypoint)
             
@@ -75,7 +79,7 @@ class RacingSimulation():
         # simulation params
         N = len(input_traj)
         x_y = np.array(state_traj)[:,:2]
-        v_psi_delta = np.array(state_traj)[:,2:5] # taking just v,psi,delta TO
+        v_psi_delta = np.array(state_traj)[:,2:5] # taking just v,psi,delta
         a_w = np.array(input_traj)
         
         # figure params
@@ -128,8 +132,7 @@ class RacingSimulation():
             repeat=False, repeat_delay=5000
         )
         
-        # Get the current figure manager
-        fig_manager = plt.get_current_fig_manager()
         # Maximize the window
+        fig_manager = plt.get_current_fig_manager()
         fig_manager.window.showMaximized()
         plt.show()  

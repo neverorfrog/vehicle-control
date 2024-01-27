@@ -62,10 +62,10 @@ class KinematicCar():
         epsi_dot = psi_dot - s_dot * kappa
         t_dot = 1
         state_dot = ca.vertcat(x_dot, y_dot, v_dot, psi_dot, delta_dot, s_dot, ey_dot, epsi_dot, t_dot)
-        ode = ca.Function('ode', [self.state.syms,self.input.syms], [state_dot],{'allow_free':True})
+        ode = ca.Function('ode', [self.state.syms,self.input.syms,kappa], [state_dot])
         
         # wrapping up
-        integrator = integrate(self.state.syms,self.input.syms,ode,self.dt)
+        integrator = integrate(self.state.syms,self.input.syms,kappa,ode,self.dt)
         self.transition = ca.Function('transition', [self.state.syms,self.input.syms,kappa], [integrator])
         
     def drive(self, input: KinematicCarInput):
@@ -74,16 +74,15 @@ class KinematicCar():
         """
         next_state = self.transition(self.state.values, input.values, self.current_waypoint.kappa).full().squeeze()
         self.state = KinematicCarState(*next_state)
-        self.update_waypoint()
+        self.current_waypoint, self.wp_id = self.get_waypoint(self.state.s)
         self.update_track_error()
         self.input = input
         return self.state
     
-    def update_waypoint(self) -> Waypoint:
+    def get_waypoint(self, s) -> Waypoint:
         """
-        Get closest waypoint on reference path based on car's current location.
+        Get closest waypoint on reference path based on location s.
         """
-        s = self.state.s
         # Compute cumulative path length
         length_cum = np.cumsum(self.track.segment_lengths)
         # Get first index with distance larger than distance traveled by car so far
@@ -97,11 +96,12 @@ class KinematicCar():
         s_prev = length_cum[prev_wp_id]
         
         if np.abs(s - s_next) < np.abs(s - s_prev):
-            self.wp_id = next_wp_id
-            self.current_waypoint = self.track.waypoints[next_wp_id]
+            wp_id = next_wp_id
+            waypoint = self.track.waypoints[next_wp_id]
         else:
-            self.wp_id = prev_wp_id
-            self.current_waypoint = self.track.waypoints[prev_wp_id]
+            wp_id = prev_wp_id
+            waypoint = self.track.waypoints[prev_wp_id]
+        return waypoint, wp_id
             
     def update_track_error(self):
         """

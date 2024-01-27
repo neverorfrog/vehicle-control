@@ -7,15 +7,15 @@ def load_config(file_path):
         config = yaml.safe_load(file)
     return config
 
-def integrate(q,u,ode,h):
+def integrate(q,u,kappa,ode,h):
     '''
     RK4 integrator
     h: integration interval
     '''
-    qd_1 = ode(q, u)
-    qd_2 = ode(q + (h/2)*qd_1, u)
-    qd_3 = ode(q + (h/2)*qd_2, u)
-    qd_4 = ode(q + h*qd_3, u)
+    qd_1 = ode(q, u, kappa)
+    qd_2 = ode(q + (h/2)*qd_1, u, kappa)
+    qd_3 = ode(q + (h/2)*qd_2, u, kappa)
+    qd_4 = ode(q + h*qd_3, u, kappa)
     newq = q + (1/6) * (qd_1 + 2 * qd_2 + 2 * qd_3 + qd_4) * h
     return newq
 

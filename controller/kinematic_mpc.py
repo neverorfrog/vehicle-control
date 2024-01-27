@@ -17,8 +17,8 @@ class RacingMPC(Controller):
         # -------------------- Optimizer Initialization ----------------------------------
         self.opti = ca.Opti()
         ns, ni, transition = self._init_ode()
-        p_opts = {"ipopt.print_level": 0, "expand": True}
-        s_opts = {}
+        p_opts = {"ipopt.print_level": 0,"expand":False}
+        s_opts = {"max_iter": 100}
         self.opti.solver("ipopt", p_opts, s_opts)
         
         # -------------------- Decision Variables with Initialization ---------------------
@@ -26,6 +26,7 @@ class RacingMPC(Controller):
         self.action = self.opti.variable(ni, self.N)   # predicted control trajectory var
         self.state_prediction = np.ones((ns, self.N+1)) # actual predicted state trajectory
         self.action_prediction = np.ones((ni, self.N))   # actual predicted control trajectory
+        self.ds = self.opti.variable(self.N)
         
         # --------------------- Helper Variables ------------------------------------------
         self.s0 = self.opti.parameter(ns) # initial state
@@ -34,10 +35,11 @@ class RacingMPC(Controller):
         
         # -------------------- Model Constraints and Cost function ------------------------
         cost_weights = config['cost_weights']
+        state_constraints = config['state_constraints']
         
         for n in range(self.N):
             state = self.state[:,n]
-            self.opti.subject_to(state[2] >= 0.1) # TODO without this, things break
+            self.opti.subject_to(state[2] >= state_constraints['v_min']) # TODO without this, things break
             
         cost = 0
         for n in range(self.N):
@@ -49,22 +51,26 @@ class RacingMPC(Controller):
             ey = state[5] # TODO hardcodato
             
             # add stage cost to objective
-            cost += cost_weights['boundary']*ca.sumsqr(ey - 0.2) # right bound
-            # cost += ca.sumsqr(ey + 0.2) # left bound
-            # cost += ca.sumsqr(epsi - ca.pi/3) #
-            # cost += ca.sumsqr(epsi + ca.pi/3) # 
-            cost += cost_weights['deviation']*ey**2 # 
+            cost += ca.if_else(ey < state_constraints['ey_min'],
+                       cost_weights['boundary']*(ey - state_constraints['ey_min'])**2, 0)
+            
+            cost += ca.if_else(ey > state_constraints['ey_max'],
+                       cost_weights['boundary']*(ey - state_constraints['ey_max'])**2, 0)
+                
+            cost += cost_weights['deviation']*ey**2 
 
             # going on for dt and snapshot of how much the car moved
-            # self.ds = self.dt * ((v * np.cos(epsi)) / (1 - ey * self.kappa[n]))
-            self.ds = 0.01 # TODO bigger step breaks things
+            v = state[2]
+            epsi = state[6]
+            self.opti.subject_to(self.ds[n] == 0.05)#self.dt * ((v * np.cos(epsi)) / (1 - ey * self.kappa[n])))
+            # self.ds = 0.005 # TODO bigger step breaks things
             
             # add continuity contraint on spatial dynamics
-            self.opti.subject_to(state_next == transition(state,input,self.kappa[n],self.ds))
+            self.opti.subject_to(state_next == transition(state,input,self.kappa[n],self.ds[n]))
             
-        cost += 0.01*state[-1,-1] # final cost (minimize time) # TODO bigger weight breaks things
-        cost += cost_weights['ey']*ca.sumsqr(state[5,-1]) # final cost (minimize terminal error)
-        cost += cost_weights['epsi']*ca.sumsqr(state[6,-1]) # final cost (minimize terminal error)
+        cost += cost_weights['time']*state[-1,-1] # final cost (minimize time) # TODO bigger weight breaks things
+        cost += cost_weights['ey']*state[5,-1]**2 # final cost (minimize terminal error)
+        cost += cost_weights['epsi']*state[6,-1]**2 # final cost (minimize terminal error)
         self.opti.minimize(cost)
             
         # -------------------- Model Constraints ------------------------------------------
@@ -101,10 +107,10 @@ class RacingMPC(Controller):
         epsi_prime = ((tan(delta)) / self.car.length) * ((1 - ey * kappa)/(np.cos(epsi))) - kappa
         t_prime = (1 - ey * kappa) / (v * np.cos(epsi))
         state_prime = ca.vertcat(x_prime, y_prime, v_prime, psi_prime, delta_prime, ey_prime, epsi_prime, t_prime)
-        ode = ca.Function('ode', [state, input], [state_prime],{'allow_free':True})
+        ode = ca.Function('ode', [state, input, kappa], [state_prime])
         
         # wrapping up
-        integrator = integrate(state, input, ode, h=ds) # TODO ds
+        integrator = integrate(state, input, kappa, ode, h=ds) # TODO ds
         transition = ca.Function('transition', [state,input,kappa,ds], [integrator])
         
         return ns, ni, transition
@@ -117,8 +123,9 @@ class RacingMPC(Controller):
         # print(self.opti.debug.value(self.ds))
         self.action_prediction = sol.value(self.action)
         self.state_prediction = sol.value(self.state)
+        ds_traj = sol.value(self.ds)
         next_input = KinematicCarInput(a=self.action_prediction[0][0], w=self.action_prediction[1][0])
-        return next_input, self.state_prediction
+        return next_input, self.state_prediction, ds_traj
     
     def start(self, s_k, kappa):
         '''
