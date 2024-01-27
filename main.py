@@ -2,7 +2,6 @@ import sys
 sys.path.append(".")
 
 from model.state import KinematicCarState
-import numpy as np
 from environment.track import Track
 from model.kinematic_car import KinematicCar
 from simulation.simulator import RacingSimulation
@@ -31,4 +30,4 @@ controller = RacingMPC(car=car, config=config)
 
 # # Simulation
 simulation = RacingSimulation(car, controller)   
-simulation.run(N=160)
+simulation.run(config['n_steps'])

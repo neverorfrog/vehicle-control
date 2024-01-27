@@ -1,5 +1,4 @@
 # TODO list
 
-- Bicycle dynamic model
-- Spatial Model
-    1. ds is still not working (variable in opti, but how?) spatial integration with euler?
+- Integrate bicycle dynamic model
+- BUG: mpc thinks the curvature remains the same during the whole prediction horizon
