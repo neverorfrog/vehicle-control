@@ -27,23 +27,25 @@ initial_state:
 
 # weights for the cost function
 cost_weights:
-  time: 10
+  time: 1
   ey: 10
   epsi: 100
   w: 0.1
+  a: 0.5
+  v: 50
   deviation: 10
   boundary: 200
 
 # input constraints
 input_constraints:
-  a_max: 2
+  a_max: 1
   a_min: -1 
   w_max: 2
   w_min: -2
 
 # state constraints
 state_constraints:
-  v_max: 1
+  v_max: 2
   v_min: 1
   delta_max: 3.0
   delta_min: -3.0
