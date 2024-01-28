@@ -51,17 +51,17 @@ cost_weights:
   ey: 10
   epsi: 100
   w: 0.1
-  a: 0.5
+  a: 0.01
   v: 50
-  deviation: 10
+  deviation: 20
   boundary: 200
 
 # input constraints
 input_constraints:
   a_max: 1
-  a_min: -1 
-  w_max: 3
-  w_min: -3
+  a_min: -1
+  w_max: 4
+  w_min: -4
 
 # state constraints
 state_constraints:
@@ -73,9 +73,9 @@ state_constraints:
   ey_min: -0.2
 
 # prediction and control horizon
-horizon: 10
+horizon: 15
 mpc_dt: 0.008
 model_dt: 0.05
 
 # simulation
-n_steps: 10
+n_steps: 40
