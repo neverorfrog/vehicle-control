@@ -73,9 +73,9 @@ state_constraints:
   ey_min: -0.2
 
 # prediction and control horizon
-horizon: 15
+horizon: 10
 mpc_dt: 0.008
 model_dt: 0.05
 
 # simulation
-n_steps: 40
+n_steps: 200
