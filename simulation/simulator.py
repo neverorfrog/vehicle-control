@@ -114,7 +114,7 @@ class RacingSimulation():
             # Plot state predictions of MPC
             if state_preds is not None:
                 preds = state_preds[i]
-                ax_large.plot(preds[0,:], preds[1,:],"go")  
+                ax_large.plot(preds[0,:], preds[1,:],"r-",alpha=0.85,linewidth=4)  
             
             ax_small1.cla()
             ax_small1.axis((0, N, -state_max*1.1, state_max*1.1))
@@ -131,8 +131,10 @@ class RacingSimulation():
             frames=N, interval=0.01, 
             repeat=False, repeat_delay=5000
         )
-        
         # Maximize the window
+        plt.ioff()
+        animation.save("animation.gif",writer='pillow',fps=20, dpi=180)
+        plt.ion()
         fig_manager = plt.get_current_fig_manager()
-        fig_manager.window.showMaximized()
-        plt.show()  
+        fig_manager.window.showMaximized() 
+        plt.show(block=True) 

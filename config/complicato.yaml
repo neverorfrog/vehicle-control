@@ -1,19 +1,21 @@
 # track data
 wp_x:
-  - -0.75
-  - -0.25 
-  - -0.25
-  - 0.25
-  - 0.25
-  - 1.25
-  - 1.25
+  - -1
+  - 0
+  - 0
   - 0.75
   - 0.75
-  - 1.25
-  - 1.25
-  - -0.75
-  - -0.75
-  - -0.25
+  - 1.5
+  - 1.5
+  - 3.0
+  - 3.0
+  - 1.5
+  - 1.0
+  - 0
+  - -1
+  - -2.5
+  - -2.5
+  - 0
 
 wp_y:
   - -1.5 
@@ -22,38 +24,58 @@ wp_y:
   - -0.5
   - -1.5
   - -1.5
-  - -1
-  - -1
   - -0.5
+  - -0.3
+  - 0.7
+  - 1.5
+  - 1.5
+  - 1.5
+  - 0
   - -0.5
-  - 0
-  - 0
   - -1.5
   - -1.5
 
 resolution: 0.03
-smoothing: 10
+smoothing: 15
 width: 0.4
+
+# initial state
+initial_state:
+  x: -0.5454
+  y: -1.5
+  v: 1
 
 # weights for the cost function
 cost_weights:
-  ey: 1.0
-  epsi: 0.5
-  deviation: 0.2
+  time: 0.1
+  ey: 10
+  epsi: 10
+  w: 0.001
+  a: 0.0001
+  v: 0.5
+  deviation: 10
+  boundary: 50
 
 # input constraints
 input_constraints:
-  a_max: 5.0
-  a_min: 3.0
-  w_max: 3.0
-  w_min: 2.0
+  a_max: 1
+  a_min: -1 
+  w_max: 3
+  w_min: -3
 
 # state constraints
 state_constraints:
-  v_max: 30
-  v_min: 0
+  v_max: 3
+  v_min: 1
   delta_max: 3.0
-  delta_min: 3.0
+  delta_min: -3.0
+  ey_max: 0.2
+  ey_min: -0.2
 
 # prediction and control horizon
 horizon: 10
+mpc_dt: 0.008
+model_dt: 0.05
+
+# simulation
+n_steps: 50
