@@ -11,7 +11,8 @@ import numpy as np
 from itertools import count, cycle
 
 class RacingSimulation():   
-    def __init__(self, car: KinematicCar, controller: Controller):
+    def __init__(self, name: str, car: KinematicCar, controller: Controller):
+        self.name = name
         self.car = car
         self.controller = controller
         logging.basicConfig(
@@ -133,7 +134,7 @@ class RacingSimulation():
         )
         # Maximize the window
         plt.ioff()
-        animation.save("animation.gif",writer='pillow',fps=20, dpi=180)
+        animation.save(f"simulation/videos/{self.name}.gif",writer='pillow',fps=20, dpi=180)
         plt.ion()
         fig_manager = plt.get_current_fig_manager()
         fig_manager.window.showMaximized() 

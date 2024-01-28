@@ -8,12 +8,10 @@ from simulation.simulator import RacingSimulation
 from controller.kinematic_mpc import RacingMPC
 from utils.utils import *
 
-# First (simpler) track
-config = load_config("config/kinematic_ippodromo.yaml")
-
-# Second track
-config = load_config("config/complicato.yaml")
-
+# Track Loading
+track_name = "ippodromo"
+track_name = "complicato"
+config = load_config(f"config/kinematic_{track_name}.yaml")
 track = Track(wp_x=config['wp_x'], 
               wp_y=config['wp_y'], 
               resolution=config['resolution'],
@@ -29,5 +27,5 @@ car.state = KinematicCarState(x = s0['x'], y = s0['y'], v = s0['v'])
 controller = RacingMPC(car=car, config=config)
 
 # Simulation
-simulation = RacingSimulation(car, controller)   
-simulation.run(N = config['n_steps'])
+simulation = RacingSimulation(track_name,car,controller)   
+simulation.run()#N = config['n_steps'])
