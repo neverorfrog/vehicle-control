@@ -5,6 +5,8 @@ import numpy as np
 import math
 from utils.utils import wrap
 from typing import List
+from scipy.interpolate import CubicSpline
+import casadi as ca
 
 # Colors
 DRIVABLE_AREA = '#BDC3C7'
@@ -12,7 +14,7 @@ WAYPOINTS = '#D0D3D4'
 PATH_CONSTRAINTS = '#F5B041'
 
 class Waypoint:
-    def __init__(self, x, y, psi, kappa):
+    def __init__(self, x, y, psi):
         """
         Waypoint object containing x, y location in global coordinate system,
         orientation of waypoint psi and local curvature kappa. Waypoint further
@@ -28,8 +30,6 @@ class Waypoint:
         self.y = y
         'y position of waypoint'
         self.psi = psi
-        'path orientation (of tangent to curve) at waypoint'
-        self.kappa: float = kappa
         'path curvature at waypoint'
         self.v_ref = None
         'reference velocity at this waypoint according to speed profile'
@@ -84,7 +84,34 @@ class Track:
         self.n_waypoints = len(self.waypoints)
         # Length and width of path
         self.length, self.segment_lengths = self._compute_length()
+        # Making a spline out of the waypoint list generated according to resolution and smoothing
+        self._construct_spline()
         
+    def get_curvature(self, s):
+        dx_ds = self.dx_ds(s)
+        dy_ds = self.dy_ds(s)
+        ddx_ds = self.ddx_ds(s)
+        ddy_ds = self.ddy_ds(s)
+        denom = ca.power(dx_ds**2 + dy_ds**2, 1.5)
+        num = dx_ds * ddy_ds - ddx_ds * dy_ds
+        curvature = ca.if_else(num < 1e-2, 0., num/denom)
+        return curvature
+    
+    def _construct_spline(self):
+        s = ca.MX.sym('s')
+        waypoints_x = [waypoint.x for waypoint in self.waypoints]
+        waypoints_y = [waypoint.y for waypoint in self.waypoints]
+        s_values = np.arange(len(waypoints_x))  # Assuming waypoints are evenly spaced along the track
+        self.spline_x = CubicSpline(s_values, waypoints_x, bc_type='periodic')
+        self.spline_y = CubicSpline(s_values, waypoints_y, bc_type='periodic')
+        self.x_spline = ca.interpolant('x_spline', 'bspline', [s_values], waypoints_x)
+        self.y_spline = ca.interpolant('y_spline', 'bspline', [s_values], waypoints_y)
+        self.x = ca.Function("x_pos",[s],[self.x_spline(s * len(self.waypoints) / self.length)])
+        self.y = ca.Function("y_pos",[s],[self.y_spline(s * len(self.waypoints) / self.length)])
+        self.dx_ds = ca.Function("dx_ds",[s],[ca.jacobian(self.x(s),s)])
+        self.dy_ds = ca.Function("dy_ds",[s],[ca.jacobian(self.y(s),s)])
+        self.ddx_ds = ca.Function("ddx_ds",[s],[ca.jacobian(self.dx_ds(s),s)])
+        self.ddy_ds = ca.Function("ddy_ds",[s],[ca.jacobian(self.dy_ds(s),s)])
         
     def _construct_path(self, wp_x, wp_y):
         """
@@ -113,10 +140,15 @@ class Track:
         for wp_id in range(self.smoothing, len(wp_x) - self.smoothing):
             wp_xs.append(np.mean(wp_x[wp_id - self.smoothing : wp_id + self.smoothing + 1]))
             wp_ys.append(np.mean(wp_y[wp_id - self.smoothing : wp_id + self.smoothing + 1]))
-
+            
+        # closing the circuit
+        wp_xs.append(wp_xs[0])
+        wp_ys.append(wp_ys[0])
+        wp_xs.append(wp_xs[0])
+        wp_ys.append(wp_ys[0])
+        
         # Construct list of waypoint objects
         waypoints = list(zip(wp_xs, wp_ys))
-        
         waypoints = self._construct_waypoints(waypoints)
 
         return waypoints
@@ -134,7 +166,7 @@ class Track:
         waypoints = []
 
         # Iterate over all waypoints
-        for wp_id in range(len(waypoint_coordinates) - 1):
+        for wp_id in range(len(waypoint_coordinates)-1):
 
             # Get start and goal waypoints
             current_wp = np.array(waypoint_coordinates[wp_id])
@@ -145,25 +177,11 @@ class Track:
 
             # Angle ahead
             psi = np.arctan2(dif_ahead[1], dif_ahead[0])
-            
-            # Distance to next waypoint
-            dist_ahead = np.linalg.norm(dif_ahead, 2)
 
             # Get x and y coordinates of current waypoint
             x, y = current_wp[0], current_wp[1]
 
-            # Compute local curvature at waypoint
-            if wp_id == 0: # first waypoint
-                kappa = 0
-            else:
-                prev_wp = np.array(waypoint_coordinates[wp_id - 1])
-                dif_behind = current_wp - prev_wp
-                angle_behind = np.arctan2(dif_behind[1], dif_behind[0])
-                angle_dif = np.mod(psi - angle_behind + math.pi, 2 * math.pi) - math.pi
-                kappa = angle_dif / (dist_ahead + self.eps)
-
-            new_waypoint = Waypoint(x, y, psi, kappa)
-            new_waypoint.v_ref = 3 - kappa # reference velocity
+            new_waypoint = Waypoint(x, y, psi)
             self._set_bounds(new_waypoint) # set left and right bounds
             waypoints.append(new_waypoint)
 
@@ -200,39 +218,24 @@ class Track:
 
         return self.waypoints[wp_id]
     
-    def plot(self, axis: Axes, display_drivable_area=True):
+    def plot(self, axis: Axes):
         """
         Display path object on current figure.
         :param display_drivable_area: If True, display arrows indicating width
         of drivable area
         """
-
-        # Get x and y coordinates for all waypoints
-        wp_x = np.array([wp.x for wp in self.waypoints])
-        wp_y = np.array([wp.y for wp in self.waypoints])
-        
         # Plot waypoints
-        axis.scatter(wp_x, wp_y, s=3)
+        boh = np.linspace(0,self.length,1000)
+        axis.plot(self.x(boh), self.y(boh))
         
-        # Get x and y locations of border cells for left and right bound
-        lb_x = np.array([wp.lb[0] for wp in self.waypoints])
-        lb_y = np.array([wp.lb[1] for wp in self.waypoints])
-        rb_x = np.array([wp.rb[0] for wp in self.waypoints])
-        rb_y = np.array([wp.rb[1] for wp in self.waypoints])
-        
-        if display_drivable_area:
-            axis.quiver(wp_x, wp_y, lb_x - wp_x, lb_y - wp_y, scale=1,
-                    units='xy', width=0.2*self.resolution, color=DRIVABLE_AREA,
-                    headwidth=1, headlength=0)
-            axis.quiver(wp_x, wp_y, rb_x - wp_x, rb_y - wp_y, scale=1,
-                    units='xy', width=0.2*self.resolution, color=DRIVABLE_AREA,
-                    headwidth=1, headlength=0)
-        
-        # Closing the circuit
+        # Get x and y locations of border cells for left and right bound and closing the circuit
         lb_x = np.array([wp.lb[0] for wp in self.waypoints] + [self.waypoints[0].lb[0]])
         lb_y = np.array([wp.lb[1] for wp in self.waypoints] + [self.waypoints[0].lb[1]])
         rb_x = np.array([wp.rb[0] for wp in self.waypoints] + [self.waypoints[0].rb[0]])
         rb_y = np.array([wp.rb[1] for wp in self.waypoints] + [self.waypoints[0].rb[1]])
         
+        # Plot road
         axis.plot(rb_x, rb_y, color='red')
         axis.plot(lb_x, lb_y, color='red')
+        axis.fill(lb_x, lb_y, "grey",alpha=0.3)
+        axis.fill(rb_x, rb_y, "w",alpha=0.9)
