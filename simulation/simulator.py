@@ -1,8 +1,8 @@
 import time
+from matplotlib.backend_bases import FigureManagerBase
 from controller.controller import Controller
 import numpy as np
 from model.kinematic_car import KinematicCar
-import logging
 from utils.utils import wrap
 from matplotlib.animation import FuncAnimation
 import matplotlib.pyplot as plt
@@ -15,12 +15,6 @@ class RacingSimulation():
         self.name = name
         self.car = car
         self.controller = controller
-        logging.basicConfig(
-            filename="test.log", 
-            filemode='w', 
-            level=logging.INFO, 
-            format='%(message)s'
-        )
         
     def run(self, N: int = None, animate: bool = True):
         
@@ -50,25 +44,16 @@ class RacingSimulation():
             s = state.s
             state.psi = wrap(state.psi)
             
-            # print(state_prediction[5,:])
-            
-            # computing path geometry for next horizon based on previous prediction positition ds_traj
+            # computing path geometry for next horizon based on previous prediction ds_traj
             s_traj = [self.car.state.s + np.sum(ds_traj[:i]) for i in range(len(ds_traj))]
             kappa = np.array([self.car.get_waypoint(s_traj[i])[0].kappa for i in range(len(s_traj))])
-            # print(self.car.state.s+ds_traj)
-            # kappa = np.array([self.car.track.waypoints[(self.car.wp_id+i) % len(self.car.track.waypoints)].kappa for i in range(self.controller.N)])
-            # print(kappa)
-            # print(self.car.current_waypoint)
             
             # logging
             state_traj.append(state)
             action_traj.append(action)
             state_preds.append(state_prediction)
             elapsed.append(elapsed_time)
-            logging.info(self.car.state)
-            logging.info(self.car.current_waypoint)
         
-        logging.shutdown()
         if animate:
             self.animate(state_traj, action_traj, state_preds, elapsed)   
         
@@ -113,7 +98,7 @@ class RacingSimulation():
                 self.car.track.plot(ax_large, display_drivable_area=False)
                 
             # Plot state predictions of MPC
-            if state_preds is not None:
+            if state_preds is not None and i < N:
                 preds = state_preds[i]
                 ax_large.plot(preds[0,:], preds[1,:],"r-",alpha=0.85,linewidth=4)  
             
@@ -129,13 +114,12 @@ class RacingSimulation():
 
         animation = FuncAnimation(
             fig=plt.gcf(), func=update, 
-            frames=N, interval=0.01, 
+            frames=N+1, interval=0.01, 
             repeat=False, repeat_delay=5000
         )
-        # Maximize the window
-        plt.ioff()
+        plt.ioff() #interactive mode off
         animation.save(f"simulation/videos/{self.name}.gif",writer='pillow',fps=20, dpi=180)
-        plt.ion()
-        fig_manager = plt.get_current_fig_manager()
+        plt.ion() #interactive mode on
+        fig_manager: FigureManagerBase = plt.get_current_fig_manager()
         fig_manager.window.showMaximized() 
         plt.show(block=True) 

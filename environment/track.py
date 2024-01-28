@@ -4,6 +4,7 @@ from matplotlib.axes import Axes
 import numpy as np
 import math
 from utils.utils import wrap
+from typing import List
 
 # Colors
 DRIVABLE_AREA = '#BDC3C7'
@@ -23,20 +24,19 @@ class Waypoint:
         :param kappa: local curvature | [1 / m]
         """
         self.x = x
+        'x position of waypoint'
         self.y = y
+        'y position of waypoint'
         self.psi = psi
-        self.kappa = kappa
-
-        # Reference velocity at this waypoint according to speed profile
+        'path orientation (of tangent to curve) at waypoint'
+        self.kappa: float = kappa
+        'path curvature at waypoint'
         self.v_ref = None
-
-        # Information about drivable area at waypoint
-        # left and right bound of drivable area orthogonal to
-        # waypoint orientation. Track is anticlockwise.
-        # Left bound: free drivable area to the left of center-line in m
-        # Right bound: free drivable area to the right of center-line in m
+        'reference velocity at this waypoint according to speed profile'
         self.lb = None
+        'left bound on drivable area wrt center line(track is anticlockwise)'
         self.rb = None
+        'right bound on drivable area wrt center line(track is anticlockwise)'
         
     def __iter__(self):
         yield self.x
@@ -79,7 +79,7 @@ class Track:
         # Look ahead distance for path averaging
         self.smoothing = smoothing
         # List of waypoint objects
-        self.waypoints = self._construct_path(wp_x, wp_y)
+        self.waypoints: List[Waypoint] = self._construct_path(wp_x, wp_y)
         # Number of waypoints
         self.n_waypoints = len(self.waypoints)
         # Length and width of path
