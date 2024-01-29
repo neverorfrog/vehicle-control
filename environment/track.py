@@ -3,6 +3,8 @@
 from matplotlib.axes import Axes
 import numpy as np
 import math
+
+from scipy.integrate import trapezoid
 from utils.utils import wrap
 from typing import List
 from scipy.interpolate import CubicSpline
@@ -44,7 +46,7 @@ class Waypoint:
         yield self.psi
         
     def __str__(self):
-        return f"Waypoint(x={self.x}, y={self.y}, psi={self.psi}, kappa={self.kappa}, v_ref={self.v_ref})"
+        return f"Waypoint(x={self.x}, y={self.y}, psi={self.psi}, v_ref={self.v_ref})"
 
     def __sub__(self, other):
         """
@@ -82,12 +84,11 @@ class Track:
         self.waypoints: List[Waypoint] = self._construct_path(wp_x, wp_y)
         # Number of waypoints
         self.n_waypoints = len(self.waypoints)
-        # Length and width of path
-        self.length, self.segment_lengths = self._compute_length()
         # Making a spline out of the waypoint list generated according to resolution and smoothing
         self._construct_spline()
         
     def get_curvature(self, s):
+        '''Get curvature (inverse of curvature radius) of a point along the spline'''
         dx_ds = self.dx_ds(s)
         dy_ds = self.dy_ds(s)
         ddx_ds = self.ddx_ds(s)
@@ -97,15 +98,36 @@ class Track:
         curvature = ca.if_else(num < 1e-2, 0., num/denom)
         return curvature
     
+    def get_orientation(self, s):
+        '''Get orientation wrt horizontal line of a point along the spline'''
+        dx_ds = self.dx_ds(s)
+        dy_ds = self.dy_ds(s)
+        magnitude = np.sqrt(dx_ds**2 + dy_ds**2)
+        tangent_x = dx_ds / magnitude
+        tangent_y = dy_ds / magnitude
+        return np.arctan2(tangent_y, tangent_x)
+        
     def _construct_spline(self):
-        s = ca.MX.sym('s')
+        # waypoint list
         waypoints_x = [waypoint.x for waypoint in self.waypoints]
         waypoints_y = [waypoint.y for waypoint in self.waypoints]
         s_values = np.arange(len(waypoints_x))  # Assuming waypoints are evenly spaced along the track
-        self.spline_x = CubicSpline(s_values, waypoints_x, bc_type='periodic')
-        self.spline_y = CubicSpline(s_values, waypoints_y, bc_type='periodic')
+        
+        # spline function definition
         self.x_spline = ca.interpolant('x_spline', 'bspline', [s_values], waypoints_x)
         self.y_spline = ca.interpolant('y_spline', 'bspline', [s_values], waypoints_y)
+        
+        #computing the length
+        s = ca.MX.sym('s')
+        x = ca.Function("x_pos",[s],[self.x_spline(s)])
+        y = ca.Function("y_pos",[s],[self.y_spline(s)])
+        dx_ds = ca.Function("dx_ds",[s],[ca.jacobian(x(s),s)])
+        dy_ds = ca.Function("dy_ds",[s],[ca.jacobian(y(s),s)])
+        one_lap_range = np.arange(0, len(self.waypoints))
+        compute_segment_length = lambda s: np.sqrt(dx_ds(s)**2 + dy_ds(s)**2).full().squeeze()
+        self.length = trapezoid(compute_segment_length(one_lap_range), one_lap_range,dx=0.0001)
+        
+        # redefining casadi functions (because s has to be normalized)
         self.x = ca.Function("x_pos",[s],[self.x_spline(s * len(self.waypoints) / self.length)])
         self.y = ca.Function("y_pos",[s],[self.y_spline(s * len(self.waypoints) / self.length)])
         self.dx_ds = ca.Function("dx_ds",[s],[ca.jacobian(self.x(s),s)])
@@ -196,27 +218,6 @@ class Track:
         rby = y + np.sin(orth_angle) * self.width/2
         waypoint.lb = np.array([lbx,lby])
         waypoint.rb = np.array([rbx,rby])
-        
-    def _compute_length(self):
-        """
-        Compute length of center-line path as sum of euclidean distance between waypoints.
-        :return: length of center-line path in m
-        """
-        distance = lambda wp_id: self.waypoints[wp_id+1] - self.waypoints[wp_id]
-        segment_lengths = [0.0] + [distance(wp_id) for wp_id in range(len(self.waypoints)-1)]
-        s = sum(segment_lengths)
-        return s, segment_lengths
-    
-    def get_waypoint(self, wp_id):
-        """
-        Get waypoint corresponding to wp_id
-        :param wp_id: unique waypoint ID
-        :return: waypoint object
-        """
-        if wp_id >= self.n_waypoints:
-            wp_id = np.mod(wp_id, self.n_waypoints)
-
-        return self.waypoints[wp_id]
     
     def plot(self, axis: Axes):
         """
@@ -224,10 +225,6 @@ class Track:
         :param display_drivable_area: If True, display arrows indicating width
         of drivable area
         """
-        # Plot waypoints
-        boh = np.linspace(0,self.length,1000)
-        axis.plot(self.x(boh), self.y(boh))
-        
         # Get x and y locations of border cells for left and right bound and closing the circuit
         lb_x = np.array([wp.lb[0] for wp in self.waypoints] + [self.waypoints[0].lb[0]])
         lb_y = np.array([wp.lb[1] for wp in self.waypoints] + [self.waypoints[0].lb[1]])
