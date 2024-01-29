@@ -2,18 +2,10 @@
 
 from matplotlib.axes import Axes
 import numpy as np
-import math
-
 from scipy.integrate import trapezoid
 from utils.utils import wrap
 from typing import List
-from scipy.interpolate import CubicSpline
 import casadi as ca
-
-# Colors
-DRIVABLE_AREA = '#BDC3C7'
-WAYPOINTS = '#D0D3D4'
-PATH_CONSTRAINTS = '#F5B041'
 
 class Waypoint:
     def __init__(self, x, y, psi):

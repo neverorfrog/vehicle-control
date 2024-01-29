@@ -63,17 +63,20 @@ class RacingSimulation():
         
         # simulation params
         N = len(input_traj)
-        v_delta = np.array(state_traj)[:,0:2] # taking just v,psi,delta
+        ey_index = self.car.state.index('ey')
+        error = np.array(state_traj)[:,ey_index:ey_index+2] # taking just ey and epsi
+        v_delta = np.array(state_traj)[:,0:2] # taking just v,delta
         a_w = np.array(input_traj)
         x_traj = []
         y_traj = []
         
         # figure params
-        grid = GridSpec(2, 2, width_ratios=[2, 1])
+        grid = GridSpec(3, 2, width_ratios=[3, 1])
         ax_large = plt.subplot(grid[:, 0])
         ax_small1 = plt.subplot(grid[0, 1])
         ax_small2 = plt.subplot(grid[1, 1])
-        state_max = max(v_delta.min(), v_delta.max(), key=abs) # for axis limits
+        ax_small3 = plt.subplot(grid[2, 1])
+        state_max = max(error.min(), error.max(), key=abs) # for axis limits
         input_max = max(a_w.min(), a_w.max(), key=abs) # for axis limits
         
         # fig titles
@@ -107,11 +110,16 @@ class RacingSimulation():
             ax_small1.axis((0, N, -state_max*1.1, state_max*1.1))
             ax_small1.plot(v_delta[:i, :], '-', alpha=0.7,label=['v',r'$\delta$'])
             ax_small1.legend()
-
+                        
             ax_small2.cla()
-            ax_small2.axis((0, N, -input_max*1.1, input_max*1.1))
-            ax_small2.plot(a_w[:i, :], '-', alpha=0.7,label=['a','w'])
+            ax_small2.axis((0, N, -state_max*1.1, state_max*1.1))
+            ax_small2.plot(error[:i, :], '-', alpha=0.7,label=[r'$e_y$',r'$e_\psi$'])
             ax_small2.legend()
+
+            ax_small3.cla()
+            ax_small3.axis((0, N, -input_max*1.1, input_max*1.1))
+            ax_small3.plot(a_w[:i, :], '-', alpha=0.7,label=['a','w'])
+            ax_small3.legend()
 
         animation = FuncAnimation(
             fig=plt.gcf(), func=update, 

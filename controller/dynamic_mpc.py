@@ -1,10 +1,8 @@
 from model.kinematic_car import KinematicCar
 import casadi as ca
 import numpy as np
-from casadi import cos, sin, tan
 from controller.controller import Controller
-from model.state import DynamicCarInput, KinematicCarInput
-from utils.utils import integrate
+from model.state import DynamicCarInput
 
 class DynamicMPC(Controller):
     def __init__(self, car: KinematicCar, config):
