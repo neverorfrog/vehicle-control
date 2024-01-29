@@ -1,64 +1,18 @@
 import casadi as ca
-from matplotlib import pyplot as plt
-from matplotlib.axes import Axes
-from environment.track import Track, Waypoint
+from model.racing_car import RacingCar
 from model.state import DynamicCarInput, DynamicCarState
 from utils.utils import *
 from collections import namedtuple
-from casadi import cos, sin, tan
 
-class DynamicCar():
-    def __init__(self, track: Track, length, dt):
-        """
-        Dynamic Bicycle Model
-        :param track: reference path object to follow
-        :param length: length of car in m
-        :param dt: sampling time of model
-        """
-        # Precision
-        self.eps = 1e-12
-        # Car Parameters
-        self.length = length
-        # Reference Path
-        self.track = track
-        # Set sampling time
-        self.dt = dt
-        
-        # Initialize state
-        self.wp_id = 0
-        self.current_waypoint: Waypoint = self.track.waypoints[self.wp_id]
-        self.state: DynamicCarState = DynamicCarState()
-        
-        # Initialize input (fictituous)
-        self.input: DynamicCarInput = DynamicCarInput()
-        
-        # Initialize dynamic model
-        self._init_ode()
-        
-        # function for evaluating curvature at given s
-        s = ca.MX.sym('s')
-        self.curvature = ca.Function("curvature",[s],[self.track.get_curvature(s)])
-        
-    def drive(self, input: DynamicCarInput):
-        """
-        :param input: input vector containing [a, w]
-        """
-        curvature = self.track.get_curvature(self.state.s)
-        next_state = self.temporal_transition(self.state.values, input.values, curvature).full().squeeze()
-        self.state = DynamicCarState(*next_state)
-        self.input = input
-        return self.state
+class DynamicCar(RacingCar):
     
-    def rel2glob(self, state):
-        s = state[self.state.index('s')]  
-        ey = state[self.state.index('ey')] 
-        epsi = state[self.state.index('epsi')]    
-        track_psi = wrap(self.track.get_orientation(s))
-        x = self.track.x(s) - sin(track_psi) * ey
-        y = self.track.y(s) + cos(track_psi) * ey
-        psi = track_psi + epsi
-        return x.full().squeeze(),y.full().squeeze(),psi.full().squeeze()
-        
+    @classmethod
+    def create_state(cls, *args, **kwargs):
+        return DynamicCarState(*args, **kwargs)
+    
+    @classmethod
+    def create_input(cls, *args, **kwargs):
+        return DynamicCarInput(*args, **kwargs)
     
     def _init_ode(self):
         g = 9.88
@@ -120,7 +74,7 @@ class DynamicCar():
         state_dot = ca.vertcat(Ux_dot, Uy_dot, r_dot, delta_dot, s_dot, ey_dot, epsi_dot, t_dot)
         t_ode = ca.Function('ode', [self.state.syms,self.input.syms,curvature], [state_dot])
         t_integrator = integrate(self.state.syms,self.input.syms,curvature,t_ode,self.dt)
-        self.temporal_transition = ca.Function('transition', [self.state.syms,self.input.syms,curvature], [t_integrator])
+        self._temporal_transition = ca.Function('transition', [self.state.syms,self.input.syms,curvature], [t_integrator])
 
         # SPATIAL ODE (equations 41a to 41f)
         s_dot = (Ux*ca.cos(epsi) - Uy*ca.sin(epsi)) / (1 - curvature*ey)
@@ -135,7 +89,7 @@ class DynamicCar():
         state_prime = ca.vertcat(Ux_prime, Uy_prime, r_prime, delta_prime, s_prime, ey_prime, epsi_prime, t_prime)
         s_ode = ca.Function('ode', [self.state.syms, self.input.syms, curvature], [state_prime])
         s_integrator = integrate(self.state.syms, self.input.syms, curvature, s_ode, h=ds)
-        self.spatial_transition = ca.Function('transition', [self.state.syms,self.input.syms,curvature,ds], [s_integrator])
+        self._spatial_transition = ca.Function('transition', [self.state.syms,self.input.syms,curvature,ds], [s_integrator])
 
     def _get_force_distribution(self, Fx):
         """
@@ -178,30 +132,10 @@ class DynamicCar():
         )
         return ca.Function("lateral_forces", [Uy, Ux, delta, r, Fx], [result])
     
-    def plot(self, axis: Axes, state: DynamicCarState):
-        x,y,psi = self.rel2glob(state)
-        delta = state.delta
-        r = self.length / 2
-        
-        # Draw the bicycle as a rectangle
-        width = self.length
-        height = self.length
-        angle = wrap(psi-np.pi/2)
-        rectangle = plt.Rectangle((x-np.cos(angle)*width/2-np.cos(psi)*2*width/3, y-np.sin(angle)*height/2-np.sin(psi)*2*height/3),
-                                  width,height,edgecolor='black',alpha=0.7, angle=np.rad2deg(angle), rotation_point='xy')
-        axis.add_patch(rectangle)
-        
-        # Draw four wheels as rectangles
-        wheel_width = self.length / 10
-        wheel_height = self.length / 4
-        wheel_angle = wrap(psi+delta-np.pi/2)
-        wheel_right_front = plt.Rectangle((x+np.cos(angle)*r, y+np.sin(angle)*r),width=wheel_width,height=wheel_height,angle=np.rad2deg(wheel_angle),facecolor='black')
-        axis.add_patch(wheel_right_front)
-        wheel_left_front = plt.Rectangle((x-np.cos(angle)*r, y-np.sin(angle)*r),width=wheel_width,height=wheel_height,angle=np.rad2deg(wheel_angle),facecolor='black')
-        axis.add_patch(wheel_left_front)
-        wheel_right_back = plt.Rectangle((x+np.cos(angle)*r-np.cos(psi)*width*0.6, y+np.sin(angle)*r-np.sin(psi)*height*0.6),width=wheel_width,height=wheel_height,angle=np.rad2deg(wheel_angle),facecolor='black')
-        axis.add_patch(wheel_right_back)
-        wheel_left_back = plt.Rectangle((x-np.cos(angle)*r-np.cos(psi)*width*0.6, y-np.sin(angle)*r-np.sin(psi)*height*0.6),width=wheel_width,height=wheel_height,angle=np.rad2deg(wheel_angle),facecolor='black')
-        axis.add_patch(wheel_left_back)
-        
-        return x,y
+    @property
+    def temporal_transition(self):
+        return self._temporal_transition
+    
+    @property
+    def spatial_transition(self):
+        return self._spatial_transition

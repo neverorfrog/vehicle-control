@@ -9,12 +9,17 @@ from simulation.simulator import RacingSimulation
 from controller.kinematic_mpc import KinematicMPC
 from controller.dynamic_mpc import DynamicMPC
 from utils.utils import *
-from matplotlib import pyplot as plt
 from scipy.integrate import quad
+from enum import Enum
+
+class Mode(Enum):
+    DYN = "dynamic"
+    KIN = "kinematic"
+    
+mode = Mode.KIN
 
 # Track Loading
-track_name = "dynamic_ippodromo"
-# track_name = "kinematic_ippodromo"
+track_name = f"{mode.value}_ippodromo"
 config = load_config(f"config/{track_name}.yaml")
 track = Track(wp_x=config['wp_x'], 
               wp_y=config['wp_y'], 
@@ -22,16 +27,15 @@ track = Track(wp_x=config['wp_x'],
               smoothing=config['smoothing'],
               width=config['width'])
 
-# Bicycle model
-# car = KinematicCar(track, length=0.2, dt=config['model_dt'])
-# car.state = KinematicCarState(v = 0.5)
-
-car = DynamicCar(track, length=0.2, dt=config['model_dt'])
-car.state = DynamicCarState(Ux = 0.5)
-
-# MPC controller
-# controller = KinematicMPC(car=car, config=config)
-controller = DynamicMPC(car=car, config=config)
+# Bicycle model and corresponding controller
+if mode is Mode.KIN:
+    car = KinematicCar(track, length=0.2, dt=config['model_dt'])
+    car.state = KinematicCarState(v = 0.5)
+    controller = KinematicMPC(car=car, config=config)
+elif mode is Mode.DYN:
+    car = DynamicCar(track, length=0.2, dt=config['model_dt'])
+    car.state = DynamicCarState(Ux = 0.5)
+    controller = DynamicMPC(car=car, config=config)
 
 # Simulation
 simulation = RacingSimulation(track_name,car,controller)   

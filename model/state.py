@@ -1,5 +1,3 @@
-# inspired by https://github.com/matssteinweg/Multi-Purpose-MPC
-
 from typing import Union
 import numpy as np
 from abc import abstractmethod
@@ -157,7 +155,7 @@ class KinematicCarState(FancyVector):
 class DynamicCarInput(FancyVector):
     def __init__(self, Fx = 0.0, w = 0.0):
         """
-        :param a: longitudinal acceleration | [m/s^2]
+        :param Fx: longitudinal force | [m/s^2]
         :param w: steering angle rate | [rad/s]
         """
         self._values = np.array([Fx,w])
@@ -196,13 +194,10 @@ class DynamicCarInput(FancyVector):
 class DynamicCarState(FancyVector):
     def __init__(self, Ux = 0.0, Uy = 0.0, r = 0.0, delta = 0.0, s = 0.0, ey = 0.0, epsi = 0.0, t = 0.0):
         """
-        :param x: x position in global coordinate system | [m]
-        :param y: y position in global coordinate system | [m]
         :param Ux: longitudinal velocity in global coordinate system | [m/s]
         :param Uy: lateral velocity in global coordinate system | [m/s]
-        :param psi: yaw angle | [rad]
-        :param delta: steering angle | [rad]
         :param r: yaw rate | [rad/s]
+        :param delta: steering angle | [rad]
         :param s: curvilinear abscissa | [m]
         :param ey: orthogonal deviation from center-line | [m]
         :param epsi: yaw angle relative to path | [rad]
