@@ -3,93 +3,104 @@ import casadi as ca
 import numpy as np
 from casadi import cos, sin, tan
 from controller.controller import Controller
-from model.state import KinematicCarInput
+from model.state import DynamicCarInput, KinematicCarInput
 from utils.utils import integrate
 
-class RacingMPC(Controller):
+class DynamicMPC(Controller):
     def __init__(self, car: KinematicCar, config):
         self.dt = config['mpc_dt']
         self.car = car
         self.N = config['horizon']
         self.config = config
-        self.ns, self.ni, self.transition = self._init_ode()
+        self.ns = len(self.car.state) # number of state variables
+        self.na = len(self.car.input) # number of action variables
         self.opti = self._init_opti()
         
-    def command(self, s_k, kappa):
+    def command(self, state, curvature):
         # every new horizon, the current state (and the last prediction) is the initial 
         print("") # to separate between prints
-        self._init_parameters(s_k, kappa)
+        self._init_parameters(state, curvature)
         sol = self.opti.solve()
         self.action_prediction = sol.value(self.action)
         self.state_prediction = sol.value(self.state)
-        ds_traj = sol.value(self.ds)
-        next_input = KinematicCarInput(a=self.action_prediction[0][0], w=self.action_prediction[1][0])
-        return next_input, self.state_prediction, ds_traj
+        curvature = sol.value(self.curvature)
+        s = sol.value(self.s)
+        print(f"EY PREDICTION: {self.state_prediction[self.car.state.index('ey'),:]}")
+        print(f"EPSI PREDICTION: {self.state_prediction[self.car.state.index('epsi'),:]}")
+        print(f"DELTA PREDICTION: {self.state_prediction[self.car.state.index('delta'),:]}")
+        print(f"OMEGA PREDICTION: {self.action_prediction[1,:]}")
+        print(f"CURVATURE PREDICTION: {curvature}")
+        print(f"S PREDICTION: {s}")
+        next_input = DynamicCarInput(Fx=self.action_prediction[0][0], w=self.action_prediction[1][0])
+        return next_input, self.state_prediction
     
-    def _init_parameters(self, s_k, kappa):
+    def _init_parameters(self, state, curvature):
         '''
         s_k is a state in its entirety. I need to extract relevant variables
         '''
-        state = np.array([s_k.x, s_k.y, s_k.v, s_k.psi, s_k.delta, s_k.ey, s_k.epsi, s_k.t])
-        self.opti.set_value(self.kappa, kappa)
-        self.opti.set_value(self.s0, state)
+        self.opti.set_initial(self.curvature[0], curvature)
+        self.opti.set_value(self.state0, state)
         self.opti.set_initial(self.action, self.action_prediction)
         self.opti.set_initial(self.state, self.state_prediction)
         
     def _init_opti(self):
         # -------------------- Optimizer Initialization ----------------------------------
         opti = ca.Opti()
-        p_opts = {"ipopt.print_level": 0,"expand":False}
+        p_opts = {"ipopt.print_level": 0, "expand":False}
         s_opts = {"max_iter": 100}
         opti.solver("ipopt", p_opts, s_opts)
         
         # -------------------- Decision Variables with Initialization ---------------------
         self.state = opti.variable(self.ns, self.N+1) # predicted state trajectory var
-        self.action = opti.variable(self.ni, self.N)   # predicted control trajectory var
+        self.action = opti.variable(self.na, self.N)   # predicted control trajectory var
         self.state_prediction = np.ones((self.ns, self.N+1)) # actual predicted state trajectory
-        self.action_prediction = np.ones((self.ni, self.N))   # actual predicted control trajectory
-        self.ds = opti.variable(self.N)
+        self.action_prediction = np.ones((self.na, self.N))   # actual predicted control trajectory
         
         # --------------------- Helper Variables ------------------------------------------
-        self.s0 = opti.parameter(self.ns) # initial state
-        opti.subject_to(self.state[:,0] == self.s0) # constraint on initial state
-        self.kappa = opti.parameter(self.N) # local curvature
+        self.state0 = opti.parameter(self.ns) # initial state
+        opti.subject_to(self.state[:,0] == self.state0) # constraint on initial state
+        self.ds = opti.variable(self.N) #ds trajectory during the planning horizon
+        self.s = opti.variable(self.N+1)
+        opti.subject_to(self.s[0] == self.state0[self.car.state.index('s')])
+        self.curvature = opti.variable(self.N+1)
         
-        # -------------------- Model Constraints ------------------------------------------
+        # -------------------- Model Constraints TODO ------------------------------------------
         state_constraints = self.config['state_constraints']
-        
         for n in range(self.N):
             state = self.state[:,n]
             state_next = self.state[:,n+1]
             input = self.action[:,n]
             
             # state constraints
-            opti.subject_to(state[2] >= state_constraints['v_min']) # TODO without this, things break
-            opti.subject_to(state[4] <= state_constraints['delta_max'])
-            opti.subject_to(state[4] >= state_constraints['delta_min'])
+            opti.subject_to(state[self.car.state.index('Ux')] >= state_constraints['Ux_min']) # TODO without this, things break
+            opti.subject_to(state[self.car.state.index('delta')] <= state_constraints['delta_max'])
+            opti.subject_to(state[self.car.state.index('delta')] >= state_constraints['delta_min'])
             
             # continuity contraint on spatial dynamics
-            v = state[2]
-            ey = state[5] # TODO hardcodato
-            epsi = state[6]
-            opti.subject_to(self.ds[n] == self.dt * ((v * np.cos(epsi)) / (1 - ey * self.kappa[n]))) # going on for dt and snapshot of how much the car moved
-            opti.subject_to(state_next == self.transition(state,input,self.kappa[n],self.ds[n]))
+            Ux = state[self.car.state.index('Ux')]
+            Uy = state[self.car.state.index('Uy')]
+            ey = state[self.car.state.index('ey')]
+            epsi = state[self.car.state.index('epsi')]
+            opti.subject_to(self.ds[n] == self.dt * (Ux*ca.cos(epsi) - Uy*ca.sin(epsi)) / (1 - self.curvature[n]*ey)) # going on for dt and snapshot of how much the car moved
+            opti.subject_to(self.s[n+1] == self.s[n] + self.ds[n])
+            opti.subject_to(self.curvature[n] == self.car.curvature(self.s[n]))
+            opti.subject_to(state_next == self.car.spatial_transition(state,input,self.curvature[n],self.ds[n]))
             
-        # ------------------- Cost Function --------------------------------------
-            
+        # ------------------- Cost Function TODO --------------------------------------
+        
         cost_weights = self.config['cost_weights'] 
         cost = 0
         for n in range(self.N):
             state = self.state[:,n]
             input = self.action[:,n]
-            ey = state[5] # TODO hardcodato
+            ey = state[self.car.state.index('ey')]
             
             # violation of road bounds
             cost += ca.if_else(ey < state_constraints['ey_min'],
-                       cost_weights['boundary']*(ey - state_constraints['ey_min'])**2, 0)
+                       cost_weights['boundary']*self.ds[n]*(ey - state_constraints['ey_min'])**2, 0)
             
             cost += ca.if_else(ey > state_constraints['ey_max'],
-                       cost_weights['boundary']*(ey - state_constraints['ey_max'])**2, 0)
+                       cost_weights['boundary']*self.ds[n]*(ey - state_constraints['ey_max'])**2, 0)
                 
             cost += cost_weights['deviation']*self.ds[n]*ey**2 # deviation from road desciptor
             
@@ -100,55 +111,21 @@ class RacingMPC(Controller):
             next_input = self.action[:,n+1]
             
             # acceleration continuous
-            cost += cost_weights['a']*(next_input[0]-input[0])
-           
-        cost += ca.if_else(self.state[2,-1] >= state_constraints['v_max'],
-            cost_weights['v']*(self.state[2,-1] - state_constraints['v_max'])**2, 0) 
-        cost += cost_weights['time']*self.state[-1,-1] # final cost (minimize time)
-        cost += cost_weights['ey']*self.state[5,-1]**2 # final cost (minimize terminal lateral error)
-        cost += cost_weights['epsi']*self.state[6,-1]**2 # final cost (minimize terminal course error)
+            cost += cost_weights['Fx']*(next_input[self.car.input.index('Fx')]-input[self.car.input.index('Fx')])
+        
+        cost += ca.if_else(self.state[self.car.state.index('Ux'),-1] >= state_constraints['Ux_max'],
+            cost_weights['Ux']*(self.state[self.car.state.index('Ux'),-1] - state_constraints['Ux_max'])**2, 0) 
+        cost += cost_weights['time']*self.state[self.car.state.index('t'),-1] # final cost (minimize time)
+        cost += cost_weights['ey']*self.state[self.car.state.index('ey'),-1]**2 # final cost (minimize terminal lateral error) hardcodato
+        cost += cost_weights['epsi']*self.state[self.car.state.index('epsi'),-1]**2 # final cost (minimize terminal course error) hardcodato
         opti.minimize(cost)
             
-        # -------------------- Input Constraints ------------------------------------------
+        # -------------------- Input Constraints TODO ------------------------------------------
         input_constraints = self.config['input_constraints']
         for n in range(self.N): # loop over control intervals
-            opti.subject_to(self.action[0,n] <= input_constraints['a_max'])
-            opti.subject_to(self.action[0,n] >= input_constraints['a_min'])
+            opti.subject_to(self.action[0,n] <= input_constraints['Fx_max'])
+            opti.subject_to(self.action[0,n] >= input_constraints['Fx_min'])
             opti.subject_to(self.action[1,n] <= input_constraints['w_max'])
             opti.subject_to(self.action[1,n] >= input_constraints['w_min'])
             
         return opti
-            
-    def _init_ode(self):
-        '''Differential equations describing the model inside the prediction horizon'''
-        ns = 8 # number of states -> (v,psi,delta,ey,epsi,t)
-        ni = 2 # number of inputs -> (a,w)
-        
-        # input variables
-        a = ca.SX.sym('a') # driving acceleration
-        w = ca.SX.sym('w') # steering angle rate
-        input = ca.vertcat(a,w)
-        
-        # state and auxiliary variables
-        x,y,v,psi,delta,s,ey,epsi,t = self.car.state.variables
-        kappa = ca.SX.sym('kappa')
-        ds = ca.SX.sym('ds')
-        state = ca.vertcat(x,y,v,psi,delta,ey,epsi,t)
-        
-        # ODE
-        x_prime = ((1 - ey*kappa) * cos(psi)) / (cos(epsi))
-        y_prime = ((1 - ey*kappa) * sin(psi)) / (cos(epsi))
-        psi_prime = ((1 - ey*kappa) * tan(delta)) / (self.car.length * cos(epsi))
-        v_prime = (1 - ey * kappa) / (v * np.cos(epsi)) * a
-        delta_prime = (1 - ey * kappa) / (v * np.cos(epsi)) * w
-        ey_prime = (1 - ey * kappa) * ca.tan(epsi)
-        epsi_prime = ((tan(delta)) / self.car.length) * ((1 - ey * kappa)/(np.cos(epsi))) - kappa
-        t_prime = (1 - ey * kappa) / (v * np.cos(epsi))
-        state_prime = ca.vertcat(x_prime, y_prime, v_prime, psi_prime, delta_prime, ey_prime, epsi_prime, t_prime)
-        ode = ca.Function('ode', [state, input, kappa], [state_prime])
-        
-        # wrapping up
-        integrator = integrate(state, input, kappa, ode, h=ds) # TODO ds
-        transition = ca.Function('transition', [state,input,kappa,ds], [integrator])
-        
-        return ns, ni, transition

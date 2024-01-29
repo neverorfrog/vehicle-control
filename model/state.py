@@ -161,7 +161,7 @@ class DynamicCarInput(FancyVector):
         :param w: steering angle rate | [rad/s]
         """
         self._values = np.array([Fx,w])
-        self._keys = ['fx','w']
+        self._keys = ['Fx','w']
         self._syms = ca.vertcat(*[ca.SX.sym(self._keys[i]) for i in range(len(self._keys))])
         
     @property
@@ -194,7 +194,7 @@ class DynamicCarInput(FancyVector):
         return cls(*args, **kwargs)
     
 class DynamicCarState(FancyVector):
-    def __init__(self, x = 0.0, y = 0.0, Ux = 0.0, Uy = 0.0, psi = 0.0, delta = 0.0, r = 0.0, s = 0.0, e = 0.0, d_psi = 0.0, t = 0.0):
+    def __init__(self, Ux = 0.0, Uy = 0.0, r = 0.0, delta = 0.0, s = 0.0, ey = 0.0, epsi = 0.0, t = 0.0):
         """
         :param x: x position in global coordinate system | [m]
         :param y: y position in global coordinate system | [m]
@@ -204,52 +204,43 @@ class DynamicCarState(FancyVector):
         :param delta: steering angle | [rad]
         :param r: yaw rate | [rad/s]
         :param s: curvilinear abscissa | [m]
-        :param e: orthogonal deviation from center-line | [m]
-        :param d_psi: yaw angle relative to path | [rad]
+        :param ey: orthogonal deviation from center-line | [m]
+        :param epsi: yaw angle relative to path | [rad]
         :param t: time | [s]
         """
-        self._values = np.array([x,y,Ux,Uy,psi,delta,r,s,e,d_psi,t])
-        self._keys = ['Ux','Uy','delta','r','s','ey','epsi','t']
+        self._values = np.array([Ux,Uy,r,delta,s,ey,epsi,t])
+        self._keys = ['Ux','Uy','r','delta','s','ey','epsi','t']
         self._syms = ca.vertcat(*[ca.SX.sym(self._keys[i]) for i in range(len(self._keys))])
-     
+    
     @property
-    def x(self): return self.values[0] 
+    def Ux(self): return self.values[0] 
+    
+    @property
+    def Uy(self): return self.values[1] 
+    
+    @property
+    def r(self): return self.values[2]
+    
+    @property
+    def delta(self): return self.values[3]
       
     @property
-    def y(self): return self.values[1]
+    def s(self): return self.values[4]
     
     @property
-    def ux(self): return self.values[2] 
+    def ey(self): return self.values[5]
+    
+    @ey.setter
+    def ey(self, value): self.values[5] = value
     
     @property
-    def uy(self): return self.values[3] 
-      
-    @property
-    def psi(self): return self.values[4]
+    def epsi(self): return self.values[6]
+    
+    @epsi.setter
+    def epsi(self, value): self.values[6] = value
     
     @property
-    def delta(self): return self.values[5]
-    
-    @property
-    def r(self): return self.values[6]
-      
-    @property
-    def s(self): return self.values[7]
-    
-    @property
-    def e(self): return self.values[8]
-    
-    @e.setter
-    def e(self, value): self.values[8] = value
-    
-    @property
-    def d_psi(self): return self.values[9]
-    
-    @d_psi.setter
-    def d_psi(self, value): self.values[9] = value
-    
-    @property
-    def t(self): return self.values[10]
+    def t(self): return self.values[7]
     
     @property
     def values(self): return self._values

@@ -81,7 +81,6 @@ class KinematicMPC(Controller):
             ey = state[self.car.state.index('ey')]
             epsi = state[self.car.state.index('epsi')]
             opti.subject_to(self.ds[n] == self.dt * ((v * np.cos(epsi)) / (1 - ey * self.curvature[n]))) # going on for dt and snapshot of how much the car moved
-            # opti.subject_to(self.ds[n] == 0.046)
             opti.subject_to(self.s[n+1] == self.s[n] + self.ds[n])
             opti.subject_to(self.curvature[n] == self.car.curvature(self.s[n]))
             opti.subject_to(state_next == self.car.spatial_transition(state,input,self.curvature[n],self.ds[n]))

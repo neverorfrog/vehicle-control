@@ -25,22 +25,22 @@ cost_weights:
   ey: 5
   epsi: 5
   w: 0.001
-  a: 0.001
-  v: 10
+  Fx: 0.001
+  Ux: 10
   deviation: 10
   boundary: 100
 
 # input constraints
 input_constraints:
-  a_max: 2
-  a_min: -8
+  Fx_max: 2
+  Fx_min: -8
   w_max: 4
   w_min: -4
 
 # state constraints
 state_constraints:
-  v_max: 3
-  v_min: 0.5
+  Ux_max: 3
+  Ux_min: 0.5
   delta_max: 2.0
   delta_min: -2.0
   ey_max: 0.3
