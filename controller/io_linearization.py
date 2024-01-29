@@ -66,7 +66,6 @@ class BicycleFBL(Controller):
     
         return vw
 
-# TODO acceleration input works well that way?
 class DFBL(Controller):
     def __init__(self, kp: np.ndarray, kd: np.ndarray):
         super().__init__(kp, kd)
