@@ -23,13 +23,14 @@ class DynamicMPC(Controller):
         self.state_prediction = sol.value(self.state)
         curvature = sol.value(self.curvature)
         s = sol.value(self.s)
+        next_input = DynamicCarInput(Fx=self.action_prediction[0][0], w=self.action_prediction[1][0])
         print(f"EY PREDICTION: {self.state_prediction[self.car.state.index('ey'),:]}")
         print(f"EPSI PREDICTION: {self.state_prediction[self.car.state.index('epsi'),:]}")
         print(f"DELTA PREDICTION: {self.state_prediction[self.car.state.index('delta'),:]}")
         print(f"OMEGA PREDICTION: {self.action_prediction[1,:]}")
         print(f"CURVATURE PREDICTION: {curvature}")
         print(f"S PREDICTION: {s}")
-        next_input = DynamicCarInput(Fx=self.action_prediction[0][0], w=self.action_prediction[1][0])
+        print(f"INPUT: {next_input}")
         return next_input, self.state_prediction
     
     def _init_parameters(self, state, curvature):

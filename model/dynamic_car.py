@@ -42,7 +42,6 @@ class DynamicCar(RacingCar):
         Crr = 0.014 #https://en.wikipedia.org/wiki/Rolling_resistance
         Frr = Crr*Fn #rolling resistance = coefficient*normal force (not specified in the paper)
         
-        
         #All the forces introduced above are constant, as the various coefficient are constant and the ground is always flat
         #Fd depends on the velocity instead, so we define a casadi function (Is this the correct methodology?)
         Cd = 0.25 #https://en.wikipedia.org/wiki/Automobile_drag_coefficient#:~:text=The%20average%20modern%20automobile%20achieves,a%20Cd%3D0.35%E2%80%930.45.
@@ -67,7 +66,7 @@ class DynamicCar(RacingCar):
         Uy_dot = (Fy(Uy, Ux, delta, r, Fx)[0] * ca.cos(delta) + Fx*Xf(Fx)*ca.sin(delta) + Fy(Uy, Ux, delta, r, Fx)[1] + Fb)/p.m - r*Ux
         r_dot = (p.a*(Fy(Uy, Ux, delta, r, Fx)[0]*ca.cos(delta) + Fx*Xf(Fx)*ca.sin(delta)) - p.b*Fy(Uy, Ux, delta, r, Fx)[1]) / p.Izz #TODO moment of inertia? maybe from here? http://archive.sciendo.com/MECDC/mecdc.2013.11.issue-1/mecdc-2013-0003/mecdc-2013-0003.pdf
         delta_dot = w 
-        s_dot = (Ux*ca.cos(epsi) - Uy*ca.sin(epsi)) / (1 - curvature*ey) #TODO The path’s curvature κ defines the horizontal path geometry
+        s_dot = (Ux*ca.cos(epsi) - Uy*ca.sin(epsi)) / (1 - curvature*ey)
         ey_dot = Ux*ca.sin(epsi) + Uy*ca.cos(epsi)
         epsi_dot = r - curvature*s_dot
         t_dot = 1
@@ -77,7 +76,6 @@ class DynamicCar(RacingCar):
         self._temporal_transition = ca.Function('transition', [self.state.syms,self.input.syms,curvature], [t_integrator])
 
         # SPATIAL ODE (equations 41a to 41f)
-        s_dot = (Ux*ca.cos(epsi) - Uy*ca.sin(epsi)) / (1 - curvature*ey)
         Ux_prime = Ux_dot / s_dot
         Uy_prime = Uy_dot / s_dot
         r_prime = r_dot / s_dot

@@ -16,7 +16,7 @@ class Mode(Enum):
     DYN = "dynamic"
     KIN = "kinematic"
     
-mode = Mode.KIN
+mode = Mode.DYN
 
 # Track Loading
 track_name = f"{mode.value}_ippodromo"
