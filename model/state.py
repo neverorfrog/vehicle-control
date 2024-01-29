@@ -32,6 +32,8 @@ class FancyVector(ABC):
     @property
     def variables(self): return [self.syms[i] for i in range(len(self.values))]
     
+    def index(self, key): return self.keys.index(key)
+    
     def __getitem__(self, key: Union[int, str]):
         if isinstance(key, int):
             return self.values[key]
@@ -101,10 +103,8 @@ class KinematicCarInput(FancyVector):
         return cls(*args, **kwargs)
 
 class KinematicCarState(FancyVector):
-    def __init__(self, x = 0.0, y = 0.0, v = 0.0, psi = 0.0, delta = 0.0, s = 0.0, ey = 0.0, epsi = 0.0, t = 0.0):
+    def __init__(self, v = 0.0, delta = 0.0, s = 0.0, ey = 0.0, epsi = 0.0, t = 0.0):
         """
-        :param x: x position in global coordinate system | [m]
-        :param y: y position in global coordinate system | [m]
         :param v: velocity in global coordinate system | [m/s]
         :param psi: yaw angle | [rad]
         :param delta: steering angle | [rad]
@@ -113,45 +113,33 @@ class KinematicCarState(FancyVector):
         :param epsi: yaw angle relative to path | [rad]
         :param t: time | [s]
         """
-        self._values = np.array([x,y,v,psi,delta,s,ey,epsi,t])
-        self._keys = ['x','y', 'v','psi','delta','s','ey','epsi','t']
+        self._values = np.array([v,delta,s,ey,epsi,t])
+        self._keys = ['v','delta','s','ey','epsi','t']
         self._syms = ca.vertcat(*[ca.SX.sym(self._keys[i]) for i in range(len(self._keys))])
-     
+    
     @property
-    def x(self): return self.values[0] 
+    def v(self): return self.values[0] 
       
     @property
-    def y(self): return self.values[1]
-    
-    @property
-    def v(self): return self.values[2] 
+    def delta(self): return self.values[1]
       
     @property
-    def psi(self): return self.values[3]
-    
-    @psi.setter
-    def psi(self, value): self.values[3] = value
+    def s(self): return self.values[2]
     
     @property
-    def delta(self): return self.values[4]
-      
-    @property
-    def s(self): return self.values[5]
-    
-    @property
-    def ey(self): return self.values[6]
+    def ey(self): return self.values[3]
     
     @ey.setter
-    def ey(self, value): self.values[6] = value
+    def ey(self, value): self.values[3] = value
     
     @property
-    def epsi(self): return self.values[7]
+    def epsi(self): return self.values[4]
     
     @epsi.setter
-    def epsi(self, value): self.values[7] = value
+    def epsi(self, value): self.values[4] = value
     
     @property
-    def t(self): return self.values[8]
+    def t(self): return self.values[5]
     
     @property
     def values(self): return self._values

@@ -9,6 +9,8 @@ import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
 import numpy as np
 from itertools import count, cycle
+from casadi import cos, sin, tan
+import casadi as ca
 
 class RacingSimulation():   
     def __init__(self, name: str, car: KinematicCar, controller: Controller):
@@ -22,58 +24,56 @@ class RacingSimulation():
         state_traj = [self.car.state] # state trajectory (logging)
         action_traj = [] # input trajectory (logging)
         elapsed = [] # elapsed times
-        state_preds = [] # state predictions for each horizon
+        preds = [] # state predictions for each horizon
         
         # Initializing simulation
         state = state_traj[0] 
-        s = 0
-        kappa = np.array([self.car.track.waypoints[i].kappa for i in range(self.controller.N)])
         counter = count(start=0)
         steps = N if N is not None else np.inf
         
         # Starting Simulation
         for n in cycle(counter):
-            if s > self.car.track.length or n >= steps: break
+            print(f"state: {state}")
+            print(f"N: {n}")
+            if state.s > self.car.track.length or n >= steps: break
+            
             # computing control signal
+            curvature = self.car.track.get_curvature(state.s)
             start = time.time()
-            action, state_prediction, ds_traj = self.controller.command(state, kappa)
+            action, state_prediction = self.controller.command(state, curvature)
             elapsed_time = time.time() - start
             
             # applying control signal
             state = self.car.drive(action)
-            s = state.s
-            state.psi = wrap(state.psi)
-            
-            # computing path geometry for next horizon based on previous prediction ds_traj
-            s_traj = [self.car.state.s + np.sum(ds_traj[:i]) for i in range(len(ds_traj))]
-            kappa = np.array([self.car.get_waypoint(s_traj[i])[0].kappa for i in range(len(s_traj))])
             
             # logging
             state_traj.append(state)
             action_traj.append(action)
-            state_preds.append(state_prediction)
             elapsed.append(elapsed_time)
-        
+            preds.append(np.array([self.car.rel2glob(state_prediction[:,i]) for i in range(self.controller.N)]).squeeze()) # converting prediction to global coordinates
+         
+        print("FINISHED")   
         if animate:
-            self.animate(state_traj, action_traj, state_preds, elapsed)   
+            self.animate(state_traj, action_traj, preds, elapsed)   
         
     
-    def animate(self, state_traj: list, input_traj: list, state_preds: list, elapsed: list):
-        assert isinstance(state_traj,list), "State traplotjectory has to be a list"
-        assert isinstance(state_traj,list), "Input trajectory has to be a list"
-
+    def animate(self, state_traj: list, input_traj: list, preds: list, elapsed: list):
+        assert isinstance(state_traj,list), "State trajectory has to be a list"
+        assert isinstance(input_traj,list), "Input trajectory has to be a list"
+        
         # simulation params
         N = len(input_traj)
-        x_y = np.array(state_traj)[:,:2]
-        v_psi_delta = np.array(state_traj)[:,2:5] # taking just v,psi,delta
+        v_delta = np.array(state_traj)[:,0:2] # taking just v,psi,delta
         a_w = np.array(input_traj)
+        x_traj = []
+        y_traj = []
         
         # figure params
         grid = GridSpec(2, 2, width_ratios=[2, 1])
         ax_large = plt.subplot(grid[:, 0])
         ax_small1 = plt.subplot(grid[0, 1])
         ax_small2 = plt.subplot(grid[1, 1])
-        state_max = max(v_psi_delta.min(), v_psi_delta.max(), key=abs) # for axis limits
+        state_max = max(v_delta.min(), v_delta.max(), key=abs) # for axis limits
         input_max = max(a_w.min(), a_w.max(), key=abs) # for axis limits
         
         # fig titles
@@ -90,21 +90,22 @@ class RacingSimulation():
             
             ax_large.cla()
             ax_large.set_aspect('equal')
-            self.car.plot(ax_large, state)
-            ax_large.plot(x_y[:i, 0],x_y[:i, 1],'-',alpha=0.7,color="k",linewidth=4)
+            x,y = self.car.plot(ax_large, state)
+            x_traj.append(x)
+            y_traj.append(y)
+            ax_large.plot(x_traj[:i+1],y_traj[:i+1],'-',alpha=0.7,color="k",linewidth=4)
             
             # Plot track
             if self.car.track is not None:
-                self.car.track.plot(ax_large, display_drivable_area=False)
+                self.car.track.plot(ax_large)
                 
             # Plot state predictions of MPC
-            if state_preds is not None and i < N:
-                preds = state_preds[i]
-                ax_large.plot(preds[0,:], preds[1,:],"r-",alpha=0.85,linewidth=4)  
+            if preds is not None and i <= N:
+                ax_large.plot(preds[i][:,0], preds[i][:,1],"g",alpha=0.85,linewidth=4)  
             
             ax_small1.cla()
             ax_small1.axis((0, N, -state_max*1.1, state_max*1.1))
-            ax_small1.plot(v_psi_delta[:i, :], '-', alpha=0.7,label=['v',r'$\psi$',r'$\delta$'])
+            ax_small1.plot(v_delta[:i, :], '-', alpha=0.7,label=['v',r'$\delta$'])
             ax_small1.legend()
 
             ax_small2.cla()
@@ -114,7 +115,7 @@ class RacingSimulation():
 
         animation = FuncAnimation(
             fig=plt.gcf(), func=update, 
-            frames=N+1, interval=0.01, 
+            frames=N, interval=0.01, 
             repeat=False, repeat_delay=5000
         )
         plt.ioff() #interactive mode off
