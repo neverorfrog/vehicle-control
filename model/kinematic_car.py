@@ -44,7 +44,7 @@ class KinematicCar():
         :param input: input vector containing [a, w]
         """
         curvature = self.track.get_curvature(self.state.s)
-        next_state = self.transition(self.state.values, input.values, curvature).full().squeeze()
+        next_state = self.temporal_transition(self.state.values, input.values, curvature).full().squeeze()
         self.state = KinematicCarState(*next_state)
         self.input = input
         return self.state
@@ -67,9 +67,10 @@ class KinematicCar():
 
         # State and auxiliary variables
         v,delta,s,ey,epsi,t = self.state.variables
-        curvature = ca.SX.sym('kappa')
+        curvature = ca.SX.sym('curvature')
+        ds = ca.SX.sym('ds')
         
-        # ODE
+        # TEMPORAL ODE
         v_dot = a
         delta_dot = w
         s_dot = (v * cos(epsi)) / (1 - ey * curvature)
@@ -77,11 +78,21 @@ class KinematicCar():
         epsi_dot = v * (tan(delta)/self.length) - s_dot * curvature
         t_dot = 1
         state_dot = ca.vertcat(v_dot, delta_dot, s_dot, ey_dot, epsi_dot, t_dot)
-        ode = ca.Function('ode', [self.state.syms,self.input.syms,curvature], [state_dot])
+        t_ode = ca.Function('ode', [self.state.syms,self.input.syms,curvature], [state_dot])
+        t_integrator = integrate(self.state.syms,self.input.syms,curvature,t_ode,self.dt)
+        self.temporal_transition = ca.Function('transition', [self.state.syms,self.input.syms,curvature], [t_integrator])
         
-        # wrapping up
-        integrator = integrate(self.state.syms,self.input.syms,curvature,ode,self.dt)
-        self.transition = ca.Function('transition', [self.state.syms,self.input.syms,curvature], [integrator])
+        # SPATIAL ODE
+        v_prime = (1 - ey * curvature) / (v * np.cos(epsi)) * a
+        delta_prime = (1 - ey * curvature) / (v * np.cos(epsi)) * w
+        s_prime = 1
+        ey_prime = (1 - ey * curvature) * ca.tan(epsi)
+        epsi_prime = ((tan(delta)) / self.length) * ((1 - ey * curvature)/(cos(epsi))) - curvature
+        t_prime = (1 - ey * curvature) / (v * np.cos(epsi))
+        state_prime = ca.vertcat(v_prime, delta_prime, s_prime, ey_prime, epsi_prime, t_prime)
+        s_ode = ca.Function('ode', [self.state.syms, self.input.syms, curvature], [state_prime])
+        s_integrator = integrate(self.state.syms, self.input.syms, curvature, s_ode, h=ds)
+        self.spatial_transition = ca.Function('transition', [self.state.syms,self.input.syms,curvature,ds], [s_integrator])
     
     def plot(self, axis: Axes, state: KinematicCarState):
         x,y,psi = self.rel2glob(state)

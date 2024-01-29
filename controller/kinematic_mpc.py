@@ -12,7 +12,8 @@ class KinematicMPC(Controller):
         self.car = car
         self.N = config['horizon']
         self.config = config
-        self.ns, self.na, self.transition = self._init_ode()
+        self.ns = len(self.car.state) # number of state variables
+        self.na = len(self.car.input) # number of action variables
         self.opti = self._init_opti()
         
     def command(self, state, curvature):
@@ -83,7 +84,7 @@ class KinematicMPC(Controller):
             # opti.subject_to(self.ds[n] == 0.046)
             opti.subject_to(self.s[n+1] == self.s[n] + self.ds[n])
             opti.subject_to(self.curvature[n] == self.car.curvature(self.s[n]))
-            opti.subject_to(state_next == self.transition(state,input,self.curvature[n],self.ds[n]))
+            opti.subject_to(state_next == self.car.spatial_transition(state,input,self.curvature[n],self.ds[n]))
             
         # ------------------- Cost Function --------------------------------------
             
@@ -128,32 +129,3 @@ class KinematicMPC(Controller):
             opti.subject_to(self.action[1,n] >= input_constraints['w_min'])
             
         return opti
-            
-    def _init_ode(self):
-        '''Differential equations describing the model inside the prediction horizon'''
-        ns = len(self.car.state) # number of states
-        na = len(self.car.input) # number of inputs
-        
-        # input variables
-        a, w = self.car.input.variables
-        
-        # state and auxiliary variables
-        v,delta,s,ey,epsi,t = self.car.state.variables
-        curvature = ca.SX.sym('curvature')
-        ds = ca.SX.sym('ds')
-        
-        # ODE
-        v_prime = (1 - ey * curvature) / (v * np.cos(epsi)) * a
-        delta_prime = (1 - ey * curvature) / (v * np.cos(epsi)) * w
-        s_prime = 1
-        ey_prime = (1 - ey * curvature) * ca.tan(epsi)
-        epsi_prime = ((tan(delta)) / self.car.length) * ((1 - ey * curvature)/(cos(epsi))) - curvature
-        t_prime = (1 - ey * curvature) / (v * np.cos(epsi))
-        state_prime = ca.vertcat(v_prime, delta_prime, s_prime, ey_prime, epsi_prime, t_prime)
-        ode = ca.Function('ode', [self.car.state.syms, self.car.input.syms, curvature], [state_prime])
-        
-        # wrapping up
-        integrator = integrate(self.car.state.syms, self.car.input.syms, curvature, ode, h=ds)
-        transition = ca.Function('transition', [self.car.state.syms,self.car.input.syms,curvature,ds], [integrator])
-        
-        return ns, na, transition
