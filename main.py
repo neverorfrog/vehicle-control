@@ -9,14 +9,13 @@ from simulation.simulator import RacingSimulation
 from controller.kinematic_mpc import KinematicMPC
 from controller.dynamic_mpc import DynamicMPC
 from utils.utils import *
-from scipy.integrate import quad
 from enum import Enum
 
 class Mode(Enum):
     DYN = "dynamic"
     KIN = "kinematic"
     
-mode = Mode.DYN
+mode = Mode.KIN
 
 # Track Loading
 track_name = f"{mode.value}_ippodromo"

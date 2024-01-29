@@ -76,7 +76,8 @@ class RacingSimulation():
         ax_small1 = plt.subplot(grid[0, 1])
         ax_small2 = plt.subplot(grid[1, 1])
         ax_small3 = plt.subplot(grid[2, 1])
-        state_max = max(error.min(), error.max(), key=abs) # for axis limits
+        state_max = max(v_delta.min(), v_delta.max(), key=abs) # for axis limits
+        error_max = max(error.min(), error.max(), key=abs) # for axis limits
         input_max = max(a_w.min(), a_w.max(), key=abs) # for axis limits
         
         # fig titles
@@ -112,7 +113,7 @@ class RacingSimulation():
             ax_small1.legend()
                         
             ax_small2.cla()
-            ax_small2.axis((0, N, -state_max*1.1, state_max*1.1))
+            ax_small2.axis((0, N, -error_max*1.1, error_max*1.1))
             ax_small2.plot(error[:i, :], '-', alpha=0.7,label=[r'$e_y$',r'$e_\psi$'])
             ax_small2.legend()
 
