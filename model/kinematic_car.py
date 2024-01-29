@@ -1,5 +1,3 @@
-# inspired by https://github.com/matssteinweg/Multi-Purpose-MPC
-
 from matplotlib import pyplot as plt
 from matplotlib.axes import Axes
 import numpy as np
@@ -46,7 +44,6 @@ class KinematicCar():
         :param input: input vector containing [a, w]
         """
         curvature = self.track.get_curvature(self.state.s)
-        print(f"CURVATURE: {curvature}")
         next_state = self.transition(self.state.values, input.values, curvature).full().squeeze()
         self.state = KinematicCarState(*next_state)
         self.input = input
@@ -70,21 +67,21 @@ class KinematicCar():
 
         # State and auxiliary variables
         v,delta,s,ey,epsi,t = self.state.variables
-        kappa = ca.SX.sym('kappa')
+        curvature = ca.SX.sym('kappa')
         
         # ODE
         v_dot = a
         delta_dot = w
-        s_dot = (v * cos(epsi)) / (1 - ey * kappa)
+        s_dot = (v * cos(epsi)) / (1 - ey * curvature)
         ey_dot = v * sin(epsi) 
-        epsi_dot = v * (tan(delta)/self.length) - s_dot * kappa
+        epsi_dot = v * (tan(delta)/self.length) - s_dot * curvature
         t_dot = 1
         state_dot = ca.vertcat(v_dot, delta_dot, s_dot, ey_dot, epsi_dot, t_dot)
-        ode = ca.Function('ode', [self.state.syms,self.input.syms,kappa], [state_dot])
+        ode = ca.Function('ode', [self.state.syms,self.input.syms,curvature], [state_dot])
         
         # wrapping up
-        integrator = integrate(self.state.syms,self.input.syms,kappa,ode,self.dt)
-        self.transition = ca.Function('transition', [self.state.syms,self.input.syms,kappa], [integrator])
+        integrator = integrate(self.state.syms,self.input.syms,curvature,ode,self.dt)
+        self.transition = ca.Function('transition', [self.state.syms,self.input.syms,curvature], [integrator])
     
     def plot(self, axis: Axes, state: KinematicCarState):
         x,y,psi = self.rel2glob(state)

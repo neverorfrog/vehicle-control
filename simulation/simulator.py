@@ -33,7 +33,7 @@ class RacingSimulation():
         
         # Starting Simulation
         for n in cycle(counter):
-            print(f"state: {state}")
+            print(f"STATE: {state}")
             print(f"N: {n}")
             if state.s > self.car.track.length or n >= steps: break
             

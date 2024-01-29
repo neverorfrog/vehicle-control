@@ -6,7 +6,7 @@ from controller.controller import Controller
 from model.state import KinematicCarInput
 from utils.utils import integrate
 
-class RacingMPC(Controller):
+class KinematicMPC(Controller):
     def __init__(self, car: KinematicCar, config):
         self.dt = config['mpc_dt']
         self.car = car
