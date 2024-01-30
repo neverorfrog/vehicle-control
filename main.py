@@ -15,7 +15,7 @@ class Mode(Enum):
     DYN = "dynamic"
     KIN = "kinematic"
     
-mode = Mode.KIN
+mode = Mode.DYN
 
 # Track Loading
 track_name = f"{mode.value}_ippodromo"
@@ -38,4 +38,4 @@ elif mode is Mode.DYN:
 
 # Simulation
 simulation = RacingSimulation(track_name,car,controller)   
-simulation.run(N = 88)
+simulation.run(N = 50)

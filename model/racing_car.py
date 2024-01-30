@@ -61,6 +61,7 @@ class RacingCar(ABC):
         :param input: vector of inputs
         """
         curvature = self.track.get_curvature(self.state.s)
+        print(f"CURVATURE IN DRIVE: {curvature}")
         next_state = self.temporal_transition(self.state.values, input.values, curvature).full().squeeze()
         self.state = self.__class__.create_state(*next_state)
         self.input = input
