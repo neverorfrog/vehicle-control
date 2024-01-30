@@ -1,11 +1,7 @@
-import sys
-sys.path.append("..")
-
-from modeling.robot import *
+from environment.trajectory import Trajectory
 from typing import Tuple
 import numpy as np
-from controllers.controller import Controller
-from modeling.trajectory import Trajectory
+from controller.controller import Controller
 from numpy import sin,cos,tan
 
 class FBL(Controller):
@@ -13,7 +9,7 @@ class FBL(Controller):
         super().__init__(kp, kd)
         self.b = b
         
-    def command(self, q_k, qd_k, ref_k):
+    def command(self, q_k, qd_k, t_k, reference: Trajectory):
         # TODO hardcodato
         x = q_k[0]
         y = q_k[1]
@@ -22,6 +18,8 @@ class FBL(Controller):
         # point at distance b from center
         x_b = x + self.b * cos(theta)
         y_b = y + self.b * sin(theta)
+        
+        ref_k = reference.update(t_k)
             
         # intermediate control signal
         e_p = ref_k['p'] - [x_b,y_b]
@@ -42,7 +40,7 @@ class BicycleFBL(Controller):
         self.b = b
         self.l = l
         
-    def command(self, q_k, qd_k, ref_k):
+    def command(self, q_k, qd_k, t_k, reference: Trajectory):
         # TODO hardcodato
         x = q_k[0]
         y = q_k[1]
@@ -52,6 +50,8 @@ class BicycleFBL(Controller):
         # point at distance b from center
         x_b = x + self.l * cos(theta) + self.b * cos(theta+phi)
         y_b = y + self.l * sin(theta) + self.b * sin(theta+phi)
+        
+        ref_k = reference.update(t_k)
         
         # intermediate control signal
         e_p = ref_k['p'] - [x_b,y_b]
@@ -66,7 +66,6 @@ class BicycleFBL(Controller):
     
         return vw
 
-# TODO acceleration input works well that way?
 class DFBL(Controller):
     def __init__(self, kp: np.ndarray, kd: np.ndarray):
         super().__init__(kp, kd)

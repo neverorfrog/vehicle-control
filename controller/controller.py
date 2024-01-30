@@ -1,14 +1,16 @@
 import numpy as np
 from typing import Tuple
+from abc import abstractmethod
+from abc import ABC
 
-from modeling.trajectory import Trajectory
-
-class Controller():
+class Controller(ABC):
+    '''Controller Class'''
     def __init__(self, kp: np.ndarray, kd: np.ndarray):
         self.kp = kp
         self.kd = kd
-            
-    def command(self, q_k, qd_k, ref_k):
+     
+    @abstractmethod       
+    def command(self, s_k):
         """Compute the control actions
         Args:
             q_k (np.array): current state
@@ -17,4 +19,4 @@ class Controller():
         Returns:
             (np.array): control actions
         """
-        return np.array([1.0,0])
+        pass
