@@ -29,6 +29,8 @@ cost_weights:
   Ux: 10
   deviation: 10
   boundary: 100
+  slip : 10
+  friction: 0.1
 
 # input constraints
 input_constraints:

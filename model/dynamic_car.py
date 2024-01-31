@@ -14,8 +14,9 @@ class DynamicCar(RacingCar):
     def create_input(cls, *args, **kwargs):
         return DynamicCarInput(*args, **kwargs)
     
+    
     def _init_ode(self):
-        g = 9.88
+        # g = 9.88
         # Input variables
         Fx,w = self.input.variables
 
@@ -25,41 +26,44 @@ class DynamicCar(RacingCar):
         ds = ca.SX.sym('ds')
 
         #parameters: mass, distance of CG from front (a) and rear (b) axis, height of CG, yaw moment of inertia
-        Parameters = namedtuple('Parameters', ['m', 'a', 'b', 'h_cg', 'Izz'])
-        p = Parameters(1000, 2, 2, 1, 2500)
+        # Parameters = namedtuple('Parameters', ['m', 'a', 'b', 'h_cg', 'Izz'])
+        # p = Parameters(1000, 2, 2, 1, 2500)
+        p = self.get_car_parameters()
+
+        g,theta,phi,Av2,Crr,eps,mu,C_alpha,Cd = self.get_parameters()
         
         #utils for ODE
         Xf, Xr = self._get_force_distribution(Fx)
 
         #TODO theta and phi are road grade and bank angle, but for now we assume flat track
-        theta = 0 
-        phi = 0
-        Av2 = 0 #because theta, phi are 0
+        # theta = 0 
+        # phi = 0
+        # Av2 = 0 #because theta, phi are 0
 
         Fb = 0 #-p.m*g*ca.cos(theta)*ca.sin(phi) TODO if you want to change the angle modify this
         Fn = -p.m*g*1 #ca.cos(theta) is 1 for theta=0, might aswell not write it
         
-        Crr = 0.014 #https://en.wikipedia.org/wiki/Rolling_resistance
+        # Crr = 0.014 #https://en.wikipedia.org/wiki/Rolling_resistance
         Frr = Crr*Fn #rolling resistance = coefficient*normal force (not specified in the paper)
         
         #All the forces introduced above are constant, as the various coefficient are constant and the ground is always flat
         #Fd depends on the velocity instead, so we define a casadi function (Is this the correct methodology?)
-        Cd = 0.25 #https://en.wikipedia.org/wiki/Automobile_drag_coefficient#:~:text=The%20average%20modern%20automobile%20achieves,a%20Cd%3D0.35%E2%80%930.45.
+        # Cd = 0.25 #https://en.wikipedia.org/wiki/Automobile_drag_coefficient#:~:text=The%20average%20modern%20automobile%20achieves,a%20Cd%3D0.35%E2%80%930.45.
         Fd = ca.Function("Fd_Function",[Ux], [Frr + Cd*Ux**2 - 0]) #p.m*g*ca.sin(theta) 
         
         #Fz is also not constant, we define 2 casadi functions for front and rear (15a/b in the paper)
         #TODO Fx here should be just the Fx value? or Fx*Xf when we're computing Fz_f and Fx*Xr when computing Fz_r?
         L = (p.a+p.b)
-        Fz_f = ca.Function("Fz_f_Function", [Ux, Fx], [p.b/L * p.m*(g*ca.cos(theta)*ca.cos(phi) + Av2*Ux**2) - p.h_cg*Fx*Xf(Fx)/L])
-        Fz_r = ca.Function("Fz_r_Function", [Ux, Fx], [p.a/L*p.m*(g*ca.cos(theta)*ca.cos(phi)+Av2*Ux**2) + p.h_cg*Fx*Xf(Fx)/L])
+        Fz_f = self.get_Fz_f_function(Ux, Fx, Xf, p, L, g, theta, phi, Av2)
+        Fz_r = self.get_Fz_r_function(Ux, Fx, Xf, p, L, g, theta, phi, Av2)
 
         #slip angles, equations 11a/b
-        alpha_f = ca.Function("alpha_f_Function",[Uy, Ux, delta, r], [ca.atan((Uy + p.a*r)/Ux) - delta])
-        alpha_r = ca.Function("alpha_r_Function", [Uy, Ux, r], [ca.atan((Uy - p.b*r)/Ux)])
+        alpha_f = self.get_alpha_f_function(Uy, Ux, delta, r, p) 
+        alpha_r = self.get_alpha_r_function(Uy, Ux, r, p)
         
         #Fy is rather complex to obtain, self.get_lateral_force returns:
         #a casadi function mapping (Uy, Ux, delta, r, Fx) to [Fy_f, Fy_r]
-        Fy = self._get_lateral_force(alpha_f, alpha_r,Uy, Ux, delta, r ,Fz_f, Fz_r, Fx, Xf)
+        Fy = self._get_lateral_force(alpha_f, alpha_r,Uy, Ux, delta, r ,Fz_f, Fz_r, Fx, Xf, eps, mu, C_alpha)
         
         # TEMPORAL ODE (equations 1a to 1f)
         Ux_dot = (Fx*Xf(Fx)*ca.cos(delta) - Fy(Uy, Ux, delta, r, Fx)[0] * ca.sin(delta) + Fx*Xr(Fx) - Fd(Ux))/p.m + r*Uy
@@ -103,15 +107,15 @@ class DynamicCar(RacingCar):
         Xr = ca.Function("force_distribution", [Fx], [(br-dr)/2 * ca.tanh(-2*(Fx + 0.5)) + (dr + br)/2 ])
         return Xf, Xr
 
-    def _get_lateral_force(self, alpha_f, alpha_r, Uy, Ux, delta, r, Fz_f, Fz_r, Fx, Xf):
-        eps = 0.85 #from the paper
-
-        mu = 0.4 #http://hyperphysics.phy-astr.gsu.edu/hbase/Mechanics/frictire.htmlFx
-        Fy_max = ca.Function("Fy_max_Function", [Ux, Fx], [((mu*ca.vertcat(Fz_f(Ux, Fx), Fz_r(Ux, Fx)))**2 - (0.99*ca.vertcat(Fx*Xf(Fx), Fx*Xf(Fx)))**2)**0.5 ]) #TODO should Fx also be vertcat(Fx_f)
+    def _get_lateral_force(self, alpha_f, alpha_r, Uy, Ux, delta, r, Fz_f, Fz_r, Fx, Xf, eps, mu, C_alpha):
+        # eps = 0.85 #from the paper
+        # mu = 0.4 #http://hyperphysics.phy-astr.gsu.edu/hbase/Mechanics/frictire.htmlFx
+        
         #Fy_max is 2 DIMENSIONAL, has front and rear values
-        C_alpha = 3.5 #https://www.politesi.polimi.it/bitstream/10589/152539/3/2019_12_Viani.pdf  proposes some real value taken from wherever, we should look at this in more detail
+        Fy_max = self.get_Fy_max_function(Ux, Fx, Fz_f, Fz_r, Xf, mu)
+        # C_alpha = 3.5 #https://www.politesi.polimi.it/bitstream/10589/152539/3/2019_12_Viani.pdf  proposes some real value taken from wherever, we should look at this in more detail
 
-        alpha_mod = ca.Function("alpha_mod_Function", [Ux, Fx], [ca.atan(3*Fy_max(Ux,Fx)*eps/C_alpha)]) #alpha mod is 2D because Fymax is 2D because Fz is 2D
+        alpha_mod = self.get_alpha_mod_function(Ux, Fx, Fy_max, eps, C_alpha)
         
 
         condition = ca.logic_and((ca.fabs(alpha_f(Uy, Ux, delta, r)) <= alpha_mod(Ux, Fx)[0]) , (ca.fabs(alpha_r(Uy, Ux, r)) <= alpha_mod(Ux, Fx)[1]))
@@ -137,3 +141,48 @@ class DynamicCar(RacingCar):
     @property
     def spatial_transition(self):
         return self._spatial_transition
+    
+    def get_alpha_f_function(self, Uy, Ux, delta, r, p):
+        alpha_f_function = ca.Function("alpha_f_Function", [Uy, Ux, delta, r], [ca.atan((Uy + p.a * r) / Ux) - delta])
+        return alpha_f_function
+    
+    def get_alpha_r_function(self, Uy, Ux, r, p):
+        alpha_r_function = ca.Function("alpha_r_Function", [Uy, Ux, r], [ca.atan((Uy - p.b*r)/Ux)])
+        return alpha_r_function
+    
+    def get_alpha_mod_function(self, Ux, Fx, Fy_max, eps, C_alpha):
+        alpha_mod_function = ca.Function("alpha_mod_Function", [Ux, Fx], [ca.atan(3*Fy_max(Ux,Fx)*eps/C_alpha)]) #alpha mod is 2D because Fymax is 2D because Fz is 2D
+        return alpha_mod_function
+    
+    def get_Fy_max_function(self, Ux, Fx, Fz_f, Fz_r, Xf, mu):
+        Fy_max_function = ca.Function("Fy_max_Function", [Ux, Fx], [((mu*ca.vertcat(Fz_f(Ux, Fx), Fz_r(Ux, Fx)))**2 - (0.99*ca.vertcat(Fx*Xf(Fx), Fx*Xf(Fx)))**2)**0.5 ]) #TODO should Fx also be vertcat(Fx_f)
+        return Fy_max_function
+    
+    def get_Fz_f_function(self, Ux, Fx, Xf, p, L, g, theta, phi, Av2):
+        Fz_f_function = ca.Function("Fz_f_Function", [Ux, Fx], [p.b/L * p.m*(g*ca.cos(theta)*ca.cos(phi) + Av2*Ux**2) - p.h_cg*Fx*Xf(Fx)/L])
+        return Fz_f_function
+    
+    def get_Fz_r_function(self, Ux, Fx, Xf, p, L, g, theta, phi, Av2):
+        Fz_r_function = ca.Function("Fz_r_Function", [Ux, Fx], [p.a/L*p.m*(g*ca.cos(theta)*ca.cos(phi)+Av2*Ux**2) + p.h_cg*Fx*Xf(Fx)/L])
+        return Fz_r_function
+    
+    def get_car_parameters(self):
+        Parameters = namedtuple('Parameters', ['m', 'a', 'b', 'h_cg', 'Izz'])
+        p = Parameters(1000, 2, 2, 1, 2500)
+        return p
+    
+    def get_parameters(self):
+        g = 9.88
+
+        #TODO theta and phi are road grade and bank angle, but for now we assume flat track
+        theta = 0 
+        phi = 0
+
+        Av2 = 0                 #because theta, phi are 0
+        Crr = 0.014             #https://en.wikipedia.org/wiki/Rolling_resistance
+        eps = 0.85              #from the paper
+        mu = 0.4                #http://hyperphysics.phy-astr.gsu.edu/hbase/Mechanics/frictire.htmlFx
+        C_alpha = 3.5           #https://www.politesi.polimi.it/bitstream/10589/152539/3/2019_12_Viani.pdf  proposes some real value taken from wherever, we should look at this in more detail
+        Cd = 0.25               #https://en.wikipedia.org/wiki/Automobile_drag_coefficient#:~:text=The%20average%20modern%20automobile%20achieves,a%20Cd%3D0.35%E2%80%930.45.
+
+        return g,theta,phi,Av2,Crr,eps,mu,C_alpha,Cd

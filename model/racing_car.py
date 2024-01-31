@@ -45,6 +45,7 @@ class RacingCar(ABC):
     def create_input(cls, *args, **kwargs) -> FancyVector:
         pass
     
+    
     @abstractmethod
     def _init_ode(self): pass
     

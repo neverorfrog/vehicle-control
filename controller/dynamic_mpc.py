@@ -63,7 +63,11 @@ class DynamicMPC(Controller):
         self.s = opti.variable(self.N+1)
         opti.subject_to(self.s[0] == self.state0[self.car.state.index('s')])
         self.curvature = opti.variable(self.N+1)
-        
+
+        # --------------------- Slack Variables ------------------------------------------
+        self.Fe = opti.variable(2, self.N)      # Slack variables for excessive force usage beyond the imposed limits
+                                                # Fe[0] for front tire, Fe[1] for rear tire
+
         # -------------------- Model Constraints TODO ------------------------------------------
         state_constraints = self.config['state_constraints']
         for n in range(self.N):
@@ -87,13 +91,44 @@ class DynamicMPC(Controller):
             opti.subject_to(state_next == self.car.spatial_transition(state,input,self.curvature[n],self.ds[n]))
             
         # ------------------- Cost Function TODO --------------------------------------
+      
+              
+        p = self.car.get_car_parameters()
+        g,theta,phi,Av2,Crr,eps,mu,C_alpha,Cd = self.car.get_parameters()
         
+        print("#############  ", p.m,"  ", p.a,"  ", p.b,"  ", p.h_cg,"  ", p.Izz)
+        
+        print("#############    ", Ux)
+        Ux_sym = ca.MX.sym('Ux_sym')
+        Uy_sym = ca.MX.sym('Ux_sym')
+        delta_sym = ca.MX.sym('Ux_sym')
+        r_sym = ca.MX.sym('Ux_sym')
+        p_sym = ca.MX.sym('Ux_sym', len(p))
+        Fx_sym = ca.MX.sym('Fx_sym')
+        
+        Xf, Xr = self.car._get_force_distribution(Fx_sym)
+        Fz_r = self.car.get_Fz_r_function(Ux_sym, Fx_sym, Xf, p, p.a+p.b, g, theta, phi, Av2)
+        Fz_f = self.car.get_Fz_f_function(Ux_sym, Fx_sym, Xf, p, p.a+p.b, g, theta, phi, Av2)
+        Fy_max = self.car.get_Fy_max_function(Ux_sym, Fx_sym,  Fz_f, Fz_r, Xf, mu)
+        
+        alpha_f = self.car.get_alpha_f_function(Uy_sym, Ux_sym, delta_sym, r_sym, p)
+        alpha_r = self.car.get_alpha_r_function(Uy_sym, Ux_sym, r_sym, p)
+        alpha_mod = self.car.get_alpha_mod_function(Ux_sym, Fx_sym, Fy_max, eps, C_alpha)
+
+
+
         cost_weights = self.config['cost_weights'] 
         cost = 0
         for n in range(self.N):
             state = self.state[:,n]
             input = self.action[:,n]
             ey = state[self.car.state.index('ey')]
+            Ux = state[self.car.state.index('Ux')]
+            Uy = state[self.car.state.index('Uy')]
+            delta = state[self.car.state.index('delta')]
+            r = state[self.car.state.index('r')]
+
+            Fx = input[self.car.input.index('Fx')]
             
             # violation of road bounds
             cost += ca.if_else(ey < state_constraints['ey_min'],
@@ -105,7 +140,15 @@ class DynamicMPC(Controller):
             cost += cost_weights['deviation']*self.ds[n]*ey**2 # deviation from road desciptor
             
             cost += cost_weights['w']*input[1]**2 # steer angle rate
-        
+
+            cost += ca.if_else(ca.fabs(ca.tan(alpha_f(Uy, Ux, delta, r))) >= ca.tan(alpha_mod(Ux, Fx)[0]),  # slip angle front
+                        cost_weights['slip']*(ca.fabs(ca.tan(alpha_f(Uy, Ux, delta, r))) - ca.tan(alpha_mod(Ux,Fx)[0]))**2, 0)
+            
+            cost += ca.if_else(ca.fabs(ca.tan(alpha_r(Uy, Ux, r))) >= ca.tan(alpha_mod(Ux, Fx)[1]),         # slip angle rear
+                        cost_weights['slip']*(ca.fabs(ca.tan(alpha_r(Uy, Ux, r))) - ca.tan(alpha_mod(Ux,Fx)[1]))**2, 0)
+            
+            cost += cost_weights['friction']*((self.Fe[0, n]**2)**2 + (self.Fe[1, n]**2)**2)
+
         for n in range(self.N - 1):
             input = self.action[:,n]
             next_input = self.action[:,n+1]
