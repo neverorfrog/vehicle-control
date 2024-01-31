@@ -10,7 +10,7 @@ from abc import abstractmethod
 from abc import ABC
 
 class RacingCar(ABC):
-    def __init__(self, track: Track, length, dt):
+    def __init__(self, track: Track, config: dict):
         """
         Abstract racing Car Model
         :param track: reference path object to follow
@@ -20,11 +20,11 @@ class RacingCar(ABC):
         # Precision
         self.eps = 1e-12
         # Car Parameters
-        self.length = length
+        self.length = config['length']
         # Reference Path
         self.track = track
         # Set sampling time
-        self.dt = dt
+        self.dt = config['dt']
         # Initialize state
         self.state: FancyVector = self.__class__.create_state()
         # Initialize input
@@ -45,7 +45,6 @@ class RacingCar(ABC):
     def create_input(cls, *args, **kwargs) -> FancyVector:
         pass
     
-    
     @abstractmethod
     def _init_ode(self): pass
     
@@ -62,7 +61,6 @@ class RacingCar(ABC):
         :param input: vector of inputs
         """
         curvature = self.track.get_curvature(self.state.s)
-        print(f"CURVATURE IN DRIVE: {curvature}")
         next_state = self.temporal_transition(self.state.values, input.values, curvature).full().squeeze()
         self.state = self.__class__.create_state(*next_state)
         self.input = input
