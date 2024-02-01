@@ -1,9 +1,8 @@
-from model.kinematic_car import KinematicCar
+from model.kinematic_car import KinematicCar, KinematicCarInput
 import casadi as ca
 import numpy as np
 from casadi import cos, sin, tan
 from controller.controller import Controller
-from model.state import KinematicCarInput
 from utils.utils import integrate
 
 class KinematicMPC(Controller):
@@ -18,21 +17,13 @@ class KinematicMPC(Controller):
         
     def command(self, state, curvature):
         # every new horizon, the current state (and the last prediction) is the initial 
-        print("") # to separate between prints
         self._init_parameters(state, curvature)
         sol = self.opti.solve()
         self.action_prediction = sol.value(self.action)
         self.state_prediction = sol.value(self.state)
-        curvature = sol.value(self.curvature)
-        s = sol.value(self.s)
-        print(f"EY PREDICTION: {self.state_prediction[self.car.state.index('ey'),:]}")
-        print(f"EPSI PREDICTION: {self.state_prediction[self.car.state.index('epsi'),:]}")
-        print(f"DELTA PREDICTION: {self.state_prediction[self.car.state.index('delta'),:]}")
-        print(f"OMEGA PREDICTION: {self.action_prediction[1,:]}")
-        print(f"CURVATURE PREDICTION: {curvature}")
-        print(f"S PREDICTION: {s}")
+        curvature_prediction = sol.value(self.curvature)
         next_input = KinematicCarInput(a=self.action_prediction[0][0], w=self.action_prediction[1][0])
-        return next_input, self.state_prediction
+        return next_input, self.state_prediction, self.action_prediction, curvature_prediction
     
     def _init_parameters(self, state, curvature):
         '''
@@ -46,8 +37,8 @@ class KinematicMPC(Controller):
     def _init_opti(self):
         # -------------------- Optimizer Initialization ----------------------------------
         opti = ca.Opti()
-        p_opts = {"ipopt.print_level": 0, "expand":False}
-        s_opts = {"max_iter": 100}
+        p_opts = {'ipopt.print_level': 0, 'print_time': False, 'expand': False}
+        s_opts = {}
         opti.solver("ipopt", p_opts, s_opts)
         
         # -------------------- Decision Variables with Initialization ---------------------
@@ -60,8 +51,6 @@ class KinematicMPC(Controller):
         self.state0 = opti.parameter(self.ns) # initial state
         opti.subject_to(self.state[:,0] == self.state0) # constraint on initial state
         self.ds = opti.variable(self.N) #ds trajectory during the planning horizon
-        self.s = opti.variable(self.N+1)
-        opti.subject_to(self.s[0] == self.state0[self.car.state.index('s')])
         self.curvature = opti.variable(self.N+1)
         
         # -------------------- Model Constraints ------------------------------------------
@@ -81,9 +70,8 @@ class KinematicMPC(Controller):
             ey = state[self.car.state.index('ey')]
             epsi = state[self.car.state.index('epsi')]
             opti.subject_to(self.ds[n] == self.dt * ((v * np.cos(epsi)) / (1 - ey * self.curvature[n]))) # going on for dt and snapshot of how much the car moved
-            opti.subject_to(self.s[n+1] == self.s[n] + self.ds[n])
-            opti.subject_to(self.curvature[n] == self.car.curvature(self.s[n]))
-            opti.subject_to(state_next == self.car.spatial_transition(state,input,self.curvature[n],self.ds[n]))
+            opti.subject_to(self.curvature[n] == self.car.track.get_curvature(self.state[self.car.state.index('s'),n]))
+            opti.subject_to(state_next == self.car.spatial_transition(state,input,self.curvature[n],self.curvature[n+1],self.ds[n]))
             
         # ------------------- Cost Function --------------------------------------
             
@@ -104,17 +92,16 @@ class KinematicMPC(Controller):
             cost += cost_weights['deviation']*self.ds[n]*ey**2 # deviation from road desciptor
             
             cost += cost_weights['w']*input[1]**2 # steer angle rate
-        
+            
         for n in range(self.N - 1):
             input = self.action[:,n]
             next_input = self.action[:,n+1]
-            
             # acceleration continuous
             cost += cost_weights['a']*(next_input[self.car.input.index('a')]-input[self.car.input.index('a')])
         
         cost += ca.if_else(self.state[self.car.state.index('v'),-1] >= state_constraints['v_max'],
             cost_weights['v']*(self.state[self.car.state.index('v'),-1] - state_constraints['v_max'])**2, 0) 
-        cost += cost_weights['time']*self.state[self.car.state.index('t'),-1] # final cost (minimize time)
+        cost += cost_weights['time']*(self.state[self.car.state.index('t'),-1]-self.state[self.car.state.index('t'),0]) # final cost (minimize time)
         cost += cost_weights['ey']*self.state[self.car.state.index('ey'),-1]**2 # final cost (minimize terminal lateral error) hardcodato
         cost += cost_weights['epsi']*self.state[self.car.state.index('epsi'),-1]**2 # final cost (minimize terminal course error) hardcodato
         opti.minimize(cost)

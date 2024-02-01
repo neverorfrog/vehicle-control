@@ -1,11 +1,10 @@
-from model.kinematic_car import KinematicCar
+from model.dynamic_car import DynamicCar, DynamicCarInput
 import casadi as ca
 import numpy as np
 from controller.controller import Controller
-from model.state import DynamicCarInput
 
 class DynamicMPC(Controller):
-    def __init__(self, car: KinematicCar, config):
+    def __init__(self, car: DynamicCar, config):
         self.dt = config['mpc_dt']
         self.car = car
         self.N = config['horizon']
@@ -22,16 +21,8 @@ class DynamicMPC(Controller):
         self.action_prediction = sol.value(self.action)
         self.state_prediction = sol.value(self.state)
         curvature = sol.value(self.curvature)
-        s = sol.value(self.s)
         # next_input = DynamicCarInput(Fx=self.action_prediction[0][0], w=self.action_prediction[1][0])
-        next_input = DynamicCarInput(Fx = 0.1, w = 0.1)
-        print(f"EY PREDICTION: {self.state_prediction[self.car.state.index('ey'),:]}")
-        print(f"EPSI PREDICTION: {self.state_prediction[self.car.state.index('epsi'),:]}")
-        print(f"DELTA PREDICTION: {self.state_prediction[self.car.state.index('delta'),:]}")
-        print(f"OMEGA PREDICTION: {self.action_prediction[1,:]}")
-        print(f"CURVATURE PREDICTION: {curvature}")
-        print(f"S PREDICTION: {s}")
-        print(f"INPUT: {next_input}")
+        next_input = DynamicCarInput(Fx = 0, w = 0)
         return next_input, self.state_prediction
     
     def _init_parameters(self, state, curvature):
@@ -46,7 +37,7 @@ class DynamicMPC(Controller):
     def _init_opti(self):
         # -------------------- Optimizer Initialization ----------------------------------
         opti = ca.Opti()
-        p_opts = {"ipopt.print_level": 0, "expand":False}
+        p_opts = {'ipopt.print_level': 0, 'print_time': False, 'expand': False}
         s_opts = {"max_iter": 100}
         opti.solver("ipopt", p_opts, s_opts)
         
@@ -99,12 +90,12 @@ class DynamicMPC(Controller):
         print("#############  ", p.m,"  ", p.a,"  ", p.b,"  ", p.h_cg,"  ", p.Izz)
         
         print("#############    ", Ux)
-        Ux_sym = ca.MX.sym('Ux_sym')
-        Uy_sym = ca.MX.sym('Ux_sym')
-        delta_sym = ca.MX.sym('Ux_sym')
-        r_sym = ca.MX.sym('Ux_sym')
-        p_sym = ca.MX.sym('Ux_sym', len(p))
-        Fx_sym = ca.MX.sym('Fx_sym')
+        Ux_sym = ca.SX.sym('Ux_sym')
+        Uy_sym = ca.SX.sym('Ux_sym')
+        delta_sym = ca.SX.sym('Ux_sym')
+        r_sym = ca.SX.sym('Ux_sym')
+        p_sym = ca.SX.sym('Ux_sym', len(p))
+        Fx_sym = ca.SX.sym('Fx_sym')
         
         Xf, Xr = self.car._get_force_distribution(Fx_sym)
         Fz_r = self.car.get_Fz_r_function(Ux_sym, Fx_sym, Xf, p, p.a+p.b, g, theta, phi, Av2)

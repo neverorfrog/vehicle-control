@@ -3,6 +3,7 @@ from matplotlib.backend_bases import FigureManagerBase
 from controller.controller import Controller
 import numpy as np
 from model.kinematic_car import KinematicCar
+from model.racing_car import RacingCar
 from utils.utils import wrap
 from matplotlib.animation import FuncAnimation
 import matplotlib.pyplot as plt
@@ -13,7 +14,7 @@ from casadi import cos, sin, tan
 import casadi as ca
 
 class RacingSimulation():   
-    def __init__(self, name: str, car: KinematicCar, controller: Controller):
+    def __init__(self, name: str, car: RacingCar, controller: Controller):
         self.name = name
         self.car = car
         self.controller = controller
@@ -33,15 +34,35 @@ class RacingSimulation():
         
         # Starting Simulation
         for n in cycle(counter):
-            print(f"STATE: {state}")
-            print(f"N: {n}")
-            if state.s > self.car.track.length or n >= steps: break
+            if state.s > self.car.track.length or n > steps: break
             
             # computing control signal
             curvature = self.car.track.get_curvature(state.s)
             start = time.time()
-            action, state_prediction = self.controller.command(state, curvature)
+            action, state_prediction, action_prediction, curvature_prediction = self.controller.command(state, curvature)
             elapsed_time = time.time() - start
+            
+            ##DEBUG PRINTS
+            if n <= steps:
+                print(f"N: {n}")
+                conv_state = self.car.rel2glob(state)
+                print(f"STATE: {state}")
+                print(f"MEASURED POSE: {conv_state[0].item():.3f}, {conv_state[1]:.3f}, {conv_state[2]:.3f}")
+                print(f"REFERENCE POSE: {self.car.track.x(state.s).full().item():.3f}, {self.car.track.y(state.s).full().item():.3f}, {self.car.track.get_orientation(state.s).full().item():.3f}")
+                print("")
+                print(f"ACTION: {action}")
+                print(f"V PREDICTION: {state_prediction[self.car.state.index('v'),:]}")
+                print(f"EY PREDICTION: {state_prediction[self.car.state.index('ey'),:]}")
+                print(f"EPSI PREDICTION: {state_prediction[self.car.state.index('epsi'),:]}")
+                print(f"DELTA PREDICTION: {state_prediction[self.car.state.index('delta'),:]}")
+                print(f"TIME PREDICTION: {state_prediction[self.car.state.index('t'),:]}")
+                print(f"S PREDICTION: {state_prediction[self.car.state.index('s'),:]}")
+                print(f"ACCELERATION PREDICTION: {action_prediction[0,:]}")
+                print(f"OMEGA PREDICTION: {action_prediction[1,:]}")
+                print(f"CURVATURE PREDICTION: {curvature_prediction}")
+                print(f"ELAPSED TIME: {elapsed_time}")
+                print("")
+            ##DEBUG PRINTS
             
             # applying control signal
             state = self.car.drive(action)
@@ -65,8 +86,10 @@ class RacingSimulation():
         N = len(input_traj)
         ey_index = self.car.state.index('ey')
         error = np.array(state_traj)[:,ey_index:ey_index+2] # taking just ey and epsi
-        v_delta = np.array(state_traj)[:,0:2] # taking just v,delta
-        a_w = np.array(input_traj)
+        v = np.array(state_traj)[:,0] # taking just v
+        delta = np.array(state_traj)[:,self.car.state.index('delta')] # taking just delta
+        s = np.array(state_traj)[:,self.car.state.index('s')] # for ascissa in side plots
+        input = np.array(input_traj)
         x_traj = []
         y_traj = []
         
@@ -76,9 +99,9 @@ class RacingSimulation():
         ax_small1 = plt.subplot(grid[0, 1])
         ax_small2 = plt.subplot(grid[1, 1])
         ax_small3 = plt.subplot(grid[2, 1])
-        state_max = max(v_delta.min(), v_delta.max(), key=abs) # for axis limits
+        state_max = max(v.min(), v.max(), delta.min(), delta.max(), key=abs) # for axis limits
         error_max = max(error.min(), error.max(), key=abs) # for axis limits
-        input_max = max(a_w.min(), a_w.max(), key=abs) # for axis limits
+        input_max = max(input.min(), input.max(), key=abs) # for axis limits
         
         # fig titles
         lap_time = plt.gcf().text(0.4, 0.95, 'Laptime', fontsize=16, ha='center', va='center')
@@ -108,27 +131,28 @@ class RacingSimulation():
                 ax_large.plot(preds[i][:,0], preds[i][:,1],"g",alpha=0.85,linewidth=4)  
             
             ax_small1.cla()
-            ax_small1.axis((0, N, -state_max*1.1, state_max*1.1))
-            ax_small1.plot(v_delta[:i, :], '-', alpha=0.7,label=['v',r'$\delta$'])
+            ax_small1.axis((0, s[-1], -state_max*1.1, state_max*1.1))
+            ax_small1.plot(s[:i],v[:i], '-', alpha=0.7,label='v')
+            ax_small1.plot(s[:i],delta[:i], '-', alpha=0.7,label=r'$\delta$')
             ax_small1.legend()
                         
             ax_small2.cla()
-            ax_small2.axis((0, N, -error_max*1.1, error_max*1.1))
-            ax_small2.plot(error[:i, :], '-', alpha=0.7,label=[r'$e_y$',r'$e_\psi$'])
+            ax_small2.axis((0, s[-1], -error_max*1.1, error_max*1.1))
+            ax_small2.plot(s[:i],error[:i, :], '-', alpha=0.7,label=[r'$e_y$',r'$e_\psi$'])
             ax_small2.legend()
 
             ax_small3.cla()
-            ax_small3.axis((0, N, -input_max*1.1, input_max*1.1))
-            ax_small3.plot(a_w[:i, :], '-', alpha=0.7,label=['a','w'])
+            ax_small3.axis((0, s[-1], -input_max*1.1, input_max*1.1))
+            ax_small3.plot(s[:i],input[:i, :], '-', alpha=0.7,label=['a','w'])
             ax_small3.legend()
 
         animation = FuncAnimation(
             fig=plt.gcf(), func=update, 
-            frames=N, interval=0.01, 
+            frames=N, interval=0, 
             repeat=False, repeat_delay=5000
         )
         plt.ioff() #interactive mode off
-        animation.save(f"simulation/videos/{self.name}.gif",writer='pillow',fps=20, dpi=180)
+        # animation.save(f"simulation/videos/{self.name}.gif",writer='pillow',fps=20, dpi=180)
         plt.ion() #interactive mode on
         fig_manager: FigureManagerBase = plt.get_current_fig_manager()
         fig_manager.window.showMaximized() 

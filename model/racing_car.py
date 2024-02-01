@@ -1,7 +1,7 @@
 from matplotlib import pyplot as plt
 from matplotlib.axes import Axes
 import numpy as np
-from model.state import FancyVector
+from utils.fancy_vector import FancyVector
 from environment.track import Track
 from utils.utils import wrap
 import casadi as ca
@@ -31,9 +31,6 @@ class RacingCar(ABC):
         self.input: FancyVector = self.__class__.create_input()
         # Initialize ode 
         self._init_ode()
-        # function for evaluating curvature at given s
-        s = ca.MX.sym('s')
-        self.curvature = ca.Function("curvature",[s],[self.track.get_curvature(s)])
         
     @classmethod
     @abstractmethod

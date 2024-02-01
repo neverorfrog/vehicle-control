@@ -1,6 +1,6 @@
 import casadi as ca
 from model.racing_car import RacingCar
-from model.state import DynamicCarInput, DynamicCarState
+from utils.fancy_vector import FancyVector
 from utils.utils import *
 from collections import namedtuple
 
@@ -14,20 +14,16 @@ class DynamicCar(RacingCar):
     def create_input(cls, *args, **kwargs):
         return DynamicCarInput(*args, **kwargs)
     
-    
     def _init_ode(self):
-        # g = 9.88
         # Input variables
         Fx,w = self.input.variables
 
         # State and auxiliary variables
-        Ux,Uy,delta,r,s,ey,epsi,t = self.state.variables
+        Ux,Uy,r,delta,s,ey,epsi,t = self.state.variables
         curvature = ca.SX.sym('curvature')
         ds = ca.SX.sym('ds')
 
         #parameters: mass, distance of CG from front (a) and rear (b) axis, height of CG, yaw moment of inertia
-        # Parameters = namedtuple('Parameters', ['m', 'a', 'b', 'h_cg', 'Izz'])
-        # p = Parameters(1000, 2, 2, 1, 2500)
         p = self.get_car_parameters()
 
         g,theta,phi,Av2,Crr,eps,mu,C_alpha,Cd = self.get_parameters()
@@ -35,20 +31,13 @@ class DynamicCar(RacingCar):
         #utils for ODE
         Xf, Xr = self._get_force_distribution(Fx)
 
-        #TODO theta and phi are road grade and bank angle, but for now we assume flat track
-        # theta = 0 
-        # phi = 0
-        # Av2 = 0 #because theta, phi are 0
-
         Fb = 0 #-p.m*g*ca.cos(theta)*ca.sin(phi) TODO if you want to change the angle modify this
         Fn = -p.m*g*1 #ca.cos(theta) is 1 for theta=0, might aswell not write it
         
-        # Crr = 0.014 #https://en.wikipedia.org/wiki/Rolling_resistance
         Frr = Crr*Fn #rolling resistance = coefficient*normal force (not specified in the paper)
         
         #All the forces introduced above are constant, as the various coefficient are constant and the ground is always flat
         #Fd depends on the velocity instead, so we define a casadi function (Is this the correct methodology?)
-        # Cd = 0.25 #https://en.wikipedia.org/wiki/Automobile_drag_coefficient#:~:text=The%20average%20modern%20automobile%20achieves,a%20Cd%3D0.35%E2%80%930.45.
         Fd = ca.Function("Fd_Function",[Ux], [Frr + Cd*Ux**2 - 0]) #p.m*g*ca.sin(theta) 
         
         #Fz is also not constant, we define 2 casadi functions for front and rear (15a/b in the paper)
@@ -108,15 +97,11 @@ class DynamicCar(RacingCar):
         return Xf, Xr
 
     def _get_lateral_force(self, alpha_f, alpha_r, Uy, Ux, delta, r, Fz_f, Fz_r, Fx, Xf, eps, mu, C_alpha):
-        # eps = 0.85 #from the paper
-        # mu = 0.4 #http://hyperphysics.phy-astr.gsu.edu/hbase/Mechanics/frictire.htmlFx
         
         #Fy_max is 2 DIMENSIONAL, has front and rear values
         Fy_max = self.get_Fy_max_function(Ux, Fx, Fz_f, Fz_r, Xf, mu)
-        # C_alpha = 3.5 #https://www.politesi.polimi.it/bitstream/10589/152539/3/2019_12_Viani.pdf  proposes some real value taken from wherever, we should look at this in more detail
 
         alpha_mod = self.get_alpha_mod_function(Ux, Fx, Fy_max, eps, C_alpha)
-        
 
         condition = ca.logic_and((ca.fabs(alpha_f(Uy, Ux, delta, r)) <= alpha_mod(Ux, Fx)[0]) , (ca.fabs(alpha_r(Uy, Ux, r)) <= alpha_mod(Ux, Fx)[1]))
 
@@ -168,7 +153,7 @@ class DynamicCar(RacingCar):
     
     def get_car_parameters(self):
         Parameters = namedtuple('Parameters', ['m', 'a', 'b', 'h_cg', 'Izz'])
-        p = Parameters(1000, 2, 2, 1, 2500)
+        p = Parameters(1778, 1.194, 1.436, 0.55, 3049)
         return p
     
     def get_parameters(self):
@@ -186,3 +171,102 @@ class DynamicCar(RacingCar):
         Cd = 0.25               #https://en.wikipedia.org/wiki/Automobile_drag_coefficient#:~:text=The%20average%20modern%20automobile%20achieves,a%20Cd%3D0.35%E2%80%930.45.
 
         return g,theta,phi,Av2,Crr,eps,mu,C_alpha,Cd
+    
+    
+class DynamicCarInput(FancyVector):
+    def __init__(self, Fx = 0.0, w = 0.0):
+        """
+        :param Fx: longitudinal force | [m/s^2]
+        :param w: steering angle rate | [rad/s]
+        """
+        self._values = np.array([Fx,w])
+        self._keys = ['Fx','w']
+        self._syms = ca.vertcat(*[ca.SX.sym(self._keys[i]) for i in range(len(self._keys))])
+        
+    @property
+    def Fx(self): return self.values[0] 
+      
+    @property
+    def w(self): return self.values[1]
+    
+    @Fx.setter
+    def Fx(self,value: float): 
+        assert isinstance(value, float)
+        self.values[0] = value
+    
+    @w.setter
+    def w(self,value: float): 
+        assert isinstance(value, float)
+        self.values[1] = value
+        
+    @property
+    def values(self): return self._values
+    
+    @property
+    def syms(self): return self._syms
+    
+    @property
+    def keys(self): return self._keys
+    
+    @classmethod
+    def create(cls, *args, **kwargs):
+        return cls(*args, **kwargs)
+    
+class DynamicCarState(FancyVector):
+    def __init__(self, Ux = 0.0, Uy = 0.0, r = 0.0, delta = 0.0, s = 0.0, ey = 0.0, epsi = 0.0, t = 0.0):
+        """
+        :param Ux: longitudinal velocity in global coordinate system | [m/s]
+        :param Uy: lateral velocity in global coordinate system | [m/s]
+        :param r: yaw rate | [rad/s]
+        :param delta: steering angle | [rad]
+        :param s: curvilinear abscissa | [m]
+        :param ey: orthogonal deviation from center-line | [m]
+        :param epsi: yaw angle relative to path | [rad]
+        :param t: time | [s]
+        """
+        self._values = np.array([Ux,Uy,r,delta,s,ey,epsi,t])
+        self._keys = ['Ux','Uy','r','delta','s','ey','epsi','t']
+        self._syms = ca.vertcat(*[ca.SX.sym(self._keys[i]) for i in range(len(self._keys))])
+    
+    @property
+    def Ux(self): return self.values[0] 
+    
+    @property
+    def Uy(self): return self.values[1] 
+    
+    @property
+    def r(self): return self.values[2]
+    
+    @property
+    def delta(self): return self.values[3]
+      
+    @property
+    def s(self): return self.values[4]
+    
+    @property
+    def ey(self): return self.values[5]
+    
+    @ey.setter
+    def ey(self, value): self.values[5] = value
+    
+    @property
+    def epsi(self): return self.values[6]
+    
+    @epsi.setter
+    def epsi(self, value): self.values[6] = value
+    
+    @property
+    def t(self): return self.values[7]
+    
+    @property
+    def values(self): return self._values
+    
+    @property
+    def syms(self): return self._syms
+    
+    @property
+    def keys(self): return self._keys
+    
+    @classmethod
+    def create(cls, *args, **kwargs):
+        return cls(*args, **kwargs)
