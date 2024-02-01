@@ -3,7 +3,7 @@ from matplotlib.axes import Axes
 import numpy as np
 from utils.fancy_vector import FancyVector
 from environment.track import Track
-from utils.utils import wrap
+from utils.common_utils import wrap
 import casadi as ca
 from casadi import sin,cos,tan
 from abc import abstractmethod

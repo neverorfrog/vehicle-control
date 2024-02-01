@@ -3,7 +3,7 @@
 from matplotlib.axes import Axes
 import numpy as np
 from scipy.integrate import trapezoid
-from utils.utils import wrap
+from utils.common_utils import wrap
 from typing import List
 import casadi as ca
 

@@ -7,7 +7,7 @@ from model.kinematic_car import KinematicCar, KinematicCarState
 from simulation.simulator import RacingSimulation
 from controller.kinematic_mpc import KinematicMPC
 from controller.dynamic_mpc import DynamicMPC
-from utils.utils import *
+from utils.common_utils import *
 from enum import Enum
 
 class Mode(Enum):

@@ -1,7 +1,7 @@
 import numpy as np
 from model.racing_car import RacingCar
 from utils.fancy_vector import FancyVector
-from utils.utils import integrate
+from utils.common_utils import integrate
 import casadi as ca
 from casadi import sin,cos,tan
 

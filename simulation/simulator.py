@@ -4,7 +4,7 @@ from controller.controller import Controller
 import numpy as np
 from model.kinematic_car import KinematicCar
 from model.racing_car import RacingCar
-from utils.utils import wrap
+from utils.common_utils import wrap
 from matplotlib.animation import FuncAnimation
 import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
