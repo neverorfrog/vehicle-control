@@ -89,7 +89,9 @@ class DynamicMPC(Controller):
             opti.subject_to(self.s[n+1] == self.s[n] + self.ds[n])
             opti.subject_to(self.curvature[n] == self.car.curvature(self.s[n]))
             opti.subject_to(state_next == self.car.spatial_transition(state,input,self.curvature[n],self.ds[n]))
-            
+
+
+
         # ------------------- Cost Function TODO --------------------------------------
       
               
@@ -114,6 +116,8 @@ class DynamicMPC(Controller):
         alpha_f = self.car.get_alpha_f_function(Uy_sym, Ux_sym, delta_sym, r_sym, p)
         alpha_r = self.car.get_alpha_r_function(Uy_sym, Ux_sym, r_sym, p)
         alpha_mod = self.car.get_alpha_mod_function(Ux_sym, Fx_sym, Fy_max, eps, C_alpha)
+       
+        Fy = self.car._get_lateral_force(alpha_f, alpha_r, Uy_sym, Ux_sym, delta_sym, r_sym, Fz_f, Fz_r, Fx_sym, Xf, eps, mu, C_alpha)
 
 
 
@@ -170,5 +174,40 @@ class DynamicMPC(Controller):
             opti.subject_to(self.action[0,n] >= input_constraints['Fx_min'])
             opti.subject_to(self.action[1,n] <= input_constraints['w_max'])
             opti.subject_to(self.action[1,n] >= input_constraints['w_min'])
+
+        # -------------------- Tire model Constraints TODO ------------------------------------------
+        
+        for n in range(self.N):
+            state = self.state[:,n]
+            input = self.action[:,n]
+
+            Xf,Xf = self.car._get_force_distribution(Fx_sym)
+            Fx = input[self.car.input.index('Fx')]
+            Ux = self.state[self.car.state.index('Ux')]
+            Uy = self.state[self.car.state.index('Uy')]
+            delta = self.state[self.car.state.index('delta')]
+            r = self.state[self.car.state.index('r')]
             
+            opti.subject_to(Xf(Fx)*Fx >= -mu*Fz_f(Ux, Fx)*ca.cos(alpha_f(Uy, Ux, delta, r)))
+            opti.subject_to(Xf(Fx)*Fx <= mu*Fz_f(Ux, Fx)*ca.cos(alpha_f(Uy, Ux, delta, r)))
+
+            opti.subject_to(Xr(Fx)*Fx >= -mu*Fz_r(Ux, Fx)*ca.cos(alpha_r(Uy, Ux, r)))
+            opti.subject_to(Xr(Fx)*Fx <= mu*Fz_r(Ux, Fx)*ca.cos(alpha_r(Uy, Ux, r)))
+            
+        # -------------------- Friction limits Constraints TODO ------------------------------------------
+        # some mu must be mu_limit
+        for n in range(self.N): 
+            state = self.state[:,n]
+            input = self.action[:,n]
+            Xf,Xf = self.car._get_force_distribution(Fx_sym)
+            Fx = input[self.car.input.index('Fx')]
+            Ux = self.state[self.car.state.index('Ux')]
+            Uy = self.state[self.car.state.index('Uy')]
+            delta = self.state[self.car.state.index('delta')]
+            r = self.state[self.car.state.index('r')]
+
+            opti.subject_to((Xf(Fx)*Fx)**2 + (Fy(Uy, Ux, delta, r, Fx)[0])**2 <= (mu*Fz_f(Ux, Fx))**2 + (self.Fe[0])**2)
+            # opti.subject_to((Xr(Fx)*Fx)**2 + (Fy(Uy, Ux, delta, r, Fx)[1])**2 <= (mu*Fz_r(Ux, Fx))**2 + (self.Fe[1])**2)
+
+
         return opti
