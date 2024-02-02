@@ -23,10 +23,7 @@ class KinematicCar(RacingCar):
         # State and auxiliary variables
         v,delta,s,ey,epsi,t = self.state.variables
         curvature = ca.SX.sym('curvature')
-        next_curvature = ca.SX.sym('next_curvature')
         ds = ca.SX.sym('ds')
-        s = ca.MX.sym('s')
-        # self.state['s'] = s
         
         # TEMPORAL ODE
         v_dot = a
@@ -49,31 +46,16 @@ class KinematicCar(RacingCar):
         t_prime = (1 - ey * curvature) / (v * np.cos(epsi))
         state_prime = ca.vertcat(v_prime, delta_prime, s_prime, ey_prime, epsi_prime, t_prime)
         s_ode = ca.Function('ode', [self.state.syms, self.input.syms, curvature], [state_prime])
-        s_integrator = self.integrate(self.state.syms, self.input.syms, curvature, next_curvature, s_ode, h=ds)
-        self._spatial_transition = ca.Function('transition', [self.state.syms,self.input.syms,curvature,next_curvature,ds], [s_integrator])
+        s_integrator = self.integrate(self.state.syms, self.input.syms, curvature, s_ode, h=ds)
+        self._spatial_transition = ca.Function('transition', [self.state.syms,self.input.syms,curvature,ds], [s_integrator])
         
     @property
-    def temporal_transition(self):
+    def transition(self):
         return self._temporal_transition
     
     @property
     def spatial_transition(self):
         return self._spatial_transition
-    
-    def integrate(self,q,u,curvature,next_curvature,ode,h):
-        '''
-        RK4 integrator
-        h: integration interval
-        '''
-        qd_1 = ode(q, u, curvature)
-        # print("next_curvature")
-        # hi = q + (h/2)*qd_1
-        # self.track.get_curvature(hi)
-        qd_2 = ode(q + (h/2)*qd_1, u, curvature)
-        qd_3 = ode(q + (h/2)*qd_2, u, curvature)
-        qd_4 = ode(q + h*qd_3, u, curvature)
-        newq = q + (1/6) * (qd_1 + 2 * qd_2 + 2 * qd_3 + qd_4) * h
-        return newq
     
 class KinematicCarInput(FancyVector):
     def __init__(self, a = 0.0, w = 0.0):
@@ -109,10 +91,6 @@ class KinematicCarInput(FancyVector):
     
     @property
     def keys(self): return self._keys
-    
-    @classmethod
-    def create(cls, *args, **kwargs):
-        return cls(*args, **kwargs)
 
 class KinematicCarState(FancyVector):
     def __init__(self, v = 0.0, delta = 0.0, s = 0.0, ey = 0.0, epsi = 0.0, t = 0.0):
@@ -161,7 +139,3 @@ class KinematicCarState(FancyVector):
     
     @property
     def keys(self): return self._keys
-    
-    @classmethod
-    def create(cls, *args, **kwargs):
-        return cls(*args, **kwargs)

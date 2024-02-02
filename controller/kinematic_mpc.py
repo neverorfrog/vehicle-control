@@ -15,9 +15,9 @@ class KinematicMPC(Controller):
         self.na = len(self.car.input) # number of action variables
         self.opti = self._init_opti()
         
-    def command(self, state, curvature):
+    def command(self, state):
         # every new horizon, the current state (and the last prediction) is the initial 
-        self._init_parameters(state, curvature)
+        self._init_parameters(state)
         sol = self.opti.solve()
         self.action_prediction = sol.value(self.action)
         self.state_prediction = sol.value(self.state)
@@ -25,11 +25,10 @@ class KinematicMPC(Controller):
         next_input = KinematicCarInput(a=self.action_prediction[0][0], w=self.action_prediction[1][0])
         return next_input, self.state_prediction, self.action_prediction, curvature_prediction
     
-    def _init_parameters(self, state, curvature):
+    def _init_parameters(self, state):
         '''
         s_k is a state in its entirety. I need to extract relevant variables
         '''
-        self.opti.set_initial(self.curvature[0], curvature)
         self.opti.set_value(self.state0, state)
         self.opti.set_initial(self.action, self.action_prediction)
         self.opti.set_initial(self.state, self.state_prediction)
@@ -52,6 +51,7 @@ class KinematicMPC(Controller):
         opti.subject_to(self.state[:,0] == self.state0) # constraint on initial state
         self.ds = opti.variable(self.N) #ds trajectory during the planning horizon
         self.curvature = opti.variable(self.N+1)
+        opti.subject_to(self.curvature[0] == self.car.track.get_curvature(self.state0[self.car.state.index('s')]))
         
         # -------------------- Model Constraints ------------------------------------------
         state_constraints = self.config['state_constraints']
@@ -69,9 +69,9 @@ class KinematicMPC(Controller):
             v = state[self.car.state.index('v')]
             ey = state[self.car.state.index('ey')]
             epsi = state[self.car.state.index('epsi')]
-            opti.subject_to(self.ds[n] == self.dt * ((v * np.cos(epsi)) / (1 - ey * self.curvature[n]))) # going on for dt and snapshot of how much the car moved
-            opti.subject_to(self.curvature[n] == self.car.track.get_curvature(self.state[self.car.state.index('s'),n]))
-            opti.subject_to(state_next == self.car.spatial_transition(state,input,self.curvature[n],self.curvature[n+1],self.ds[n]))
+            opti.subject_to(self.ds[n] == self.dt * ((v * cos(epsi)) / (1 - ey * self.curvature[n]))) # going on for dt and snapshot of how much the car moved
+            opti.subject_to(state_next == self.car.spatial_transition(state,input,self.curvature[n],self.ds[n]))
+            opti.subject_to(self.curvature[n+1] == self.car.track.get_curvature(state_next[self.car.state.index('s')]))
             
         # ------------------- Cost Function --------------------------------------
             
