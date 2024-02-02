@@ -1,6 +1,6 @@
 import casadi as ca
 from model.racing_car import RacingCar
-from utils.fancy_vector import DynamicPointMassInput, DynamicPointMassState, FancyVector
+from utils.fancy_vector import FancyVector
 from utils.common_utils import *
 from collections import namedtuple
 
