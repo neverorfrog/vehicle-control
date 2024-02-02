@@ -1,7 +1,8 @@
 import numpy as np
-from typing import Tuple
 from abc import abstractmethod
 from abc import ABC
+from environment.trajectory import Trajectory
+from model.robot import Robot
 
 class Controller(ABC):
     '''Controller Class'''
@@ -10,12 +11,11 @@ class Controller(ABC):
         self.kd = kd
      
     @abstractmethod       
-    def command(self, s_k):
+    def command(self, robot: Robot, reference: Trajectory = None):
         """Compute the control actions
         Args:
-            q_k (np.array): current state
-            qd_k (np.array): current derivative of the state
-            ref_k (dict)
+            robot: robot that encapsulates current state and last applied action
+            reference:  (optional) for feedback control
         Returns:
             (np.array): control actions
         """

@@ -1,6 +1,7 @@
 from typing import Union
 from abc import abstractmethod
 from abc import ABC
+import numpy as np
 
 class FancyVector(ABC):
     """
@@ -9,17 +10,16 @@ class FancyVector(ABC):
     """
     
     @classmethod
-    @abstractmethod
     def create(cls, *args, **kwargs):
-        pass
+        return cls(*args, **kwargs)
     
     @property
     @abstractmethod
-    def values(self): pass
+    def values(self) -> np.ndarray: pass
     
     @property
     @abstractmethod
-    def keys(self): pass
+    def keys(self) -> list: pass
     
     @property
     @abstractmethod
@@ -55,6 +55,6 @@ class FancyVector(ABC):
         :param other: numpy array to be added to state vector
         """
         assert isinstance(other, (self.__class__)), "You can only sum two same states"
-        tobesummed = other.state if isinstance(other, FancyVector) else other
-        new_state = self.state + tobesummed
+        tobesummed = other.values if isinstance(other, FancyVector) else other
+        new_state = self.values + tobesummed
         return self.__class__.create(*new_state)
