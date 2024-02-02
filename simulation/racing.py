@@ -115,7 +115,7 @@ class RacingSimulation():
             x,y = self.car.plot(ax_large, state)
             x_traj.append(x)
             y_traj.append(y)
-            ax_large.plot(x_traj[:i+1],y_traj[:i+1],'-',alpha=0.7,color="k",linewidth=4)
+            ax_large.plot(x_traj[:i+1],y_traj[:i+1],'-',alpha=0.7,color="k",linewidth=2)
             
             # Plot track
             if self.car.track is not None:
@@ -123,21 +123,21 @@ class RacingSimulation():
                 
             # Plot state predictions of MPC
             if preds is not None and i <= N:
-                ax_large.plot(preds[i][:,0], preds[i][:,1],"go-",alpha=0.85,linewidth=0.5)  
+                ax_large.plot(preds[i][:,0], preds[i][:,1],'g',alpha=0.5,linewidth=3)  
             
             ax_small1.cla()
-            ax_small1.axis((0, s[-1], -state_max*1.1, state_max*1.1))
+            ax_small1.axis((s[0], s[-1], -state_max*1.1, state_max*1.1))
             ax_small1.plot(s[:i],v[:i], '-', alpha=0.7,label='v')
             ax_small1.plot(s[:i],delta[:i], '-', alpha=0.7,label=r'$\delta$')
             ax_small1.legend()
                         
             ax_small2.cla()
-            ax_small2.axis((0, s[-1], -error_max*1.1, error_max*1.1))
+            ax_small2.axis((s[0], s[-1], -error_max*1.1, error_max*1.1))
             ax_small2.plot(s[:i],error[:i, :], '-', alpha=0.7,label=[r'$e_y$',r'$e_\psi$'])
             ax_small2.legend()
 
             ax_small3.cla()
-            ax_small3.axis((0, s[-1], -input_max*1.1, input_max*1.1))
+            ax_small3.axis((s[0], s[-1], -input_max*1.1, input_max*1.1))
             ax_small3.plot(s[:i],input[:i, :], '-', alpha=0.7,label=['a','w'])
             ax_small3.legend()
 
@@ -150,6 +150,6 @@ class RacingSimulation():
         fig_manager.window.showMaximized() 
         plt.show(block=True) 
         plt.ioff() #interactive mode off
-        animation.save(f"simulation/videos/{self.name}.gif",writer='pillow',fps=20, dpi=200)
+        # animation.save(f"simulation/videos/{self.name}.gif",writer='pillow',fps=20, dpi=200)
         plt.ion() #interactive mode on
         print("ANIMATION SAVED")
