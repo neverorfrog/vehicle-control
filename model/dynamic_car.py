@@ -96,6 +96,7 @@ class DynamicCar(RacingCar):
         Xr = ca.Function("force_distribution", [Fx], [(br-dr)/2 * ca.tanh(-2*(Fx + 0.5)) + (dr + br)/2 ])
         return Xf, Xr
 
+    # in practical, this is Fy
     def _get_lateral_force(self, alpha_f, alpha_r, Uy, Ux, delta, r, Fz_f, Fz_r, Fx, Xf, eps, mu, C_alpha):
         
         #Fy_max is 2 DIMENSIONAL, has front and rear values
@@ -139,7 +140,7 @@ class DynamicCar(RacingCar):
         alpha_mod_function = ca.Function("alpha_mod_Function", [Ux, Fx], [ca.atan(3*Fy_max(Ux,Fx)*eps/C_alpha)]) #alpha mod is 2D because Fymax is 2D because Fz is 2D
         return alpha_mod_function
     
-    def get_Fy_max_function(self, Ux, Fx, Fz_f, Fz_r, Xf, mu):
+    def get_Fy_max_function(self, Ux, Fx, Fz_f, Fz_r, Xf, mu): 
         Fy_max_function = ca.Function("Fy_max_Function", [Ux, Fx], [((mu*ca.vertcat(Fz_f(Ux, Fx), Fz_r(Ux, Fx)))**2 - (0.99*ca.vertcat(Fx*Xf(Fx), Fx*Xf(Fx)))**2)**0.5 ]) #TODO should Fx also be vertcat(Fx_f)
         return Fy_max_function
     
@@ -171,7 +172,7 @@ class DynamicCar(RacingCar):
         Cd = 0.25               #https://en.wikipedia.org/wiki/Automobile_drag_coefficient#:~:text=The%20average%20modern%20automobile%20achieves,a%20Cd%3D0.35%E2%80%930.45.
 
         return g,theta,phi,Av2,Crr,eps,mu,C_alpha,Cd
-    
+      
     
 class DynamicCarInput(FancyVector):
     def __init__(self, Fx = 0.0, w = 0.0):
