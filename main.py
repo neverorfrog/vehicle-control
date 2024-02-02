@@ -1,41 +1,47 @@
 import sys
 sys.path.append(".")
 
-from model.dynamic_car import DynamicCar
-from model.state import DynamicCarState, KinematicCarState
+from model.dynamic_car import DynamicCar, DynamicCarState
 from environment.track import Track
-from model.kinematic_car import KinematicCar
-from simulation.simulator import RacingSimulation
+from model.kinematic_car import KinematicCar, KinematicCarState
+from simulation.racing import RacingSimulation
 from controller.kinematic_mpc import KinematicMPC
 from controller.dynamic_mpc import DynamicMPC
-from utils.utils import *
+from utils.common_utils import *
 from enum import Enum
+from matplotlib import pyplot as plt
 
-class Mode(Enum):
+class CarType(Enum):
     DYN = "dynamic"
     KIN = "kinematic"
     
-mode = Mode.DYN
+class TrackType(Enum):
+    I = "ippodromo"
+    C = "complicato"
+    
+mode = CarType.KIN
+track_name = TrackType.C.value
 
 # Track Loading
-track_name = f"{mode.value}_ippodromo"
-config = load_config(f"config/{track_name}.yaml")
-track = Track(wp_x=config['wp_x'], 
-              wp_y=config['wp_y'], 
-              resolution=config['resolution'],
-              smoothing=config['smoothing'],
-              width=config['width'])
+track_config = load_config(f"config/environment/{track_name}.yaml")
+track = Track(wp_x=track_config['wp_x'], 
+              wp_y=track_config['wp_y'], 
+              resolution=track_config['resolution'],
+              smoothing=track_config['smoothing'],
+              width=track_config['width'])
 
 # Bicycle model and corresponding controller
-if mode is Mode.KIN:
-    car = KinematicCar(track, length=0.2, dt=config['model_dt'])
-    car.state = KinematicCarState(v = 0.5)
-    controller = KinematicMPC(car=car, config=config)
-elif mode is Mode.DYN:
-    car = DynamicCar(track, length=0.2, dt=config['model_dt'])
-    car.state = DynamicCarState(Ux = 0.5)
-    controller = DynamicMPC(car=car, config=config)
+car_config = load_config(f"config/model/{mode.value}.yaml")
+controller_config = load_config(f"config/controller/{mode.value}_{track_name}.yaml")
+if mode is CarType.KIN:
+    car = KinematicCar(config=car_config, track = track)
+    car.state = KinematicCarState(v = 1, s = 470)
+    controller = KinematicMPC(car=car, config=controller_config)
+elif mode is CarType.DYN:
+    car = DynamicCar(config=car_config, track = track)
+    car.state = DynamicCarState(Ux = 0.5, delta = -0.6)
+    controller = DynamicMPC(car=car, config=controller_config)
 
 # Simulation
-simulation = RacingSimulation(track_name,car,controller)   
-simulation.run(N = 50)
+simulation = RacingSimulation(f"{mode.value}_{track_name}",car,controller)   
+simulation.run(N = 100)

@@ -1,57 +1,26 @@
 from matplotlib import pyplot as plt
 from matplotlib.axes import Axes
 import numpy as np
-from model.state import FancyVector
+from model.robot import Robot
+from utils.fancy_vector import FancyVector
 from environment.track import Track
-from utils.utils import wrap
-import casadi as ca
-from casadi import sin,cos,tan
+from utils.common_utils import wrap
+from casadi import sin,cos
 from abc import abstractmethod
-from abc import ABC
 
-class RacingCar(ABC):
-    def __init__(self, track: Track, length, dt):
+class RacingCar(Robot):
+    def __init__(self, config: dict, track: Track):
         """
         Abstract racing Car Model
         :param track: reference path object to follow
         :param length: length of car in m
         :param dt: sampling time of model
         """
-        # Precision
-        self.eps = 1e-12
         # Car Parameters
-        self.length = length
+        self.length = config['length']
         # Reference Path
         self.track = track
-        # Set sampling time
-        self.dt = dt
-        # Initialize state
-        self.state: FancyVector = self.__class__.create_state()
-        # Initialize input
-        self.input: FancyVector = self.__class__.create_input()
-        # Initialize ode 
-        self._init_ode()
-        # function for evaluating curvature at given s
-        s = ca.MX.sym('s')
-        self.curvature = ca.Function("curvature",[s],[self.track.get_curvature(s)])
-        
-    @classmethod
-    @abstractmethod
-    def create_state(cls, *args, **kwargs) -> FancyVector:
-        pass
-    
-    @classmethod
-    @abstractmethod
-    def create_input(cls, *args, **kwargs) -> FancyVector:
-        pass
-    
-    
-    @abstractmethod
-    def _init_ode(self): pass
-    
-    @property
-    @abstractmethod
-    def temporal_transition(self): pass
+        super().__init__(config)
     
     @property
     @abstractmethod
@@ -62,8 +31,7 @@ class RacingCar(ABC):
         :param input: vector of inputs
         """
         curvature = self.track.get_curvature(self.state.s)
-        print(f"CURVATURE IN DRIVE: {curvature}")
-        next_state = self.temporal_transition(self.state.values, input.values, curvature).full().squeeze()
+        next_state = self.transition(self.state.values, input.values, curvature).full().squeeze()
         self.state = self.__class__.create_state(*next_state)
         self.input = input
         return self.state
@@ -78,6 +46,29 @@ class RacingCar(ABC):
         psi = track_psi + epsi
         return x.full().squeeze(),y.full().squeeze(),psi.full().squeeze()
     
+    
+    def integrate(self,state,action,curvature,ode,h):
+        '''
+        RK4 integrator
+        h: integration interval
+        '''
+        state_dot_1 = ode(state, action, curvature)
+        state_1 = state + (h/2)*state_dot_1
+        # curvature = self.track.get_curvature(state_1[self.state.index('s')])
+        
+        state_dot_2 = ode(state_1, action, curvature)
+        state_2 = state + (h/2)*state_dot_2
+        # curvature = self.track.get_curvature(state_2[self.state.index('s')])
+        
+        state_dot_3 = ode(state_2, action, curvature)
+        state_3 = state + h*state_dot_3
+        # curvature = self.track.get_curvature(state_3[self.state.index('s')])
+        
+        state_dot_4 = ode(state_3, action, curvature)
+        state = state + (1/6) * (state_dot_1 + 2 * state_dot_2 + 2 * state_dot_3 + state_dot_4) * h
+        
+        return state
+    
     def plot(self, axis: Axes, state: FancyVector):
         x,y,psi = self.rel2glob(state)
         delta = state.delta
@@ -88,7 +79,7 @@ class RacingCar(ABC):
         height = self.length
         angle = wrap(psi-np.pi/2)
         rectangle = plt.Rectangle((x-np.cos(angle)*width/2-np.cos(psi)*2*width/3, y-np.sin(angle)*height/2-np.sin(psi)*2*height/3),
-                                  width,height,edgecolor='black',alpha=0.7, angle=np.rad2deg(angle), rotation_point='xy')
+                                width,height,edgecolor='black',alpha=0.7, angle=np.rad2deg(angle), rotation_point='xy')
         axis.add_patch(rectangle)
         
         # Draw four wheels as rectangles
@@ -97,11 +88,11 @@ class RacingCar(ABC):
         wheel_angle = wrap(psi+delta-np.pi/2)
         wheel_right_front = plt.Rectangle((x+np.cos(angle)*r, y+np.sin(angle)*r),width=wheel_width,height=wheel_height,angle=np.rad2deg(wheel_angle),facecolor='black')
         axis.add_patch(wheel_right_front)
-        wheel_left_front = plt.Rectangle((x-np.cos(angle)*r, y-np.sin(angle)*r),width=wheel_width,height=wheel_height,angle=np.rad2deg(wheel_angle),facecolor='black')
+        wheel_left_front = plt.Rectangle((x-np.cos(angle)*r-cos(wheel_angle)*wheel_width, y-np.sin(angle)*r-sin(wheel_angle)*wheel_width),width=wheel_width,height=wheel_height,angle=np.rad2deg(wheel_angle),facecolor='black')
         axis.add_patch(wheel_left_front)
         wheel_right_back = plt.Rectangle((x+np.cos(angle)*r-np.cos(psi)*width*0.6, y+np.sin(angle)*r-np.sin(psi)*height*0.6),width=wheel_width,height=wheel_height,angle=np.rad2deg(wheel_angle),facecolor='black')
         axis.add_patch(wheel_right_back)
-        wheel_left_back = plt.Rectangle((x-np.cos(angle)*r-np.cos(psi)*width*0.6, y-np.sin(angle)*r-np.sin(psi)*height*0.6),width=wheel_width,height=wheel_height,angle=np.rad2deg(wheel_angle),facecolor='black')
+        wheel_left_back = plt.Rectangle((x-np.cos(angle)*r-np.cos(psi)*width*0.6-cos(wheel_angle)*wheel_width, y-np.sin(angle)*r-np.sin(psi)*height*0.6-sin(wheel_angle)*wheel_width),width=wheel_width,height=wheel_height,angle=np.rad2deg(wheel_angle),facecolor='black')
         axis.add_patch(wheel_left_back)
         
         return x,y

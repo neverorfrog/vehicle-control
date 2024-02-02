@@ -1,0 +1,20 @@
+# track data
+wp_x:
+  - -50
+  - 50
+  - 50
+  - -50
+  - -50
+  - -26
+
+wp_y:
+  - 0
+  - 0
+  - 50
+  - 50
+  - 0
+  - 0
+
+resolution: 0.1
+smoothing: 120
+width: 8

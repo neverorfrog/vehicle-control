@@ -1,7 +1,7 @@
 import casadi as ca
 from model.racing_car import RacingCar
-from model.state import DynamicPointMassInput, DynamicPointMassState
-from utils.utils import *
+from utils.fancy_vector import FancyVector
+from utils.common_utils import *
 from collections import namedtuple
 
 class DynamicPointMass(RacingCar):
@@ -81,3 +81,90 @@ class DynamicPointMass(RacingCar):
     @property
     def spatial_transition(self):
         return self._spatial_transition
+    
+    
+class DynamicPointMassInput(FancyVector):
+    def __init__(self, Fx = 0.0, Fy = 0.0):
+        """
+        :param Fx: longitudinal force | [m/s^2]
+        :param Fy: lateral force | [m/s^2]
+        """
+        self._values = np.array([Fx, Fy])
+        self._keys = ['Fx', 'Fy']
+        self._syms = ca.vertcat(*[ca.SX.sym(self._keys[i]) for i in range(len(self._keys))])
+        
+    @property
+    def Fx(self): return self.values[0] 
+    
+    @Fx.setter
+    def Fx(self,value: float): 
+        assert isinstance(value, float)
+        self.values[0] = value
+        
+    @property
+    def Fy(self): return self.values[1] 
+    
+    @Fx.setter
+    def Fy(self,value: float): 
+        assert isinstance(value, float)
+        self.values[1] = value
+        
+    @property
+    def values(self): return self._values
+    
+    @property
+    def syms(self): return self._syms
+    
+    @property
+    def keys(self): return self._keys
+    
+    @classmethod
+    def create(cls, *args, **kwargs):
+        return cls(*args, **kwargs)
+    
+class DynamicPointMassState(FancyVector):
+    def __init__(self, V = 0.0, s = 0.0, ey = 0.0, epsi = 0.0, t = 0.0):
+        """
+        :param V: longitudinal velocity in global coordinate system | [m/s]
+        :param s: curvilinear abscissa | [m]
+        :param ey: orthogonal deviation from center-line | [m]
+        :param epsi: yaw angle relative to path | [rad]
+        :param t: time | [s]
+        """
+        self._values = np.array([V,s,ey,epsi,t])
+        self._keys = ['V','s','ey','epsi','t']
+        self._syms = ca.vertcat(*[ca.SX.sym(self._keys[i]) for i in range(len(self._keys))])
+    
+    @property
+    def V(self): return self.values[0] 
+    
+    @property
+    def s(self): return self.values[1]
+    
+    @property
+    def ey(self): return self.values[2]
+    
+    @ey.setter
+    def ey(self, value): self.values[2] = value
+    
+    @property
+    def epsi(self): return self.values[3]
+    
+    @epsi.setter
+    def epsi(self, value): self.values[3] = value
+    
+    @property
+    def t(self): return self.values[4]
+    
+    @property
+    def values(self): return self._values
+    
+    @property
+    def syms(self): return self._syms
+    
+    @property
+    def keys(self): return self._keys
+    
+    @classmethod
+    def create(cls, *args, **kwargs):
+        return cls(*args, **kwargs)

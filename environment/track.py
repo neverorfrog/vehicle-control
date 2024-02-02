@@ -3,7 +3,7 @@
 from matplotlib.axes import Axes
 import numpy as np
 from scipy.integrate import trapezoid
-from utils.utils import wrap
+from utils.common_utils import wrap
 from typing import List
 import casadi as ca
 
@@ -61,22 +61,14 @@ class Track:
         :param wp_x: x coordinates of corner points in global coordinates
         :param wp_y: y coordinates of corner points in global coordinates
         :param resolution: resolution of the path in m/wp
-        :param smoothing: number of waypoints used for smoothing the
-        path by averaging neighborhood of waypoints
+        :param smoothing: number of waypoints used for smoothing the path by averaging neighborhood of waypoints
         :param width: width of path to both sides in m
         """
         self.width = width
-        # Precision
-        self.eps = 1e-12
-        # Resolution of the path
         self.resolution = resolution
-        # Look ahead distance for path averaging
         self.smoothing = smoothing
-        # List of waypoint objects
         self.waypoints: List[Waypoint] = self._construct_path(wp_x, wp_y)
-        # Number of waypoints
         self.n_waypoints = len(self.waypoints)
-        # Making a spline out of the waypoint list generated according to resolution and smoothing
         self._construct_spline()
         
     def get_curvature(self, s):
@@ -87,7 +79,8 @@ class Track:
         ddy_ds = self.ddy_ds(s)
         denom = ca.power(dx_ds**2 + dy_ds**2, 1.5)
         num = dx_ds * ddy_ds - ddx_ds * dy_ds
-        curvature = ca.if_else(num < 1e-2, 0., num/denom)
+        curvature = ca.if_else(ca.fabs(denom) < ca.DM(1e-2), ca.DM(0.), num/denom)
+        # return ca.if_else(ca.fabs(curvature) < ca.DM(1e-10), ca.DM(0.), curvature)
         return curvature
     
     def get_orientation(self, s):
