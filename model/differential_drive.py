@@ -52,14 +52,8 @@ class DifferentialDrive(Robot):
         r = 0.2
         
         # Plot circular shape
-        circle = plt.Circle(xy=(x,y), radius=r, edgecolor='b', facecolor='none', lw=2)
+        circle = plt.Circle(xy=(x,y), radius=r, facecolor='orange', alpha=0.5, lw=2)
         axis.add_patch(circle)
-        
-        # Plot directional tick
-        line_length = 1.5 * r
-        line_end_x = x + line_length * np.cos(psi)
-        line_end_y = y + line_length * np.sin(psi)
-        axis.plot([x, line_end_x], [y, line_end_y], color='r', lw=3)
         
         # Draw two wheels as rectangles
         wheel_angle = wrap(psi-np.pi/2)

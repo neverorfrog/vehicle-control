@@ -119,7 +119,7 @@ class TrajectoryTrackingSimulation():
             repeat=False, repeat_delay=5000
         )
         plt.ioff() #interactive mode off
-        # animation.save(f"simulation/videos/{self.name}.gif",writer='pillow',fps=20, dpi=180)
+        animation.save(f"simulation/videos/{self.name}.gif",writer='pillow',fps=20, dpi=180)
         plt.ion() #interactive mode on
         fig_manager: FigureManagerBase = plt.get_current_fig_manager()
         fig_manager.window.showMaximized() 
