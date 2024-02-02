@@ -1,3 +1,7 @@
+# prediction and control horizon
+horizon: 15
+mpc_dt: 0.008
+
 # weights for the cost function
 cost_weights:
   time: 0.1
@@ -26,7 +30,3 @@ state_constraints:
   delta_min: -2.0
   ey_max: 0.3
   ey_min: -0.3
-
-# prediction and control horizon
-horizon: 15
-mpc_dt: 0.008
