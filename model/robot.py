@@ -14,11 +14,11 @@ class Robot(ABC):
         # Initialize input
         self.input: FancyVector = self.__class__.create_input()
         # Initialize ode 
-        self._init_ode()
+        self._init_model()
     
     @abstractmethod
-    def _init_ode(self):
-        '''Initializes the casadi function responsible for evolving the state of the robot in time''' 
+    def _init_model(self):
+        '''Initializes the casadi transition function responsible for evolving the state of the robot''' 
         pass
     
     @abstractmethod

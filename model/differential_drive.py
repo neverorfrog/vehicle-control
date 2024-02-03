@@ -17,7 +17,7 @@ class DifferentialDrive(Robot):
     def create_input(cls, *args, **kwargs):
         return DifferentialDriveInput(*args, **kwargs)
     
-    def _init_ode(self):
+    def _init_model(self):
         
         #state variables
         x,y,psi,t = self.state.variables

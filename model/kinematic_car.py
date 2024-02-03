@@ -14,7 +14,7 @@ class KinematicCar(RacingCar):
     def create_input(cls, *args, **kwargs):
         return KinematicCarInput(*args, **kwargs)
         
-    def _init_ode(self):
+    def _init_model(self):
         '''Differential equations describing the model'''
         
         # Input variables

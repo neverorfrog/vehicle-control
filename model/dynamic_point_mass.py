@@ -23,7 +23,7 @@ class DynamicPointMass(RacingCar):
     def create_input(cls, *args, **kwargs):
         return DynamicPointMassInput(*args, **kwargs)
     
-    def _init_ode(self):
+    def _init_model(self):
         g = 9.88
         # Input variables
         Fx, Fy = self.input.variables

@@ -14,7 +14,7 @@ class DynamicCar(RacingCar):
     def create_input(cls, *args, **kwargs):
         return DynamicCarInput(*args, **kwargs)
     
-    def _init_ode(self):
+    def _init_model(self):
         
         # ----------- State and auxiliary variables --------------
         Ux,Uy,r,delta,s,ey,epsi,t = self.state.variables
@@ -65,14 +65,14 @@ class DynamicCar(RacingCar):
         Fy_f = ca.if_else(
             (ca.fabs(alpha_f) <= alphamod_f),
             -Calpha_f*tan(alpha_f) + Calpha_f**2*fabs(tan(alpha_f))*tan(alpha_f) / (3*Fymax_f) - \
-                        (Calpha_f**3*ca.tan(alpha_f)**3)/(27*Fymax_f**2),
+                        (Calpha_f**3*tan(alpha_f)**3)/(27*Fymax_f**2),
             -Calpha_f*(1 - 2*eps + eps**2)*tan(alpha_f) - Fymax_f*(3*eps**2 - 2*eps**3)*sign(alpha_f),
         )
         
         Fy_r = ca.if_else(
             (ca.fabs(alpha_r) <= alphamod_r),
             -Calpha_r*tan(alpha_r) + Calpha_r**2*fabs(tan(alpha_r))*tan(alpha_r) / (3*Fymax_r) - \
-                        (Calpha_r**3*ca.tan(alpha_r)**3)/(27*Fymax_r**2),
+                        (Calpha_r**3*tan(alpha_r)**3)/(27*Fymax_r**2),
             -Calpha_r*(1 - 2*eps + eps**2)*tan(alpha_r) - Fymax_r*(3*eps**2 - 2*eps**3)*sign(alpha_r),
         )
         
@@ -93,8 +93,8 @@ class DynamicCar(RacingCar):
         Uy_dot = (Fy_f*cos(delta) + Fx_f*sin(delta) + Fy_r + Fb)/car['m'] - r*Ux
         r_dot = (car['a']*(Fy_f*cos(delta) + Fx_f*sin(delta)) - car['b']*Fy_r) / car['Izz']
         delta_dot = w 
-        s_dot = (Ux*ca.cos(epsi) - Uy*ca.sin(epsi)) / (1 - curvature*ey)
-        ey_dot = Ux*ca.sin(epsi) + Uy*ca.cos(epsi)
+        s_dot = (Ux*cos(epsi) - Uy*sin(epsi)) / (1 - curvature*ey)
+        ey_dot = Ux*sin(epsi) + Uy*cos(epsi)
         epsi_dot = r - curvature*s_dot
         t_dot = 1
         state_dot = ca.vertcat(Ux_dot, Uy_dot, r_dot, delta_dot, s_dot, ey_dot, epsi_dot, t_dot)
