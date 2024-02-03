@@ -3,7 +3,6 @@ import casadi as ca
 import numpy as np
 from casadi import cos, sin, tan
 from controller.controller import Controller
-from utils.common_utils import integrate
 
 class KinematicMPC(Controller):
     def __init__(self, car: KinematicCar, config):

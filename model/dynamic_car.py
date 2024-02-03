@@ -2,7 +2,7 @@ import casadi as ca
 from model.racing_car import RacingCar
 from utils.fancy_vector import FancyVector
 from utils.common_utils import *
-from collections import namedtuple
+from casadi import cos, sin, tan, sqrt, atan, fabs, sign
 
 class DynamicCar(RacingCar):
     
@@ -15,49 +15,83 @@ class DynamicCar(RacingCar):
         return DynamicCarInput(*args, **kwargs)
     
     def _init_ode(self):
-        # Input variables
-        Fx,w = self.input.variables
-
-        # State and auxiliary variables
+        
+        # ----------- State and auxiliary variables --------------
         Ux,Uy,r,delta,s,ey,epsi,t = self.state.variables
         curvature = ca.SX.sym('curvature')
         ds = ca.SX.sym('ds')
-
-        #parameters: mass, distance of CG from front (a) and rear (b) axis, height of CG, yaw moment of inertia
-        p = self.get_car_parameters()
-
-        g,theta,phi,Av2,Crr,eps,mu,C_alpha,Cd = self.get_parameters()
+        g = 9.88 # gravity
+        eps = 0.85 #from the paper
+        car = self.config['car']
+        env = self.config['env']
         
-        #utils for ODE
-        Xf, Xr = self._get_force_distribution(Fx)
-
+        # --------- Input Model ----------------
+        Fx,w = self.input.variables
+        Xd = car['Xd']
+        Xb = car['Xb']
+        Xf = (Xd['f']-Xb['f'])/2 * ca.tanh(2*(Fx + 0.5)) + (Xd['f'] + Xb['f'])/2
+        Xr = (Xb['r']-Xd['r'])/2 * ca.tanh(-2*(Fx + 0.5)) + (Xd['r'] + Xb['r'])/2
+        Fx_f = Fx*Xf
+        Fx_r = Fx*Xr
+        self.Fx_f = ca.Function("Fx_f",[Fx],[Fx_f])
+        self.Fx_r = ca.Function("Fx_f",[Fx],[Fx_r])
+        
+        # -------- Normal Load -----------------
+        Fz_f = car['b']/self.length*car['m']*(g*cos(env['theta'])*cos(env['phi']) + env['Av2']*Ux**2) - car['h']*Fx/self.length
+        Fz_r = car['a']/self.length*car['m']*(g*cos(env['theta'])*cos(env['phi']) + env['Av2']*Ux**2) + car['h']*Fx/self.length
+        self.Fz_f = ca.Function("Fz_f",[Ux,Fx],[Fz_f])
+        self.Fz_r = ca.Function("Fz_f",[Ux,Fx],[Fz_r])
+        
+        # ----- Maximum Lateral Tire Force -----
+        Fymax_f = sqrt(env['mu']['f']*Fz_f**2 - (0.99*Fx_f**2))
+        Fymax_r = sqrt(env['mu']['r']*Fz_r**2 - (0.99*Fx_r**2))
+        
+        # --- Slip Angles equations 11a/b ------
+        alpha_f = atan((Uy + car['a'] * r) / Ux) - delta
+        self.alpha_f = ca.Function("alpha_f",[Ux,Uy,r,delta],[alpha_f])
+        alpha_r = atan((Uy - car['b'] * r) / Ux)
+        self.alpha_r = ca.Function("alpha_r",[Ux,Uy,r,delta],[alpha_r])
+        
+        # ---- Lateral Force -------------------
+        Calpha_f = env['C_alpha']['f']
+        Calpha_r = env['C_alpha']['r']
+        
+        alphamod_f = atan(3*Fymax_f*eps/Calpha_f)
+        self.alphamod_f = ca.Function("alphamod_f",[Fx],[alphamod_f])
+        alphamod_r = atan(3*Fymax_r*eps/Calpha_r)
+        self.alphamod_r = ca.Function("alphamod_r",[Fx],[alphamod_r])
+        
+        
+        Fy_f = ca.if_else(
+            (ca.fabs(alpha_f) <= alphamod_f),
+            -Calpha_f*tan(alpha_f) + Calpha_f**2*fabs(tan(alpha_f))*tan(alpha_f) / (3*Fymax_f) - \
+                        (Calpha_f**3*ca.tan(alpha_f)**3)/(27*Fymax_f**2),
+            -Calpha_f*(1 - 2*eps + eps**2)*tan(alpha_f) - Fymax_f*(3*eps**2 - 2*eps**3)*sign(alpha_f),
+        )
+        
+        Fy_r = ca.if_else(
+            (ca.fabs(alpha_r) <= alphamod_r),
+            -Calpha_r*tan(alpha_r) + Calpha_r**2*fabs(tan(alpha_r))*tan(alpha_r) / (3*Fymax_r) - \
+                        (Calpha_r**3*ca.tan(alpha_r)**3)/(27*Fymax_r**2),
+            -Calpha_r*(1 - 2*eps + eps**2)*tan(alpha_r) - Fymax_r*(3*eps**2 - 2*eps**3)*sign(alpha_r),
+        )
+        
+        self.Fy_f = ca.Function("Fy_f",[Ux,Uy,r,delta,Fx],[Fy_f])
+        self.Fy_r = ca.Function("Fy_r",[Ux,Uy,r,delta,Fx],[Fy_r])
+        
+        # ------ Model --------------
         Fb = 0 #-p.m*g*ca.cos(theta)*ca.sin(phi) TODO if you want to change the angle modify this
-        Fn = -p.m*g*1 #ca.cos(theta) is 1 for theta=0, might aswell not write it
-        
-        Frr = Crr*Fn #rolling resistance = coefficient*normal force (not specified in the paper)
+        Fn = -car['m']*g #ca.cos(theta) is 1 for theta=0, might aswell not write it
+        Frr = env['Crr']*Fn #rolling resistance = coefficient*normal force (not specified in the paper)
         
         #All the forces introduced above are constant, as the various coefficient are constant and the ground is always flat
         #Fd depends on the velocity instead, so we define a casadi function (Is this the correct methodology?)
-        Fd = ca.Function("Fd_Function",[Ux], [Frr + Cd*Ux**2 - 0]) #p.m*g*ca.sin(theta) 
-        
-        #Fz is also not constant, we define 2 casadi functions for front and rear (15a/b in the paper)
-        #TODO Fx here should be just the Fx value? or Fx*Xf when we're computing Fz_f and Fx*Xr when computing Fz_r?
-        L = (p.a+p.b)
-        Fz_f = self.get_Fz_f_function(Ux, Fx, Xf, p, L, g, theta, phi, Av2)
-        Fz_r = self.get_Fz_r_function(Ux, Fx, Xf, p, L, g, theta, phi, Av2)
+        Fd = Frr + env['Cd']*Ux**2 #p.m*g*ca.sin(theta) 
 
-        #slip angles, equations 11a/b
-        alpha_f = self.get_alpha_f_function(Uy, Ux, delta, r, p) 
-        alpha_r = self.get_alpha_r_function(Uy, Ux, r, p)
-        
-        #Fy is rather complex to obtain, self.get_lateral_force returns:
-        #a casadi function mapping (Uy, Ux, delta, r, Fx) to [Fy_f, Fy_r]
-        Fy = self._get_lateral_force(alpha_f, alpha_r,Uy, Ux, delta, r ,Fz_f, Fz_r, Fx, Xf, eps, mu, C_alpha)
-        
         # TEMPORAL ODE (equations 1a to 1f)
-        Ux_dot = (Fx*Xf(Fx)*ca.cos(delta) - Fy(Uy, Ux, delta, r, Fx)[0] * ca.sin(delta) + Fx*Xr(Fx) - Fd(Ux))/p.m + r*Uy
-        Uy_dot = (Fy(Uy, Ux, delta, r, Fx)[0] * ca.cos(delta) + Fx*Xf(Fx)*ca.sin(delta) + Fy(Uy, Ux, delta, r, Fx)[1] + Fb)/p.m - r*Ux
-        r_dot = (p.a*(Fy(Uy, Ux, delta, r, Fx)[0]*ca.cos(delta) + Fx*Xf(Fx)*ca.sin(delta)) - p.b*Fy(Uy, Ux, delta, r, Fx)[1]) / p.Izz #TODO moment of inertia? maybe from here? http://archive.sciendo.com/MECDC/mecdc.2013.11.issue-1/mecdc-2013-0003/mecdc-2013-0003.pdf
+        Ux_dot = (Fx_f*cos(delta) - Fy_f*sin(delta) + Fx_r - Fd)/car['m'] + r*Uy
+        Uy_dot = (Fy_f*cos(delta) + Fx_f*sin(delta) + Fy_r + Fb)/car['m'] - r*Ux
+        r_dot = (car['a']*(Fy_f*cos(delta) + Fx_f*sin(delta)) - car['b']*Fy_r) / car['Izz']
         delta_dot = w 
         s_dot = (Ux*ca.cos(epsi) - Uy*ca.sin(epsi)) / (1 - curvature*ey)
         ey_dot = Ux*ca.sin(epsi) + Uy*ca.cos(epsi)
@@ -81,98 +115,14 @@ class DynamicCar(RacingCar):
         s_ode = ca.Function('ode', [self.state.syms, self.input.syms, curvature], [state_prime])
         s_integrator = integrate(self.state.syms, self.input.syms, curvature, s_ode, h=ds)
         self._spatial_transition = ca.Function('transition', [self.state.syms,self.input.syms,curvature,ds], [s_integrator])
-
-    def _get_force_distribution(self, Fx):
-        """
-        returns two casadi functions, to get the front/rear force distribution given Fx
-        equation 6a/6b in the paper
-        """
-        #for rear only drive:
-        df = 0
-        dr = 1
-        bf = 0.5
-        br = 0.5 
-        Xf = ca.Function("force_distribution", [Fx], [(df-bf)/2 * ca.tanh(2*(Fx + 0.5)) + (df + bf)/2])
-        Xr = ca.Function("force_distribution", [Fx], [(br-dr)/2 * ca.tanh(-2*(Fx + 0.5)) + (dr + br)/2 ])
-        return Xf, Xr
-
-    # in practical, this is Fy
-    def _get_lateral_force(self, alpha_f, alpha_r, Uy, Ux, delta, r, Fz_f, Fz_r, Fx, Xf, eps, mu, C_alpha):
-        
-        #Fy_max is 2 DIMENSIONAL, has front and rear values
-        Fy_max = self.get_Fy_max_function(Ux, Fx, Fz_f, Fz_r, Xf, mu)
-
-        alpha_mod = self.get_alpha_mod_function(Ux, Fx, Fy_max, eps, C_alpha)
-
-        condition = ca.logic_and((ca.fabs(alpha_f(Uy, Ux, delta, r)) <= alpha_mod(Ux, Fx)[0]) , (ca.fabs(alpha_r(Uy, Ux, r)) <= alpha_mod(Ux, Fx)[1]))
-
-        # Element-wise operations based on conditions
-        result = ca.if_else(
-            condition,
-            ca.vertcat(
-            -C_alpha*ca.tan(alpha_f(Uy, Ux, delta, r)) + C_alpha**2*ca.fabs(ca.tan(alpha_f(Uy, Ux, delta, r)))*ca.tan(alpha_f(Uy, Ux, delta, r)) / (3*Fy_max(Ux, Fx)[0]) - (C_alpha**3*ca.tan(alpha_f(Uy, Ux, delta, r))**3)/(27*Fy_max(Ux, Fx)[0]**2),
-            -C_alpha*ca.tan(alpha_r(Uy, Ux, r)) + C_alpha**2*ca.fabs(ca.tan(alpha_r(Uy, Ux, r)))*ca.tan(alpha_r(Uy, Ux, r)) / (3*Fy_max(Ux, Fx)[1]) - (C_alpha**3*ca.tan(alpha_r(Uy, Ux, r))**3)/(27*Fy_max(Ux, Fx)[1]**2)
-            ),
-            ca.vertcat(
-            -C_alpha*(1 - 2*eps + eps**2)*ca.tan(alpha_f(Uy, Ux, delta, r)) - Fy_max(Ux, Fx)[0]*(3*eps**2 - 2*eps**3)*ca.sign(alpha_f(Uy, Ux, delta, r)),
-            -C_alpha*(1 - 2*eps + eps**2)*ca.tan(alpha_r(Uy, Ux, r)) - Fy_max(Ux, Fx)[1]*(3*eps**2 - 2*eps**3)*ca.sign(alpha_r(Uy, Ux, r))
-            )
-        )
-        return ca.Function("lateral_forces", [Uy, Ux, delta, r, Fx], [result])
     
     @property
-    def temporal_transition(self):
+    def transition(self):
         return self._temporal_transition
     
     @property
     def spatial_transition(self):
         return self._spatial_transition
-    
-    def get_alpha_f_function(self, Uy, Ux, delta, r, p):
-        alpha_f_function = ca.Function("alpha_f_Function", [Uy, Ux, delta, r], [ca.atan((Uy + p.a * r) / Ux) - delta])
-        return alpha_f_function
-    
-    def get_alpha_r_function(self, Uy, Ux, r, p):
-        alpha_r_function = ca.Function("alpha_r_Function", [Uy, Ux, r], [ca.atan((Uy - p.b*r)/Ux)])
-        return alpha_r_function
-    
-    def get_alpha_mod_function(self, Ux, Fx, Fy_max, eps, C_alpha):
-        alpha_mod_function = ca.Function("alpha_mod_Function", [Ux, Fx], [ca.atan(3*Fy_max(Ux,Fx)*eps/C_alpha)]) #alpha mod is 2D because Fymax is 2D because Fz is 2D
-        return alpha_mod_function
-    
-    def get_Fy_max_function(self, Ux, Fx, Fz_f, Fz_r, Xf, mu): 
-        Fy_max_function = ca.Function("Fy_max_Function", [Ux, Fx], [((mu*ca.vertcat(Fz_f(Ux, Fx), Fz_r(Ux, Fx)))**2 - (0.99*ca.vertcat(Fx*Xf(Fx), Fx*Xf(Fx)))**2)**0.5 ]) #TODO should Fx also be vertcat(Fx_f)
-        return Fy_max_function
-    
-    def get_Fz_f_function(self, Ux, Fx, Xf, p, L, g, theta, phi, Av2):
-        Fz_f_function = ca.Function("Fz_f_Function", [Ux, Fx], [p.b/L * p.m*(g*ca.cos(theta)*ca.cos(phi) + Av2*Ux**2) - p.h_cg*Fx*Xf(Fx)/L])
-        return Fz_f_function
-    
-    def get_Fz_r_function(self, Ux, Fx, Xf, p, L, g, theta, phi, Av2):
-        Fz_r_function = ca.Function("Fz_r_Function", [Ux, Fx], [p.a/L*p.m*(g*ca.cos(theta)*ca.cos(phi)+Av2*Ux**2) + p.h_cg*Fx*Xf(Fx)/L])
-        return Fz_r_function
-    
-    def get_car_parameters(self):
-        Parameters = namedtuple('Parameters', ['m', 'a', 'b', 'h_cg', 'Izz'])
-        p = Parameters(1778, 1.194, 1.436, 0.55, 3049)
-        return p
-    
-    def get_parameters(self):
-        g = 9.88
-
-        #TODO theta and phi are road grade and bank angle, but for now we assume flat track
-        theta = 0 
-        phi = 0
-
-        Av2 = 0                 #because theta, phi are 0
-        Crr = 0.014             #https://en.wikipedia.org/wiki/Rolling_resistance
-        eps = 0.85              #from the paper
-        mu = 0.4                #http://hyperphysics.phy-astr.gsu.edu/hbase/Mechanics/frictire.htmlFx
-        C_alpha = 3.5           #https://www.politesi.polimi.it/bitstream/10589/152539/3/2019_12_Viani.pdf  proposes some real value taken from wherever, we should look at this in more detail
-        Cd = 0.25               #https://en.wikipedia.org/wiki/Automobile_drag_coefficient#:~:text=The%20average%20modern%20automobile%20achieves,a%20Cd%3D0.35%E2%80%930.45.
-
-        return g,theta,phi,Av2,Crr,eps,mu,C_alpha,Cd
-      
     
 class DynamicCarInput(FancyVector):
     def __init__(self, Fx = 0.0, w = 0.0):
@@ -208,10 +158,6 @@ class DynamicCarInput(FancyVector):
     
     @property
     def keys(self): return self._keys
-    
-    @classmethod
-    def create(cls, *args, **kwargs):
-        return cls(*args, **kwargs)
     
 class DynamicCarState(FancyVector):
     def __init__(self, Ux = 0.0, Uy = 0.0, r = 0.0, delta = 0.0, s = 0.0, ey = 0.0, epsi = 0.0, t = 0.0):
@@ -267,7 +213,3 @@ class DynamicCarState(FancyVector):
     
     @property
     def keys(self): return self._keys
-    
-    @classmethod
-    def create(cls, *args, **kwargs):
-        return cls(*args, **kwargs)

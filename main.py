@@ -12,15 +12,15 @@ from enum import Enum
 from matplotlib import pyplot as plt
 
 class CarType(Enum):
-    DYN = "dynamic"
-    KIN = "kinematic"
+    DYN = "dynamic_car"
+    KIN = "kinematic_car"
     
 class TrackType(Enum):
     I = "ippodromo"
     C = "complicato"
     
-mode = CarType.KIN
-track_name = TrackType.C.value
+mode = CarType.DYN
+track_name = TrackType.I.value
 
 # Track Loading
 track_config = load_config(f"config/environment/{track_name}.yaml")
@@ -39,9 +39,9 @@ if mode is CarType.KIN:
     controller = KinematicMPC(car=car, config=controller_config)
 elif mode is CarType.DYN:
     car = DynamicCar(config=car_config, track = track)
-    car.state = DynamicCarState(Ux = 0.5, delta = -0.6)
+    car.state = DynamicCarState(Ux = 0.5)
     controller = DynamicMPC(car=car, config=controller_config)
 
 # Simulation
 simulation = RacingSimulation(f"{mode.value}_{track_name}",car,controller)   
-simulation.run(N = 100)
+simulation.run(N = 300)
