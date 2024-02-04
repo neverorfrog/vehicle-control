@@ -21,6 +21,7 @@ class DynamicMPC(Controller):
         self.action_prediction = sol.value(self.action)
         self.state_prediction = sol.value(self.state)
         curvature_prediction = sol.value(self.curvature)
+        print(self.opti.debug.value)
         next_input = DynamicCarInput(Fx=self.action_prediction[0][0], w=self.action_prediction[1][0])
         return next_input, self.state_prediction, self.action_prediction, curvature_prediction
     
@@ -43,7 +44,7 @@ class DynamicMPC(Controller):
         # ========================= Decision Variables with Initialization ===================
         self.state = opti.variable(self.ns, self.N+1) # state trajectory var
         self.action = opti.variable(self.na, self.N)   # control trajectory var
-        self.state_prediction = np.ones((self.ns, self.N+1))*2 # actual predicted state trajectory
+        self.state_prediction = np.ones((self.ns, self.N+1)) # actual predicted state trajectory
         self.action_prediction = np.zeros((self.na, self.N))   # actual predicted control trajectory
         
         # ======================== Helper Variables ==========================================
@@ -56,7 +57,7 @@ class DynamicMPC(Controller):
         # ======================== Slack Variables ============================================
         self.Fy_f = opti.variable(self.N)
         self.Fy_r = opti.variable(self.N)
-        self.Fe_f = opti.variable(self.N)       # Slack variables for excessive force usage beyond the imposed limits
+        self.Fe_f = opti.variable(self.N) # Slack variables for excessive force usage beyond the imposed limits
         self.Fe_r = opti.variable(self.N)  
                                            
         # ======================= Cycle the entire horizon defining NLP problem ===============
@@ -125,8 +126,8 @@ class DynamicMPC(Controller):
             opti.subject_to(Fx*self.car.Xr(Fx) <=  mu['r']*self.car.Fz_r(Ux,Fx)*cos(self.car.alpha_r(Ux,Uy,r,delta)))
             
             # friction limits
-            opti.subject_to((Fx*self.car.Xf(Fx))**2 + self.Fy_f[n]**2 <= (mu['f']*self.car.Fz_f(Ux,Fx))**2 + (self.Fe_f[n])**2)
-            opti.subject_to((Fx*self.car.Xr(Fx))**2 + self.Fy_r[n]**2 <= (mu['r']*self.car.Fz_r(Ux,Fx))**2 + (self.Fe_r[n])**2) 
+            opti.subject_to((Fx*self.car.Xf(Fx))**2 + self.Fy_f[n]**2 <= (input_constraints['mu_lim']*self.car.Fz_f(Ux,Fx))**2 + (self.Fe_f[n])**2)
+            opti.subject_to((Fx*self.car.Xr(Fx))**2 + self.Fy_r[n]**2 <= (input_constraints['mu_lim']*self.car.Fz_r(Ux,Fx))**2 + (self.Fe_r[n])**2) 
              
 
         # ------------------ Stage Cost for Force Input Continuity ----------------------

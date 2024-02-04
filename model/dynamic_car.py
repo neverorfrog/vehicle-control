@@ -80,9 +80,9 @@ class DynamicCar(RacingCar):
         
         # ===================== Differential Equations ===================================
         Fb = 0 #-p.m*g*ca.cos(theta)*ca.sin(phi) TODO if you want to change the angle modify this
-        Fn = -car['m']*g #ca.cos(theta) is 1 for theta=0, might aswell not write it
-        Frr = env['Crr']*Fn #rolling resistance = coefficient*normal force (not specified in the paper)
-        Fd = Frr + env['Cd']*Ux**2 #p.m*g*ca.sin(theta) 
+        Fn = car['m']*g #ca.cos(theta) is 1 for theta=0, might aswell not write it
+        Frr = 280 #env['Crr']*Fn #rolling resistance = coefficient*normal force (not specified in the paper)
+        Fd = Frr + env['Cd']*(Ux**2) #p.m*g*ca.sin(theta) 
 
         # TEMPORAL Transition (equations 1a to 1f)
         Ux_dot = (Fx_f*cos(delta) - Fy_f*sin(delta) + Fx_r - Fd)/car['m'] + r*Uy

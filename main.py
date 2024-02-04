@@ -35,13 +35,13 @@ car_config = load_config(f"config/model/{mode.value}.yaml")
 controller_config = load_config(f"config/controller/{mode.value}_{track_name}.yaml")
 if mode is CarType.KIN:
     car = KinematicCar(config=car_config, track = track)
-    car.state = KinematicCarState(v = 1, s = 470)
+    car.state = KinematicCarState(v = 0.5, s = 0)
     controller = KinematicMPC(car=car, config=controller_config)
 elif mode is CarType.DYN:
     car = DynamicCar(config=car_config, track = track)
-    car.state = DynamicCarState(Ux = 0.5)
+    car.state = DynamicCarState(Ux = 5.3, s = 65)
     controller = DynamicMPC(car=car, config=controller_config)
 
 # Simulation
 simulation = RacingSimulation(f"{mode.value}_{track_name}",car,controller)   
-simulation.run(N = 300)
+simulation.run(N = 50)
