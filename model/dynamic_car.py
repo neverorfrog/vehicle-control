@@ -2,7 +2,7 @@ import casadi as ca
 from model.racing_car import RacingCar
 from utils.fancy_vector import FancyVector
 from utils.common_utils import *
-from casadi import cos, sin, tan, sqrt, atan, fabs, sign
+from casadi import cos, sin, tan, sqrt, atan, fabs, sign, tanh
 
 class DynamicCar(RacingCar):
     
@@ -16,79 +16,75 @@ class DynamicCar(RacingCar):
     
     def _init_model(self):
         
-        # ----------- State and auxiliary variables --------------
+        # =========== State and auxiliary variables ===================================
         Ux,Uy,r,delta,s,ey,epsi,t = self.state.variables
         curvature = ca.SX.sym('curvature')
         ds = ca.SX.sym('ds')
-        g = 9.88 # gravity
+        g =  9.88 # gravity
         eps = 0.85 #from the paper
         car = self.config['car']
         env = self.config['env']
         
-        # --------- Input Model ----------------
+        # ====== Input Model (Fx needs to be distributed between front and rear) ======
         Fx,w = self.input.variables
-        Xd = car['Xd']
-        Xb = car['Xb']
-        Xf = (Xd['f']-Xb['f'])/2 * ca.tanh(2*(Fx + 0.5)) + (Xd['f'] + Xb['f'])/2
-        Xr = (Xb['r']-Xd['r'])/2 * ca.tanh(-2*(Fx + 0.5)) + (Xd['r'] + Xb['r'])/2
+        Xd = car['Xd'] # drive distribution
+        Xb = car['Xb'] # brake distribution
+        
+        Xf = (Xd['f']-Xb['f'])/2 * tanh(2*(Fx + 0.5)) + (Xd['f'] + Xb['f'])/2
+        self.Xf = ca.Function("Xf",[Fx],[Xf])
         Fx_f = Fx*Xf
-        Fx_r = Fx*Xr
         self.Fx_f = ca.Function("Fx_f",[Fx],[Fx_f])
+        
+        Xr = (Xb['r']-Xd['r'])/2 * tanh(-2*(Fx + 0.5)) + (Xd['r'] + Xb['r'])/2
+        self.Xr = ca.Function("Xr",[Fx],[Xr])
+        Fx_r = Fx*Xr
         self.Fx_r = ca.Function("Fx_f",[Fx],[Fx_r])
         
-        # -------- Normal Load -----------------
+        # ================= Normal Load ================================================
         Fz_f = car['b']/self.length*car['m']*(g*cos(env['theta'])*cos(env['phi']) + env['Av2']*Ux**2) - car['h']*Fx/self.length
-        Fz_r = car['a']/self.length*car['m']*(g*cos(env['theta'])*cos(env['phi']) + env['Av2']*Ux**2) + car['h']*Fx/self.length
         self.Fz_f = ca.Function("Fz_f",[Ux,Fx],[Fz_f])
+        
+        Fz_r = car['a']/self.length*car['m']*(g*cos(env['theta'])*cos(env['phi']) + env['Av2']*Ux**2) + car['h']*Fx/self.length
         self.Fz_r = ca.Function("Fz_f",[Ux,Fx],[Fz_r])
         
-        # ----- Maximum Lateral Tire Force -----
-        Fymax_f = sqrt(env['mu']['f']*Fz_f**2 - (0.99*Fx_f**2))
-        Fymax_r = sqrt(env['mu']['r']*Fz_r**2 - (0.99*Fx_r**2))
+        # ================ Maximum Lateral Tire Force ==================================
+        Fymax_f = (env['mu']['f']*Fz_f)**2 - ((0.98*Fx_f)**2) # TODO sqrt?
         
-        # --- Slip Angles equations 11a/b ------
+        Fymax_r = (env['mu']['r']*Fz_r)**2 - ((0.98*Fx_r)**2) # TODO sqrt?
+        
+        # ================ Slip Angles equations 11a/b =================================
         alpha_f = atan((Uy + car['a'] * r) / Ux) - delta
         self.alpha_f = ca.Function("alpha_f",[Ux,Uy,r,delta],[alpha_f])
+        
         alpha_r = atan((Uy - car['b'] * r) / Ux)
         self.alpha_r = ca.Function("alpha_r",[Ux,Uy,r,delta],[alpha_r])
         
-        # ---- Lateral Force -------------------
+        # ================ Lateral Force ===============================================
         Calpha_f = env['C_alpha']['f']
-        Calpha_r = env['C_alpha']['r']
-        
         alphamod_f = atan(3*Fymax_f*eps/Calpha_f)
         self.alphamod_f = ca.Function("alphamod_f",[Fx],[alphamod_f])
-        alphamod_r = atan(3*Fymax_r*eps/Calpha_r)
-        self.alphamod_r = ca.Function("alphamod_r",[Fx],[alphamod_r])
-        
-        
-        Fy_f = ca.if_else(
-            (ca.fabs(alpha_f) <= alphamod_f),
+        Fy_f = ca.if_else((ca.fabs(alpha_f) <= alphamod_f),
             -Calpha_f*tan(alpha_f) + Calpha_f**2*fabs(tan(alpha_f))*tan(alpha_f) / (3*Fymax_f) - \
                         (Calpha_f**3*tan(alpha_f)**3)/(27*Fymax_f**2),
-            -Calpha_f*(1 - 2*eps + eps**2)*tan(alpha_f) - Fymax_f*(3*eps**2 - 2*eps**3)*sign(alpha_f),
-        )
+            -Calpha_f*(1 - 2*eps + eps**2)*tan(alpha_f) - Fymax_f*(3*eps**2 - 2*eps**3)*sign(alpha_f))
+        self.Fy_f = ca.Function("Fy_f",[Ux,Uy,r,delta,Fx],[Fy_f])
         
-        Fy_r = ca.if_else(
-            (ca.fabs(alpha_r) <= alphamod_r),
+        Calpha_r = env['C_alpha']['r']
+        alphamod_r = atan(3*Fymax_r*eps/Calpha_r)
+        self.alphamod_r = ca.Function("alphamod_r",[Fx],[alphamod_r])
+        Fy_r = ca.if_else((ca.fabs(alpha_r) <= alphamod_r),
             -Calpha_r*tan(alpha_r) + Calpha_r**2*fabs(tan(alpha_r))*tan(alpha_r) / (3*Fymax_r) - \
                         (Calpha_r**3*tan(alpha_r)**3)/(27*Fymax_r**2),
-            -Calpha_r*(1 - 2*eps + eps**2)*tan(alpha_r) - Fymax_r*(3*eps**2 - 2*eps**3)*sign(alpha_r),
-        )
-        
-        self.Fy_f = ca.Function("Fy_f",[Ux,Uy,r,delta,Fx],[Fy_f])
+            -Calpha_r*(1 - 2*eps + eps**2)*tan(alpha_r) - Fymax_r*(3*eps**2 - 2*eps**3)*sign(alpha_r))
         self.Fy_r = ca.Function("Fy_r",[Ux,Uy,r,delta,Fx],[Fy_r])
         
-        # ------ Model --------------
+        # ===================== Differential Equations ===================================
         Fb = 0 #-p.m*g*ca.cos(theta)*ca.sin(phi) TODO if you want to change the angle modify this
         Fn = -car['m']*g #ca.cos(theta) is 1 for theta=0, might aswell not write it
         Frr = env['Crr']*Fn #rolling resistance = coefficient*normal force (not specified in the paper)
-        
-        #All the forces introduced above are constant, as the various coefficient are constant and the ground is always flat
-        #Fd depends on the velocity instead, so we define a casadi function (Is this the correct methodology?)
         Fd = Frr + env['Cd']*Ux**2 #p.m*g*ca.sin(theta) 
 
-        # TEMPORAL ODE (equations 1a to 1f)
+        # TEMPORAL Transition (equations 1a to 1f)
         Ux_dot = (Fx_f*cos(delta) - Fy_f*sin(delta) + Fx_r - Fd)/car['m'] + r*Uy
         Uy_dot = (Fy_f*cos(delta) + Fx_f*sin(delta) + Fy_r + Fb)/car['m'] - r*Ux
         r_dot = (car['a']*(Fy_f*cos(delta) + Fx_f*sin(delta)) - car['b']*Fy_r) / car['Izz']
@@ -102,7 +98,7 @@ class DynamicCar(RacingCar):
         t_integrator = integrate(self.state.syms,self.input.syms,curvature,t_ode,self.dt)
         self._temporal_transition = ca.Function('transition', [self.state.syms,self.input.syms,curvature], [t_integrator])
 
-        # SPATIAL ODE (equations 41a to 41f)
+        # SPATIAL Transition (equations 41a to 41f)
         Ux_prime = Ux_dot / s_dot
         Uy_prime = Uy_dot / s_dot
         r_prime = r_dot / s_dot

@@ -10,8 +10,8 @@ car:
   h: 0.55 # CG height
   Peng: 172 #maximum engine power
   Xd: # drive force distribution
-    f: 0
-    r: 1
+    f: 1
+    r: 0
   Xb: # brake force distribution
     f: 0.78
     r: 0.22
@@ -24,8 +24,8 @@ env:
     f: 180
     r: 300
   mu: # friction coefficient
-    f: 0.75
-    r: 0.80
+    f: 0.9
+    r: 1.0
   theta: 0 #TODO theta and phi are road grade and bank angle, but for now we assume flat track
   phi: 0
   Av2: 0 #because theta, phi are 0
