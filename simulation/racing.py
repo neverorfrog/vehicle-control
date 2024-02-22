@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
 import numpy as np
 from itertools import count, cycle
+from model.dynamic_car import DynamicCarInput
 
 class RacingSimulation():   
     def __init__(self, name: str, car: RacingCar, controller: Controller):
@@ -34,9 +35,18 @@ class RacingSimulation():
             
             # computing control signal
             start = time.time()
-            action, state_prediction, action_prediction, curvature_prediction = self.controller.command(state)
+            state_prediction = None
+            """try:action, state_prediction, action_prediction, curvature_prediction = self.controller.command(state)
+            except Exception as e:
+                print(e)
+                break
+            """
             elapsed_time = time.time() - start
-            
+
+            action = DynamicCarInput(1, 1)
+            if n>=25: 
+                action = DynamicCarInput(1, 0)
+                
             ##DEBUG PRINTS
             if n <= steps:
                 print(f"N: {n}")
@@ -49,12 +59,12 @@ class RacingSimulation():
                 # print(f"REAR FORCE: {self.car.Fx_r(action[0])}")
                 # print(f"V PREDICTION: {state_prediction[self.car.state.index('Ux'),:]}")
                 # print(f"EY PREDICTION: {state_prediction[self.car.state.index('ey'),:]}")
-                print(f"EPSI PREDICTION: {state_prediction[self.car.state.index('epsi'),:]}")
+                #print(f"EPSI PREDICTION: {state_prediction[self.car.state.index('epsi'),:]}")
                 # print(f"DELTA PREDICTION: {state_prediction[self.car.state.index('delta'),:]}")
                 # print(f"TIME PREDICTION: {state_prediction[self.car.state.index('t'),:]}")
                 # print(f"S PREDICTION: {state_prediction[self.car.state.index('s'),:]}")
                 # print(f"ACCELERATION PREDICTION: {action_prediction[0,:]}")
-                print(f"OMEGA PREDICTION: {action_prediction[1,:]}")
+                #print(f"OMEGA PREDICTION: {action_prediction[1,:]}")
                 # print(f"CURVATURE PREDICTION: {curvature_prediction}")
                 print(f"ELAPSED TIME: {elapsed_time}")
                 print("")
@@ -62,13 +72,14 @@ class RacingSimulation():
             
             # applying control signal
             state = self.car.drive(action)
+            self.car.print(state.values, action.values)
             
             # logging
             state_traj.append(state)
             action_traj.append(action)
             elapsed.append(elapsed_time)
-            preds.append(np.array([self.car.rel2glob(state_prediction[:,i]) for i in range(self.controller.N)]).squeeze()) # converting prediction to global coordinates
-         
+            try:preds.append(np.array([self.car.rel2glob(state_prediction[:,i]) for i in range(self.controller.N)]).squeeze()) # converting prediction to global coordinates
+            except: preds = None
         print("FINISHED")   
         if animate:
             self.animate(state_traj, action_traj, preds, elapsed)   
@@ -151,6 +162,6 @@ class RacingSimulation():
         fig_manager.window.showMaximized() 
         plt.show(block=True) 
         plt.ioff() #interactive mode off
-        # animation.save(f"simulation/videos/{self.name}.gif",writer='pillow',fps=20, dpi=200)
+        animation.save(f"simulation/videos/{self.name}.gif",writer='pillow',fps=20, dpi=200)
         plt.ion() #interactive mode on
         print("ANIMATION SAVED")

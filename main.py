@@ -39,7 +39,7 @@ if mode is CarType.KIN:
     controller = KinematicMPC(car=car, config=controller_config)
 elif mode is CarType.DYN:
     car = DynamicCar(config=car_config, track = track)
-    car.state = DynamicCarState(Ux = 5.3, s = 65)
+    car.state = DynamicCarState(Ux = 10, s = 0)
     controller = DynamicMPC(car=car, config=controller_config)
 
 # Simulation

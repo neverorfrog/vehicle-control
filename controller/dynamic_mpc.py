@@ -110,7 +110,7 @@ class DynamicMPC(Controller):
             opti.subject_to(w >= input_constraints['w_min'])
             
             # dynamics
-            opti.subject_to(self.ds[n] == self.dt * (Ux*ca.cos(epsi) - Uy*ca.sin(epsi)) / (1 - self.curvature[n]*ey)) # going on for dt and snapshot of how much the car moved
+            opti.subject_to(self.ds[n] == 0.1)#self.dt * (Ux*ca.cos(epsi) - Uy*ca.sin(epsi)) / (1 - self.curvature[n]*ey)) # going on for dt and snapshot of how much the car moved
             opti.subject_to(state_next == self.car.spatial_transition(state,input,self.curvature[n],self.ds[n]))
             opti.subject_to(self.curvature[n+1] == self.car.track.get_curvature(state_next[self.car.state.index('s')]))
             
