@@ -19,6 +19,13 @@ class DynamicCar(RacingCar):
         Fx, w = input
         print(f"Fx_f: {self.Fx_f(Fx)}")
         print(f"Fx_r: {self.Fx_r(Fx)}")
+        car = self.config['car']
+        env = self.config['env']
+        print(f"Fymax_f: {(env['mu']['f']*self.Fx_f(Fx))**2 - ((0.98*self.Fx_f(Fx))**2)}")
+        #self.Fymax_f = ca.Function("Fymax_f", [self.Fz_f(Ux, Fx), self.Fx_f(Fx)], [Fymax_f])
+        print(f"Fymax_r: {(env['mu']['r']*self.Fx_r(Fx))**2 - ((0.98*self.Fx_r(Fx))**2)}" )
+        g = 0.98
+
         print(f"Fz_f: {self.Fz_f(Ux, Fx)}")
         print(f"Fz_r: {self.Fz_r(Ux,Fx)}")
         #print(f"Fymax_f: {self.Fymax_f(self.Fz_f(self.Ux, self.Fx), self.Fx_f(self.Fx))}")

@@ -45,11 +45,11 @@ class RacingSimulation():
 
             action = DynamicCarInput(1, 1)
             if n>=25: 
-                action = DynamicCarInput(1, 0)
+                action = DynamicCarInput(1, -1)
                 
             ##DEBUG PRINTS
             if n <= steps:
-                print(f"N: {n}")
+                print(f"\n\nN: {n}")
                 conv_state = self.car.rel2glob(state)
                 print(f"STATE: {state}")
                 # print(f"MEASURED POSE: {conv_state[0].item():.3f}, {conv_state[1]:.3f}, {conv_state[2]:.3f}")
