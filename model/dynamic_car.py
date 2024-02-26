@@ -81,9 +81,9 @@ class DynamicCar(RacingCar):
         self.Fz_r = ca.Function("Fz_f",[Ux,Fx],[Fz_r])
         
         # ================ Maximum Lateral Tire Force ==================================
-        Fymax_f = (env['mu']['f']*Fz_f)**2 - ((0.98*Fx_f)**2) # TODO sqrt?
+        Fymax_f = ((env['mu']['f']*Fz_f)**2 - ((0.98*Fx_f)**2))**0.5 # TODO sqrt?
         #self.Fymax_f = ca.Function("Fymax_f", [self.Fz_f(Ux, Fx), self.Fx_f(Fx)], [Fymax_f])
-        Fymax_r = (env['mu']['r']*Fz_r)**2 - ((0.98*Fx_r)**2) # TODO sqrt?
+        Fymax_r = ((env['mu']['r']*Fz_r)**2 - ((0.98*Fx_r)**2))**0.5 # TODO sqrt?
         #self.Fymax_r = ca.Function("Fymax_r", [self.Fz_r(Ux, Fx), self.Fx_r(Fx)], [Fymax_f])
         
         # ================ Slip Angles equations 11a/b =================================

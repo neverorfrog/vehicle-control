@@ -6,19 +6,19 @@ mpc_dt: 0.03
 cost_weights:
   time: 1
   Ux: 0.1
-  ey: 0.5
+  ey: 0.4
   epsi: 1
   w:  0.001
   Fx: 0.0001
   deviation: 0.001
   boundary: 1
   slip : 1000
-  friction: 0.00001
+  friction: 0.1
 
 # input constraints
 input_constraints:
-  w_min: -1
-  w_max: 1
+  w_min: -0.35
+  w_max: 0.35
   mu_lim: 0.7
 
 # state constraints

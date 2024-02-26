@@ -117,7 +117,7 @@ class RacingSimulation():
         def update(i):
             state = state_traj[i]
             
-            lap_time.set_text(f"Lap time: {state.t:.2f} s") 
+            lap_time.set_text(f"Lap time: {state.t:.2f} s | Iteration n.{i}") 
             
             if np.mod(i,5) == 0 and i > 0:
                 elapsed_time.set_text(f"Average computation time: {np.mean(elapsed[i-5:i])*1000:.2f} ms")

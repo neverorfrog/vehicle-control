@@ -105,7 +105,7 @@ class DynamicMPC(Controller):
             opti.subject_to(delta >= state_constraints['delta_min'])
             
             # input limits
-            opti.subject_to(Fx <= 172 / Ux)
+            opti.subject_to(Fx <= 172000 / Ux)
             opti.subject_to(w <= input_constraints['w_max'])
             opti.subject_to(w >= input_constraints['w_min'])
             
