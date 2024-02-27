@@ -73,18 +73,18 @@ class Track:
         
     def get_curvature(self, s):
         '''Get curvature (inverse of curvature radius) of a point along the spline'''
+        s = np.mod(s,self.length-0.1) # need to module s (for successive laps)
         dx_ds = self.dx_ds(s)
         dy_ds = self.dy_ds(s)
         ddx_ds = self.ddx_ds(s)
         ddy_ds = self.ddy_ds(s)
         denom = ca.power(dx_ds**2 + dy_ds**2, 1.5)
         num = dx_ds * ddy_ds - ddx_ds * dy_ds
-        curvature = ca.if_else(ca.fabs(denom) < ca.DM(1e-2), ca.DM(0.), num/denom)
-        # return ca.if_else(ca.fabs(curvature) < ca.DM(1e-10), ca.DM(0.), curvature)
-        return curvature
+        return ca.fabs(num/denom)
     
     def get_orientation(self, s):
         '''Get orientation wrt horizontal line of a point along the spline'''
+        s = np.mod(s,self.length-0.1) # need to module s (for successive laps)
         dx_ds = self.dx_ds(s)
         dy_ds = self.dy_ds(s)
         magnitude = np.sqrt(dx_ds**2 + dy_ds**2)
@@ -110,11 +110,11 @@ class Track:
         dy_ds = ca.Function("dy_ds",[s],[ca.jacobian(y(s),s)])
         one_lap_range = np.arange(0, len(self.waypoints))
         compute_segment_length = lambda s: np.sqrt(dx_ds(s)**2 + dy_ds(s)**2).full().squeeze()
-        self.length = trapezoid(compute_segment_length(one_lap_range), one_lap_range,dx=0.0001)
+        self.length = trapezoid(compute_segment_length(one_lap_range), one_lap_range,dx=0.1)
         
-        # redefining casadi functions (because s has to be normalized)
-        self.x = ca.Function("x_pos",[s],[self.x_spline(s * len(self.waypoints) / self.length)])
-        self.y = ca.Function("y_pos",[s],[self.y_spline(s * len(self.waypoints) / self.length)])
+        # redefining casadi functions (because s has to be spread from range [0,length] to [0,len(waypoints)])
+        self.x = ca.Function("x_pos",[s],[self.x_spline((s/self.length) * len(self.waypoints))])
+        self.y = ca.Function("y_pos",[s],[self.y_spline((s/self.length) * len(self.waypoints))])
         self.dx_ds = ca.Function("dx_ds",[s],[ca.jacobian(self.x(s),s)])
         self.dy_ds = ca.Function("dy_ds",[s],[ca.jacobian(self.y(s),s)])
         self.ddx_ds = ca.Function("ddx_ds",[s],[ca.jacobian(self.dx_ds(s),s)])
@@ -149,8 +149,6 @@ class Track:
             wp_ys.append(np.mean(wp_y[wp_id - self.smoothing : wp_id + self.smoothing + 1]))
             
         # closing the circuit
-        wp_xs.append(wp_xs[0])
-        wp_ys.append(wp_ys[0])
         wp_xs.append(wp_xs[0])
         wp_ys.append(wp_ys[0])
         
