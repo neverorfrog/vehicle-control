@@ -8,11 +8,11 @@ from casadi import sin,cos,tan
 class KinematicCar(RacingCar):        
     @classmethod
     def create_state(cls, *args, **kwargs):
-        return KinematicCarState(*args, **kwargs)
+        return KinematicState(*args, **kwargs)
     
     @classmethod
     def create_input(cls, *args, **kwargs):
-        return KinematicCarInput(*args, **kwargs)
+        return KinematicInput(*args, **kwargs)
         
     def _init_model(self):
         '''Differential equations describing the model'''
@@ -21,32 +21,32 @@ class KinematicCar(RacingCar):
         a,w = self.input.variables
 
         # State and auxiliary variables
-        v,delta,s,ey,epsi,t = self.state.variables
+        v,delta,ey,epsi,_,_ = self.state.variables
         curvature = ca.SX.sym('curvature')
         ds = ca.SX.sym('ds')
         
         # TEMPORAL ODE
         v_dot = a
         delta_dot = w
-        s_dot = (v * cos(epsi)) / (1 - ey * curvature)
+        s_dot = (v * cos(epsi)) / (1 - ey*curvature)
         ey_dot = v * sin(epsi) 
-        epsi_dot = v * (tan(delta)/self.length) - s_dot * curvature
+        epsi_dot = v * (tan(delta)/self.length) - s_dot*curvature
         t_dot = 1
-        state_dot = ca.vertcat(v_dot, delta_dot, s_dot, ey_dot, epsi_dot, t_dot)
+        state_dot = ca.vertcat(v_dot, delta_dot, ey_dot, epsi_dot, s_dot, t_dot)
         t_ode = ca.Function('ode', [self.state.syms,self.input.syms,curvature], [state_dot])
-        t_integrator = integrate(self.state.syms,self.input.syms,curvature,t_ode,self.dt)
+        t_integrator = self.integrate(self.state.syms,self.input.syms,curvature,t_ode,self.dt)
         self._temporal_transition = ca.Function('transition', [self.state.syms,self.input.syms,curvature], [t_integrator])
         
         # SPATIAL ODE
-        v_prime = (1 - ey * curvature) / (v * np.cos(epsi)) * a
-        delta_prime = (1 - ey * curvature) / (v * np.cos(epsi)) * w
+        v_prime = ((1 - ey*curvature) / (v*cos(epsi))) * a #dv/dt * dt/ds = dv/ds
+        delta_prime = ((1 - ey*curvature) / (v * cos(epsi))) * w #dw/dt * dt/ds = dw/ds
+        ey_prime = (1 - ey*curvature) * tan(epsi)
+        epsi_prime = (tan(delta) / self.length) * ((1 - ey*curvature)/cos(epsi)) - curvature
         s_prime = 1
-        ey_prime = (1 - ey * curvature) * ca.tan(epsi)
-        epsi_prime = ((tan(delta)) / self.length) * ((1 - ey * curvature)/(cos(epsi))) - curvature
-        t_prime = (1 - ey * curvature) / (v * np.cos(epsi))
-        state_prime = ca.vertcat(v_prime, delta_prime, s_prime, ey_prime, epsi_prime, t_prime)
+        t_prime = (1 - ey*curvature) / (v*cos(epsi))
+        state_prime = ca.vertcat(v_prime, delta_prime, ey_prime, epsi_prime, s_prime, t_prime)
         s_ode = ca.Function('ode', [self.state.syms, self.input.syms, curvature], [state_prime])
-        s_integrator = self.integrate(self.state.syms, self.input.syms, curvature, s_ode, h=ds)
+        s_integrator = self.integrate(self.state.syms,self.input.syms,curvature,s_ode,h=ds)
         self._spatial_transition = ca.Function('transition', [self.state.syms,self.input.syms,curvature,ds], [s_integrator])
         
     @property
@@ -57,7 +57,10 @@ class KinematicCar(RacingCar):
     def spatial_transition(self):
         return self._spatial_transition
     
-class KinematicCarInput(FancyVector):
+    def print(self, state, input):
+        pass
+    
+class KinematicInput(FancyVector):
     def __init__(self, a = 0.0, w = 0.0):
         """
         :param a: longitudinal acceleration | [m/s^2]
@@ -82,60 +85,40 @@ class KinematicCarInput(FancyVector):
     def w(self,value: float): 
         assert isinstance(value, float)
         self.values[1] = value
-        
-    @property
-    def values(self): return self._values
-    
-    @property
-    def syms(self): return self._syms
-    
-    @property
-    def keys(self): return self._keys
-
-class KinematicCarState(FancyVector):
-    def __init__(self, v = 0.0, delta = 0.0, s = 0.0, ey = 0.0, epsi = 0.0, t = 0.0):
+  
+class KinematicState(FancyVector):
+    def __init__(self, v = 0.0, delta = 0.0, ey = 0.0, epsi = 0.0, s = 0.0, t = 0.0):
         """
         :param v: velocity in global coordinate system | [m/s]
-        :param psi: yaw angle | [rad]
         :param delta: steering angle | [rad]
-        :param s: curvilinear abscissa | [m]
         :param ey: orthogonal deviation from center-line | [m]
         :param epsi: yaw angle relative to path | [rad]
-        :param t: time | [s]
+        :param s: curvilinear abscissa | [m]
         """
-        self._values = np.array([v,delta,s,ey,epsi,t])
-        self._keys = ['v','delta','s','ey','epsi','t']
+        self._values = np.array([v,delta,ey,epsi,s,t])
+        self._keys = ['v','delta','ey','epsi','s','t']
         self._syms = ca.vertcat(*[ca.SX.sym(self._keys[i]) for i in range(len(self._keys))])
-    
+        
     @property
     def v(self): return self.values[0] 
       
     @property
     def delta(self): return self.values[1]
-      
-    @property
-    def s(self): return self.values[2]
     
     @property
-    def ey(self): return self.values[3]
+    def ey(self): return self.values[2]
     
     @ey.setter
-    def ey(self, value): self.values[3] = value
+    def ey(self, value): self.values[2] = value
     
     @property
-    def epsi(self): return self.values[4]
+    def epsi(self): return self.values[3]
     
     @epsi.setter
-    def epsi(self, value): self.values[4] = value
+    def epsi(self, value): self.values[3] = value  
+    
+    @property
+    def s(self): return self.values[4]
     
     @property
     def t(self): return self.values[5]
-    
-    @property
-    def values(self): return self._values
-    
-    @property
-    def syms(self): return self._syms
-    
-    @property
-    def keys(self): return self._keys

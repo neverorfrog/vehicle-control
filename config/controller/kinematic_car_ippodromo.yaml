@@ -1,5 +1,5 @@
 # prediction horizon
-horizon: 25
+horizon: 40
 mpc_dt: 0.01
 
 # weights for the cost function
@@ -7,24 +7,24 @@ cost_weights:
   time: 1
   ey: 0.5
   epsi: 1
-  w: 0.0001
-  a: 0.01
   v: 0.1
-  deviation: 0.01
+  w: 0.0001
+  a: 100
+  deviation: 0.001
   boundary: 1
 
 # input constraints
 input_constraints:
   a_min: -10
   a_max: 10
-  w_min: -2
-  w_max: 2
+  w_min: -0.5
+  w_max: 0.5
 
 # state constraints
 state_constraints:
-  v_min: 0.5
-  v_max: 25
-  delta_min: -1
-  delta_max: 1
+  v_min: 1
+  v_max: 20
+  delta_min: -0.5
+  delta_max: 0.5
   ey_min: -3
   ey_max: 3

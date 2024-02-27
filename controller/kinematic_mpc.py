@@ -1,8 +1,9 @@
-from model.kinematic_car import KinematicCar, KinematicCarInput
+from model.kinematic_car import KinematicCar, KinematicInput
 import casadi as ca
 import numpy as np
 from casadi import cos, sin, tan
 from controller.controller import Controller
+np.random.seed(3)
 
 class KinematicMPC(Controller):
     def __init__(self, car: KinematicCar, config):
@@ -15,15 +16,16 @@ class KinematicMPC(Controller):
         self.opti = self._init_opti()
         
     def command(self, state):
-        self._init_parameters(state)
+        self._init_horizon(state)
         sol = self.opti.solve()
         self.action_prediction = sol.value(self.action)
         self.state_prediction = sol.value(self.state)
-        curvature_prediction = sol.value(self.curvature)
-        next_input = KinematicCarInput(a=self.action_prediction[0][0], w=self.action_prediction[1][0])
-        return next_input, self.state_prediction, self.action_prediction, curvature_prediction
+        next_input = KinematicInput(a=self.action_prediction[0][0], w=self.action_prediction[1][0])
+        return next_input, self.state_prediction, self.action_prediction
     
-    def _init_parameters(self, state):
+    def _init_horizon(self, state):
+        # initial state
+        state = state.values.squeeze()
         self.opti.set_value(self.state0, state)
         self.opti.set_initial(self.action, self.action_prediction)
         self.opti.set_initial(self.state, self.state_prediction)
@@ -38,15 +40,12 @@ class KinematicMPC(Controller):
         # ========================= Decision Variables with Initialization ===================
         self.state = opti.variable(self.ns, self.N+1) # state trajectory var
         self.action = opti.variable(self.na, self.N)   # control trajectory var
-        self.state_prediction = np.ones((self.ns, self.N+1))*2 # actual predicted state trajectory
-        self.action_prediction = np.zeros((self.na, self.N))   # actual predicted control trajectory
+        self.state_prediction = np.random.random((self.ns, self.N+1)) # actual predicted state trajectory
+        self.action_prediction = np.random.random((self.na, self.N))   # actual predicted control trajectory
         
         # ======================== Helper Variables ==========================================
         self.state0 = opti.parameter(self.ns) # initial state
         opti.subject_to(self.state[:,0] == self.state0) # constraint on initial state
-        self.ds = opti.variable(self.N) #ds trajectory during the planning horizon
-        self.curvature = opti.variable(self.N+1)
-        opti.subject_to(self.curvature[0] == self.car.track.get_curvature(self.state0[self.car.state.index('s')]))
         
         # ======================= Cycle the entire horizon defining NLP problem ===============
         cost_weights = self.config['cost_weights'] 
@@ -54,7 +53,7 @@ class KinematicMPC(Controller):
         input_constraints = self.config['input_constraints']
         cost = 0
         for n in range(self.N):
-            # extracting state and input at current iteration of horizon
+            # -------- State and Input Extraction --------------------------------
             state = self.state[:,n]
             state_next = self.state[:,n+1]
             input = self.action[:,n]
@@ -65,47 +64,42 @@ class KinematicMPC(Controller):
             a = input[self.car.input.index('a')]
             w = input[self.car.input.index('w')]
             
+            # ---------- Discretization and model dynamics ------------------------
+            # going on for dt and snapshot of how much the car moved
+            curvature = self.car.track.get_curvature(state[self.car.state.index('s')]) #departing from s=0 we get NaN values due to the curvature at s=0 (dunno why)
+            ds = self.dt * ((v * cos(epsi)) / (1 - ey * curvature))
+            opti.subject_to(state_next == self.car.spatial_transition(state,input,curvature,ds))
+            
             # -------------------- Stage Cost -------------------------------------
+            cost += cost_weights['deviation']*ds*ey**2 # deviation from road desciptor
+            
             cost += ca.if_else(ey < state_constraints['ey_min'], # violation of road bounds
-                       cost_weights['boundary']*self.ds[n]*(ey - state_constraints['ey_min'])**2, 0)
+                       cost_weights['boundary']*ds*(ey - state_constraints['ey_min'])**2, 0)
             
             cost += ca.if_else(ey > state_constraints['ey_max'], # violation of road bounds
-                       cost_weights['boundary']*self.ds[n]*(ey - state_constraints['ey_max'])**2, 0)
-                
-            cost += cost_weights['deviation']*self.ds[n]*ey**2 # deviation from road desciptor
+                       cost_weights['boundary']*ds*(ey - state_constraints['ey_max'])**2, 0)
             
             cost += cost_weights['w']*w**2 # steer angle rate
+            
+            if n < self.N-1: #Input Continuity
+                next_input = self.action[:,n+1]
+                cost += cost_weights['a']*(1/v)*(next_input[self.car.input.index('a')]-input[self.car.input.index('a')])**2 
 
             # -------------------- Constraints ------------------------------------------
-            # state limits
-            opti.subject_to(v    >= state_constraints['v_min'])
-            opti.subject_to(delta >= state_constraints['delta_min'])
-            opti.subject_to(delta <= state_constraints['delta_max'])
+            # state bounds
+            opti.subject_to(v >= state_constraints['v_min'])
+            opti.subject_to(opti.bounded(state_constraints['delta_min'],delta,state_constraints['delta_max']))
             
-            # input limits
-            opti.subject_to(a >= input_constraints['a_min'])
-            opti.subject_to(a <= input_constraints['a_max'])
-            opti.subject_to(w >= input_constraints['w_min'])
-            opti.subject_to(w <= input_constraints['w_max'])
+            # input bounds
+            opti.subject_to(opti.bounded(input_constraints['a_min'],a,input_constraints['a_max']))
+            opti.subject_to(opti.bounded(input_constraints['w_min'],w,input_constraints['w_max']))
             
-            # dynamics
-            opti.subject_to(self.ds[n] == self.dt * ((v * cos(epsi)) / (1 - ey * self.curvature[n]))) # going on for dt and snapshot of how much the car moved
-            opti.subject_to(state_next == self.car.spatial_transition(state,input,self.curvature[n],self.ds[n]))
-            opti.subject_to(self.curvature[n+1] == self.car.track.get_curvature(state_next[self.car.state.index('s')]))
-            
-        # ------------------ Stage Cost for Force Input Continuity ----------------------            
-        for n in range(self.N - 1):
-            input = self.action[:,n]
-            next_input = self.action[:,n+1]
-            # acceleration continuous
-            cost += cost_weights['a']*(next_input[self.car.input.index('a')]-input[self.car.input.index('a')])
-        
         # -------------------- Terminal Cost -----------------------
         cost += ca.if_else(self.state[self.car.state.index('v'),-1] >= state_constraints['v_max'], # excessive speed
             cost_weights['v']*(self.state[self.car.state.index('v'),-1] - state_constraints['v_max'])**2, 0) 
-        cost += cost_weights['time']*(self.state[self.car.state.index('t'),-1]-self.state[self.car.state.index('t'),0]) # final cost (minimize time)
-        cost += cost_weights['ey']*self.state[self.car.state.index('ey'),-1]**2 # final cost (minimize terminal lateral error) hardcodato
-        cost += cost_weights['epsi']*self.state[self.car.state.index('epsi'),-1]**2 # final cost (minimize terminal course error) hardcodato
+        cost += cost_weights['time']*self.state[self.car.state.index('t'),-1] # final cost (minimize time)
+        cost += cost_weights['ey']*self.state[self.car.state.index('ey'),-1]**2 # final cost (minimize terminal lateral error)
+        cost += cost_weights['epsi']*self.state[self.car.state.index('epsi'),-1]**2 # final cost (minimize terminal course error)
         
         opti.minimize(cost)
         return opti

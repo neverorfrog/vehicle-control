@@ -87,7 +87,7 @@ class Track:
         s = np.mod(s,self.length-0.1) # need to module s (for successive laps)
         dx_ds = self.dx_ds(s)
         dy_ds = self.dy_ds(s)
-        magnitude = np.sqrt(dx_ds**2 + dy_ds**2)
+        magnitude = (dx_ds**2 + dy_ds**2)**0.5
         tangent_x = dx_ds / magnitude
         tangent_y = dy_ds / magnitude
         return np.arctan2(tangent_y, tangent_x)

@@ -14,16 +14,13 @@ class FancyVector(ABC):
         return cls(*args, **kwargs)
     
     @property
-    @abstractmethod
-    def values(self) -> np.ndarray: pass
+    def values(self) -> np.ndarray: return self._values #redefined by subclass
     
     @property
-    @abstractmethod
-    def keys(self) -> list: pass
+    def keys(self) -> list: return self._keys #redefined by subclass
     
     @property
-    @abstractmethod
-    def syms(self): pass
+    def syms(self): return self._syms #redefined by subclass
     
     @property
     def variables(self): return [self.syms[i] for i in range(len(self.values))]

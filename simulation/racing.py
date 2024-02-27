@@ -9,6 +9,7 @@ from matplotlib.gridspec import GridSpec
 import numpy as np
 from itertools import count, cycle
 from model.dynamic_car import DynamicCarInput
+from utils.fancy_vector import FancyVector
 
 class RacingSimulation():   
     def __init__(self, name: str, car: RacingCar, controller: Controller):
@@ -25,7 +26,7 @@ class RacingSimulation():
         preds = [] # state predictions for each horizon
         
         # Initializing simulation
-        state = state_traj[0] 
+        state: FancyVector = state_traj[0] 
         counter = count(start=0)
         steps = N if N is not None else np.inf
         
@@ -36,22 +37,25 @@ class RacingSimulation():
             # computing control signal
             start = time.time()
             state_prediction = None
-            """try:action, state_prediction, action_prediction, curvature_prediction = self.controller.command(state)
+            try:
+                action, state_prediction, action_prediction = self.controller.command(state)
             except Exception as e:
                 print(e)
+                print("ERROOOOOOOOOOOOOOOOOOOOOOOOOOOOOOR")
                 break
-            """
+            
             elapsed_time = time.time() - start
 
-            action = DynamicCarInput(1, 1)
-            if n>=25: 
-                action = DynamicCarInput(1, -1)
+            # action = DynamicCarInput(1, 1)
+            # if n>=25: 
+            #     action = DynamicCarInput(1, -1)
                 
             ##DEBUG PRINTS
             if n <= steps:
                 print(f"\n\nN: {n}")
                 conv_state = self.car.rel2glob(state)
                 print(f"STATE: {state}")
+                print(f"FINAL CURVATURE: {self.car.track.get_curvature(state_prediction[self.car.state.index('s'),-1])}")
                 # print(f"MEASURED POSE: {conv_state[0].item():.3f}, {conv_state[1]:.3f}, {conv_state[2]:.3f}")
                 # print(f"REFERENCE POSE: {self.car.track.x(state.s).full().item():.3f}, {self.car.track.y(state.s).full().item():.3f}, {self.car.track.get_orientation(state.s).full().item():.3f}")
                 print(f"ACTION: {action}")
@@ -64,7 +68,7 @@ class RacingSimulation():
                 # print(f"TIME PREDICTION: {state_prediction[self.car.state.index('t'),:]}")
                 # print(f"S PREDICTION: {state_prediction[self.car.state.index('s'),:]}")
                 # print(f"ACCELERATION PREDICTION: {action_prediction[0,:]}")
-                #print(f"OMEGA PREDICTION: {action_prediction[1,:]}")
+                # print(f"OMEGA PREDICTION: {action_prediction[1,:]}")
                 # print(f"CURVATURE PREDICTION: {curvature_prediction}")
                 print(f"ELAPSED TIME: {elapsed_time}")
                 print("")
@@ -93,9 +97,9 @@ class RacingSimulation():
         N = len(input_traj)
         ey_index = self.car.state.index('ey')
         error = np.array(state_traj)[:,ey_index:ey_index+2] # taking just ey and epsi
-        v = np.array(state_traj)[:,0] # taking just v
+        v = np.array(state_traj)[:,self.car.state.index('v')] # taking just v
         delta = np.array(state_traj)[:,self.car.state.index('delta')] # taking just delta
-        s = np.array(state_traj)[:,self.car.state.index('s')] # for ascissa in side plots
+        s = np.array(state_traj)[:,self.car.state.index('s')] # for ascissa in side plots TODO hardcodato
         input = np.array(input_traj)
         x_traj = []
         y_traj = []
