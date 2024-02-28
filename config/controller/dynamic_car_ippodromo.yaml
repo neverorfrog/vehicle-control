@@ -4,12 +4,12 @@ mpc_dt: 0.03
 
 # weights for the cost function
 cost_weights:
-  time: 1
+  time: 0.1
   Ux: 0.1
   ey: 0.4
   epsi: 1
   w:  0.001
-  Fx: 0.0001
+  Fx: 0.001
   deviation: 0.001
   boundary: 1
   slip : 1000
@@ -17,6 +17,7 @@ cost_weights:
 
 # input constraints
 input_constraints:
+  Fx_min: -100
   w_min: -0.35
   w_max: 0.35
   mu_lim: 0.7

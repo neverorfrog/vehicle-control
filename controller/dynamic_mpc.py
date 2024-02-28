@@ -3,6 +3,7 @@ import casadi as ca
 import numpy as np
 from casadi import cos, sin, tan, fabs
 from controller.controller import Controller
+np.random.seed(3)
 
 class DynamicMPC(Controller):
     def __init__(self, car: DynamicCar, config):
@@ -16,20 +17,19 @@ class DynamicMPC(Controller):
         self._init_racing()
         
     def command(self, state):
-        self._init_parameters(state)
+        self._init_horizon(state)
         sol = self.opti.solve()
         self.action_prediction = sol.value(self.action)
         self.state_prediction = sol.value(self.state)
-        curvature_prediction = sol.value(self.curvature)
-        print(self.opti.debug.value)
         next_input = DynamicCarInput(Fx=self.action_prediction[0][0], w=self.action_prediction[1][0])
-        return next_input, self.state_prediction, self.action_prediction, curvature_prediction
+        return next_input, self.state_prediction, self.action_prediction
     
     def _init_racing(self):
         '''Initializing state prediction'''
         pass
     
-    def _init_parameters(self, state):
+    def _init_horizon(self, state):
+        state = state.values.squeeze()
         self.opti.set_value(self.state0, state)
         self.opti.set_initial(self.action, self.action_prediction)
         self.opti.set_initial(self.state, self.state_prediction)
@@ -38,7 +38,7 @@ class DynamicMPC(Controller):
         # ========================= Optimizer Initialization =================================
         opti = ca.Opti()
         p_opts = {'ipopt.print_level': 0, 'print_time': False, 'expand': False}
-        s_opts = {}
+        s_opts = {'nlp_scaling_method': 'none'}
         opti.solver("ipopt", p_opts, s_opts)
         
         # ========================= Decision Variables with Initialization ===================
@@ -46,13 +46,8 @@ class DynamicMPC(Controller):
         self.action = opti.variable(self.na, self.N)   # control trajectory var
         self.state_prediction = np.ones((self.ns, self.N+1)) # actual predicted state trajectory
         self.action_prediction = np.zeros((self.na, self.N))   # actual predicted control trajectory
-        
-        # ======================== Helper Variables ==========================================
         self.state0 = opti.parameter(self.ns) # initial state
         opti.subject_to(self.state[:,0] == self.state0) # constraint on initial state
-        self.ds = opti.variable(self.N) #ds trajectory during the planning horizon
-        self.curvature = opti.variable(self.N+1)
-        opti.subject_to(self.curvature[0] == self.car.track.get_curvature(self.state0[self.car.state.index('s')]))
 
         # ======================== Slack Variables ============================================
         self.Fy_f = opti.variable(self.N)
@@ -64,6 +59,8 @@ class DynamicMPC(Controller):
         cost_weights = self.config['cost_weights'] 
         state_constraints = self.config['state_constraints']
         input_constraints = self.config['input_constraints']
+        Peng = self.car.config['car']['Peng']
+        mu = self.car.config['env']['mu']
         cost = 0
         for n in range(self.N):
             # extracting state and input at current iteration of horizon
@@ -79,14 +76,20 @@ class DynamicMPC(Controller):
             Fx = input[self.car.input.index('Fx')]
             w = input[self.car.input.index('w')]
             
+            # ---------- Discretization and model dynamics ------------------------
+            # going on for dt and snapshot of how much the car moved
+            curvature = self.car.track.get_curvature(state[self.car.state.index('s')]) #departing from s=0 we get NaN values due to the curvature at s=0 (dunno why)
+            ds = self.dt * (Ux*ca.cos(epsi) - Uy*ca.sin(epsi)) / (1 - curvature*ey)
+            opti.subject_to(state_next == self.car.spatial_transition(state,input,curvature,ds))
+            
             # -------------------- Stage Cost -------------------------------------
             cost += ca.if_else(ey < state_constraints['ey_min'], # violation of road bounds
-                       cost_weights['boundary']*self.ds[n]*(ey - state_constraints['ey_min'])**2, 0)
+                       cost_weights['boundary']*ds*(ey - state_constraints['ey_min'])**2, 0)
             
             cost += ca.if_else(ey > state_constraints['ey_max'], # violation of road bounds
-                       cost_weights['boundary']*self.ds[n]*(ey - state_constraints['ey_max'])**2, 0)
+                       cost_weights['boundary']*ds*(ey - state_constraints['ey_max'])**2, 0)
                 
-            cost += cost_weights['deviation']*self.ds[n]*(ey**2) # deviation from road desciptor
+            cost += cost_weights['deviation']*ds*(ey**2) # deviation from road desciptor
             
             cost += cost_weights['w']*(w**2) # steer angle rate
 
@@ -98,24 +101,22 @@ class DynamicMPC(Controller):
             
             cost += cost_weights['friction']*((self.Fe_f[n]**2)**2 + (self.Fe_r[n]**2)**2) # friction limit
             
+            if n < self.N-1: #Force Input Continuity
+                next_input = self.action[:,n+1]
+                Fx_next = next_input[self.car.input.index('Fx')]
+                cost += cost_weights['Fx']*(1/ds)*(Fx_next - Fx)**2 
+            
             # -------------------- Constraints ------------------------------------------
             # state limits
-            opti.subject_to(Ux    >= state_constraints['Ux_min'])
-            opti.subject_to(delta <= state_constraints['delta_max'])
-            opti.subject_to(delta >= state_constraints['delta_min'])
+            opti.subject_to(Ux >= state_constraints['Ux_min'])
+            opti.subject_to(opti.bounded(state_constraints['delta_min'],delta,state_constraints['delta_max']))
             
             # input limits
-            opti.subject_to(Fx <= 172000 / Ux)
-            opti.subject_to(w <= input_constraints['w_max'])
-            opti.subject_to(w >= input_constraints['w_min'])
-            
-            # dynamics
-            opti.subject_to(self.ds[n] == 0.1)#self.dt * (Ux*ca.cos(epsi) - Uy*ca.sin(epsi)) / (1 - self.curvature[n]*ey)) # going on for dt and snapshot of how much the car moved
-            opti.subject_to(state_next == self.car.spatial_transition(state,input,self.curvature[n],self.ds[n]))
-            opti.subject_to(self.curvature[n+1] == self.car.track.get_curvature(state_next[self.car.state.index('s')]))
+            opti.subject_to(Fx >= input_constraints['Fx_min'])
+            opti.subject_to(Fx <= Peng / Ux)
+            opti.subject_to(opti.bounded(input_constraints['w_min'],w,input_constraints['w_max']))
             
             # tire model dynamics
-            mu = self.car.config['env']['mu']
             opti.subject_to(self.Fy_f[n] == self.car.Fy_f(Ux,Uy,r,delta,Fx))
             opti.subject_to(self.Fy_r[n] == self.car.Fy_r(Ux,Uy,r,delta,Fx))
             
@@ -128,13 +129,6 @@ class DynamicMPC(Controller):
             # friction limits
             opti.subject_to((Fx*self.car.Xf(Fx))**2 + self.Fy_f[n]**2 <= (input_constraints['mu_lim']*self.car.Fz_f(Ux,Fx))**2 + (self.Fe_f[n])**2)
             opti.subject_to((Fx*self.car.Xr(Fx))**2 + self.Fy_r[n]**2 <= (input_constraints['mu_lim']*self.car.Fz_r(Ux,Fx))**2 + (self.Fe_r[n])**2) 
-             
-
-        # ------------------ Stage Cost for Force Input Continuity ----------------------
-        for n in range(self.N - 1):
-            input = self.action[:,n]
-            next_input = self.action[:,n+1]
-            cost += cost_weights['Fx']*(next_input[0]-input[0])**2
         
         # -------------------- Terminal Cost -----------------------
         cost += ca.if_else(self.state[self.car.state.index('Ux'),-1] >= state_constraints['Ux_max'], # excessive speed

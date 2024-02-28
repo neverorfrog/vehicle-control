@@ -34,7 +34,7 @@ class KinematicMPC(Controller):
         # ========================= Optimizer Initialization =================================
         opti = ca.Opti()
         p_opts = {'ipopt.print_level': 0, 'print_time': False, 'expand': False}
-        s_opts = {}
+        s_opts = {'nlp_scaling_method': 'equilibration-based'}
         opti.solver("ipopt", p_opts, s_opts)
         
         # ========================= Decision Variables with Initialization ===================
@@ -42,8 +42,6 @@ class KinematicMPC(Controller):
         self.action = opti.variable(self.na, self.N)   # control trajectory var
         self.state_prediction = np.random.random((self.ns, self.N+1)) # actual predicted state trajectory
         self.action_prediction = np.random.random((self.na, self.N))   # actual predicted control trajectory
-        
-        # ======================== Helper Variables ==========================================
         self.state0 = opti.parameter(self.ns) # initial state
         opti.subject_to(self.state[:,0] == self.state0) # constraint on initial state
         
@@ -79,7 +77,7 @@ class KinematicMPC(Controller):
             cost += ca.if_else(ey > state_constraints['ey_max'], # violation of road bounds
                        cost_weights['boundary']*ds*(ey - state_constraints['ey_max'])**2, 0)
             
-            cost += cost_weights['w']*w**2 # steer angle rate
+            cost += cost_weights['w']*w**2 #steer angle rate
             
             if n < self.N-1: #Input Continuity
                 next_input = self.action[:,n+1]

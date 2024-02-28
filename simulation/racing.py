@@ -43,19 +43,20 @@ class RacingSimulation():
                 print(e)
                 print("ERROOOOOOOOOOOOOOOOOOOOOOOOOOOOOOR")
                 break
-            
             elapsed_time = time.time() - start
 
-            # action = DynamicCarInput(1, 1)
-            # if n>=25: 
-            #     action = DynamicCarInput(1, -1)
+            # action = DynamicCarInput(1000, 0)
+            # if n>=50 and n < 80: 
+            #     action = DynamicCarInput(1000, 0.1)
+            # if n > 80:
+            #     action = DynamicCarInput(1000, -0.3)
                 
             ##DEBUG PRINTS
             if n <= steps:
                 print(f"\n\nN: {n}")
                 conv_state = self.car.rel2glob(state)
                 print(f"STATE: {state}")
-                print(f"FINAL CURVATURE: {self.car.track.get_curvature(state_prediction[self.car.state.index('s'),-1])}")
+                # print(f"FINAL CURVATURE: {self.car.track.get_curvature(state_prediction[self.car.state.index('s'),-1])}")
                 # print(f"MEASURED POSE: {conv_state[0].item():.3f}, {conv_state[1]:.3f}, {conv_state[2]:.3f}")
                 # print(f"REFERENCE POSE: {self.car.track.x(state.s).full().item():.3f}, {self.car.track.y(state.s).full().item():.3f}, {self.car.track.get_orientation(state.s).full().item():.3f}")
                 print(f"ACTION: {action}")
@@ -97,9 +98,9 @@ class RacingSimulation():
         N = len(input_traj)
         ey_index = self.car.state.index('ey')
         error = np.array(state_traj)[:,ey_index:ey_index+2] # taking just ey and epsi
-        v = np.array(state_traj)[:,self.car.state.index('v')] # taking just v
+        v = np.array(state_traj)[:,self.car.state.index('Ux')] # taking just v
         delta = np.array(state_traj)[:,self.car.state.index('delta')] # taking just delta
-        s = np.array(state_traj)[:,self.car.state.index('s')] # for ascissa in side plots TODO hardcodato
+        s = np.array(state_traj)[:,self.car.state.index('s')] # for ascissa in side plots
         input = np.array(input_traj)
         x_traj = []
         y_traj = []
@@ -166,6 +167,6 @@ class RacingSimulation():
         fig_manager.window.showMaximized() 
         plt.show(block=True) 
         plt.ioff() #interactive mode off
-        animation.save(f"simulation/videos/{self.name}.gif",writer='pillow',fps=20, dpi=200)
+        # animation.save(f"simulation/videos/{self.name}.gif",writer='pillow',fps=20, dpi=200)
         plt.ion() #interactive mode on
         print("ANIMATION SAVED")

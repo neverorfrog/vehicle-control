@@ -3,7 +3,7 @@ sys.path.append(".")
 
 from model.dynamic_car import DynamicCar, DynamicCarState
 from environment.track import Track
-from model.kinematic_car import KinematicCar, KinematicCarState
+from model.kinematic_car import KinematicCar, KinematicState
 from simulation.racing import RacingSimulation
 from controller.kinematic_mpc import KinematicMPC
 from controller.dynamic_mpc import DynamicMPC
@@ -35,13 +35,13 @@ car_config = load_config(f"config/model/{mode.value}.yaml")
 controller_config = load_config(f"config/controller/{mode.value}_{track_name}.yaml")
 if mode is CarType.KIN:
     car = KinematicCar(config=car_config, track = track)
-    car.state = KinematicCarState(v = 0.5, s = 0)
+    car.state = KinematicState(v = 1, s = 1)
     controller = KinematicMPC(car=car, config=controller_config)
 elif mode is CarType.DYN:
     car = DynamicCar(config=car_config, track = track)
-    car.state = DynamicCarState(Ux = 10, s = 0)
+    car.state = DynamicCarState(Ux = 5, s = 1)
     controller = DynamicMPC(car=car, config=controller_config)
 
 # Simulation
 simulation = RacingSimulation(f"{mode.value}_{track_name}",car,controller)   
-simulation.run(N = 50)
+simulation.run(N = 200)

@@ -2,7 +2,7 @@ import casadi as ca
 from model.racing_car import RacingCar
 from utils.fancy_vector import FancyVector
 from utils.common_utils import *
-from casadi import cos, sin, tan, sqrt, atan, fabs, sign, tanh
+from casadi import cos, sin, tan, atan, fabs, sign, tanh
 
 class DynamicCar(RacingCar):
     
@@ -81,9 +81,9 @@ class DynamicCar(RacingCar):
         self.Fz_r = ca.Function("Fz_f",[Ux,Fx],[Fz_r])
         
         # ================ Maximum Lateral Tire Force ==================================
-        Fymax_f = ((env['mu']['f']*Fz_f)**2 - ((0.98*Fx_f)**2))**0.5 # TODO sqrt?
+        Fymax_f = ((env['mu']['f']*Fz_f)**2 - ((0.98*Fx_f)**2))**0.5
         #self.Fymax_f = ca.Function("Fymax_f", [self.Fz_f(Ux, Fx), self.Fx_f(Fx)], [Fymax_f])
-        Fymax_r = ((env['mu']['r']*Fz_r)**2 - ((0.98*Fx_r)**2))**0.5 # TODO sqrt?
+        Fymax_r = ((env['mu']['r']*Fz_r)**2 - ((0.98*Fx_r)**2))**0.5
         #self.Fymax_r = ca.Function("Fymax_r", [self.Fz_r(Ux, Fx), self.Fx_r(Fx)], [Fymax_f])
         
         # ================ Slip Angles equations 11a/b =================================
@@ -117,7 +117,7 @@ class DynamicCar(RacingCar):
         # ===================== Differential Equations ===================================
         Fb = 0 #-p.m*g*ca.cos(theta)*ca.sin(phi) TODO if you want to change the angle modify this
         Fn = car['m']*g #ca.cos(theta) is 1 for theta=0, might aswell not write it
-        Frr = 280 #env['Crr']*Fn #rolling resistance = coefficient*normal force (not specified in the paper)
+        Frr = 218 #env['Crr']*Fn #rolling resistance = coefficient*normal force (not specified in the paper)
         Fd = Frr + env['Cd']*(Ux**2) #p.m*g*ca.sin(theta) 
 
         # TEMPORAL Transition (equations 1a to 1f)
