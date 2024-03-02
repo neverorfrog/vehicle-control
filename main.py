@@ -6,7 +6,7 @@ from environment.track import Track
 from model.kinematic_car import KinematicCar, KinematicState
 from simulation.racing import RacingSimulation
 from controller.kinematic_mpc import KinematicMPC
-from controller.dynamic_mpc import DynamicMPC
+from controller.singletrack_mpc import DynamicMPC
 from utils.common_utils import *
 from enum import Enum
 from matplotlib import pyplot as plt

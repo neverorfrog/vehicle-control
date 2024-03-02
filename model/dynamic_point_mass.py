@@ -3,6 +3,7 @@ from model.racing_car import RacingCar
 from utils.fancy_vector import FancyVector
 from utils.common_utils import *
 from collections import namedtuple
+from casadi import cos, sin, tan, atan, fabs, sign, tanh
 
 class DynamicPointMass(RacingCar):
     
