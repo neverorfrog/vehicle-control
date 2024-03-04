@@ -6,7 +6,7 @@ from environment.track import Track
 from model.kinematic_car import KinematicCar, KinematicState
 from simulation.racing import RacingSimulation
 from controller.kinematic_mpc import KinematicMPC
-from controller.singletrack_mpc import DynamicMPC
+from controller.singletrack_mpc import SingleTrackMPC
 from utils.common_utils import *
 from enum import Enum
 from matplotlib import pyplot as plt
@@ -40,7 +40,7 @@ if mode is CarType.KIN:
 elif mode is CarType.DYN:
     car = DynamicCar(config=car_config, track = track)
     car.state = DynamicCarState(Ux = 5, s = 1)
-    controller = DynamicMPC(car=car, config=controller_config)
+    controller = SingleTrackMPC(car=car, config=controller_config)
 
 # Simulation
 simulation = RacingSimulation(f"{mode.value}_{track_name}",car,controller)   

@@ -5,7 +5,7 @@ from casadi import cos, sin, tan, fabs
 from controller.controller import Controller
 np.random.seed(3)
 
-class DynamicMPC(Controller):
+class SingleTrackMPC(Controller):
     def __init__(self, car: DynamicCar, config):
         self.dt = config['mpc_dt']
         self.car = car
@@ -38,14 +38,14 @@ class DynamicMPC(Controller):
         # ========================= Optimizer Initialization =================================
         opti = ca.Opti()
         p_opts = {'ipopt.print_level': 0, 'print_time': False, 'expand': False}
-        s_opts = {'nlp_scaling_method': 'none'}
+        s_opts = {'nlp_scaling_method': 'gradient-based'}
         opti.solver("ipopt", p_opts, s_opts)
         
         # ========================= Decision Variables with Initialization ===================
         self.state = opti.variable(self.ns, self.N+1) # state trajectory var
         self.action = opti.variable(self.na, self.N)   # control trajectory var
         self.state_prediction = np.ones((self.ns, self.N+1)) # actual predicted state trajectory
-        self.action_prediction = np.zeros((self.na, self.N))   # actual predicted control trajectory
+        self.action_prediction = np.ones((self.na, self.N))   # actual predicted control trajectory
         self.state0 = opti.parameter(self.ns) # initial state
         opti.subject_to(self.state[:,0] == self.state0) # constraint on initial state
 
@@ -112,7 +112,6 @@ class DynamicMPC(Controller):
             opti.subject_to(opti.bounded(state_constraints['delta_min'],delta,state_constraints['delta_max']))
             
             # input limits
-            opti.subject_to(Fx >= input_constraints['Fx_min'])
             opti.subject_to(Fx <= Peng / Ux)
             opti.subject_to(opti.bounded(input_constraints['w_min'],w,input_constraints['w_max']))
             

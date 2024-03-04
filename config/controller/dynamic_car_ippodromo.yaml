@@ -10,14 +10,13 @@ cost_weights:
   epsi: 1
   w:  0.001
   Fx: 0.001
-  deviation: 0.001
+  deviation: 0.01
   boundary: 1
   slip : 1000
   friction: 0.1
 
 # input constraints
 input_constraints:
-  Fx_min: -100
   w_min: -0.35
   w_max: 0.35
   mu_lim: 0.7
