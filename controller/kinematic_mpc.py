@@ -18,8 +18,6 @@ class KinematicMPC(Controller):
     def command(self, state):
         self._init_horizon(state)
         sol = self.opti.solve()
-        print(f"CURVATURE PREDICTION: {self.opti.debug.value(self.curvature)}")
-        # print(self.opti.debug.value(self.ds))
         self.action_prediction = sol.value(self.action)
         self.state_prediction = sol.value(self.state)
         next_input = KinematicInput(a=self.action_prediction[0][0], w=self.action_prediction[1][0])
@@ -42,8 +40,6 @@ class KinematicMPC(Controller):
         # ========================= Decision Variables with Initialization ===================
         self.state = opti.variable(self.ns, self.N+1) # state trajectory var
         self.action = opti.variable(self.na, self.N)   # control trajectory var
-        self.ds = opti.variable(1,self.N) # spatial step size trajectory var
-        self.curvature = opti.variable(1,self.N) # curvature trajectory var
         self.state_prediction = np.random.random((self.ns, self.N+1)) # actual predicted state trajectory
         self.action_prediction = np.random.random((self.na, self.N))   # actual predicted control trajectory
         self.state0 = opti.parameter(self.ns) # initial state
@@ -66,13 +62,11 @@ class KinematicMPC(Controller):
             delta = state[self.car.state.index('delta')]
             a = input[self.car.input.index('a')]
             w = input[self.car.input.index('w')]
-            ds = self.ds[n]
-            curvature = self.curvature[n]
             
             # ---------- Discretization and model dynamics ------------------------
             # going on for dt and snapshot of how much the car moved
-            opti.subject_to(self.curvature[n] == self.car.track.get_curvature(state_next[self.car.state.index('s')]))
-            opti.subject_to(self.ds[n] == self.dt * ((v * cos(epsi)) / (1 - curvature*ey)))
+            curvature = self.car.track.get_curvature(state_next[self.car.state.index('s')])
+            ds = self.dt * ((v * cos(epsi)) / (1 - curvature*ey))
             opti.subject_to(state_next == self.car.spatial_transition(state,input,curvature,ds))
             
             # -------------------- Stage Cost -------------------------------------

@@ -2,7 +2,7 @@ import casadi as ca
 from model.racing_car import RacingCar
 from utils.fancy_vector import FancyVector
 from utils.common_utils import *
-from casadi import cos, sin, tan, atan, fabs, sign, tanh
+from casadi import cos, sin, tan, atan, fabs, sign, tanh, atan2
 
 class DynamicCar(RacingCar):
     
@@ -19,29 +19,21 @@ class DynamicCar(RacingCar):
         Fx, w = input
         print(f"Fx_f: {self.Fx_f(Fx)}")
         print(f"Fx_r: {self.Fx_r(Fx)}")
-        car = self.config['car']
+        print(f"Xf: {self.Xf(Fx)}")
+        print(f"Xr: {self.Xr(Fx)}")
         env = self.config['env']
         print(f"Fymax_f: {(env['mu']['f']*self.Fz_f(Ux,Fx))**2 - ((0.98*self.Fx_f(Fx))**2)}")
-        #self.Fymax_f = ca.Function("Fymax_f", [self.Fz_f(Ux, Fx), self.Fx_f(Fx)], [Fymax_f])
         print(f"Fymax_r: {(env['mu']['r']*self.Fz_r(Ux,Fx))**2 - ((0.98*self.Fx_r(Fx))**2)}" )
-        g = 0.98
-
         print(f"Fz_f: {self.Fz_f(Ux, Fx)}")
         print(f"Fz_r: {self.Fz_r(Ux,Fx)}")
-        #print(f"Fymax_f: {self.Fymax_f(self.Fz_f(self.Ux, self.Fx), self.Fx_f(self.Fx))}")
-        #print(f"Fymax_r: {self.Fymax_r(self.Fz_r(self.Ux, self.Fx), self.Fx_r(self.Fx))}")
         print(f"alpha_f: {self.alpha_f(Ux,Uy,r,delta)}")
         print(f"alpha_r: {self.alpha_r(Ux,Uy,r,delta)}")
         print(f"alpha_mod_f: {self.alphamod_f(Fx)}")
         print(f"alpha_mod_r: {self.alphamod_r(Fx)}")
         print(f"Fy_f: {self.Fy_f(Ux,Uy,r,delta, Fx)}")
         print(f"Fy_r: {self.Fy_r(Ux,Uy,r,delta, Fx)}")
-
-
-
     
     def _init_model(self):
-        
         # =========== State and auxiliary variables ===================================
         Ux,Uy,r,delta,s,ey,epsi,t = self.state.variables
         self.Ux = Ux
@@ -63,6 +55,7 @@ class DynamicCar(RacingCar):
         Xd = car['Xd'] # drive distribution
         Xb = car['Xb'] # brake distribution
         
+        # TODO qua Fx vanno divisi per 1000 (nel paper dice che sono in kN)?
         Xf = (Xd['f']-Xb['f'])/2 * tanh(2*(Fx + 0.5)) + (Xd['f'] + Xb['f'])/2
         self.Xf = ca.Function("Xf",[Fx],[Xf])
         Fx_f = Fx*Xf
@@ -99,9 +92,7 @@ class DynamicCar(RacingCar):
         self.alphamod_f = ca.Function("alphamod_f",[Fx],[alphamod_f])
 
         Fy_f = ca.if_else((ca.fabs(alpha_f) <= alphamod_f),
-            -Calpha_f*tan(alpha_f) + Calpha_f**2*fabs(tan(alpha_f))*tan(alpha_f) / (3*Fymax_f) - \
-                        (Calpha_f**3*tan(alpha_f)**3)/(27*Fymax_f**2),
-
+            -Calpha_f*tan(alpha_f) + Calpha_f**2*fabs(tan(alpha_f))*tan(alpha_f) / (3*Fymax_f) - (Calpha_f**3*tan(alpha_f)**3)/(27*Fymax_f**2),
             -Calpha_f*(1 - 2*eps + eps**2)*tan(alpha_f) - Fymax_f*(3*eps**2 - 2*eps**3)*sign(alpha_f))
         self.Fy_f = ca.Function("Fy_f",[Ux,Uy,r,delta,Fx],[Fy_f])
         
@@ -159,7 +150,7 @@ class DynamicCar(RacingCar):
 class DynamicCarInput(FancyVector):
     def __init__(self, Fx = 0.0, w = 0.0):
         """
-        :param Fx: longitudinal force | [m/s^2]
+        :param Fx: longitudinal force | [N]
         :param w: steering angle rate | [rad/s]
         """
         self._values = np.array([Fx,w])

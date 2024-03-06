@@ -62,7 +62,7 @@ class RacingSimulation():
                 print(f"ACTION: {action}")
                 # print(f"FRONT FORCE: {self.car.Fx_f(action[0])}")
                 # print(f"REAR FORCE: {self.car.Fx_r(action[0])}")
-                print(f"V PREDICTION: {state_prediction[self.car.state.index('v'),:]}")
+                print(f"UX PREDICTION: {state_prediction[self.car.state.index('Ux'),:]}")
                 print(f"EY PREDICTION: {state_prediction[self.car.state.index('ey'),:]}")
                 print(f"EPSI PREDICTION: {state_prediction[self.car.state.index('epsi'),:]}")
                 # print(f"DELTA PREDICTION: {state_prediction[self.car.state.index('delta'),:]}")

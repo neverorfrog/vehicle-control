@@ -78,8 +78,8 @@ class SingleTrackMPC(Controller):
             
             # ---------- Discretization and model dynamics ------------------------
             # going on for dt and snapshot of how much the car moved
-            curvature = self.car.track.get_curvature(state[self.car.state.index('s')]) #departing from s=0 we get NaN values due to the curvature at s=0 (dunno why)
-            ds = self.dt * (Ux*ca.cos(epsi) - Uy*ca.sin(epsi)) / (1 - curvature*ey)
+            curvature = self.car.track.get_curvature(state_next[self.car.state.index('s')])
+            ds = self.dt * ((Ux*ca.cos(epsi) - Uy*ca.sin(epsi)) / (1 - curvature*ey))
             opti.subject_to(state_next == self.car.spatial_transition(state,input,curvature,ds))
             
             # -------------------- Stage Cost -------------------------------------
@@ -104,7 +104,7 @@ class SingleTrackMPC(Controller):
             if n < self.N-1: #Force Input Continuity
                 next_input = self.action[:,n+1]
                 Fx_next = next_input[self.car.input.index('Fx')]
-                cost += cost_weights['Fx']*(1/ds)*(Fx_next - Fx)**2 
+                cost += cost_weights['Fx']*(Fx_next - Fx)**2 
             
             # -------------------- Constraints ------------------------------------------
             # state limits
@@ -120,10 +120,10 @@ class SingleTrackMPC(Controller):
             opti.subject_to(self.Fy_r[n] == self.car.Fy_r(Ux,Uy,r,delta,Fx))
             
             # longitudinal force limits on tires
-            opti.subject_to(Fx*self.car.Xf(Fx) >= -mu['f']*self.car.Fz_f(Ux,Fx)*cos(self.car.alpha_f(Ux,Uy,r,delta)))
-            opti.subject_to(Fx*self.car.Xf(Fx) <=  mu['f']*self.car.Fz_f(Ux,Fx)*cos(self.car.alpha_f(Ux,Uy,r,delta)))
-            opti.subject_to(Fx*self.car.Xr(Fx) >= -mu['r']*self.car.Fz_r(Ux,Fx)*cos(self.car.alpha_r(Ux,Uy,r,delta)))
-            opti.subject_to(Fx*self.car.Xr(Fx) <=  mu['r']*self.car.Fz_r(Ux,Fx)*cos(self.car.alpha_r(Ux,Uy,r,delta)))
+            bound_f = mu['f']*self.car.Fz_f(Ux,Fx)*cos(self.car.alpha_f(Ux,Uy,r,delta))
+            opti.subject_to(opti.bounded(-bound_f,self.car.Fx_f(Fx),bound_f))
+            bound_r = mu['r']*self.car.Fz_r(Ux,Fx)*cos(self.car.alpha_r(Ux,Uy,r,delta))
+            opti.subject_to(opti.bounded(-bound_r,self.car.Fx_r(Fx),bound_r))
             
             # friction limits
             opti.subject_to((Fx*self.car.Xf(Fx))**2 + self.Fy_f[n]**2 <= (input_constraints['mu_lim']*self.car.Fz_f(Ux,Fx))**2 + (self.Fe_f[n])**2)
