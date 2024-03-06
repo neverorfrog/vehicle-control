@@ -37,13 +37,13 @@ class RacingCar(Robot):
         return self.state
     
     def rel2glob(self, state):
-        s = state[self.state.index('s')]  
+        s = state[self.state.index('s')]
         ey = state[self.state.index('ey')] 
         epsi = state[self.state.index('epsi')]    
         track_psi = wrap(self.track.get_orientation(s))
         x = self.track.x(s) - sin(track_psi) * ey
         y = self.track.y(s) + cos(track_psi) * ey
-        psi = track_psi + epsi
+        psi = wrap(track_psi + epsi)
         return x.full().squeeze(),y.full().squeeze(),psi.full().squeeze()
     
     
@@ -52,6 +52,7 @@ class RacingCar(Robot):
         RK4 integrator
         h: integration interval
         '''
+        #RK4
         state_dot_1 = ode(state, action, curvature)
         state_1 = state + (h/2)*state_dot_1
         # curvature = self.track.get_curvature(state_1[self.state.index('s')])

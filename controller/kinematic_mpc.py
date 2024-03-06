@@ -18,13 +18,15 @@ class KinematicMPC(Controller):
     def command(self, state):
         self._init_horizon(state)
         sol = self.opti.solve()
+        print(f"CURVATURE PREDICTION: {self.opti.debug.value(self.curvature)}")
+        # print(self.opti.debug.value(self.ds))
         self.action_prediction = sol.value(self.action)
         self.state_prediction = sol.value(self.state)
         next_input = KinematicInput(a=self.action_prediction[0][0], w=self.action_prediction[1][0])
         return next_input, self.state_prediction, self.action_prediction
     
     def _init_horizon(self, state):
-        # initial state
+        # ======================= Initializing state and action prediction ============================
         state = state.values.squeeze()
         self.opti.set_value(self.state0, state)
         self.opti.set_initial(self.action, self.action_prediction)
@@ -33,13 +35,15 @@ class KinematicMPC(Controller):
     def _init_opti(self):
         # ========================= Optimizer Initialization =================================
         opti = ca.Opti()
-        p_opts = {'ipopt.print_level': 0, 'print_time': False, 'expand': False}
-        s_opts = {'nlp_scaling_method': 'equilibration-based'}
+        p_opts = {'ipopt.print_level': 0, 'print_time': 0, 'expand': False}
+        s_opts = {'nlp_scaling_method': 'gradient-based'}
         opti.solver("ipopt", p_opts, s_opts)
         
         # ========================= Decision Variables with Initialization ===================
         self.state = opti.variable(self.ns, self.N+1) # state trajectory var
         self.action = opti.variable(self.na, self.N)   # control trajectory var
+        self.ds = opti.variable(1,self.N) # spatial step size trajectory var
+        self.curvature = opti.variable(1,self.N) # curvature trajectory var
         self.state_prediction = np.random.random((self.ns, self.N+1)) # actual predicted state trajectory
         self.action_prediction = np.random.random((self.na, self.N))   # actual predicted control trajectory
         self.state0 = opti.parameter(self.ns) # initial state
@@ -50,6 +54,7 @@ class KinematicMPC(Controller):
         state_constraints = self.config['state_constraints']
         input_constraints = self.config['input_constraints']
         cost = 0
+        
         for n in range(self.N):
             # -------- State and Input Extraction --------------------------------
             state = self.state[:,n]
@@ -61,11 +66,13 @@ class KinematicMPC(Controller):
             delta = state[self.car.state.index('delta')]
             a = input[self.car.input.index('a')]
             w = input[self.car.input.index('w')]
+            ds = self.ds[n]
+            curvature = self.curvature[n]
             
             # ---------- Discretization and model dynamics ------------------------
             # going on for dt and snapshot of how much the car moved
-            curvature = self.car.track.get_curvature(state[self.car.state.index('s')]) #departing from s=0 we get NaN values due to the curvature at s=0 (dunno why)
-            ds = self.dt * ((v * cos(epsi)) / (1 - ey * curvature))
+            opti.subject_to(self.curvature[n] == self.car.track.get_curvature(state_next[self.car.state.index('s')]))
+            opti.subject_to(self.ds[n] == self.dt * ((v * cos(epsi)) / (1 - curvature*ey)))
             opti.subject_to(state_next == self.car.spatial_transition(state,input,curvature,ds))
             
             # -------------------- Stage Cost -------------------------------------
@@ -95,7 +102,7 @@ class KinematicMPC(Controller):
         # -------------------- Terminal Cost -----------------------
         cost += ca.if_else(self.state[self.car.state.index('v'),-1] >= state_constraints['v_max'], # excessive speed
             cost_weights['v']*(self.state[self.car.state.index('v'),-1] - state_constraints['v_max'])**2, 0) 
-        cost += cost_weights['time']*self.state[self.car.state.index('t'),-1] # final cost (minimize time)
+        cost += cost_weights['time']*self.state[self.car.state.index('t'),-1]  # final cost (minimize time)
         cost += cost_weights['ey']*self.state[self.car.state.index('ey'),-1]**2 # final cost (minimize terminal lateral error)
         cost += cost_weights['epsi']*self.state[self.car.state.index('epsi'),-1]**2 # final cost (minimize terminal course error)
         
