@@ -56,21 +56,20 @@ class RacingSimulation():
                 print(f"\n\nN: {n}")
                 conv_state = self.car.rel2glob(state)
                 print(f"STATE: {state}")
-                # print(f"FINAL CURVATURE: {self.car.track.get_curvature(state_prediction[self.car.state.index('s'),-1])}")
+                print(f"FINAL CURVATURE: {self.car.track.get_curvature(state_prediction[self.car.state.index('s'),-1])}")
                 # print(f"MEASURED POSE: {conv_state[0].item():.3f}, {conv_state[1]:.3f}, {conv_state[2]:.3f}")
                 # print(f"REFERENCE POSE: {self.car.track.x(state.s).full().item():.3f}, {self.car.track.y(state.s).full().item():.3f}, {self.car.track.get_orientation(state.s).full().item():.3f}")
                 print(f"ACTION: {action}")
                 # print(f"FRONT FORCE: {self.car.Fx_f(action[0])}")
                 # print(f"REAR FORCE: {self.car.Fx_r(action[0])}")
-                # print(f"V PREDICTION: {state_prediction[self.car.state.index('Ux'),:]}")
-                # print(f"EY PREDICTION: {state_prediction[self.car.state.index('ey'),:]}")
-                #print(f"EPSI PREDICTION: {state_prediction[self.car.state.index('epsi'),:]}")
+                print(f"V PREDICTION: {state_prediction[self.car.state.index('v'),:]}")
+                print(f"EY PREDICTION: {state_prediction[self.car.state.index('ey'),:]}")
+                print(f"EPSI PREDICTION: {state_prediction[self.car.state.index('epsi'),:]}")
                 # print(f"DELTA PREDICTION: {state_prediction[self.car.state.index('delta'),:]}")
                 # print(f"TIME PREDICTION: {state_prediction[self.car.state.index('t'),:]}")
                 # print(f"S PREDICTION: {state_prediction[self.car.state.index('s'),:]}")
-                # print(f"ACCELERATION PREDICTION: {action_prediction[0,:]}")
-                # print(f"OMEGA PREDICTION: {action_prediction[1,:]}")
-                # print(f"CURVATURE PREDICTION: {curvature_prediction}")
+                print(f"ACCELERATION PREDICTION: {action_prediction[0,:]}")
+                print(f"OMEGA PREDICTION: {action_prediction[1,:]}")
                 print(f"ELAPSED TIME: {elapsed_time}")
                 print("")
             ##DEBUG PRINTS
@@ -83,8 +82,10 @@ class RacingSimulation():
             state_traj.append(state)
             action_traj.append(action)
             elapsed.append(elapsed_time)
-            try:preds.append(np.array([self.car.rel2glob(state_prediction[:,i]) for i in range(self.controller.N)]).squeeze()) # converting prediction to global coordinates
-            except: preds = None
+            try:
+                preds.append(np.array([self.car.rel2glob(state_prediction[:,i]) for i in range(self.controller.N)]).squeeze()) # converting prediction to global coordinates
+            except:
+                preds = None
         print("FINISHED")   
         if animate:
             self.animate(state_traj, action_traj, preds, elapsed)   
@@ -169,4 +170,4 @@ class RacingSimulation():
         plt.ioff() #interactive mode off
         # animation.save(f"simulation/videos/{self.name}.gif",writer='pillow',fps=20, dpi=200)
         plt.ion() #interactive mode on
-        print("ANIMATION SAVED")
+        # print("ANIMATION SAVED")
