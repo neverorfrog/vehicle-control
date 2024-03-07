@@ -104,7 +104,7 @@ class SingleTrackMPC(Controller):
             if n < self.N-1: #Force Input Continuity
                 next_input = self.action[:,n+1]
                 Fx_next = next_input[self.car.input.index('Fx')]
-                cost += cost_weights['Fx']*(Fx_next - Fx)**2 
+                cost += cost_weights['Fx']*(1/ds)*(Fx_next - Fx)**2 
             
             # -------------------- Constraints ------------------------------------------
             # state limits
@@ -116,8 +116,8 @@ class SingleTrackMPC(Controller):
             opti.subject_to(opti.bounded(input_constraints['w_min'],w,input_constraints['w_max']))
             
             # tire model dynamics
-            opti.subject_to(self.Fy_f[n] == self.car.Fy_f(Ux,Uy,r,delta,Fx))
-            opti.subject_to(self.Fy_r[n] == self.car.Fy_r(Ux,Uy,r,delta,Fx))
+            # opti.subject_to(self.Fy_f[n] == self.car.Fy_f(Ux,Uy,r,delta,Fx))
+            # opti.subject_to(self.Fy_r[n] == self.car.Fy_r(Ux,Uy,r,delta,Fx))
             
             # longitudinal force limits on tires
             bound_f = mu['f']*self.car.Fz_f(Ux,Fx)*cos(self.car.alpha_f(Ux,Uy,r,delta))

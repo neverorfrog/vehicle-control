@@ -13,7 +13,7 @@ cost_weights:
   deviation: 0.01
   boundary: 1
   slip : 1000
-  friction: 0.0000001
+  friction: 0.1
 
 # input constraints
 input_constraints:
