@@ -56,12 +56,12 @@ class DynamicCar(RacingCar):
         Xb = car['Xb'] # brake distribution
         
         # TODO qua Fx vanno divisi per 1000 (nel paper dice che sono in kN)?
-        Xf = (Xd['f']-Xb['f'])/2 * tanh(2*(Fx + 0.5)) + (Xd['f'] + Xb['f'])/2
+        Xf = (Xd['f']-Xb['f'])/2 * tanh(2*(Fx/1000 + 0.5)) + (Xd['f'] + Xb['f'])/2
         self.Xf = ca.Function("Xf",[Fx],[Xf])
         Fx_f = Fx*Xf
         self.Fx_f = ca.Function("Fx_f",[Fx],[Fx_f])
         
-        Xr = (Xb['r']-Xd['r'])/2 * tanh(-2*(Fx + 0.5)) + (Xd['r'] + Xb['r'])/2
+        Xr = (Xb['r']-Xd['r'])/2 * tanh(-2*(Fx/1000 + 0.5)) + (Xd['r'] + Xb['r'])/2
         self.Xr = ca.Function("Xr",[Fx],[Xr])
         Fx_r = Fx*Xr
         self.Fx_r = ca.Function("Fx_r",[Fx],[Fx_r])
@@ -90,7 +90,6 @@ class DynamicCar(RacingCar):
         Calpha_f = env['C_alpha']['f']
         alphamod_f = atan(3*Fymax_f*eps/Calpha_f)
         self.alphamod_f = ca.Function("alphamod_f",[Fx],[alphamod_f])
-
         Fy_f = ca.if_else((ca.fabs(alpha_f) <= alphamod_f),
             -Calpha_f*tan(alpha_f) + Calpha_f**2*fabs(tan(alpha_f))*tan(alpha_f) / (3*Fymax_f) - (Calpha_f**3*tan(alpha_f)**3)/(27*Fymax_f**2),
             -Calpha_f*(1 - 2*eps + eps**2)*tan(alpha_f) - Fymax_f*(3*eps**2 - 2*eps**3)*sign(alpha_f))
