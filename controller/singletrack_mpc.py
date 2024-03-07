@@ -35,6 +35,14 @@ class SingleTrackMPC(Controller):
         self.opti.set_initial(self.state, self.state_prediction)
         
     def _init_opti(self):
+        """
+        Optimizer Initialization
+                
+        A function that initializes the optimizer and the decision variables, and defines the NLP problem.
+
+        Returns:
+        - opti: The initialized optimizer.
+        """
         # ========================= Optimizer Initialization =================================
         opti = ca.Opti()
         p_opts = {'ipopt.print_level': 0, 'print_time': False, 'expand': False}
@@ -104,20 +112,16 @@ class SingleTrackMPC(Controller):
             if n < self.N-1: #Force Input Continuity
                 next_input = self.action[:,n+1]
                 Fx_next = next_input[self.car.input.index('Fx')]
-                cost += cost_weights['Fx']*(1/ds)*(Fx_next - Fx)**2 
+                cost += cost_weights['Fx']*(Fx_next - Fx)**2 
             
             # -------------------- Constraints ------------------------------------------
             # state limits
             opti.subject_to(Ux >= state_constraints['Ux_min'])
             opti.subject_to(opti.bounded(state_constraints['delta_min'],delta,state_constraints['delta_max']))
-            
+                
             # input limits
             opti.subject_to(Fx <= Peng / Ux)
             opti.subject_to(opti.bounded(input_constraints['w_min'],w,input_constraints['w_max']))
-            
-            # tire model dynamics
-            # opti.subject_to(self.Fy_f[n] == self.car.Fy_f(Ux,Uy,r,delta,Fx))
-            # opti.subject_to(self.Fy_r[n] == self.car.Fy_r(Ux,Uy,r,delta,Fx))
             
             # longitudinal force limits on tires
             bound_f = mu['f']*self.car.Fz_f(Ux,Fx)*cos(self.car.alpha_f(Ux,Uy,r,delta))
@@ -126,8 +130,10 @@ class SingleTrackMPC(Controller):
             opti.subject_to(opti.bounded(-bound_r,self.car.Fx_r(Fx),bound_r))
             
             # friction limits
-            opti.subject_to((Fx*self.car.Xf(Fx))**2 + self.Fy_f[n]**2 <= (input_constraints['mu_lim']*self.car.Fz_f(Ux,Fx))**2 + (self.Fe_f[n])**2)
-            opti.subject_to((Fx*self.car.Xr(Fx))**2 + self.Fy_r[n]**2 <= (input_constraints['mu_lim']*self.car.Fz_r(Ux,Fx))**2 + (self.Fe_r[n])**2) 
+            # opti.subject_to(self.Fy_f[n] == self.car.Fy_f(Ux,Uy,r,delta,Fx))
+            # opti.subject_to(self.Fy_r[n] == self.car.Fy_r(Ux,Uy,r,delta,Fx))
+            opti.subject_to(self.car.Fx_f(Fx)**2 <= (input_constraints['mu_lim']*self.car.Fz_f(Ux,Fx))**2 + (self.Fe_f[n])**2)
+            opti.subject_to(self.car.Fx_r(Fx)**2 <= (input_constraints['mu_lim']*self.car.Fz_r(Ux,Fx))**2 + (self.Fe_r[n])**2) 
         
         # -------------------- Terminal Cost -----------------------
         cost += ca.if_else(self.state[self.car.state.index('Ux'),-1] >= state_constraints['Ux_max'], # excessive speed

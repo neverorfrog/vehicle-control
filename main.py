@@ -44,4 +44,4 @@ elif mode is CarType.DYN:
 
 # Simulation
 simulation = RacingSimulation(f"{mode.value}_{track_name}",car,controller)   
-simulation.run(N = 200)
+simulation.run(N = 400)
