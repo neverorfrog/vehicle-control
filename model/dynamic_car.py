@@ -67,10 +67,10 @@ class DynamicCar(RacingCar):
         self.Fx_r = ca.Function("Fx_r",[Fx],[Fx_r])
         
         # ================= Normal Load ================================================
-        Fz_f = car['b']/self.length*car['m']*(g*cos(env['theta'])*cos(env['phi']) + env['Av2']*Ux**2) - car['h']*Fx/self.length
+        Fz_f = (car['b']/self.length)*car['m']*(g*cos(env['theta'])*cos(env['phi']) + env['Av2']*Ux**2) - car['h']*Fx/self.length
         self.Fz_f = ca.Function("Fz_f",[Ux,Fx],[Fz_f])
         
-        Fz_r = car['a']/self.length*car['m']*(g*cos(env['theta'])*cos(env['phi']) + env['Av2']*Ux**2) + car['h']*Fx/self.length
+        Fz_r = (car['a']/self.length)*car['m']*(g*cos(env['theta'])*cos(env['phi']) + env['Av2']*Ux**2) + car['h']*Fx/self.length
         self.Fz_r = ca.Function("Fz_f",[Ux,Fx],[Fz_r])
         
         # ================ Maximum Lateral Tire Force ==================================
@@ -91,7 +91,8 @@ class DynamicCar(RacingCar):
         alphamod_f = atan(3*Fymax_f*eps/Calpha_f)
         self.alphamod_f = ca.Function("alphamod_f",[Fx],[alphamod_f])
         Fy_f = ca.if_else((ca.fabs(alpha_f) <= alphamod_f),
-            -Calpha_f*tan(alpha_f) + Calpha_f**2*fabs(tan(alpha_f))*tan(alpha_f) / (3*Fymax_f) - (Calpha_f**3*tan(alpha_f)**3)/(27*Fymax_f**2),
+            -Calpha_f*tan(alpha_f) + Calpha_f**2*fabs(tan(alpha_f))*tan(alpha_f) / (3*Fymax_f) - \
+                (Calpha_f**3*tan(alpha_f)**3)/(27*Fymax_f**2), #first case, 
             -Calpha_f*(1 - 2*eps + eps**2)*tan(alpha_f) - Fymax_f*(3*eps**2 - 2*eps**3)*sign(alpha_f))
         self.Fy_f = ca.Function("Fy_f",[Ux,Uy,r,delta,Fx],[Fy_f])
         

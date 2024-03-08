@@ -32,7 +32,7 @@ class RacingSimulation():
         
         # Starting Simulation
         for n in cycle(counter):
-            if state.s > self.car.track.length or n > steps: break
+            if state.s > self.car.track.length-0.3 or n > steps: break
             
             # computing control signal
             start = time.time()

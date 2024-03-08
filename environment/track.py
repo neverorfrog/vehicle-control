@@ -73,7 +73,7 @@ class Track:
         
     def get_curvature(self, s):
         '''Get curvature (inverse of curvature radius) of a point along the spline'''
-        s = np.mod(s,self.length-0.1) # need to module s (for successive laps)
+        s = ca.fmod(s,self.length) # need to module s (for successive laps)
         dx_ds = self.dx_ds(s)
         dy_ds = self.dy_ds(s)
         ddx_ds = self.ddx_ds(s)
@@ -84,7 +84,7 @@ class Track:
     
     def get_orientation(self, s):
         '''Get orientation wrt horizontal line of a point along the spline'''
-        s = np.mod(s,self.length-0.1) # need to module s (for successive laps)
+        s = ca.fmod(s,self.length) # need to module s (for successive laps)
         dx_ds = self.dx_ds(s)
         dy_ds = self.dy_ds(s)
         magnitude = (dx_ds**2 + dy_ds**2)**0.5

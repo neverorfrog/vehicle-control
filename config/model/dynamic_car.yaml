@@ -24,8 +24,8 @@ env:
     f: 180000
     r: 300000
   mu: # friction coefficient
-    f: 0.8
-    r: 0.85
+    f: 0.9
+    r: 0.95
   theta: 0 #TODO theta and phi are road grade and bank angle, but for now we assume flat track
   phi: 0
   Av2: 0 #because theta, phi are 0

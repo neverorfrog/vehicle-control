@@ -55,15 +55,12 @@ class RacingCar(Robot):
         #RK4
         state_dot_1 = ode(state, action, curvature)
         state_1 = state + (h/2)*state_dot_1
-        # curvature = self.track.get_curvature(state_1[self.state.index('s')])
         
         state_dot_2 = ode(state_1, action, curvature)
         state_2 = state + (h/2)*state_dot_2
-        # curvature = self.track.get_curvature(state_2[self.state.index('s')])
         
         state_dot_3 = ode(state_2, action, curvature)
         state_3 = state + h*state_dot_3
-        # curvature = self.track.get_curvature(state_3[self.state.index('s')])
         
         state_dot_4 = ode(state_3, action, curvature)
         state = state + (1/6) * (state_dot_1 + 2 * state_dot_2 + 2 * state_dot_3 + state_dot_4) * h

@@ -46,7 +46,7 @@ class SingleTrackMPC(Controller):
         # ========================= Optimizer Initialization =================================
         opti = ca.Opti()
         p_opts = {'ipopt.print_level': 0, 'print_time': False, 'expand': False}
-        s_opts = {'nlp_scaling_method': 'gradient-based'}
+        s_opts = {}
         opti.solver("ipopt", p_opts, s_opts)
         
         # ========================= Decision Variables with Initialization ===================
@@ -107,12 +107,13 @@ class SingleTrackMPC(Controller):
             cost += ca.if_else(fabs(tan(self.car.alpha_r(Ux,Uy,r,delta))) >= tan(self.car.alphamod_r(Fx)),  # slip angle rear
                         cost_weights['slip']*(fabs(tan(self.car.alpha_r(Ux,Uy,r,delta))) - tan(self.car.alphamod_r(Fx)))**2, 0)
             
-            cost += cost_weights['friction']*((self.Fe_f[n]**2)**2 + (self.Fe_r[n]**2)**2) # friction limit
+            cost += cost_weights['friction']*((self.Fe_f[n]**2)**2 + (self.Fe_r[n]**2)**2) # slack variables for sparsity
             
             if n < self.N-1: #Force Input Continuity
                 next_input = self.action[:,n+1]
                 Fx_next = next_input[self.car.input.index('Fx')]
-                cost += cost_weights['Fx']*(Fx_next - Fx)**2 
+                # cost += cost_weights['Fx']*(1/ds)*(Fx_next - Fx)**2
+                cost += cost_weights['Fx']*(1/(Ux*self.dt))*(Fx_next - Fx)**2  
             
             # -------------------- Constraints ------------------------------------------
             # state limits
@@ -129,11 +130,15 @@ class SingleTrackMPC(Controller):
             bound_r = mu['r']*self.car.Fz_r(Ux,Fx)*cos(self.car.alpha_r(Ux,Uy,r,delta))
             opti.subject_to(opti.bounded(-bound_r,self.car.Fx_r(Fx),bound_r))
             
-            # friction limits
+            # tire model
             # opti.subject_to(self.Fy_f[n] == self.car.Fy_f(Ux,Uy,r,delta,Fx))
             # opti.subject_to(self.Fy_r[n] == self.car.Fy_r(Ux,Uy,r,delta,Fx))
-            opti.subject_to(self.car.Fx_f(Fx)**2 <= (input_constraints['mu_lim']*self.car.Fz_f(Ux,Fx))**2 + (self.Fe_f[n])**2)
-            opti.subject_to(self.car.Fx_r(Fx)**2 <= (input_constraints['mu_lim']*self.car.Fz_r(Ux,Fx))**2 + (self.Fe_r[n])**2) 
+            
+            # friction limits: these constraints are necessary for real world experiments
+            # front = self.car.Fx_f(Fx)**2 + self.Fy_f[n]**2
+            # rear = self.car.Fx_r(Fx)**2 + self.Fy_r[n]**2
+            # opti.subject_to(front <= (input_constraints['mu_lim']*self.car.Fz_f(Ux,Fx))**2 + (self.Fe_f[n])**2)
+            # opti.subject_to(rear <= (input_constraints['mu_lim']*self.car.Fz_r(Ux,Fx))**2 + (self.Fe_r[n])**2) 
         
         # -------------------- Terminal Cost -----------------------
         cost += ca.if_else(self.state[self.car.state.index('Ux'),-1] >= state_constraints['Ux_max'], # excessive speed
