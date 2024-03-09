@@ -1,8 +1,8 @@
-from model.dynamic_car import DynamicCar, DynamicCarInput
+from models.dynamic_car import DynamicCar, DynamicCarInput
 import casadi as ca
 import numpy as np
 from casadi import cos, sin, tan, fabs
-from controller.controller import Controller
+from controllers.controller import Controller
 np.random.seed(3)
 
 # TODO

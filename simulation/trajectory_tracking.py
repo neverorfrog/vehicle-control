@@ -1,6 +1,6 @@
 import time
 from matplotlib.backend_bases import FigureManagerBase
-from controller.controller import Controller
+from controllers.controller import Controller
 import numpy as np
 from matplotlib.animation import FuncAnimation
 import matplotlib.pyplot as plt
@@ -8,7 +8,7 @@ from matplotlib.gridspec import GridSpec
 import numpy as np
 from itertools import count, cycle
 from environment.trajectory import Trajectory
-from model.robot import Robot
+from models.robot import Robot
 
 class TrajectoryTrackingSimulation():   
     def __init__(self, name: str, robot: Robot, controller: Controller, trajectory: Trajectory):
@@ -123,4 +123,25 @@ class TrajectoryTrackingSimulation():
         plt.ion() #interactive mode on
         fig_manager: FigureManagerBase = plt.get_current_fig_manager()
         fig_manager.window.showMaximized() 
-        plt.show(block=True) 
+        plt.show(block=True)
+        
+        
+from simulation.trajectory_tracking import TrajectoryTrackingSimulation
+from models.differential_drive import DifferentialDrive
+from utils.common_utils import *
+from environment.trajectory import Circle
+from controllers.feedback_linearization.differential_drive import DFBL
+        
+if __name__ == "__main__":
+    reference = Circle()
+
+    # Bicycle model and corresponding controller
+    robot_config = load_config(f"config/model/differential_drive.yaml")
+    robot = DifferentialDrive(config=robot_config)
+    robot.input.v = 0.1
+    # controller = FBL(kp=np.array([1,1]),kd=np.array([1,1]))
+    controller = DFBL(kp=np.array([5,5]),kd=np.array([2,2]))
+
+    # Simulation
+    simulation = TrajectoryTrackingSimulation("boh",robot,controller,reference)   
+    simulation.run(N = 200, animate = True)

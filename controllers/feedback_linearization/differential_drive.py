@@ -1,8 +1,8 @@
 from environment.trajectory import Trajectory
 import numpy as np
-from controller.controller import Controller
+from controllers.controller import Controller
 from casadi import sin,cos
-from model.differential_drive import DifferentialDrive, DifferentialDriveInput
+from models.differential_drive import DifferentialDrive, DifferentialDriveInput
 import casadi as ca
 
 class FBL(Controller):

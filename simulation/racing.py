@@ -1,14 +1,14 @@
 import time
 from matplotlib.backend_bases import FigureManagerBase
-from controller.controller import Controller
+from controllers.controller import Controller
 import numpy as np
-from model.racing_car import RacingCar
+from models.racing_car import RacingCar
 from matplotlib.animation import FuncAnimation
 import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
 import numpy as np
 from itertools import count, cycle
-from model.dynamic_car import DynamicCarInput
+from models.dynamic_car import DynamicCarInput
 from utils.fancy_vector import FancyVector
 
 class RacingSimulation():   
@@ -34,24 +34,17 @@ class RacingSimulation():
         for n in cycle(counter):
             if state.s > self.car.track.length-0.3 or n > steps: break
             
-            # computing control signal
+            # ----------- Computing control signal ------
             start = time.time()
             state_prediction = None
             try:
                 action, state_prediction, action_prediction = self.controller.command(state)
             except Exception as e:
                 print(e)
-                print("ERROOOOOOOOOOOOOOOOOOOOOOOOOOOOOOR")
                 break
             elapsed_time = time.time() - start
 
-            # action = DynamicCarInput(1000, 0)
-            # if n>=50 and n < 80: 
-            #     action = DynamicCarInput(1000, 0.1)
-            # if n > 80:
-            #     action = DynamicCarInput(1000, -0.3)
-                
-            ##DEBUG PRINTS
+            # ------------- DEBUG PRINTS -----------------
             if n <= steps:
                 print(f"\n\nN: {n}")
                 conv_state = self.car.rel2glob(state)
@@ -72,13 +65,12 @@ class RacingSimulation():
                 # print(f"OMEGA PREDICTION: {action_prediction[1,:]}")
                 print(f"ELAPSED TIME: {elapsed_time}")
                 print("")
-            ##DEBUG PRINTS
             
-            # applying control signal
+            # ----------- Applying control signal --------
             state = self.car.drive(action)
             self.car.print(state.values, action.values)
             
-            # logging
+            # ----------- Logging -------------------------
             state_traj.append(state)
             action_traj.append(action)
             elapsed.append(elapsed_time)

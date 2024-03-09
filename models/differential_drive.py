@@ -1,7 +1,7 @@
 from matplotlib import pyplot as plt
 from matplotlib.axes import Axes
 import numpy as np
-from model.robot import Robot
+from models.robot import Robot
 from utils.common_utils import wrap
 from utils.fancy_vector import FancyVector
 import casadi as ca
@@ -94,15 +94,6 @@ class DifferentialDriveInput(FancyVector):
     def w(self,value: float): 
         assert isinstance(value, float)
         self.values[1] = value
-        
-    @property
-    def values(self): return self._values
-    
-    @property
-    def syms(self): return self._syms
-    
-    @property
-    def keys(self): return self._keys
     
     
 class DifferentialDriveState(FancyVector):
@@ -127,12 +118,3 @@ class DifferentialDriveState(FancyVector):
     
     @property
     def t(self): return self.values[3]
-    
-    @property
-    def values(self): return self._values
-    
-    @property
-    def syms(self): return self._syms
-    
-    @property
-    def keys(self): return self._keys

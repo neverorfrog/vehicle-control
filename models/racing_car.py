@@ -1,7 +1,7 @@
 from matplotlib import pyplot as plt
 from matplotlib.axes import Axes
 import numpy as np
-from model.robot import Robot
+from models.robot import Robot
 from utils.fancy_vector import FancyVector
 from environment.track import Track
 from utils.common_utils import wrap

@@ -1,8 +1,8 @@
-from model.kinematic_car import KinematicCar, KinematicInput
+from models.kinematic_car import KinematicCar, KinematicInput
 import casadi as ca
 import numpy as np
 from casadi import cos, sin, tan
-from controller.controller import Controller
+from controllers.controller import Controller
 np.random.seed(3)
 
 class KinematicMPC(Controller):

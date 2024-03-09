@@ -1,5 +1,5 @@
 import casadi as ca
-from model.racing_car import RacingCar
+from models.racing_car import RacingCar
 from utils.fancy_vector import FancyVector
 from utils.common_utils import *
 from collections import namedtuple
@@ -61,7 +61,7 @@ class DynamicPointMass(RacingCar):
         t_dot = 1
         state_dot = ca.vertcat(V_dot,  s_dot, ey_dot, epsi_dot, t_dot)
         t_ode = ca.Function('ode', [self.state.syms,self.input.syms,curvature], [state_dot])
-        t_integrator = integrate(self.state.syms,self.input.syms,curvature,t_ode,self.dt)
+        t_integrator = self.integrate(self.state.syms,self.input.syms,curvature,t_ode,self.dt)
         self._temporal_transition = ca.Function('transition', [self.state.syms,self.input.syms,curvature], [t_integrator])
 
         # SPATIAL ODE (equations 41a to 41f)
@@ -72,7 +72,7 @@ class DynamicPointMass(RacingCar):
         t_prime = t_dot / s_dot
         state_prime = ca.vertcat(V_prime, s_prime, ey_prime, epsi_prime, t_prime)
         s_ode = ca.Function('ode', [self.state.syms, self.input.syms, curvature], [state_prime])
-        s_integrator = integrate(self.state.syms, self.input.syms, curvature, s_ode, h=ds)
+        s_integrator = self.integrate(self.state.syms, self.input.syms, curvature, s_ode, h=ds)
         self._spatial_transition = ca.Function('transition', [self.state.syms,self.input.syms,curvature,ds], [s_integrator])
 
     @property
@@ -109,19 +109,6 @@ class DynamicPointMassInput(FancyVector):
     def Fy(self,value: float): 
         assert isinstance(value, float)
         self.values[1] = value
-        
-    @property
-    def values(self): return self._values
-    
-    @property
-    def syms(self): return self._syms
-    
-    @property
-    def keys(self): return self._keys
-    
-    @classmethod
-    def create(cls, *args, **kwargs):
-        return cls(*args, **kwargs)
     
 class DynamicPointMassState(FancyVector):
     def __init__(self, V = 0.0, s = 0.0, ey = 0.0, epsi = 0.0, t = 0.0):
@@ -156,16 +143,3 @@ class DynamicPointMassState(FancyVector):
     
     @property
     def t(self): return self.values[4]
-    
-    @property
-    def values(self): return self._values
-    
-    @property
-    def syms(self): return self._syms
-    
-    @property
-    def keys(self): return self._keys
-    
-    @classmethod
-    def create(cls, *args, **kwargs):
-        return cls(*args, **kwargs)

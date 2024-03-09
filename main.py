@@ -1,24 +1,25 @@
 import sys
 sys.path.append(".")
 
-from model.dynamic_car import DynamicCar, DynamicCarState
+from models.dynamic_car import DynamicCar, DynamicCarState
 from environment.track import Track
-from model.kinematic_car import KinematicCar, KinematicState
+from models.kinematic_car import KinematicCar, KinematicState
 from simulation.racing import RacingSimulation
-from controller.kinematic_mpc import KinematicMPC
-from controller.singletrack_mpc import SingleTrackMPC
+from controllers.mpc.kinematic_mpc import KinematicMPC
+from controllers.mpc.dynamic_mpc import DynamicMPC
 from utils.common_utils import *
 from enum import Enum
 
 class CarType(Enum):
     DYN = "dynamic_car"
     KIN = "kinematic_car"
+    CAS = "cascaded"
     
 class TrackType(Enum):
     I = "ippodromo"
     C = "complicato"
     
-mode = CarType.DYN
+car_type = CarType.DYN
 track_name = TrackType.I.value
 
 # Track Loading
@@ -30,17 +31,17 @@ track = Track(wp_x=track_config['wp_x'],
               width=track_config['width'])
 
 # Bicycle model and corresponding controller
-car_config = load_config(f"config/model/{mode.value}.yaml")
-controller_config = load_config(f"config/controller/{mode.value}_{track_name}.yaml")
-if mode is CarType.KIN:
+car_config = load_config(f"config/models/{car_type.value}.yaml")
+controller_config = load_config(f"config/controllers/{track_name}/{car_type.value}.yaml")
+if car_type is CarType.KIN:
     car = KinematicCar(config=car_config, track = track)
     car.state = KinematicState(v = 1, s = 170)
     controller = KinematicMPC(car=car, config=controller_config)
-elif mode is CarType.DYN:
+elif car_type is CarType.DYN:
     car = DynamicCar(config=car_config, track = track)
     car.state = DynamicCarState(Ux = 3, s = 50)
-    controller = SingleTrackMPC(car=car, config=controller_config)
+    controller = DynamicMPC(car=car, config=controller_config)
 
 # Simulation
-simulation = RacingSimulation(f"{mode.value}_{track_name}",car,controller)   
+simulation = RacingSimulation(f"{car_type.value}_{track_name}",car,controller)   
 simulation.run(N = 1000)

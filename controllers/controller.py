@@ -2,7 +2,7 @@ import numpy as np
 from abc import abstractmethod
 from abc import ABC
 from environment.trajectory import Trajectory
-from model.robot import Robot
+from models.robot import Robot
 
 class Controller(ABC):
     '''Controller Class'''

@@ -1,5 +1,5 @@
 import casadi as ca
-from model.racing_car import RacingCar
+from models.racing_car import RacingCar
 from utils.fancy_vector import FancyVector
 from utils.common_utils import *
 from casadi import cos, sin, tan, atan, fabs, sign, tanh, atan2
@@ -122,7 +122,7 @@ class DynamicCar(RacingCar):
         t_dot = 1
         state_dot = ca.vertcat(Ux_dot, Uy_dot, r_dot, delta_dot, s_dot, ey_dot, epsi_dot, t_dot)
         t_ode = ca.Function('ode', [self.state.syms,self.input.syms,curvature], [state_dot])
-        t_integrator = integrate(self.state.syms,self.input.syms,curvature,t_ode,self.dt)
+        t_integrator = self.integrate(self.state.syms,self.input.syms,curvature,t_ode,self.dt)
         self._temporal_transition = ca.Function('transition', [self.state.syms,self.input.syms,curvature], [t_integrator])
 
         # SPATIAL Transition (equations 41a to 41f)
@@ -136,7 +136,7 @@ class DynamicCar(RacingCar):
         t_prime = t_dot / s_dot
         state_prime = ca.vertcat(Ux_prime, Uy_prime, r_prime, delta_prime, s_prime, ey_prime, epsi_prime, t_prime)
         s_ode = ca.Function('ode', [self.state.syms, self.input.syms, curvature], [state_prime])
-        s_integrator = integrate(self.state.syms, self.input.syms, curvature, s_ode, h=ds)
+        s_integrator = self.integrate(self.state.syms, self.input.syms, curvature, s_ode, h=ds)
         self._spatial_transition = ca.Function('transition', [self.state.syms,self.input.syms,curvature,ds], [s_integrator])
     
     @property
@@ -172,15 +172,6 @@ class DynamicCarInput(FancyVector):
     def w(self,value: float): 
         assert isinstance(value, float)
         self.values[1] = value
-        
-    @property
-    def values(self): return self._values
-    
-    @property
-    def syms(self): return self._syms
-    
-    @property
-    def keys(self): return self._keys
     
 class DynamicCarState(FancyVector):
     def __init__(self, Ux = 0.0, Uy = 0.0, r = 0.0, delta = 0.0, s = 0.0, ey = 0.0, epsi = 0.0, t = 0.0):
@@ -227,12 +218,3 @@ class DynamicCarState(FancyVector):
     
     @property
     def t(self): return self.values[7]
-    
-    @property
-    def values(self): return self._values
-    
-    @property
-    def syms(self): return self._syms
-    
-    @property
-    def keys(self): return self._keys
