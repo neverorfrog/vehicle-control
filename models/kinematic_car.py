@@ -68,6 +68,7 @@ class KinematicInput(FancyVector):
         self._values = np.array([a,w])
         self._keys = ['a','w']
         self._syms = ca.vertcat(*[ca.SX.sym(self._keys[i]) for i in range(len(self._keys))])
+        self._labels = [r'$a$',r'$\omega$']
         
     @property
     def a(self): return self.values[0] 

@@ -23,6 +23,9 @@ class FancyVector(ABC):
     def syms(self): return self._syms #redefined by subclass
     
     @property
+    def labels(self): return self._labels #redefined by subclass
+    
+    @property
     def variables(self): return [self.syms[i] for i in range(len(self.values))]
     
     def index(self, key): return self.keys.index(key)

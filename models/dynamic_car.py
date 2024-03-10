@@ -55,7 +55,6 @@ class DynamicCar(RacingCar):
         Xd = car['Xd'] # drive distribution
         Xb = car['Xb'] # brake distribution
         
-        # TODO qua Fx vanno divisi per 1000 (nel paper dice che sono in kN)?
         Xf = (Xd['f']-Xb['f'])/2 * tanh(2*(Fx/1000 + 0.5)) + (Xd['f'] + Xb['f'])/2
         self.Xf = ca.Function("Xf",[Fx],[Xf])
         Fx_f = Fx*Xf
@@ -67,10 +66,10 @@ class DynamicCar(RacingCar):
         self.Fx_r = ca.Function("Fx_r",[Fx],[Fx_r])
         
         # ================= Normal Load ================================================
-        Fz_f = (car['b']/self.length)*car['m']*(g*cos(env['theta'])*cos(env['phi']) + env['Av2']*Ux**2) - car['h']*Fx/self.length
+        Fz_f = (car['b']/car['l'])*car['m']*(g*cos(env['theta'])*cos(env['phi']) + env['Av2']*Ux**2) - car['h']*Fx/car['l']
         self.Fz_f = ca.Function("Fz_f",[Ux,Fx],[Fz_f])
         
-        Fz_r = (car['a']/self.length)*car['m']*(g*cos(env['theta'])*cos(env['phi']) + env['Av2']*Ux**2) + car['h']*Fx/self.length
+        Fz_r = (car['a']/car['l'])*car['m']*(g*cos(env['theta'])*cos(env['phi']) + env['Av2']*Ux**2) + car['h']*Fx/car['l']
         self.Fz_r = ca.Function("Fz_f",[Ux,Fx],[Fz_r])
         
         # ================ Maximum Lateral Tire Force ==================================
@@ -107,8 +106,8 @@ class DynamicCar(RacingCar):
         
         # ===================== Differential Equations ===================================
         Fb = 0 #-p.m*g*ca.cos(theta)*ca.sin(phi) TODO if you want to change the angle modify this
-        Fn = car['m']*g #ca.cos(theta) is 1 for theta=0, might aswell not write it
-        Frr = 218 #env['Crr']*Fn #rolling resistance = coefficient*normal force (not specified in the paper)
+        Fn = -car['m']*g #ca.cos(theta) is 1 for theta=0, might aswell not write it
+        Frr = env['Frr'] #env['Crr']*Fn #rolling resistance = coefficient*normal force (not specified in the paper)
         Fd = Frr + env['Cd']*(Ux**2) #p.m*g*ca.sin(theta) 
 
         # TEMPORAL Transition (equations 1a to 1f)
@@ -156,6 +155,7 @@ class DynamicCarInput(FancyVector):
         self._values = np.array([Fx,w])
         self._keys = ['Fx','w']
         self._syms = ca.vertcat(*[ca.SX.sym(self._keys[i]) for i in range(len(self._keys))])
+        self._labels = [r'$F_x$',r'$\omega$']
         
     @property
     def Fx(self): return self.values[0] 

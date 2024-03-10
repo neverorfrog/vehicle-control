@@ -17,7 +17,7 @@ class RacingCar(Robot):
         :param dt: sampling time of model
         """
         # Car Parameters
-        self.length = config['length']
+        self.length = config['car']['l']
         # Reference Path
         self.track = track
         super().__init__(config)
