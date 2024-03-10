@@ -22,7 +22,7 @@ class TrackType(Enum):
     I = "ippodromo"
     C = "complicato"
     
-car_type = CarType.KIN
+car_type = CarType.DPM
 track_name = TrackType.I.value
 
 # Track Loading

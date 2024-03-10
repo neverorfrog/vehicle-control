@@ -101,7 +101,9 @@ class PointMassMPC(Controller):
             if n < self.N-1: #Force Input Continuity
                 next_input = self.action[:,n+1]
                 Fx_next = next_input[self.car.input.index('Fx')]
-                cost += cost_weights['Fx']*(1/(V*self.dt))*(Fx_next-Fx)**2 
+                Fy_next = next_input[self.car.input.index('Fy')]
+                cost += cost_weights['Fx']*(1/ds)*(Fx_next-Fx)**2 
+                cost += cost_weights['Fx']*(1/ds)*(Fy_next-Fy)**2 
             
             # -------------------- Constraints ------------------------------------------
             # state limits
