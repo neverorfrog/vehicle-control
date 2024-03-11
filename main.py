@@ -59,5 +59,8 @@ elif car_type is CarType.CAS:
     controller = CascadedMPC(car=car, point_mass=point_mass, config=controller_config)
 
 # Simulation
-simulation = RacingSimulation(f"{car_type.value}_{track_name}",car,controller)   
+if car_type is CarType.CAS:
+    simulation = RacingSimulation(f"{car_type.value}_{track_name}",car,point_mass,controller)
+else:    
+    simulation = RacingSimulation(f"{car_type.value}_{track_name}",car,controller)   
 simulation.run(N = 1000)

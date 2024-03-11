@@ -12,9 +12,16 @@ from models.dynamic_car import DynamicCarInput
 from utils.fancy_vector import FancyVector
 
 class RacingSimulation():   
-    def __init__(self, name: str, car: RacingCar, controller: Controller):
+    # TODO: Activate this and comment the one below if you are not using cascaded model
+    # def __init__(self, name: str, car: RacingCar, controller: Controller):
+        
+    def __init__(self, name: str, car: RacingCar, point_mass: RacingCar, controller: Controller):
         self.name = name
         self.car = car
+        
+        # TODO: comment this if you are not using cascaded model
+        self.point_mass = point_mass
+
         self.controller = controller
         
     def run(self, N: int = None, animate: bool = True):
@@ -83,7 +90,7 @@ class RacingSimulation():
                 
                 preds_car = [self.car.rel2glob(state_prediction[:,i]) for i in range(self.controller.N)]
                 preds_pm = [self.point_mass.rel2glob(state_pm_prediction[:,i]) for i in range(self.controller.M)]
-                preds = np.array(preds_car + preds_pm).squeeze()
+                preds.append(np.array(preds_car + preds_pm).squeeze())
             except:
                 preds = None
         print("FINISHED")   
