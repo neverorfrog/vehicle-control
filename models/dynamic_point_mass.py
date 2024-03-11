@@ -24,59 +24,62 @@ class DynamicPointMass(RacingCar):
     def create_input(cls, *args, **kwargs):
         return DynamicPointMassInput(*args, **kwargs)
     
+    # TODO: if there is some value to print, do it here
     def print(self, state, input):
-        pass
-    
+        V,s,ey,epsi,t = state
+        Fx, Fy = input
+        print("##########################")
     def _init_model(self):
         car = self.config['car']
         env = self.config['env']
-        
-        # =========== State and auxiliary variables ===================================
+
+        g = 9.88
+        # Input variables
+        Fx, Fy = self.input.variables
+
+        # State and auxiliary variables
         V,s,ey,epsi,t = self.state.variables
         curvature = ca.SX.sym('curvature')
         ds = ca.SX.sym('ds')
-        g = 9.88
+
+        #parameters: mass, distance of CG from front (a) and rear (b) axis, height of CG, yaw moment of inertia
+        Parameters = namedtuple('Parameters', ['m'])
+        p = Parameters(1000)
+        #TODO theta and phi are road grade and bank angle, but for now we assume flat track
+        theta = 0 
+        phi = 0
+
+        Fb = 0 #-p.m*g*ca.cos(theta)*ca.sin(phi) TODO if you want to change the angle modify this
+        Fn = -p.m*g*1 #ca.cos(theta) is 1 for theta=0, might aswell not write it
         
-        # ====== Input Model ==========================================================
-        Fx, Fy = self.input.variables
-        Xd = car['Xd'] # drive distribution
-        Xb = car['Xb'] # brake distribution
+        Crr = 0.014 #https://en.wikipedia.org/wiki/Rolling_resistance
+        Frr = Crr*Fn #rolling resistance = coefficient*normal force (not specified in the paper)
         
-        Xf = (Xd['f']-Xb['f'])/2 * tanh(2*(Fx/1000 + 0.5)) + (Xd['f'] + Xb['f'])/2
-        self.Xf = ca.Function("Xf",[Fx],[Xf])
-        Fx_f = Fx*Xf
-        self.Fx_f = ca.Function("Fx_f",[Fx],[Fx_f])
-        
-        Xr = (Xb['r']-Xd['r'])/2 * tanh(-2*(Fx/1000 + 0.5)) + (Xd['r'] + Xb['r'])/2
-        self.Xr = ca.Function("Xr",[Fx],[Xr])
-        Fx_r = Fx*Xr
-        self.Fx_r = ca.Function("Fx_r",[Fx],[Fx_r])
+        #All the forces introduced above are constant, as the various coefficient are constant and the ground is always flat
+            #Fd depends on the velocity instead, so we define a casadi function (Is this the correct methodology?)
+        Cd = 0.25 #https://en.wikipedia.org/wiki/Automobile_drag_coefficient#:~:text=The%20average%20modern%20automobile%20achieves,a%20Cd%3D0.35%E2%80%930.45.
+        Fd = ca.Function("Fd_Function",[V], [Frr + Cd*V**2 - 0]) #p.m*g*ca.sin(theta) 
         
         # ================= Normal Load ================================================
-        Fz_f = (car['b']/car['l'])*car['m']*(g*cos(env['theta'])*cos(env['phi']) + env['Av2']*V**2) - car['h']*Fx/car['l']
+        Fz_f = (car['b']/self.length)*car['m']*(g*cos(env['theta'])*cos(env['phi']) + env['Av2']*V**2) - car['h']*Fx/self.length
         self.Fz_f = ca.Function("Fz_f",[V,Fx],[Fz_f])
         
-        Fz_r = (car['a']/car['l'])*car['m']*(g*cos(env['theta'])*cos(env['phi']) + env['Av2']*V**2) + car['h']*Fx/car['l']
+        Fz_r = (car['a']/self.length)*car['m']*(g*cos(env['theta'])*cos(env['phi']) + env['Av2']*V**2) + car['h']*Fx/self.length
         self.Fz_r = ca.Function("Fz_f",[V,Fx],[Fz_r])
-        
-        # ===================== Differential Equations ===================================
-        Fb = 0 #-p.m*g*ca.cos(theta)*ca.sin(phi) TODO if you want to change the angle modify this
-        Fn = -car['m']*g #ca.cos(theta) is 1 for theta=0, might aswell not write it
-        Frr = env['Frr'] #env['Crr']*Fn #rolling resistance = coefficient*normal force (not specified in the paper)
-        Fd = Frr + env['Cd']*(V**2) #p.m*g*ca.sin(theta)
-        
-        # TEMPORAL transition (equations 1a to 1f)
-        V_dot = (Fx - Fd)/car['m']
+
+
+        # TEMPORAL ODE (equations 1a to 1f)
+        V_dot = (Fx - Fd(V))/p.m
         s_dot = V*ca.cos(epsi)/(1-curvature*ey)
         ey_dot = V*ca.sin(epsi)
-        epsi_dot = (Fy + Fb)/(car['m']*V) - curvature*s_dot
+        epsi_dot = (Fy + Fb)/(p.m*V) - curvature*s_dot
         t_dot = 1
         state_dot = ca.vertcat(V_dot,  s_dot, ey_dot, epsi_dot, t_dot)
         t_ode = ca.Function('ode', [self.state.syms,self.input.syms,curvature], [state_dot])
         t_integrator = self.integrate(self.state.syms,self.input.syms,curvature,t_ode,self.dt)
         self._temporal_transition = ca.Function('transition', [self.state.syms,self.input.syms,curvature], [t_integrator])
 
-        # SPATIAL transition (equations 41a to 41f)
+        # SPATIAL ODE (equations 41a to 41f)
         V_prime = V_dot / s_dot
         s_prime = 1
         ey_prime = ey_dot / s_dot
@@ -105,7 +108,6 @@ class DynamicPointMassInput(FancyVector):
         self._values = np.array([Fx, Fy])
         self._keys = ['Fx', 'Fy']
         self._syms = ca.vertcat(*[ca.SX.sym(self._keys[i]) for i in range(len(self._keys))])
-        self._labels = [r'$F_x$',r'$F_y$']
         
     @property
     def Fx(self): return self.values[0] 
@@ -135,7 +137,6 @@ class DynamicPointMassState(FancyVector):
         self._values = np.array([V,s,ey,epsi,t])
         self._keys = ['V','s','ey','epsi','t']
         self._syms = ca.vertcat(*[ca.SX.sym(self._keys[i]) for i in range(len(self._keys))])
-        self.delta = 0 #fictituous steering angle (always zero)
     
     @property
     def V(self): return self.values[0] 

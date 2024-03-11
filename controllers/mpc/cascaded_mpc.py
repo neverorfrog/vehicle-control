@@ -1,20 +1,26 @@
 from models.dynamic_car import DynamicCar, DynamicCarInput
+from models.dynamic_point_mass import DynamicPointMass
 import casadi as ca
 import numpy as np
-from casadi import cos, sin, tan, fabs
+from casadi import cos, sin, tan, fabs, atan
 from controllers.controller import Controller
 np.random.seed(3)
 
 # TODO: Implement cascaded MPC
 
-class DynamicMPC(Controller):
-    def __init__(self, car: DynamicCar, config):
+class CascadedMPC(Controller):
+    def __init__(self, car: DynamicCar, point_mass: DynamicPointMass, config):
         self.dt = config['mpc_dt']
         self.car = car
+        self.point_mass = point_mass
         self.N = config['horizon']
+        self.M = config['horizon_pm']
         self.config = config
         self.ns = len(self.car.state) # number of state variables
         self.na = len(self.car.input) # number of action variables
+        self.ns_pm = len(self.point_mass.state) # number of state variables
+        self.na_pm = len(self.point_mass.input) # number of action variables
+
         self.opti = self._init_opti()
         self._init_racing()
         
@@ -23,8 +29,10 @@ class DynamicMPC(Controller):
         sol = self.opti.solve()
         self.action_prediction = sol.value(self.action)
         self.state_prediction = sol.value(self.state)
+        self.action_pm_prediction = sol.value(self.action_pm)
+        self.state_pm_prediction = sol.value(self.state_pm)
         next_input = DynamicCarInput(Fx=self.action_prediction[0][0], w=self.action_prediction[1][0])
-        return next_input, self.state_prediction, self.action_prediction
+        return next_input, self.state_prediction, self.action_prediction, self.state_pm_prediction, self.action_pm_prediction
     
     def _init_racing(self):
         '''Initializing state prediction'''
@@ -46,11 +54,16 @@ class DynamicMPC(Controller):
         # ========================= Decision Variables with Initialization ===================
         self.state = opti.variable(self.ns, self.N+1) # state trajectory var
         self.action = opti.variable(self.na, self.N)   # control trajectory var
+        self.state_pm = opti.variable(self.ns_pm, self.M+1)
+        self.action_pm = opti.variable(self.na_pm, self.M)
         self.state_prediction = np.ones((self.ns, self.N+1)) # actual predicted state trajectory
         self.action_prediction = np.zeros((self.na, self.N))   # actual predicted control trajectory
+        self.state_pm_prediction = np.ones((self.ns_pm, self.M+1)) # actual predicted state trajectory
+        self.action_pm_prediction = np.zeros((self.na_pm, self.M))   # actual predicted control trajectory
         self.state0 = opti.parameter(self.ns) # initial state
         opti.subject_to(self.state[:,0] == self.state0) # constraint on initial state
 
+        
         # ======================== Slack Variables ============================================
         self.Fy_f = opti.variable(self.N)
         self.Fy_r = opti.variable(self.N)
@@ -60,6 +73,7 @@ class DynamicMPC(Controller):
         # ======================= Cycle the entire horizon defining NLP problem ===============
         cost_weights = self.config['cost_weights'] 
         state_constraints = self.config['state_constraints']
+        state_pm_constraints = self.config['state_pm_constraints']
         input_constraints = self.config['input_constraints']
         Peng = self.car.config['car']['Peng']
         mu = self.car.config['env']['mu']
@@ -114,7 +128,7 @@ class DynamicMPC(Controller):
             opti.subject_to(opti.bounded(state_constraints['delta_min'],delta,state_constraints['delta_max']))
             
             # input limits
-            opti.subject_to(Fx >= input_constraints['Fx_min'])
+            opti.subject_to(Fx >= input_constraints['Fx_min'])  # TODO: Fx_min does not exist (?)
             opti.subject_to(Fx <= Peng / Ux)
             opti.subject_to(opti.bounded(input_constraints['w_min'],w,input_constraints['w_max']))
             
@@ -132,12 +146,94 @@ class DynamicMPC(Controller):
             opti.subject_to((Fx*self.car.Xf(Fx))**2 + self.Fy_f[n]**2 <= (input_constraints['mu_lim']*self.car.Fz_f(Ux,Fx))**2 + (self.Fe_f[n])**2)
             opti.subject_to((Fx*self.car.Xr(Fx))**2 + self.Fy_r[n]**2 <= (input_constraints['mu_lim']*self.car.Fz_r(Ux,Fx))**2 + (self.Fe_r[n])**2) 
         
+        #######     POINT MASS MODEL    ########
+        for m in range(self.M):
+            state_pm = self.state_pm[:,m]
+            state_pm_next = self.state_pm[:,m+1]
+            input_pm = self.action_pm[:,m]
+            V_bar = state_pm[self.point_mass.state.index('V')]
+            ey_bar = state_pm[self.point_mass.state.index('ey')]
+            epsi_bar = state_pm[self.point_mass.state.index('epsi')]
+            Fx_bar = input_pm[self.point_mass.input.index('Fx')]
+            Fy_bar = input_pm[self.point_mass.input.index('Fy')]
+
+            curvature = self.point_mass.track.get_curvature(state[self.point_mass.state.index('s')]) #departing from s=0 we get NaN values due to the curvature at s=0 (dunno why)
+            ds_bar = self.dt * (V_bar*ca.cos(epsi_bar)) / (1 - curvature*ey_bar)
+
+            opti.subject_to(state_pm_next == self.point_mass.spatial_transition(state_pm, input_pm, curvature, ds_bar))
+
+            cost += ca.if_else(ey_bar < state_pm_constraints['ey_bar_min'], # 3) road boundary intrusion
+                       cost_weights['boundary']*ds_bar*(ey_bar - state_pm_constraints['ey_bar_min'])**2, 0)
+            
+            cost += ca.if_else(ey_bar > state_pm_constraints['ey_bar_max'], # 3) road boundary intrusion
+                       cost_weights['boundary']*ds_bar*(ey_bar - state_pm_constraints['ey_bar_max'])**2, 0)
+            
+            cost += cost_weights['deviation']*ds_bar*(ey_bar**2)    # 4) deviation from road descriptor path
+
+
+            if m < self.M-1:    # 5) Slew Rate
+                next_input_pm = self.action_pm[:,m+1]
+                Fy_bar_next = next_input_pm[self.point_mass.input.index('Fy')]
+                Fx_bar_next = next_input_pm[self.point_mass.input.index('Fx')]
+                cost += cost_weights['Fy_bar']*(1/ds_bar)*(Fy_bar_next - Fy_bar)**2
+                cost += cost_weights['Fx']*(1/ds_bar)*(Fx_bar_next - Fx_bar)**2 
+
+            # -------------------- Constraints ------------------------------------------
+            # state limits
+            opti.subject_to(V_bar >= state_pm_constraints['V_bar_min'])
+
+            # input limits
+            opti.subject_to(Fx <= Peng / V_bar)
+
+            # friction limits
+            # TODO: da aggiungere
+
+
+        # TODO: Slew rate, how to compute the ds between 
+        # last s in single-track and first s in point-mass?
+
+        # input_car_final = self.action[:,self.N-1]
+        # Fx_final = input_car_final[self.car.input.index('Fx')]
+        # w_final = input_car_final[self.car.input.index('w')]
+        
+        # input_pm_initial = self.action_pm[:,0]
+        # Fx_bar_initial = input_pm_initial[self.point_mass.input.index('Fx')]
+        # Fy_bar_initial = input_pm_initial[self.point_mass.input.index('Fy')]
+
+        # TODO: divide for the differnece between final s of single-track
+        # and initial s of point mass model
+        # TODO: maybe N should be N-1
+        # cost += cost_weights['Fx'] * ((Fx_bar_initial-Fx_final)**2 + (Fy_bar_initial-self.Fy_f[self.N]-self.Fy_r[self.N])**2)
+
+
+        # Linking between single track and point mass models
+        state_car_final = self.state[:,self.N-1]    #TODO this can be N or N+1 instead of N-1
+        Ux_final = state_car_final[self.car.state.index('Ux')]
+        Uy_final = state_car_final[self.car.state.index('Uy')]
+        ey_final = state_car_final[self.car.state.index('ey')]
+        epsi_final = state_car_final[self.car.state.index('epsi')]
+        r_final = state_car_final[self.car.state.index('r')]
+        delta_final = state_car_final[self.car.state.index('delta')]
+
+        state_pm_initial = self.state_pm[:, 0]
+        V_bar_initial = state_pm_initial[self.point_mass.state.index('V')]
+        ey_bar_initial = state_pm_initial[self.point_mass.state.index('ey')]
+        epsi_bar_initial = state_pm_initial[self.point_mass.state.index('epsi')]
+        
+        opti.subject_to(V_bar_initial == (Ux_final**2 + Uy_final**2)**0.5)
+        opti.subject_to(ey_bar_initial == ey_final)
+        opti.subject_to(epsi_bar_initial == atan(Uy_final/Ux_final) + delta_final)
+        
         # -------------------- Terminal Cost -----------------------
         cost += ca.if_else(self.state[self.car.state.index('Ux'),-1] >= state_constraints['Ux_max'], # excessive speed
             cost_weights['Ux']*(self.state[self.car.state.index('Ux'),-1] - state_constraints['Ux_max'])**2, 0) 
-        cost += cost_weights['time']*self.state[self.car.state.index('t'),-1] # final cost (minimize time)
-        cost += cost_weights['ey']*self.state[self.car.state.index('ey'),-1]**2 # final cost (minimize terminal lateral error) hardcodato
-        cost += cost_weights['epsi']*self.state[self.car.state.index('epsi'),-1]**2 # final cost (minimize terminal course error) hardcodato
+        #cost += cost_weights['time']*self.state[self.car.state.index('t'),-1] # final cost (minimize time)
+        # cost += cost_weights['ey']*self.state[self.car.state.index('ey'),-1]**2 # final cost (minimize terminal lateral error) hardcodato
+        # cost += cost_weights['epsi']*self.state[self.car.state.index('epsi'),-1]**2 # final cost (minimize terminal course error) hardcodato
             
+        cost += cost_weights['time']*self.state_pm[self.point_mass.state.index('t'), -1] # final cost (minimize time)
+        cost += cost_weights['ey']*self.state_pm[self.point_mass.state.index('ey'),-1]**2 # final cost (minimize terminal lateral error) hardcodato
+        cost += cost_weights['epsi']*self.state_pm[self.point_mass.state.index('epsi'),-1]**2 # final cost (minimize terminal course error) hardcodato
+        # TODO: V_safe to add
         opti.minimize(cost)
         return opti

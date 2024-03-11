@@ -8,6 +8,7 @@ from models.dynamic_point_mass import DynamicPointMass, DynamicPointMassState
 from simulation.racing import RacingSimulation
 from controllers.mpc.kinematic_mpc import KinematicMPC
 from controllers.mpc.dynamic_mpc import DynamicMPC
+from controllers.mpc.cascaded_mpc import CascadedMPC
 from utils.common_utils import load_config
 from enum import Enum
 from controllers.mpc.pointmass_mpc import PointMassMPC
@@ -16,13 +17,13 @@ class CarType(Enum):
     KIN = "kinematic_car"
     DYN = "dynamic_car"
     DPM = "dynamic_point_mass"
-    CAS = "cascaded"
+    CAS = "cascaded_car"
     
 class TrackType(Enum):
     I = "ippodromo"
     C = "complicato"
     
-car_type = CarType.DPM
+car_type = CarType.CAS
 track_name = TrackType.I.value
 
 # Track Loading
@@ -35,6 +36,8 @@ track = Track(wp_x=track_config['wp_x'],
 
 # Bicycle model and corresponding controller
 car_config = load_config(f"config/models/{car_type.value}.yaml")
+pm_config = load_config("config/models/dynamic_point_mass.yaml")
+
 controller_config = load_config(f"config/controllers/{track_name}/{car_type.value}.yaml")
 if car_type is CarType.KIN:
     car = KinematicCar(config=car_config, track = track)
@@ -48,6 +51,12 @@ elif car_type is CarType.DPM:
     car = DynamicPointMass(config=car_config, track = track)
     car.state = DynamicPointMassState(V = 3, s = 50)
     controller = PointMassMPC(car=car, config=controller_config)
+elif car_type is CarType.CAS:
+    car = DynamicCar(config=car_config, track=track)
+    car.state = DynamicCarState(Ux = 3, s = 50)
+    point_mass = DynamicPointMass(config=pm_config, track=track)
+    point_mass.state = DynamicPointMassState()
+    controller = CascadedMPC(car=car, point_mass=point_mass, config=controller_config)
 
 # Simulation
 simulation = RacingSimulation(f"{car_type.value}_{track_name}",car,controller)   

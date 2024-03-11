@@ -38,7 +38,10 @@ class RacingSimulation():
             start = time.time()
             state_prediction = None
             try:
+                # TODO: Activate this and comment the one below if you are not using cascaded model
                 action, state_prediction, action_prediction = self.controller.command(state)
+
+                # action, state_prediction, action_prediction, state_pm_prediction, action_pm_prediction = self.controller.command(state)
             except Exception as e:
                 print(e)
                 break
@@ -75,7 +78,12 @@ class RacingSimulation():
             action_traj.append(action)
             elapsed.append(elapsed_time)
             try:
+                # TODO: Activate this and comment the one below if you are not using cascaded model
                 preds.append(np.array([self.car.rel2glob(state_prediction[:,i]) for i in range(self.controller.N)]).squeeze()) # converting prediction to global coordinates
+                
+                # preds_car = [self.car.rel2glob(state_prediction[:,i]) for i in range(self.controller.N)]
+                # preds_pm = [self.point_mass.rel2glob(state_pm_prediction[:,i]) for i in range(self.controller.M)]
+                # preds = np.array(preds_car + preds_pm).squeeze()
             except:
                 preds = None
         print("FINISHED")   
@@ -91,7 +99,8 @@ class RacingSimulation():
         N = len(input_traj)
         ey_index = self.car.state.index('ey')
         error = np.array(state_traj)[:,ey_index:ey_index+2] # taking just ey and epsi
-        v = np.array(state_traj)[:,0] # taking just velocity
+        v = np.array(state_traj)[:,self.car.state.index('Ux')] # taking just v
+        delta = np.array(state_traj)[:,self.car.state.index('delta')] # taking just delta
         s = np.array(state_traj)[:,self.car.state.index('s')] # for ascissa in side plots
         input = np.array(input_traj)
         x_traj = []
@@ -103,11 +112,9 @@ class RacingSimulation():
         ax_small1 = plt.subplot(grid[0, 1])
         ax_small2 = plt.subplot(grid[1, 1])
         ax_small3 = plt.subplot(grid[2, 1])
-        state_max = max(v.min(), v.max(), key=abs) # for axis limits
+        state_max = max(v.min(), v.max(), delta.min(), delta.max(), key=abs) # for axis limits
         error_max = max(error.min(), error.max(), key=abs) # for axis limits
         input_max = max(input.min(), input.max(), key=abs) # for axis limits
-        input_labels = self.car.create_input().labels
-        error_labels = [r'$e_y$',r'$e_\psi$']
         
         # fig titles
         lap_time = plt.gcf().text(0.4, 0.95, 'Laptime', fontsize=16, ha='center', va='center')
@@ -139,16 +146,17 @@ class RacingSimulation():
             ax_small1.cla()
             ax_small1.axis((s[0], s[-1], -state_max*1.1, state_max*1.1))
             ax_small1.plot(s[:i],v[:i], '-', alpha=0.7,label='v')
+            ax_small1.plot(s[:i],delta[:i], '-', alpha=0.7,label=r'$\delta$')
             ax_small1.legend()
                         
             ax_small2.cla()
             ax_small2.axis((s[0], s[-1], -error_max*1.1, error_max*1.1))
-            ax_small2.plot(s[:i],error[:i, :], '-', alpha=0.7,label=error_labels)
+            ax_small2.plot(s[:i],error[:i, :], '-', alpha=0.7,label=[r'$e_y$',r'$e_\psi$'])
             ax_small2.legend()
 
             ax_small3.cla()
             ax_small3.axis((s[0], s[-1], -input_max*1.1, input_max*1.1))
-            ax_small3.plot(s[:i],input[:i, :], '-', alpha=0.7,label=input_labels)
+            ax_small3.plot(s[:i],input[:i, :], '-', alpha=0.7,label=['a','w'])
             ax_small3.legend()
 
         animation = FuncAnimation(
