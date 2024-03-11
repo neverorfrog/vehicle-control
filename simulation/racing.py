@@ -39,9 +39,9 @@ class RacingSimulation():
             state_prediction = None
             try:
                 # TODO: Activate this and comment the one below if you are not using cascaded model
-                action, state_prediction, action_prediction = self.controller.command(state)
+                # action, state_prediction, action_prediction = self.controller.command(state)
 
-                # action, state_prediction, action_prediction, state_pm_prediction, action_pm_prediction = self.controller.command(state)
+                action, state_prediction, action_prediction, state_pm_prediction, action_pm_prediction = self.controller.command(state)
             except Exception as e:
                 print(e)
                 break
@@ -79,11 +79,11 @@ class RacingSimulation():
             elapsed.append(elapsed_time)
             try:
                 # TODO: Activate this and comment the one below if you are not using cascaded model
-                preds.append(np.array([self.car.rel2glob(state_prediction[:,i]) for i in range(self.controller.N)]).squeeze()) # converting prediction to global coordinates
+                # preds.append(np.array([self.car.rel2glob(state_prediction[:,i]) for i in range(self.controller.N)]).squeeze()) # converting prediction to global coordinates
                 
-                # preds_car = [self.car.rel2glob(state_prediction[:,i]) for i in range(self.controller.N)]
-                # preds_pm = [self.point_mass.rel2glob(state_pm_prediction[:,i]) for i in range(self.controller.M)]
-                # preds = np.array(preds_car + preds_pm).squeeze()
+                preds_car = [self.car.rel2glob(state_prediction[:,i]) for i in range(self.controller.N)]
+                preds_pm = [self.point_mass.rel2glob(state_pm_prediction[:,i]) for i in range(self.controller.M)]
+                preds = np.array(preds_car + preds_pm).squeeze()
             except:
                 preds = None
         print("FINISHED")   
