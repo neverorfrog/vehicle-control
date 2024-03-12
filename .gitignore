@@ -1,9 +1,10 @@
 *.aux
 *.log
-*.pdf
 *.gz
 *.nav
 *.out
 *.snm
 *.toc
 *.vrb
+*.bbl
+*.blg
