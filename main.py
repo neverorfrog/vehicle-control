@@ -12,7 +12,9 @@ from controllers.mpc.cascaded_mpc import CascadedMPC
 from utils.common_utils import load_config, ControlType, CarType, TrackType
 from controllers.mpc.pointmass_mpc import PointMassMPC
    
-control_type = ControlType.CAS 
+
+# Configuration
+control_type = ControlType.SIN 
 car_type = CarType.DYN
 track_name = TrackType.I.value
 
