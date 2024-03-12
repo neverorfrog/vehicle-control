@@ -2,6 +2,7 @@ import time
 from matplotlib.backend_bases import FigureManagerBase
 from controllers.controller import Controller
 import numpy as np
+from controllers.mpc.dynamic_mpc import DynamicMPC
 from models.racing_car import RacingCar
 from matplotlib.animation import FuncAnimation
 import matplotlib.pyplot as plt
@@ -12,16 +13,10 @@ from models.dynamic_car import DynamicCarInput
 from utils.fancy_vector import FancyVector
 
 class RacingSimulation():   
-    # TODO: Activate this and comment the one below if you are not using cascaded model
-    # def __init__(self, name: str, car: RacingCar, controller: Controller):
-        
     def __init__(self, name: str, car: RacingCar, point_mass: RacingCar, controller: Controller):
         self.name = name
         self.car = car
-        
-        # TODO: comment this if you are not using cascaded model
         self.point_mass = point_mass
-
         self.controller = controller
         
     def run(self, N: int = None, animate: bool = True):
@@ -45,49 +40,32 @@ class RacingSimulation():
             start = time.time()
             state_prediction = None
             try:
-                # TODO: Activate this and comment the one below if you are not using cascaded model
-                # action, state_prediction, action_prediction = self.controller.command(state)
-
-                action, state_prediction, action_prediction, state_pm_prediction, action_pm_prediction = self.controller.command(state)
+                action = self.controller.command(state)
             except Exception as e:
                 print(e)
                 break
             elapsed_time = time.time() - start
-
-            # ------------- DEBUG PRINTS -----------------
-            if n <= steps:
-                print(f"\n\nN: {n}")
-                conv_state = self.car.rel2glob(state)
-                print(f"STATE: {state}")
-                print(f"FINAL CURVATURE: {self.car.track.get_curvature(state_prediction[self.car.state.index('s'),-1])}")
-                # print(f"MEASURED POSE: {conv_state[0].item():.3f}, {conv_state[1]:.3f}, {conv_state[2]:.3f}")
-                # print(f"REFERENCE POSE: {self.car.track.x(state.s).full().item():.3f}, {self.car.track.y(state.s).full().item():.3f}, {self.car.track.get_orientation(state.s).full().item():.3f}")
-                # print(f"ACTION: {action}")
-                # print(f"FRONT FORCE: {self.car.Fx_f(action[0])}")
-                # print(f"REAR FORCE: {self.car.Fx_r(action[0])}")
-                # print(f"UX PREDICTION: {state_prediction[self.car.state.index('Ux'),:]}")
-                # print(f"EY PREDICTION: {state_prediction[self.car.state.index('ey'),:]}")
-                # print(f"EPSI PREDICTION: {state_prediction[self.car.state.index('epsi'),:]}")
-                # print(f"DELTA PREDICTION: {state_prediction[self.car.state.index('delta'),:]}")
-                # print(f"TIME PREDICTION: {state_prediction[self.car.state.index('t'),:]}")
-                # print(f"S PREDICTION: {state_prediction[self.car.state.index('s'),:]}")
-                print(f"ACCELERATION PREDICTION: {action_prediction[0,:]}")
-                # print(f"OMEGA PREDICTION: {action_prediction[1,:]}")
-                print(f"ELAPSED TIME: {elapsed_time}")
-                print("")
             
             # ----------- Applying control signal --------
             state = self.car.drive(action)
-            self.car.print(state.values, action.values)
+            state_prediction = self.controller.state_prediction
+            state_pm_prediction = self.controller.state_pm_prediction
+
+            # ------------- DEBUG PRINTS -----------------
+            print("------------------------------------------------------------------------------")
+            print(f"N: {n}")
+            print(f"STATE: {state}")
+            print(f"ACTION: {action}")
+            print(f"FINAL CURVATURE: {self.car.track.get_curvature(state_prediction[state.index('s'),-1])}")
+            print(f"ELAPSED TIME: {elapsed_time}")
+            print("------------------------------------------------------------------------------")
+            print(f"\n")
             
             # ----------- Logging -------------------------
             state_traj.append(state)
             action_traj.append(action)
             elapsed.append(elapsed_time)
             try:
-                # TODO: Activate this and comment the one below if you are not using cascaded model
-                # preds.append(np.array([self.car.rel2glob(state_prediction[:,i]) for i in range(self.controller.N)]).squeeze()) # converting prediction to global coordinates
-                
                 preds_car = [self.car.rel2glob(state_prediction[:,i]) for i in range(self.controller.N)]
                 preds_pm = [self.point_mass.rel2glob(state_pm_prediction[:,i]) for i in range(self.controller.M)]
                 preds.append(np.array(preds_car + preds_pm).squeeze())
@@ -106,8 +84,7 @@ class RacingSimulation():
         N = len(input_traj)
         ey_index = self.car.state.index('ey')
         error = np.array(state_traj)[:,ey_index:ey_index+2] # taking just ey and epsi
-        v = np.array(state_traj)[:,self.car.state.index('Ux')] # taking just v
-        delta = np.array(state_traj)[:,self.car.state.index('delta')] # taking just delta
+        v = np.array(state_traj)[:,0] # taking just velocity
         s = np.array(state_traj)[:,self.car.state.index('s')] # for ascissa in side plots
         input = np.array(input_traj)
         x_traj = []
@@ -119,9 +96,11 @@ class RacingSimulation():
         ax_small1 = plt.subplot(grid[0, 1])
         ax_small2 = plt.subplot(grid[1, 1])
         ax_small3 = plt.subplot(grid[2, 1])
-        state_max = max(v.min(), v.max(), delta.min(), delta.max(), key=abs) # for axis limits
+        state_max = max(v.min(), v.max(), key=abs) # for axis limits
         error_max = max(error.min(), error.max(), key=abs) # for axis limits
         input_max = max(input.min(), input.max(), key=abs) # for axis limits
+        input_labels = self.car.create_input().labels
+        error_labels = [r'$e_y$',r'$e_\psi$']
         
         # fig titles
         lap_time = plt.gcf().text(0.4, 0.95, 'Laptime', fontsize=16, ha='center', va='center')
@@ -153,17 +132,16 @@ class RacingSimulation():
             ax_small1.cla()
             ax_small1.axis((s[0], s[-1], -state_max*1.1, state_max*1.1))
             ax_small1.plot(s[:i],v[:i], '-', alpha=0.7,label='v')
-            ax_small1.plot(s[:i],delta[:i], '-', alpha=0.7,label=r'$\delta$')
             ax_small1.legend()
                         
             ax_small2.cla()
             ax_small2.axis((s[0], s[-1], -error_max*1.1, error_max*1.1))
-            ax_small2.plot(s[:i],error[:i, :], '-', alpha=0.7,label=[r'$e_y$',r'$e_\psi$'])
+            ax_small2.plot(s[:i],error[:i, :], '-', alpha=0.7,label=error_labels)
             ax_small2.legend()
 
             ax_small3.cla()
             ax_small3.axis((s[0], s[-1], -input_max*1.1, input_max*1.1))
-            ax_small3.plot(s[:i],input[:i, :], '-', alpha=0.7,label=['a','w'])
+            ax_small3.plot(s[:i],input[:i, :], '-', alpha=0.7,label=input_labels)
             ax_small3.legend()
 
         animation = FuncAnimation(

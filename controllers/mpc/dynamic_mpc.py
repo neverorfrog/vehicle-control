@@ -14,19 +14,13 @@ class DynamicMPC(Controller):
         self.ns = len(self.car.state) # number of state variables
         self.na = len(self.car.input) # number of action variables
         self.opti = self._init_opti()
-        self._init_racing()
         
     def command(self, state):
         self._init_horizon(state)
         sol = self.opti.solve()
         self.action_prediction = sol.value(self.action)
         self.state_prediction = sol.value(self.state)
-        next_input = DynamicCarInput(Fx=self.action_prediction[0][0], w=self.action_prediction[1][0])
-        return next_input, self.state_prediction, self.action_prediction
-    
-    def _init_racing(self):
-        '''Initializing state prediction'''
-        pass
+        return DynamicCarInput(Fx=self.action_prediction[0][0], w=self.action_prediction[1][0])
     
     def _init_horizon(self, state):
         state = state.values.squeeze()
@@ -54,12 +48,13 @@ class DynamicMPC(Controller):
         self.action = opti.variable(self.na, self.N)   # control trajectory var
         self.state_prediction = np.ones((self.ns, self.N+1)) # actual predicted state trajectory
         self.action_prediction = np.ones((self.na, self.N))   # actual predicted control trajectory
+        self.ds = opti.variable(self.N) # ds trajectory var (just for loggin purposes)
         self.state0 = opti.parameter(self.ns) # initial state
         opti.subject_to(self.state[:,0] == self.state0) # constraint on initial state
 
         # ======================== Slack Variables ============================================
-        self.Fy_f = opti.variable(self.N)
-        self.Fy_r = opti.variable(self.N)
+        # self.Fy_f = opti.variable(self.N)
+        # self.Fy_r = opti.variable(self.N)
         self.Fe_f = opti.variable(self.N) # Slack variables for excessive force usage beyond the imposed limits
         self.Fe_r = opti.variable(self.N)  
                                            
@@ -86,9 +81,13 @@ class DynamicMPC(Controller):
             
             # ---------- Discretization and model dynamics ------------------------
             # going on for dt and snapshot of how much the car moved
-            curvature = self.car.track.get_curvature(state_next[self.car.state.index('s')])
+            curvature_next = self.car.track.get_curvature(state_next[self.car.state.index('s')])
+            curvature_current = self.car.track.get_curvature(state[self.car.state.index('s')])
+            curvature = (curvature_next + curvature_current)/2
             ds = self.dt * ((Ux*ca.cos(epsi) - Uy*ca.sin(epsi)) / (1 - curvature*ey))
-            opti.subject_to(state_next == self.car.spatial_transition(state,input,curvature,ds))
+            opti.subject_to(self.ds[n] > 0)
+            opti.subject_to(self.ds[n] == ds)
+            opti.subject_to(state_next == self.car.spatial_transition(state,input,curvature,self.ds[n]))
             
             # -------------------- Stage Cost -------------------------------------
             cost += ca.if_else(ey < state_constraints['ey_min'], # violation of road bounds
@@ -112,8 +111,7 @@ class DynamicMPC(Controller):
             if n < self.N-1: #Force Input Continuity
                 next_input = self.action[:,n+1]
                 Fx_next = next_input[self.car.input.index('Fx')]
-                # cost += cost_weights['Fx']*(1/ds)*(Fx_next - Fx)**2
-                cost += cost_weights['Fx']*(1/(Ux*self.dt))*(Fx_next - Fx)**2  
+                cost += cost_weights['Fx']*(1/ds)*(Fx_next - Fx)**2
             
             # -------------------- Constraints ------------------------------------------
             # state limits

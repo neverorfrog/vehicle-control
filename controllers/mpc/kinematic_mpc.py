@@ -20,8 +20,7 @@ class KinematicMPC(Controller):
         sol = self.opti.solve()
         self.action_prediction = sol.value(self.action)
         self.state_prediction = sol.value(self.state)
-        next_input = KinematicInput(a=self.action_prediction[0][0], w=self.action_prediction[1][0])
-        return next_input, self.state_prediction, self.action_prediction
+        return KinematicInput(a=self.action_prediction[0][0], w=self.action_prediction[1][0])
     
     def _init_horizon(self, state):
         # ======================= Initializing state and action prediction ============================
@@ -34,7 +33,7 @@ class KinematicMPC(Controller):
         # ========================= Optimizer Initialization =================================
         opti = ca.Opti()
         p_opts = {'ipopt.print_level': 0, 'print_time': 0, 'expand': False}
-        s_opts = {'nlp_scaling_method': 'gradient-based'}
+        s_opts = {}
         opti.solver("ipopt", p_opts, s_opts)
         
         # ========================= Decision Variables with Initialization ===================

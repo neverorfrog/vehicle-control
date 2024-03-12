@@ -5,7 +5,7 @@ wp_x:
   - 50
   - -50
   - -50
-  - -26
+  - -18
 
 wp_y:
   - 0
@@ -16,5 +16,5 @@ wp_y:
   - 0
 
 resolution: 0.1
-smoothing: 120
+smoothing: 170
 width: 8
