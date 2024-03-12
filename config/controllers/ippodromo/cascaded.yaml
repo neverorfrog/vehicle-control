@@ -1,6 +1,6 @@
 # prediction and control horizon
-horizon: 25
-horizon_pm: 10 
+horizon: 34
+horizon_pm: 1 
 mpc_dt: 0.01  # TODO bigger than 0.01, everything breaks
 
 # weights for the cost function

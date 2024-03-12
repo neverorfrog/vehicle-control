@@ -14,7 +14,7 @@ from controllers.mpc.pointmass_mpc import PointMassMPC
    
 
 # Configuration
-control_type = ControlType.SIN 
+control_type = ControlType.CAS 
 car_type = CarType.DYN
 track_name = TrackType.I.value
 
@@ -32,30 +32,29 @@ if control_type is ControlType.CAS:
     #DYNAMIC CAR
     car_config = load_config(f"config/models/dynamic_car.yaml")
     car = DynamicCar(config=car_config, track=track)
-    car.state = DynamicCarState(Ux = 3, s = 50)
+    car.state = DynamicCarState(Ux = 3, s = 30)
     #DYNAMIC POINT MASS
     pm_config = load_config(f"config/models/dynamic_point_mass.yaml")
     point_mass = DynamicPointMass(config=pm_config, track=track)
     point_mass.state = DynamicPointMassState()
     controller = CascadedMPC(car=car, point_mass=point_mass, config=controller_config)
-        
+    simulation = RacingSimulation(f"cascaded_{track_name}",car,point_mass,controller)     
 elif control_type is ControlType.SIN:
     controller_config = load_config(f"config/controllers/{track_name}/{car_type.value}.yaml")
     car_config = load_config(f"config/models/{car_type.value}.yaml")
     point_mass = None
     if car_type is CarType.KIN:
         car = KinematicCar(config=car_config, track = track)
-        car.state = KinematicState(v = 1, s = 170)
+        car.state = KinematicState(v = 1, s = 30)
         controller = KinematicMPC(car=car, config=controller_config)
     elif car_type is CarType.DYN:
         car = DynamicCar(config=car_config, track = track)
-        car.state = DynamicCarState(Ux = 3, s = 60)
+        car.state = DynamicCarState(Ux = 3, s = 30)
         controller = DynamicMPC(car=car, config=controller_config)
     elif car_type is CarType.DPM:
         car = DynamicPointMass(config=car_config, track = track)
-        car.state = DynamicPointMassState(V = 3, s = 50)
+        car.state = DynamicPointMassState(V = 3, s = 30)
         controller = PointMassMPC(car=car, config=controller_config)
+    simulation = RacingSimulation(f"{car_type.value}_{track_name}",car,point_mass,controller)  
 
-# Simulation
-simulation = RacingSimulation(f"{car_type.value}_{track_name}",car,point_mass,controller)  
 simulation.run(N = 1000)

@@ -157,6 +157,6 @@ class RacingSimulation():
         fig_manager.window.showMaximized() 
         plt.show(block=True) 
         plt.ioff() #interactive mode off
-        # animation.save(f"simulation/videos/{self.name}.gif",writer='pillow',fps=20, dpi=200)
+        animation.save(f"simulation/videos/{self.name}.gif",writer='pillow',fps=20, dpi=200)
         plt.ion() #interactive mode on
-        # print("ANIMATION SAVED")
+        print("ANIMATION SAVED")
