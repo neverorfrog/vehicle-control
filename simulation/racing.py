@@ -59,6 +59,7 @@ class RacingSimulation():
             print(f"ACTION: {action}")
             print(f"FINAL CURVATURE: {self.car.track.get_curvature(state_prediction[state.index('s'),-1])}")
             print(f"ELAPSED TIME: {elapsed_time}")
+            self.car.print(state,action)
             print("------------------------------------------------------------------------------")
             print(f"\n")
             
@@ -116,7 +117,7 @@ class RacingSimulation():
             lap_time.set_text(f"Lap time: {state.t:.2f} s | Iteration n.{i}") 
             
             if np.mod(i,5) == 0 and i > 0:
-                elapsed_time.set_text(f"Average computation time: {np.mean(elapsed[i-5:i])*1000:.2f} ms")
+                elapsed_time.set_text(f"Average computation time: {np.mean(elapsed[:i])*1000:.2f} ms")
             
             ax_large.cla()
             ax_large.set_aspect('equal')
@@ -157,6 +158,6 @@ class RacingSimulation():
         fig_manager.window.showMaximized() 
         plt.show(block=True) 
         plt.ioff() #interactive mode off
-        animation.save(f"simulation/videos/{self.name}.gif",writer='pillow',fps=20, dpi=200)
+        # animation.save(f"simulation/videos/{self.name}.gif",writer='pillow',fps=20, dpi=200)
         plt.ion() #interactive mode on
-        print("ANIMATION SAVED")
+        # print("ANIMATION SAVED")

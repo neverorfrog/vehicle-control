@@ -1,17 +1,19 @@
 # prediction and control horizon
-horizon: 34
-horizon_pm: 1 
-mpc_dt: 0.01  # TODO bigger than 0.01, everything breaks
+horizon: 20
+mpc_dt: 0.015
+horizon_pm: 20
+ds_bar: 0.15
+mpc_dt_pm: 0.01
 
 # weights for the cost function
 cost_weights:
   time: 1
   speed: 0.1
-  ey: 0.5
+  ey: 0.1
   epsi: 1
   w:  0.0001
   Fx: 0.002
-  Fy: 0.000001
+  Fy: 0.002
   deviation: 0.001
   boundary: 1
   slip : 1000

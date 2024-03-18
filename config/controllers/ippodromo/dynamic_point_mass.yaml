@@ -1,5 +1,5 @@
 # prediction and control horizon
-horizon: 32
+horizon: 30
 mpc_dt: 0.01 # TODO bigger than 0.01, everything breaks
 
 # weights for the cost function
@@ -8,7 +8,7 @@ cost_weights:
   V: 0.1
   ey: 0.5
   epsi: 1
-  Fx: 0.00001
+  Fx: 0.001
   deviation: 0.01
   boundary: 1
   slip : 1000

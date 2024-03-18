@@ -3,7 +3,7 @@ import casadi as ca
 import numpy as np
 from casadi import cos, sin, tan, fabs
 from controllers.controller import Controller
-np.random.seed(3)
+np.random.seed(30)
 
 class DynamicMPC(Controller):
     def __init__(self, car: DynamicCar, config):
@@ -20,6 +20,8 @@ class DynamicMPC(Controller):
         sol = self.opti.solve()
         self.action_prediction = sol.value(self.action)
         self.state_prediction = sol.value(self.state)
+        print(f"Solver iterations: {sol.stats()["iter_count"]}")
+        print(f"ds: {sol.value(self.ds)}")
         return DynamicCarInput(Fx=self.action_prediction[0][0], w=self.action_prediction[1][0])
     
     def _init_horizon(self, state):
@@ -35,28 +37,30 @@ class DynamicMPC(Controller):
         A function that initializes the optimizer and the decision variables, and defines the NLP problem.
 
         Returns:
-        - opti: The initialized optimizer.
+        - opti: The initialized optimizer
         """
         # ========================= Optimizer Initialization =================================
         opti = ca.Opti()
         p_opts = {'ipopt.print_level': 0, 'print_time': False, 'expand': False}
-        s_opts = {}
+        s_opts = {'fixed_variable_treatment': 'relax_bounds', 'linear_solver': 'ma27','hsllib': "/home/flavio/Programs/hsl/lib/libcoinhsl.so"}
         opti.solver("ipopt", p_opts, s_opts)
         
         # ========================= Decision Variables with Initialization ===================
         self.state = opti.variable(self.ns, self.N+1) # state trajectory var
         self.action = opti.variable(self.na, self.N)   # control trajectory var
         self.state_prediction = np.ones((self.ns, self.N+1)) # actual predicted state trajectory
-        self.action_prediction = np.ones((self.na, self.N))   # actual predicted control trajectory
-        self.ds = opti.variable(self.N) # ds trajectory var (just for loggin purposes)
+        self.action_prediction = np.ones((self.na, self.N))# actual predicted control trajectory
+        self.ds = opti.variable(self.N) # ds trajectory var
         self.state0 = opti.parameter(self.ns) # initial state
         opti.subject_to(self.state[:,0] == self.state0) # constraint on initial state
 
         # ======================== Slack Variables ============================================
-        # self.Fy_f = opti.variable(self.N)
-        # self.Fy_r = opti.variable(self.N)
-        self.Fe_f = opti.variable(self.N) # Slack variables for excessive force usage beyond the imposed limits
+        self.Fe_f = opti.variable(self.N) 
         self.Fe_r = opti.variable(self.N)  
+        # self.Fx_f = opti.variable(self.N) 
+        # self.Fx_r = opti.variable(self.N)
+        # self.Fy_f = opti.variable(self.N) 
+        # self.Fy_r = opti.variable(self.N)
                                            
         # ======================= Cycle the entire horizon defining NLP problem ===============
         cost_weights = self.config['cost_weights'] 
@@ -66,7 +70,7 @@ class DynamicMPC(Controller):
         mu = self.car.config['env']['mu']
         cost = 0
         for n in range(self.N):
-            # extracting state and input at current iteration of horizon
+            # ----------- Extracting State and Input --------------------------------------------
             state = self.state[:,n]
             state_next = self.state[:,n+1]
             input = self.action[:,n]
@@ -79,17 +83,30 @@ class DynamicMPC(Controller):
             Fx = input[self.car.input.index('Fx')]
             w = input[self.car.input.index('w')]
             
-            # ---------- Discretization and model dynamics ------------------------
-            # going on for dt and snapshot of how much the car moved
-            curvature_next = self.car.track.get_curvature(state_next[self.car.state.index('s')])
-            curvature_current = self.car.track.get_curvature(state[self.car.state.index('s')])
-            curvature = (curvature_next + curvature_current)/2
-            ds = self.dt * ((Ux*ca.cos(epsi) - Uy*ca.sin(epsi)) / (1 - curvature*ey))
-            opti.subject_to(self.ds[n] > 0)
-            opti.subject_to(self.ds[n] == ds)
-            opti.subject_to(state_next == self.car.spatial_transition(state,input,curvature,self.ds[n]))
+            # -------------------- Constraints --------------------------------------------------
+            # state limits
+            opti.subject_to(Ux >= state_constraints['Ux_min'])
+            opti.subject_to(opti.bounded(state_constraints['delta_min'],delta,state_constraints['delta_max']))
             
-            # -------------------- Stage Cost -------------------------------------
+            # Discretization (Going on for dt with displacement snapshot) 
+            curvature = self.car.track.get_curvature(state[self.car.state.index('s')])
+            ds = self.dt * Ux * cos(epsi)
+            opti.subject_to(self.ds[n] == ds)
+            
+            # Model dynamics 
+            opti.subject_to(state_next == self.car.spatial_transition(state,input,curvature,self.ds[n])) 
+                
+            # input limits
+            opti.subject_to(Fx <= Peng / Ux)
+            opti.subject_to(opti.bounded(input_constraints['w_min'],w,input_constraints['w_max']))
+            
+            # longitudinal force limits on tires
+            bound_f = mu['f']*self.car.Fz_f(Ux,Fx)*cos(self.car.alpha_f(Ux,Uy,r,delta))
+            opti.subject_to(opti.bounded(-bound_f,self.car.Fx_f(Fx),bound_f))
+            bound_r = mu['r']*self.car.Fz_r(Ux,Fx)*cos(self.car.alpha_r(Ux,Uy,r,delta))
+            opti.subject_to(opti.bounded(-bound_r,self.car.Fx_r(Fx),bound_r))   
+            
+            # -------------------- Stage Cost -------------------------------------------
             cost += ca.if_else(ey < state_constraints['ey_min'], # violation of road bounds
                        cost_weights['boundary']*ds*(ey - state_constraints['ey_min'])**2, 0)
             
@@ -105,40 +122,21 @@ class DynamicMPC(Controller):
             
             cost += ca.if_else(fabs(tan(self.car.alpha_r(Ux,Uy,r,delta))) >= tan(self.car.alphamod_r(Fx)),  # slip angle rear
                         cost_weights['slip']*(fabs(tan(self.car.alpha_r(Ux,Uy,r,delta))) - tan(self.car.alphamod_r(Fx)))**2, 0)
-            
+              
             cost += cost_weights['friction']*((self.Fe_f[n]**2)**2 + (self.Fe_r[n]**2)**2) # slack variables for sparsity
-            
+                      
             if n < self.N-1: #Force Input Continuity
                 next_input = self.action[:,n+1]
                 Fx_next = next_input[self.car.input.index('Fx')]
-                cost += cost_weights['Fx']*(1/ds)*(Fx_next - Fx)**2
+                cost += cost_weights['Fx']*(1/ds)*(Fx_next - Fx)**2 
             
-            # -------------------- Constraints ------------------------------------------
-            # state limits
-            opti.subject_to(Ux >= state_constraints['Ux_min'])
-            opti.subject_to(opti.bounded(state_constraints['delta_min'],delta,state_constraints['delta_max']))
-                
-            # input limits
-            opti.subject_to(Fx <= Peng / Ux)
-            opti.subject_to(opti.bounded(input_constraints['w_min'],w,input_constraints['w_max']))
-            
-            # longitudinal force limits on tires
-            bound_f = mu['f']*self.car.Fz_f(Ux,Fx)*cos(self.car.alpha_f(Ux,Uy,r,delta))
-            opti.subject_to(opti.bounded(-bound_f,self.car.Fx_f(Fx),bound_f))
-            bound_r = mu['r']*self.car.Fz_r(Ux,Fx)*cos(self.car.alpha_r(Ux,Uy,r,delta))
-            opti.subject_to(opti.bounded(-bound_r,self.car.Fx_r(Fx),bound_r))
-            
-            
-            # --------- Constraints that break things ----------------------------
-            # tire model
+            # --------- Stuff that breaks things (Friction Limits for real world experiments) -----
             # opti.subject_to(self.Fy_f[n] == self.car.Fy_f(Ux,Uy,r,delta,Fx))
             # opti.subject_to(self.Fy_r[n] == self.car.Fy_r(Ux,Uy,r,delta,Fx))
-            
-            # friction limits: these constraints are necessary for real world experiments
-            # front = self.car.Fx_f(Fx)**2 + self.Fy_f[n]**2
-            # rear = self.car.Fx_r(Fx)**2 + self.Fy_r[n]**2
-            # opti.subject_to(front <= (input_constraints['mu_lim']*self.car.Fz_f(Ux,Fx))**2 + (self.Fe_f[n])**2)
-            # opti.subject_to(rear <= (input_constraints['mu_lim']*self.car.Fz_r(Ux,Fx))**2 + (self.Fe_r[n])**2) 
+            # opti.subject_to(self.Fx_f[n] == self.car.Fx_f(Fx))
+            # opti.subject_to(self.Fx_r[n] == self.car.Fx_r(Fx))
+            # opti.subject_to(self.Fx_f[n]**2 + self.Fy_f[n]**2 <= (input_constraints['mu_lim']*self.car.Fz_f(Ux,Fx))**2 + (self.Fe_f[n])**2)
+            # opti.subject_to(self.Fx_f[n]**2 + self.Fy_r[n]**2 <= (input_constraints['mu_lim']*self.car.Fz_r(Ux,Fx))**2 + (self.Fe_r[n])**2) 
             # ---------------------------------------------------------------------
         
         # -------------------- Terminal Cost -----------------------
