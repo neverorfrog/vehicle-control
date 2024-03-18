@@ -69,6 +69,7 @@ class DynamicMPC(Controller):
         Peng = self.car.config['car']['Peng']
         mu = self.car.config['env']['mu']
         cost = 0
+        
         for n in range(self.N):
             # ----------- Extracting State and Input --------------------------------------------
             state = self.state[:,n]

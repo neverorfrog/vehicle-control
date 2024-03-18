@@ -49,7 +49,7 @@ class RacingSimulation():
             # ----------- Applying control signal --------
             state = self.car.drive(action)
             state_prediction = self.controller.state_prediction
-            if self.point_mass is not None:
+            if self.point_mass is not None and self.controller.M > 0:
                 state_pm_prediction = self.controller.state_pm_prediction
 
             # ------------- DEBUG PRINTS -----------------
@@ -69,7 +69,7 @@ class RacingSimulation():
             elapsed.append(elapsed_time)
             try:
                 preds_car = [self.car.rel2glob(state_prediction[:,i]) for i in range(self.controller.N)]
-                if self.point_mass is not None:
+                if self.point_mass is not None and self.controller.M > 0:
                     preds_pm = [self.point_mass.rel2glob(state_pm_prediction[:,i]) for i in range(self.controller.M)]
                 else:
                     preds_pm = []

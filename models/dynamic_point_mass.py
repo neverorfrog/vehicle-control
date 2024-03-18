@@ -71,7 +71,7 @@ class DynamicPointMass(RacingCar):
 
         # TEMPORAL transition (equations 1a to 1f)
         V_dot = (Fx - Fd)/car['m']
-        s_dot = V*ca.cos(epsi)/(1-curvature*ey)
+        s_dot = (V*ca.cos(epsi))/(1-curvature*ey)
         ey_dot = V*ca.sin(epsi)
         epsi_dot = (Fy + Fb)/(car['m']*V) - curvature*s_dot
         t_dot = 1
