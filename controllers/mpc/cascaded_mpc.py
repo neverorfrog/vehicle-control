@@ -26,15 +26,16 @@ class CascadedMPC(Controller):
         sol = self.opti.solve()
         self.action_prediction = sol.value(self.action)
         self.state_prediction = sol.value(self.state)
-        # self.action_pm_prediction = sol.value(self.action_pm)
-        # self.state_pm_prediction = sol.value(self.state_pm)
         print(f"Solver iterations: {sol.stats()["iter_count"]}")
         print(f"ds: {sol.value(self.ds)}")
-        # print(f"ds_pm: {sol.value(self.ds_pm)}")
         print(f"car_epsi: {self.state_prediction[self.car.state.index('epsi'),-1]}")
-        # print(f"pm_epsi: {self.state_pm_prediction[self.point_mass.state.index('epsi'),0]}")
         print(f"car_ey: {self.state_prediction[self.car.state.index('ey'),-1]}")
-        # print(f"pm_ey: {self.state_pm_prediction[self.point_mass.state.index('ey'),0]}")
+        if self.M > 0:
+            self.action_pm_prediction = sol.value(self.action_pm)
+            self.state_pm_prediction = sol.value(self.state_pm)
+            print(f"pm_ey: {self.state_pm_prediction[self.point_mass.state.index('ey'),0]}")
+            print(f"pm_epsi: {self.state_pm_prediction[self.point_mass.state.index('epsi'),0]}")
+            print(f"ds_pm: {sol.value(self.ds_pm)}")
         return DynamicCarInput(Fx=self.action_prediction[0][0], w=self.action_prediction[1][0])
     
     def _init_horizon(self, state):
