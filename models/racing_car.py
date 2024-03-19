@@ -86,11 +86,11 @@ class RacingCar(Robot):
         wheel_angle = wrap(psi+delta-np.pi/2)
         wheel_right_front = plt.Rectangle((x+np.cos(angle)*r, y+np.sin(angle)*r),width=wheel_width,height=wheel_height,angle=np.rad2deg(wheel_angle),facecolor='black')
         axis.add_patch(wheel_right_front)
-        wheel_left_front = plt.Rectangle((x-np.cos(angle)*r-cos(wheel_angle)*wheel_width, y-np.sin(angle)*r-sin(wheel_angle)*wheel_width),width=wheel_width,height=wheel_height,angle=np.rad2deg(wheel_angle),facecolor='black')
+        wheel_left_front = plt.Rectangle((x-np.cos(angle)*r-cos(wheel_angle)*wheel_width, y-np.sin(angle)*0.9*r-sin(wheel_angle)*wheel_width),width=wheel_width,height=wheel_height,angle=np.rad2deg(wheel_angle),facecolor='black')
         axis.add_patch(wheel_left_front)
         wheel_right_back = plt.Rectangle((x+np.cos(angle)*r-np.cos(psi)*width*0.6, y+np.sin(angle)*r-np.sin(psi)*height*0.6),width=wheel_width,height=wheel_height,angle=np.rad2deg(wheel_angle),facecolor='black')
         axis.add_patch(wheel_right_back)
-        wheel_left_back = plt.Rectangle((x-np.cos(angle)*r-np.cos(psi)*width*0.6-cos(wheel_angle)*wheel_width, y-np.sin(angle)*r-np.sin(psi)*height*0.6-sin(wheel_angle)*wheel_width),width=wheel_width,height=wheel_height,angle=np.rad2deg(wheel_angle),facecolor='black')
+        wheel_left_back = plt.Rectangle((x-np.cos(angle)*r-np.cos(psi)*width*0.6-cos(wheel_angle)*wheel_width, y-np.sin(angle)*r*0.9-np.sin(psi)*height*0.6-sin(wheel_angle)*wheel_width),width=wheel_width,height=wheel_height,angle=np.rad2deg(wheel_angle),facecolor='black')
         axis.add_patch(wheel_left_back)
         
         return x,y

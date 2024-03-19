@@ -78,6 +78,7 @@ class RacingSimulation():
                 preds = None
         print("FINISHED")   
         if animate:
+            # plt.style.use('dark_background')
             self.animate(state_traj, action_traj, preds, elapsed)   
         
     
@@ -96,11 +97,13 @@ class RacingSimulation():
         y_traj = []
         
         # figure params
-        grid = GridSpec(3, 2, width_ratios=[3, 1])
+        grid = GridSpec(4, 2, width_ratios=[3, 1])
+        plt.subplots_adjust(left=0.05, bottom=0.05, right=0.95, top=0.95, hspace=0.3, wspace=0.1)
         ax_large = plt.subplot(grid[:, 0])
         ax_small1 = plt.subplot(grid[0, 1])
         ax_small2 = plt.subplot(grid[1, 1])
         ax_small3 = plt.subplot(grid[2, 1])
+        ax_small4 = plt.subplot(grid[3, 1])
         state_max = max(v.min(), v.max(), key=abs) # for axis limits
         error_max = max(error.min(), error.max(), key=abs) # for axis limits
         input_max = max(input.min(), input.max(), key=abs) # for axis limits
@@ -136,7 +139,7 @@ class RacingSimulation():
             
             ax_small1.cla()
             ax_small1.axis((s[0], s[-1], -state_max*1.1, state_max*1.1))
-            ax_small1.plot(s[:i],v[:i], '-', alpha=0.7,label='v')
+            ax_small1.plot(s[:i],v[:i], '-', alpha=0.7,label='v',color='r')
             ax_small1.legend()
                         
             ax_small2.cla()
@@ -146,8 +149,13 @@ class RacingSimulation():
 
             ax_small3.cla()
             ax_small3.axis((s[0], s[-1], -input_max*1.1, input_max*1.1))
-            ax_small3.plot(s[:i],input[:i, :], '-', alpha=0.7,label=input_labels)
+            ax_small3.plot(s[:i],input[:i, 0], '-', alpha=0.7,label=input_labels[0], color='g')
             ax_small3.legend()
+            
+            ax_small4.cla()
+            ax_small4.axis((s[0], s[-1], -0.6, 0.6))
+            ax_small4.plot(s[:i],input[:i, 1], '-', alpha=0.7,label=input_labels[1], color='c')
+            ax_small4.legend()
 
         animation = FuncAnimation(
             fig=plt.gcf(), func=update, 

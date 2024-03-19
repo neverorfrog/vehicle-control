@@ -19,17 +19,17 @@ class DynamicCar(RacingCar):
         Fx, w = input
         print(f"Fx_f: {self.Fx_f(Fx)}")
         print(f"Fx_r: {self.Fx_r(Fx)}")
-        print(f"Xf: {self.Xf(Fx)}")
-        print(f"Xr: {self.Xr(Fx)}")
-        env = self.config['env']
-        print(f"Fymax_f: {(env['mu']['f']*self.Fz_f(Ux,Fx))**2 - ((0.98*self.Fx_f(Fx))**2)}")
-        print(f"Fymax_r: {(env['mu']['r']*self.Fz_r(Ux,Fx))**2 - ((0.98*self.Fx_r(Fx))**2)}" )
-        print(f"Fz_f: {self.Fz_f(Ux, Fx)}")
-        print(f"Fz_r: {self.Fz_r(Ux,Fx)}")
-        print(f"alpha_f: {self.alpha_f(Ux,Uy,r,delta)}")
-        print(f"alpha_r: {self.alpha_r(Ux,Uy,r,delta)}")
-        print(f"alpha_mod_f: {self.alphamod_f(Fx)}")
-        print(f"alpha_mod_r: {self.alphamod_r(Fx)}")
+        # print(f"Xf: {self.Xf(Fx)}")
+        # print(f"Xr: {self.Xr(Fx)}")
+        # env = self.config['env']
+        # print(f"Fymax_f: {(env['mu']['f']*self.Fz_f(Ux,Fx))**2 - ((0.98*self.Fx_f(Fx))**2)}")
+        # print(f"Fymax_r: {(env['mu']['r']*self.Fz_r(Ux,Fx))**2 - ((0.98*self.Fx_r(Fx))**2)}" )
+        # print(f"Fz_f: {self.Fz_f(Ux, Fx)}")
+        # print(f"Fz_r: {self.Fz_r(Ux,Fx)}")
+        # print(f"alpha_f: {self.alpha_f(Ux,Uy,r,delta)}")
+        # print(f"alpha_r: {self.alpha_r(Ux,Uy,r,delta)}")
+        # print(f"alpha_mod_f: {self.alphamod_f(Fx)}")
+        # print(f"alpha_mod_r: {self.alphamod_r(Fx)}")
         print(f"Fy_f: {self.Fy_f(Ux,Uy,r,delta, Fx)}")
         print(f"Fy_r: {self.Fy_r(Ux,Uy,r,delta, Fx)}")
     
