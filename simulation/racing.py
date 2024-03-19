@@ -53,7 +53,7 @@ class RacingSimulation():
                 state_pm_prediction = self.controller.state_pm_prediction
 
             # ------------- DEBUG PRINTS -----------------
-            print("------------------------------------------------------------------------------")
+            # print("------------------------------------------------------------------------------")
             print(f"N: {n}")
             print(f"STATE: {state}")
             print(f"ACTION: {action}")

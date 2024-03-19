@@ -80,7 +80,7 @@ class Track:
         ddy_ds = self.ddy_ds(s)
         denom = ca.power(dx_ds**2 + dy_ds**2, 1.5)
         num = dx_ds * ddy_ds - ddx_ds * dy_ds
-        return ca.fabs(num/denom)
+        return ca.fabs(num)/denom
     
     def get_orientation(self, s):
         '''Get orientation wrt horizontal line of a point along the spline'''
