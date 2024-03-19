@@ -1,8 +1,8 @@
 # prediction and control horizon
 horizon: 20
-mpc_dt: 0.03
-horizon_pm: 0
-ds_bar: 1.5
+mpc_dt: 0.03         
+horizon_pm: 10
+ds_bar: 1
 mpc_dt_pm: 0.01
 
 # weights for the cost function
@@ -10,11 +10,11 @@ cost_weights:
   time: 1
   speed: 0.1
   ey: 0.1
-  epsi: 0.6
-  w:  0.001
-  Fx: 0.00000001
-  Fy: 0.00001
-  deviation: 0.0001
+  epsi: 1
+  w:  0.0001
+  Fx: 0.001
+  Fy: 0.001
+  deviation: 0.001
   boundary: 1
   slip : 1000
   friction: 0.00000001

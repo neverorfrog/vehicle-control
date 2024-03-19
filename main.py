@@ -15,7 +15,7 @@ from controllers.mpc.pointmass_mpc import PointMassMPC
 # Configuration
 control_type = ControlType.CAS 
 car_type = CarType.DYN
-track_name = TrackType.N.value
+track_name = TrackType.I.value
 
 # Track Definition
 track_config = load_config(f"config/environment/{track_name}.yaml")

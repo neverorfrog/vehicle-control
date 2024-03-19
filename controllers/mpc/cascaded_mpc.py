@@ -36,14 +36,6 @@ class CascadedMPC(Controller):
         if self.M > 0:
             self.action_pm_prediction = sol.value(self.action_pm)
             self.state_pm_prediction = sol.value(self.state_pm)
-            # print("--")
-            # print(f"ST: {self.state_prediction[:,-1]}")
-            # print(f"PM: {self.state_pm_prediction[:,0]}")
-            # print("--")
-            # print(f"curvature_PM: {sol.value(self.curvature_pm)}")
-            # print("--")
-            # print(f"Fx_bar: {self.action_pm_prediction[0,:]}")
-            # print(f"Fy_bar: {self.action_pm_prediction[1,:]}")
         return DynamicCarInput(Fx=self.action_prediction[0][0], w=self.action_prediction[1][0])
     
     def _init_horizon(self, state):
@@ -93,8 +85,6 @@ class CascadedMPC(Controller):
         self.Fe_r = opti.variable(self.N)
         self.Fe_pm_f = opti.variable(self.M) 
         self.Fe_pm_r = opti.variable(self.M)  
-        # self.Fy_f = opti.variable(1) 
-        # self.Fy_r = opti.variable(1)
                                            
         # ======================= Cycle the entire horizon defining NLP problem ===============
         cost_weights = self.config['cost_weights'] 
@@ -194,7 +184,7 @@ class CascadedMPC(Controller):
                 Fy_f = self.car.Fy_f(Ux_final,Uy_final,r_final,delta_final,Fx)
                 Fy_r = self.car.Fy_r(Ux_final,Uy_final,r_final,delta_final,Fx)
                 # cost += (cost_weights['Fx']/ds) * ((Fx_bar_initial-Fx)**2 + (Fy_bar_initial-Fy_f-Fy_r)**2)
-                # cost += (cost_weights['Fx']) * ((Fx_bar_initial-Fx)**2)
+                cost += (cost_weights['Fx'] / ds) * ((Fx_bar_initial-Fx)**2)
 
             # --------- Stuff that breaks things (Friction Limits for real world experiments) -----
             # opti.subject_to(self.Fy_f[n] == self.car.Fy_f(Ux,Uy,r,delta,Fx))
@@ -234,8 +224,9 @@ class CascadedMPC(Controller):
             # friction limits
             Fx_f_bar = self.car.Fx_f(Fx_bar)
             Fx_r_bar = self.car.Fx_r(Fx_bar)
-            opti.subject_to(Fx_f_bar**2 + (self.car.config['car']['a']/self.car.config['car']['l'])*Fy_bar**2 <= (input_constraints['mu_lim']*self.car.Fz_f(V_bar,Fx_bar))**2)
-
+            opti.subject_to(Fx_f_bar**2 + (self.car.config['car']['b']/self.car.config['car']['l'])*Fy_bar**2 <= (input_constraints['mu_lim']*self.car.Fz_f(V_bar,Fx_bar))**2)
+            opti.subject_to(Fx_r_bar**2 + (self.car.config['car']['a']/self.car.config['car']['l'])*Fy_bar**2 <= (input_constraints['mu_lim']*self.car.Fz_r(V_bar,Fx_bar))**2)
+            
             # -------------------- Stage Cost -------------------------------------
             cost += ca.if_else(ey_bar < state_pm_constraints['ey_bar_min'], # 3) road boundary intrusion
                        cost_weights['boundary']*ds_bar*(ey_bar - state_pm_constraints['ey_bar_min'])**2, 0)
