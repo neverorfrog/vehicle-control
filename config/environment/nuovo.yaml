@@ -1,24 +1,46 @@
 # track data
 wp_x:
-  - -40
+  # start
+  - -60
+
+  # bottom segment
   - 60
 
-  - 50
-  - 20
+  # right segment
+  - 60
 
-  - -40
-  - -40
+  # top segment
+  - 30
   - -10
+  - -10
+  - -60
+
+  # left segment
+  - -60
+
+  # end
+  - -27
 
 wp_y:
-  - 0
+  # start
   - 0
 
-  - 20
-  - 40
-
-  - 40
+  # bottom segment
   - 0
+
+  # right segment
+  - 70
+
+  # top segment
+  - 70
+  - 48
+  - 60
+  - 48
+
+  # left segment
+  - 0
+
+  # end
   - 0
 
 resolution: 0.1
