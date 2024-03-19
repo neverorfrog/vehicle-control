@@ -15,7 +15,7 @@ from controllers.mpc.pointmass_mpc import PointMassMPC
 # Configuration
 control_type = ControlType.CAS 
 car_type = CarType.DYN
-track_name = TrackType.I.value
+track_name = TrackType.N.value
 
 # Track Definition
 track_config = load_config(f"config/environment/{track_name}.yaml")
@@ -31,7 +31,7 @@ if control_type is ControlType.CAS:
     #DYNAMIC CAR
     car_config = load_config(f"config/models/dynamic_car.yaml")
     car = DynamicCar(config=car_config, track=track)
-    car.state = DynamicCarState(Ux = 4, s = 30)
+    car.state = DynamicCarState(Ux = 4, s = 1)
     #DYNAMIC POINT MASS
     pm_config = load_config(f"config/models/dynamic_point_mass.yaml")
     point_mass = DynamicPointMass(config=pm_config, track=track)

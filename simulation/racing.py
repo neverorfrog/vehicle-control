@@ -57,7 +57,9 @@ class RacingSimulation():
             print(f"N: {n}")
             print(f"STATE: {state}")
             print(f"ACTION: {action}")
-            print(f"FINAL CURVATURE: {self.car.track.get_curvature(state_prediction[state.index('s'),-1])}")
+            print(f"FINAL ST CURVATURE: {self.car.track.get_curvature(state_prediction[state.index('s'),-1])}")
+            if self.controller.M > 0:
+                print(f"FINAL PM CURVATURE: {self.car.track.get_curvature(state_pm_prediction[self.point_mass.state.index('s'),-1])}")
             print(f"ELAPSED TIME: {elapsed_time}")
             self.car.print(state,action)
             print("------------------------------------------------------------------------------")
@@ -135,7 +137,7 @@ class RacingSimulation():
                 
             # Plot state predictions of MPC
             if preds is not None and i <= N:
-                ax_large.plot(preds[i][:,0], preds[i][:,1],'g',alpha=0.5,linewidth=3)  
+                ax_large.plot(preds[i][:,0], preds[i][:,1],'go',alpha=0.5,linewidth=3)  
             
             ax_small1.cla()
             ax_small1.axis((s[0], s[-1], -state_max*1.1, state_max*1.1))

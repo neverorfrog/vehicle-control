@@ -1,7 +1,7 @@
 # track data
 wp_x:
   # start
-  - -60
+  - 0
 
   # bottom segment
   - 60
@@ -19,7 +19,7 @@ wp_x:
   - -60
 
   # end
-  - -27
+  - 0
 
 wp_y:
   # start

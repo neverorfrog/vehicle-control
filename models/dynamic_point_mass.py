@@ -6,15 +6,6 @@ from collections import namedtuple
 from casadi import cos, sin, tan, atan, fabs, sign, tanh
 
 class DynamicPointMass(RacingCar):
-    
-
-    def set_state_from_singletrack_state(self, state):
-        s = state.s
-        V = ca.sqrt(state.Ux**2 + state.Uy**2)
-        ey = state.ey
-        epsi = ca.arctan(state.Uy/state.Uy) + state.epsi
-        self.state = DynamicPointMassState(V=V, s=s, ey=ey, epsi=epsi)
-
 
     @classmethod
     def create_state(cls, *args, **kwargs):
