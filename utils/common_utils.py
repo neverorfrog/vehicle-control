@@ -10,6 +10,7 @@ class CarType(Enum):
 class TrackType(Enum):
     I = "ippodromo"
     C = "complicato"
+    N = "nuovo"
     
 class ControlType(Enum):
     SIN = "single_track"

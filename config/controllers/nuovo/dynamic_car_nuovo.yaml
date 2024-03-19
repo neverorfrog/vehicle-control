@@ -1,19 +1,19 @@
 # prediction and control horizon
-horizon: 30
-mpc_dt: 0.015
-horizon_pm: 0
-ds_bar: 0.2
+horizon: 35
+mpc_dt: 0.025
+horizon_pm: 10
+ds_bar: 1
 mpc_dt_pm: 0.01
 
 # weights for the cost function
 cost_weights:
   time: 1
-  speed: 0.1
+  Ux: 0.1
   ey: 0.1
-  epsi: 1
-  w:  0.0001
-  Fx: 0.001
-  Fy: 0.002
+  epsi: 0.1
+  w:  0.001
+  Fx: 0.0000001
+  Fy: 0.00001
   deviation: 0.001
   boundary: 1
   slip : 1000
@@ -28,7 +28,7 @@ input_constraints:
 # state constraints
 state_constraints:
   Ux_min: 3
-  max_speed: 12
+  Ux_max: 14
   delta_min: -0.5
   delta_max: 0.5
   ey_min: -4

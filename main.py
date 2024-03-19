@@ -14,7 +14,7 @@ from controllers.mpc.pointmass_mpc import PointMassMPC
 
 # Configuration
 control_type = ControlType.CAS 
-car_type = CarType.DPM
+car_type = CarType.DYN
 track_name = TrackType.I.value
 
 # Track Definition
@@ -27,7 +27,7 @@ track = Track(wp_x=track_config['wp_x'],
 
 # Model and Controller Definition
 if control_type is ControlType.CAS:
-    controller_config = load_config(f"config/controllers/{track_name}/cascaded.yaml")
+    controller_config = load_config(f"config/controllers/{track_name}/cascaded_{track_name}.yaml")
     #DYNAMIC CAR
     car_config = load_config(f"config/models/dynamic_car.yaml")
     car = DynamicCar(config=car_config, track=track)
@@ -39,7 +39,7 @@ if control_type is ControlType.CAS:
     controller = CascadedMPC(car=car, point_mass=point_mass, config=controller_config)
     simulation = RacingSimulation(f"cascaded_{track_name}",car,point_mass,controller)     
 elif control_type is ControlType.SIN:
-    controller_config = load_config(f"config/controllers/{track_name}/{car_type.value}.yaml")
+    controller_config = load_config(f"config/controllers/{track_name}/{car_type.value}_{track_name}.yaml")
     car_config = load_config(f"config/models/{car_type.value}.yaml")
     point_mass = None
     if car_type is CarType.KIN:
