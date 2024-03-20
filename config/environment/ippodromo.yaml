@@ -26,10 +26,10 @@ wp_y:
   - 0
 
   # right segment
-  - 50
+  - 60
 
   # top segment
-  - 50
+  - 60
 
   # left segment
   - 0

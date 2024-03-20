@@ -91,6 +91,11 @@ class Track:
         tangent_x = dx_ds / magnitude
         tangent_y = dy_ds / magnitude
         return np.arctan2(tangent_y, tangent_x)
+    
+    def get_speed(self, s): # TODO
+        '''Get desired speed of a point along the spline'''
+        s = ca.fmod(s,self.length) # need to module s (for successive laps)
+        return 10 * (1 - self.get_curvature(s))
         
     def _construct_spline(self):
         # waypoint list
