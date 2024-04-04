@@ -41,7 +41,7 @@ class DynamicMPC(Controller):
         """
         # ========================= Optimizer Initialization =================================
         opti = ca.Opti()
-        p_opts = {'ipopt.print_level': 0, 'print_time': False, 'expand': False}
+        p_opts = {'ipopt.print_level': 5, 'print_time': False, 'expand': False}
         s_opts = {'fixed_variable_treatment': 'relax_bounds', 'linear_solver': 'ma27','hsllib': "/home/flavio/Programs/hsl/lib/libcoinhsl.so"}
         opti.solver("ipopt", p_opts, s_opts)
         

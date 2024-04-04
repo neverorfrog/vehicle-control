@@ -32,7 +32,9 @@ class CascadedMPC(Controller):
         sol = self.opti.solve()
         self.action_prediction = sol.value(self.action)
         self.state_prediction = sol.value(self.state)
-        print(f"Solver iterations: {sol.stats()["iter_count"]}")
+        # print(f"Solver iterations: {sol.stats()["iter_count"]}")
+        # print(f"Using linear solver {self.opti.solver("ipopt",s_opts, p_opts)}")
+        # print(f"Using linear solver {sol.opti.value_variables()}")
         if self.M > 0:
             self.action_pm_prediction = sol.value(self.action_pm)
             self.state_pm_prediction = sol.value(self.state_pm)
@@ -57,14 +59,14 @@ class CascadedMPC(Controller):
         - opti: The initialized optimizer
         """
         # ========================= Optimizer Initialization =================================
-        opti = ca.Opti()
-        p_opts = {'ipopt.print_level': 0, 'print_time': False, 'expand': False}
-        s_opts = {'linear_solver': 'ma27','hsllib': "/home/flavio/Programs/hsl/lib/libcoinhsl.so", 'fixed_variable_treatment': 'relax_bounds'}
+        opti = ca.Opti('nlp')
+        p_opts = {'ipopt.print_level': 5, 'print_time': False, 'expand': False}
+        s_opts = {"linear_solver": "ma27",'hsllib': '/usr/local/lib/libcoinhsl.so'}
         opti.solver("ipopt", p_opts, s_opts)
         
         # ========================= Decision Variables with Initialization ===================
         self.state = opti.variable(self.ns, self.N+1) # state trajectory var
-        self.action = opti.variable(self.na, self.N)   # control trajectory var
+        self.action = opti.variable(self.na, self.N)  # control trajectory var
         self.state_prediction = np.ones((self.ns, self.N+1)) # actual predicted state trajectory
         self.action_prediction = np.ones((self.na, self.N))+np.random.random((self.na, self.N)) # actual predicted control trajectory
         self.ds = opti.variable(self.N) # ds trajectory var (just for loggin purposes)

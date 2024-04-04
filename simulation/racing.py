@@ -2,14 +2,11 @@ import time
 from matplotlib.backend_bases import FigureManagerBase
 from controllers.controller import Controller
 import numpy as np
-from controllers.mpc.dynamic_mpc import DynamicMPC
 from models.racing_car import RacingCar
 from matplotlib.animation import FuncAnimation
 import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
-import numpy as np
 from itertools import count, cycle
-from models.dynamic_car import DynamicCarInput
 from utils.fancy_vector import FancyVector
 
 class RacingSimulation():   
