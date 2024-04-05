@@ -4,24 +4,16 @@ wp_x:
   - 0
 
   # bottom segment
-  - 30
-  - 40
   - 50
 
   # right segment
   - 50
-  - 40
-  - 30
 
   # top segment
-  - -30
-  - -40
   - -50
 
   # left segment
   - -50
-  - -40
-  - -30
 
   # end
   - 0
@@ -32,27 +24,19 @@ wp_y:
 
   # bottom segment
   - 0
-  - 10
-  - 20
 
   # right segment
-  - 40
-  - 50
   - 60
 
   # top segment
   - 60
-  - 50
-  - 40
 
   # left segment
-  - 20
-  - 10
   - 0
 
   # end
   - 0
 
 resolution: 0.1
-smoothing: 150
+smoothing: 170
 width: 8
