@@ -1,5 +1,3 @@
-# inspired by https://github.com/matssteinweg/Multi-Purpose-MPC
-
 from matplotlib.axes import Axes
 import numpy as np
 from scipy.integrate import trapezoid

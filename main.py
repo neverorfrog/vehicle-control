@@ -51,4 +51,4 @@ elif control_type is ControlType.SIN:
         controller = controllers.PointMassMPC(car=car, config=controller_config)
     simulation = RacingSimulation(f"{car_type.value}_{track_name}",car,point_mass,controller)  
 
-simulation.run(N = 1)
+simulation.run(N = 500)

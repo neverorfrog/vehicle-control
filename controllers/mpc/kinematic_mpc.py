@@ -31,10 +31,10 @@ class KinematicMPC(Controller):
         
     def _init_opti(self):
         # ========================= Optimizer Initialization =================================
-        opti = ca.Opti()
-        p_opts = {'ipopt.print_level': 0, 'print_time': 0, 'expand': False}
-        s_opts = {}
-        opti.solver("ipopt", p_opts, s_opts)
+        opti = ca.Opti('nlp')
+        ipopt_options = {'print_level': 0, 'linear_solver': 'ma27', 'hsllib': '/usr/local/lib/libcoinhsl.so', 'fixed_variable_treatment': 'relax_bounds'}
+        options = {'print_time': False, 'expand': False, 'ipopt': ipopt_options}
+        opti.solver("ipopt", options)
         
         # ========================= Decision Variables with Initialization ===================
         self.state = opti.variable(self.ns, self.N+1) # state trajectory var

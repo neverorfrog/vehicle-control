@@ -162,9 +162,9 @@ class RacingSimulation():
             repeat=False, repeat_delay=5000
         )
         fig_manager: FigureManagerBase = plt.get_current_fig_manager()
-        fig_manager.window.showMaximized() 
+        fig_manager.window.showMaximized()
         plt.show(block=True) 
         plt.ioff() #interactive mode off
-        # animation.save(f"simulation/videos/{self.name}.gif",writer='pillow',fps=20, dpi=200)
+        animation.save(f"simulation/videos/{self.name}.gif",writer='pillow',fps=20, dpi=200)
         plt.ion() #interactive mode on
-        # print("ANIMATION SAVED")
+        print("ANIMATION SAVED")

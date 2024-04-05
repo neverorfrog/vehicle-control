@@ -40,10 +40,11 @@ class DynamicMPC(Controller):
         - opti: The initialized optimizer
         """
         # ========================= Optimizer Initialization =================================
-        opti = ca.Opti()
-        p_opts = {'ipopt.print_level': 5, 'print_time': False, 'expand': False}
-        s_opts = {'fixed_variable_treatment': 'relax_bounds', 'linear_solver': 'ma27','hsllib': "/home/flavio/Programs/hsl/lib/libcoinhsl.so"}
-        opti.solver("ipopt", p_opts, s_opts)
+        
+        opti = ca.Opti('nlp')
+        ipopt_options = {'print_level': 0, 'linear_solver': 'ma27', 'hsllib': '/usr/local/lib/libcoinhsl.so', 'fixed_variable_treatment': 'relax_bounds'}
+        options = {'print_time': False, 'expand': False, 'ipopt': ipopt_options}
+        opti.solver("ipopt", options)
         
         # ========================= Decision Variables with Initialization ===================
         self.state = opti.variable(self.ns, self.N+1) # state trajectory var

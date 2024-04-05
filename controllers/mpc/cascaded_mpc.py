@@ -32,9 +32,7 @@ class CascadedMPC(Controller):
         sol = self.opti.solve()
         self.action_prediction = sol.value(self.action)
         self.state_prediction = sol.value(self.state)
-        # print(f"Solver iterations: {sol.stats()["iter_count"]}")
-        # print(f"Using linear solver {self.opti.solver("ipopt",s_opts, p_opts)}")
-        # print(f"Using linear solver {sol.opti.value_variables()}")
+        print(f"Solver iterations: {sol.stats()["iter_count"]}")
         if self.M > 0:
             self.action_pm_prediction = sol.value(self.action_pm)
             self.state_pm_prediction = sol.value(self.state_pm)
@@ -60,9 +58,9 @@ class CascadedMPC(Controller):
         """
         # ========================= Optimizer Initialization =================================
         opti = ca.Opti('nlp')
-        p_opts = {'ipopt.print_level': 5, 'print_time': False, 'expand': False}
-        s_opts = {"linear_solver": "ma27",'hsllib': '/usr/local/lib/libcoinhsl.so'}
-        opti.solver("ipopt", p_opts, s_opts)
+        ipopt_options = {'print_level': 0, 'linear_solver': 'ma27', 'hsllib': '/usr/local/lib/libcoinhsl.so', 'fixed_variable_treatment': 'relax_bounds'}
+        options = {'print_time': False, 'expand': False, 'ipopt': ipopt_options}
+        opti.solver("ipopt", options)
         
         # ========================= Decision Variables with Initialization ===================
         self.state = opti.variable(self.ns, self.N+1) # state trajectory var
@@ -125,8 +123,8 @@ class CascadedMPC(Controller):
             # Discretization (Going on for dt with displacement snapshot) 
             curvature = self.car.track.get_curvature(state[self.car.state.index('s')])
             opti.subject_to(self.curvature[n] == curvature)
-            num = Ux * cos(epsi)**2 - Uy * sin(epsi)
-            denom = 1 - (self.curvature[n]*ey)**2
+            # num = Ux * cos(epsi)**2 - Uy * sin(epsi)
+            # denom = 1 - (self.curvature[n]*ey)**2
             ds = self.dt * Ux
             opti.subject_to(self.ds[n] == ds)
             
@@ -146,7 +144,7 @@ class CascadedMPC(Controller):
             cost += ca.if_else(ey > state_constraints['ey_max'], # violation of road bounds
                        cost_weights['boundary']*ds*(ey - state_constraints['ey_max'])**2, 0)
                 
-            cost += cost_weights['deviation']*ds*(ey**2) # deviation from road desciptor
+            cost += cost_weights['deviation_st']*ds*(ey**2) # deviation from road desciptor
             
             cost += cost_weights['w']*(w**2) # steer angle rate
 
@@ -237,7 +235,7 @@ class CascadedMPC(Controller):
             cost += ca.if_else(ey_bar > state_pm_constraints['ey_bar_max'], # 3) road boundary intrusion
                        cost_weights['boundary']*ds_bar*(ey_bar - state_pm_constraints['ey_bar_max'])**2, 0)
             
-            cost += cost_weights['deviation']*ds_bar*(ey_bar**2) # 4) deviation from road descriptor path
+            cost += cost_weights['deviation_pm']*ds_bar*(ey_bar**2) # 4) deviation from road descriptor path
             
             cost += cost_weights['friction']*((self.Fe_pm_f[m]**2)**2 + (self.Fe_pm_r[m]**2)**2) # slack variables for sparsity
             
