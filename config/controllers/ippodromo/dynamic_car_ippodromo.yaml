@@ -1,0 +1,31 @@
+# prediction and control horizon
+horizon: 30
+mpc_dt: 0.015  # TODO bigger than 0.01, everything breaks
+
+# weights for the cost function
+cost_weights:
+  time: 1
+  Ux: 0.1
+  ey: 0.1
+  epsi: 1
+  w:  0.0001
+  Fx: 0.001
+  deviation: 0.001
+  boundary: 1
+  slip : 1000
+  friction: 0.000000001
+
+# input constraints
+input_constraints:
+  w_min: -0.4 # [rad/s]
+  w_max: 0.4 # [rad/s]
+  mu_lim: 0.95
+
+# state constraints
+state_constraints:
+  Ux_min: 3
+  Ux_max: 13
+  delta_min: -0.5 # [rad]
+  delta_max: 0.5 # [rad]
+  ey_min: -4
+  ey_max: 4

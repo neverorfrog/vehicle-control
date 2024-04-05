@@ -1,3 +1,4 @@
 # TODO list
 
-- Integrate bicycle dynamic model
+- [ ] Obstacles
+- [ ] Precomputed fastest path (?)

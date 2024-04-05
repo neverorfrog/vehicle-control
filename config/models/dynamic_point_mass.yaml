@@ -1,0 +1,28 @@
+dt: 0.05 # sampling time
+
+# car parameters mass, distance of CG from front (a) and rear (b) axis, height of CG, yaw moment of inertia
+car:
+  m: 1778 #mass
+  Peng: 170000 #maximum engine power
+  a: 1.194 # distance from front to CG [m]
+  b: 1.436 # distance from rear to CG
+  l: 2.5 # total length [m]
+  h: 0.55 # CG height [m]
+  Xd: # drive force distribution
+    f: 1
+    r: 0
+  Xb: # brake force distribution
+    f: 0.78
+    r: 0.22
+
+# coefficients related to environment
+env:
+  Crr: 0.01 # rolling resistance coefficient https://en.wikipedia.org/wiki/Rolling_resistance
+  Cd: 0.4243 # aerodynamic drag coefficient
+  mu: # friction coefficient
+    f: 0.9
+    r: 0.95
+  theta: 0 #TODO theta and phi are road grade and bank angle, but for now we assume flat track
+  phi: 0
+  Av2: 0 #because theta, phi are 0
+  Frr: 218 #rolling resistance force

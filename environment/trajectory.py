@@ -1,7 +1,10 @@
+from abc import ABC, abstractmethod
 import numpy as np
 
-class Trajectory():
-    def update(self, t):
+class Trajectory(ABC):
+    
+    @abstractmethod
+    def update(self, t: float):
         '''
         Given the present time, return the desired flat output and derivatives.
 
@@ -16,7 +19,7 @@ class Trajectory():
         pass
 
 class Circle(Trajectory):
-    def __init__(self, T = 6, center=np.array([0,0,0]), radius=1, freq=0.2):
+    def __init__(self, T = 6, center=np.array([0,0]), radius=1, freq=0.2):
         """
         This is the constructor for the circle trajectory
 
@@ -26,7 +29,7 @@ class Circle(Trajectory):
             freq, the frequency with which a circle is completed (Hz)
         """
         self.center = center
-        self.cx, self.cy, self.cz = center[0], center[1], center[2]
+        self.cx, self.cy = center[0], center[1]
         self.radius = radius
         self.freq = freq
         self.omega = 2*np.pi*self.freq
