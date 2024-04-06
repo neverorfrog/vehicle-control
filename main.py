@@ -6,11 +6,13 @@ import models
 import environment as env
 from simulation.racing import RacingSimulation
 from utils.common_utils import load_config, ControlType, CarType, TrackType
+from matplotlib import pyplot as plt
+import logging
 
 # Configuration
 control_type = ControlType.CAS 
 car_type = CarType.DYN
-track_name = TrackType.I.value
+track_name = TrackType.C.value
 
 # Track Definition
 track_config = load_config(f"config/environment/{track_name}.yaml")
@@ -19,6 +21,12 @@ track = env.Track(wp_x=track_config['wp_x'],
               resolution=track_config['resolution'],
               smoothing=track_config['smoothing'],
               width=track_config['width'])
+
+# for waypoint in track.waypoints:
+#     print(waypoint)
+# track.plot(plt.gca())
+# plt.show()
+# exit()
 
 # Model and Controller Definition
 if control_type is ControlType.CAS:
@@ -51,4 +59,10 @@ elif control_type is ControlType.SIN:
         controller = controllers.PointMassMPC(car=car, config=controller_config)
     simulation = RacingSimulation(f"{car_type.value}_{track_name}",car,point_mass,controller)  
 
-simulation.run(N = 500)
+logfile = '/home/neverorfrog/code/vehicle-control-cascaded-models/logs/test.log'
+with open(logfile, "w") as f:
+    # sys.stdout = f
+    print(f"Car configuration: {car_config}")
+    print(f"Controller configuration: {controller_config}")
+    simulation.run(N = 500)
+sys.stdout = sys.__stdout__

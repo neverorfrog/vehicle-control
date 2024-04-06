@@ -70,11 +70,11 @@ class RacingCar(Robot):
     def plot(self, axis: Axes, state: FancyVector):
         x,y,psi = self.rel2glob(state)
         delta = state.delta
-        r = self.length / 2
+        r = 1 # TODO hardcodato
         
         # Draw the bicycle as a rectangle
-        width = self.length
-        height = self.length
+        width = 2 # TODO hardcodato
+        height = 2 # TODO hardcodato
         angle = wrap(psi-np.pi/2)
         rectangle = plt.Rectangle((x-np.cos(angle)*width/2-np.cos(psi)*2*width/3, y-np.sin(angle)*height/2-np.sin(psi)*2*height/3),
                                 width,height,edgecolor='black',alpha=0.7, angle=np.rad2deg(angle), rotation_point='xy')

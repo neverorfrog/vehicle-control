@@ -48,7 +48,21 @@ class RacingSimulation():
             state_prediction = self.controller.state_prediction
             if self.point_mass is not None and self.controller.M > 0:
                 state_pm_prediction = self.controller.state_pm_prediction
-
+            
+            # ----------- Logging -------------------------
+            state_traj.append(state)
+            action_traj.append(action)
+            elapsed.append(elapsed_time)
+            try:
+                preds_car = [self.car.rel2glob(state_prediction[:,i]) for i in range(self.controller.N)]
+                if self.point_mass is not None and self.controller.M > 0:
+                    preds_pm = [self.point_mass.rel2glob(state_pm_prediction[:,i]) for i in range(self.controller.M)]
+                else:
+                    preds_pm = []
+                preds.append(np.array(preds_car + preds_pm).squeeze())
+            except:
+                preds = None
+                
             # ------------- DEBUG PRINTS -----------------
             Fx = action[self.car.input.index('Fx')]
             Ux = state[self.car.state.index('Ux')]
@@ -65,24 +79,12 @@ class RacingSimulation():
             print(f"FINAL ST CURVATURE: {self.car.track.get_curvature(state_prediction[state.index('s'),-1])}")
             if self.controller.M > 0:
                 print(f"FINAL PM CURVATURE: {self.car.track.get_curvature(state_pm_prediction[self.point_mass.state.index('s'),-1])}")
-            print(f"ELAPSED TIME: {elapsed_time}")
-            self.car.print(state,action)
+            print(f"AVERAGE ELAPSED TIME: {np.mean(elapsed):.3f}")
+            # self.car.print(state,action)
             print("------------------------------------------------------------------------------")
             print(f"\n")
+                
             
-            # ----------- Logging -------------------------
-            state_traj.append(state)
-            action_traj.append(action)
-            elapsed.append(elapsed_time)
-            try:
-                preds_car = [self.car.rel2glob(state_prediction[:,i]) for i in range(self.controller.N)]
-                if self.point_mass is not None and self.controller.M > 0:
-                    preds_pm = [self.point_mass.rel2glob(state_pm_prediction[:,i]) for i in range(self.controller.M)]
-                else:
-                    preds_pm = []
-                preds.append(np.array(preds_car + preds_pm).squeeze())
-            except:
-                preds = None
         print("FINISHED")   
         if animate:
             # plt.style.use('dark_background')

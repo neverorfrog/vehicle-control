@@ -84,7 +84,7 @@ class DynamicCar(RacingCar):
         self.alpha_r = ca.Function("alpha_r",[Ux,Uy,r,delta],[alpha_r])
         
         # ================ Lateral Force ===============================================
-        Calpha_f = env['C_alpha']['f']
+        Calpha_f = car['C_alpha']['f']
         alphamod_f = atan((3*Fymax_f*eps)/Calpha_f)
         self.alphamod_f = ca.Function("alphamod_f",[Fx],[alphamod_f])
         Fy_f = ca.if_else((ca.fabs(alpha_f) <= alphamod_f),
@@ -93,7 +93,7 @@ class DynamicCar(RacingCar):
             -Calpha_f*(1 - 2*eps + eps**2)*tan(alpha_f) - Fymax_f*(3*eps**2 - 2*eps**3)*sign(alpha_f))
         self.Fy_f = ca.Function("Fy_f",[Ux,Uy,r,delta,Fx],[Fy_f])
         
-        Calpha_r = env['C_alpha']['r']
+        Calpha_r = car['C_alpha']['r']
         alphamod_r = atan((3*Fymax_r*eps)/Calpha_r)
         self.alphamod_r = ca.Function("alphamod_r",[Fx],[alphamod_r])
         Fy_r = ca.if_else((ca.fabs(alpha_r) <= alphamod_r),
