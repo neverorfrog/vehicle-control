@@ -45,9 +45,9 @@ class DynamicCar(RacingCar):
         curvature = ca.SX.sym('curvature')
         ds = ca.SX.sym('ds')
         g =  9.88 # gravity
-        eps = 0.85 #from the paper
         car = self.config['car']
         env = self.config['env']
+        eps = car['eps']
         
         # ====== Input Model (Fx needs to be distributed between front and rear) ======
         Fx,w = self.input.variables
@@ -73,10 +73,8 @@ class DynamicCar(RacingCar):
         self.Fz_r = ca.Function("Fz_f",[Ux,Fx],[Fz_r])
         
         # ================ Maximum Lateral Tire Force ==================================
-        Fymax_f = ((env['mu']['f']*Fz_f)**2 - ((0.98*Fx_f)**2))**0.5
-        #self.Fymax_f = ca.Function("Fymax_f", [self.Fz_f(Ux, Fx), self.Fx_f(Fx)], [Fymax_f])
-        Fymax_r = ((env['mu']['r']*Fz_r)**2 - ((0.98*Fx_r)**2))**0.5
-        #self.Fymax_r = ca.Function("Fymax_r", [self.Fz_r(Ux, Fx), self.Fx_r(Fx)], [Fymax_f])
+        Fymax_f = ((env['mu']['f']*Fz_f)**2 - ((0.99*Fx_f)**2))**0.5
+        Fymax_r = ((env['mu']['r']*Fz_r)**2 - ((0.99*Fx_r)**2))**0.5
         
         # ================ Slip Angles equations 11a/b =================================
         alpha_f = atan((Uy + car['a'] * r) / Ux) - delta
@@ -87,7 +85,7 @@ class DynamicCar(RacingCar):
         
         # ================ Lateral Force ===============================================
         Calpha_f = env['C_alpha']['f']
-        alphamod_f = atan(3*Fymax_f*eps/Calpha_f)
+        alphamod_f = atan((3*Fymax_f*eps)/Calpha_f)
         self.alphamod_f = ca.Function("alphamod_f",[Fx],[alphamod_f])
         Fy_f = ca.if_else((ca.fabs(alpha_f) <= alphamod_f),
             -Calpha_f*tan(alpha_f) + Calpha_f**2*fabs(tan(alpha_f))*tan(alpha_f) / (3*Fymax_f) - \
@@ -96,7 +94,7 @@ class DynamicCar(RacingCar):
         self.Fy_f = ca.Function("Fy_f",[Ux,Uy,r,delta,Fx],[Fy_f])
         
         Calpha_r = env['C_alpha']['r']
-        alphamod_r = atan(3*Fymax_r*eps/Calpha_r)
+        alphamod_r = atan((3*Fymax_r*eps)/Calpha_r)
         self.alphamod_r = ca.Function("alphamod_r",[Fx],[alphamod_r])
         Fy_r = ca.if_else((ca.fabs(alpha_r) <= alphamod_r),
             -Calpha_r*tan(alpha_r) + Calpha_r**2*fabs(tan(alpha_r))*tan(alpha_r) / (3*Fymax_r) - \
@@ -120,6 +118,8 @@ class DynamicCar(RacingCar):
         epsi_dot = r - curvature*s_dot
         t_dot = 1
         state_dot = ca.vertcat(Ux_dot, Uy_dot, r_dot, delta_dot, s_dot, ey_dot, epsi_dot, t_dot)
+        self.Ux_dot = ca.Function("Ux_dot",[Fx,Ux,Uy,r,delta],[Ux_dot])
+        self.Uy_dot = ca.Function("Uy_dot",[Fx,Ux,Uy,r,delta],[Uy_dot])
         t_ode = ca.Function('ode', [self.state.syms,self.input.syms,curvature], [state_dot])
         t_integrator = self.integrate(self.state.syms,self.input.syms,curvature,t_ode,self.dt)
         self._temporal_transition = ca.Function('transition', [self.state.syms,self.input.syms,curvature], [t_integrator])
@@ -128,11 +128,11 @@ class DynamicCar(RacingCar):
         Ux_prime = Ux_dot / s_dot
         Uy_prime = Uy_dot / s_dot
         r_prime = r_dot / s_dot
-        delta_prime = delta_dot / s_dot
+        delta_prime = w / s_dot
         s_prime = 1
         ey_prime = ey_dot / s_dot
         epsi_prime = epsi_dot / s_dot
-        t_prime = t_dot / s_dot
+        t_prime = 1 / s_dot
         state_prime = ca.vertcat(Ux_prime, Uy_prime, r_prime, delta_prime, s_prime, ey_prime, epsi_prime, t_prime)
         s_ode = ca.Function('ode', [self.state.syms, self.input.syms, curvature], [state_prime])
         s_integrator = self.integrate(self.state.syms, self.input.syms, curvature, s_ode, h=ds)

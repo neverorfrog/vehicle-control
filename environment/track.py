@@ -218,7 +218,10 @@ class Track:
         rb_y = np.array([wp.rb[1] for wp in self.waypoints] + [self.waypoints[0].rb[1]])
         
         # Plot road
-        axis.plot(rb_x, rb_y, color='red')
-        axis.plot(lb_x, lb_y, color='red')
+        wpx = np.array([wp.x for wp in self.waypoints])
+        wpy = np.array([wp.y for wp in self.waypoints])
+        axis.plot(wpx, wpy, 'k--')
+        axis.plot(rb_x, rb_y, color='k')
+        axis.plot(lb_x, lb_y, color='k')
         axis.fill(lb_x, lb_y, "grey",alpha=0.3)
         axis.fill(rb_x, rb_y, "w",alpha=0.9)
