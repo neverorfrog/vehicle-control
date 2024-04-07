@@ -88,8 +88,14 @@ class RacingSimulation():
         print("FINISHED")   
         if animate:
             # plt.style.use('dark_background')
-            self.animate(state_traj, action_traj, preds, elapsed)   
-        
+            self.animate(state_traj, action_traj, preds, elapsed) 
+        self.save(state_traj, action_traj, preds, elapsed)
+      
+    def save(self, state_traj: list, input_traj: list, preds: list, elapsed: list):
+        np.savez(f"{self.name}.npz", state_traj=state_traj, input_traj=input_traj, preds=preds, elapsed=elapsed)  
+    
+    def load(self):
+        return np.load(f"{self.name}.npz")  
     
     def animate(self, state_traj: list, input_traj: list, preds: list, elapsed: list):
         assert isinstance(state_traj,list), "State trajectory has to be a list"
@@ -178,4 +184,4 @@ class RacingSimulation():
         plt.ioff() #interactive mode off
         # animation.save(f"simulation/videos/{self.name}.gif",writer='pillow',fps=20, dpi=200)
         plt.ion() #interactive mode on
-        # print("ANIMATION SAVED")
+        print("ANIMATION SAVED")

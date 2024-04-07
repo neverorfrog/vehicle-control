@@ -1,3 +1,4 @@
+import random
 from models.dynamic_car import DynamicCar, DynamicCarInput
 from models.dynamic_point_mass import DynamicPointMass
 import casadi as ca
@@ -5,6 +6,7 @@ import numpy as np
 from casadi import cos, sin, tan, fabs, atan2, atan
 from controllers.controller import Controller
 np.random.seed(3)
+random.seed(3)
 
 class CascadedMPC(Controller):
     def __init__(self, car: DynamicCar, point_mass: DynamicPointMass, config):
@@ -58,7 +60,7 @@ class CascadedMPC(Controller):
         """
         # ========================= Optimizer Initialization =================================
         opti = ca.Opti('nlp')
-        ipopt_options = {'print_level': 0, 'linear_solver': 'ma27', 'hsllib': '/usr/local/lib/libcoinhsl.so', 'fixed_variable_treatment': 'relax_bounds'}
+        ipopt_options = {'print_level': 1, 'linear_solver': 'ma27', 'hsllib': '/usr/local/lib/libcoinhsl.so', 'fixed_variable_treatment': 'relax_bounds'}
         options = {'print_time': False, 'expand': False, 'ipopt': ipopt_options}
         opti.solver("ipopt", options)
         
@@ -123,9 +125,7 @@ class CascadedMPC(Controller):
             # Discretization (Going on for dt with displacement snapshot) 
             curvature = self.car.track.get_curvature(state[self.car.state.index('s')])
             opti.subject_to(self.curvature[n] == curvature)
-            # num = Ux * cos(epsi)**2 - Uy * sin(epsi)
-            # denom = 1 - (self.curvature[n]*ey)**2
-            ds = self.dt * Ux
+            ds = self.dt * Ux #((Ux*cos(epsi) - Uy*sin(epsi)) / (1 - curvature))
             opti.subject_to(self.ds[n] == ds)
             
             # Model dynamics 
@@ -159,7 +159,7 @@ class CascadedMPC(Controller):
             if n < self.N-1: #Force Input Continuity
                 next_input = self.action[:,n+1]
                 Fx_next = next_input[self.car.input.index('Fx')]
-                cost += (cost_weights['Fx']/ds) * (Fx_next - Fx)**2 
+                cost += (cost_weights['Fx']/ds) * (Fx_next - Fx)**2
                 
             if n == self.N-1 and self.M > 0: #SINGLETRACK/POINTMASS Continuity
                 Ux_final = state_next[self.car.state.index('Ux')]
@@ -183,14 +183,9 @@ class CascadedMPC(Controller):
                 # Fy_bar_initial = input_pm_initial[self.point_mass.input.index('Fy')]
                 # Fy_f = self.car.Fy_f(Ux_final,Uy_final,r_final,delta_final,Fx)
                 # Fy_r = self.car.Fy_r(Ux_final,Uy_final,r_final,delta_final,Fx)
-                # cost += (cost_weights['Fx']/ds) * ((Fx_bar_initial-Fx)**2 + (Fy_bar_initial-Fy_f-Fy_r)**2)
-                cost += (cost_weights['Fx'] / ds) * ((Fx_bar_initial-Fx)**2)
+                cost += (cost_weights['Fx']/ds) * (((Fx_bar_initial-Fx)**2)) #+ (Fy_bar_initial-Fy_f-Fy_r)**2)
 
             # --------- Stuff that breaks things (Friction Limits for real world experiments) -----
-            # opti.subject_to(self.Fy_f[n] == self.car.Fy_f(Ux,Uy,r,delta,Fx))
-            # opti.subject_to(self.Fy_r[n] == self.car.Fy_r(Ux,Uy,r,delta,Fx))
-            # opti.subject_to(self.Fx_f[n] == self.car.Fx_f(Fx))
-            # opti.subject_to(self.Fx_r[n] == self.car.Fx_r(Fx))
             # opti.subject_to(self.Fx_f[n]**2 + self.Fy_f[n]**2 <= (input_constraints['mu_lim']*self.car.Fz_f(Ux,Fx))**2 + (self.Fe_f[n])**2)
             # opti.subject_to(self.Fx_r[n]**2 + self.Fy_f[n]**2 <= (input_constraints['mu_lim']*self.car.Fz_r(Ux,Fx))**2 + (self.Fe_r[n])**2) 
             # ---------------------------------------------------------------------
@@ -215,7 +210,9 @@ class CascadedMPC(Controller):
             
             # Discretization (Going on for dt with displacement snapshot) 
             curvature = self.point_mass.track.get_curvature(state_pm[self.point_mass.state.index('s')])
-            # ds_bar = self.dt_pm * self.car.track.get_speed(state_pm[self.point_mass.state.index('s')])
+            v_des = self.car.track.get_speed(state_pm[self.point_mass.state.index('s')])
+            # ds_bar = self.dt_pm * ((v_des) / (1 - curvature))
+            # ds_bar = ds_bar / (1 - curvature)
             opti.subject_to(self.curvature_pm[m] == curvature)
             opti.subject_to(self.ds_pm[m] == ds_bar)
             
@@ -236,8 +233,6 @@ class CascadedMPC(Controller):
                        cost_weights['boundary']*ds_bar*(ey_bar - state_pm_constraints['ey_bar_max'])**2, 0)
             
             cost += cost_weights['deviation_pm']*ds_bar*(ey_bar**2) # 4) deviation from road descriptor path
-            
-            cost += cost_weights['friction']*((self.Fe_pm_f[m]**2)**2 + (self.Fe_pm_r[m]**2)**2) # slack variables for sparsity
             
             if m < self.M-1: # 5) Slew Rate
                 next_input_pm = self.action_pm[:,m+1]

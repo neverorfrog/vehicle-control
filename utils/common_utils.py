@@ -8,7 +8,6 @@ class CarType(Enum):
     DPM = "dynamic_point_mass"
     
 class TrackType(Enum):
-    C = "circomassimo"
     I = "ippodromo"
     M = "montecarlo"
     G = "gokart"
