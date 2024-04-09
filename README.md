@@ -21,4 +21,4 @@ Implementation of some control algorithms, based on model-predictive control, fo
 ## References
 
 <a id="1">[1]</a> 
-V. A. Laurense and J. C. Gerdes, "Long-Horizon Vehicle Motion Planning and Control Through Serially Cascaded Model Complexity," in IEEE Transactions on Control Systems Technology, vol. 30, no. 1, pp. 166-179, Jan. 2022
+[V. A. Laurense and J. C. Gerdes, "Long-Horizon Vehicle Motion Planning and Control Through Serially Cascaded Model Complexity," in IEEE Transactions on Control Systems Technology, vol. 30, no. 1, pp. 166-179, Jan. 2022](https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=9366415)
