@@ -16,14 +16,14 @@ car:
   Xb: # brake force distribution
     f: 0.78
     r: 0.22
+  C_alpha: # cornering stiffness
+    f: 180000
+    r: 300000
 
 # coefficients related to environment
 env:
   Crr: 0.01 # rolling resistance coefficient https://en.wikipedia.org/wiki/Rolling_resistance
   Cd: 0.4243 # aerodynamic drag coefficient
-  C_alpha: # cornering stiffness
-    f: 180000
-    r: 300000
   mu: # friction coefficient
     f: 0.9
     r: 0.95

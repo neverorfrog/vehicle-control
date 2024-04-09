@@ -49,14 +49,14 @@ class Waypoint:
     
 
 class Track:
-    def __init__(self, corners, curves, smoothing, resolution, width = 0.4):
+    def __init__(self, corners, smoothing, resolution, width = 0.4):
         """
         Track object containing a list of waypoints and a spline constructed
         """
         self.width = width
         self.resolution = resolution
         self.smoothing = smoothing
-        self.waypoints: List[Waypoint] = self._construct_path(corners, curves)
+        self.waypoints: List[Waypoint] = self._construct_path(corners)
         self.n_waypoints = len(self.waypoints)
         self._construct_spline()
         self.ds = 0.03
@@ -83,11 +83,6 @@ class Track:
         tangent_x = dx_ds / magnitude
         tangent_y = dy_ds / magnitude
         return np.arctan2(tangent_y, tangent_x)
-    
-    def get_speed(self, s): # TODO
-        '''Get desired speed of a point along the spline'''
-        s = ca.fmod(s,self.length) # need to module s (for successive laps)
-        return 10 * (1 - self.get_curvature(s))
     
     def _precompute_curvatures(self):
         curvatures = []
@@ -125,7 +120,7 @@ class Track:
         self.ddx_ds = ca.Function("ddx_ds",[s],[ca.jacobian(self.dx_ds(s),s)])
         self.ddy_ds = ca.Function("ddy_ds",[s],[ca.jacobian(self.dy_ds(s),s)])
         
-    def _construct_path(self, corners, curves):
+    def _construct_path(self, corners):
         """
         Construct path from given waypoints.
         :return: list of waypoint objects
@@ -139,29 +134,9 @@ class Track:
             start = [corners[i][0], corners[i][1]]
             end = [corners[i + 1][0], corners[i + 1][1]]
             distance = np.sqrt((end[0] - start[0]) ** 2 + (end[1] - start[1]) ** 2)
-            # if curves[i] == False:
             n_wp = int(distance/self.resolution)
             wp_x.extend(np.linspace(start[0], end[0], n_wp, endpoint=False).tolist())
             wp_y.extend(np.linspace(start[1], end[1], n_wp, endpoint=False).tolist())
-            # else:
-            #     midpoint = ((start[0] + end[0]) / 2, (start[1] + end[1]) / 2)
-            #     radius = np.sqrt(distance**2 / 2)
-            #     centerx = start[0] + radius * np.sin(angle)
-            #     centery = start[1] + radius * np.cos(angle)
-            #     start_angle = np.arctan2(centery - start[1], centerx - start[0])
-            #     end_angle = np.arctan2(centery - end[1], centerx - end[0])
-            #     x_list = []
-            #     y_list = []
-            #     n_wp = 250
-            #     for i in range(n_wp):
-            #         angle = start_angle + i * wrap((end_angle - start_angle)) / n_wp
-            #         x = centerx - radius * np.cos(angle)
-            #         y = centery - radius * np.sin(angle)
-            #         x_list.append(x)
-            #         y_list.append(y)
-            #     wp_x.extend(x_list)
-            #     wp_y.extend(y_list)
-            # angle = np.arctan2(start[1] - end[1], end[0] - start[0])
 
         # Smooth path
         wp_xs = []

@@ -10,9 +10,7 @@ corners:
   - [-60, 45]
   - [-60, 15]
   - [-45, 0]
-  - [0, 0]
-
-curves: [False, True, False, True, False, True, False, True, False]
+  - [23, 0]
 
 resolution: 0.1
 smoothing: 110

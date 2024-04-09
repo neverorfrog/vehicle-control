@@ -80,22 +80,21 @@ class RacingSimulation():
             if self.controller.M > 0:
                 print(f"FINAL PM CURVATURE: {self.car.track.get_curvature(state_pm_prediction[self.point_mass.state.index('s'),-1])}")
             print(f"AVERAGE ELAPSED TIME: {np.mean(elapsed):.3f}")
-            # self.car.print(state,action)
+            self.car.print(state,action)
             print("------------------------------------------------------------------------------")
             print(f"\n")
                 
             
         print("FINISHED")   
         if animate:
-            # plt.style.use('dark_background')
             self.animate(state_traj, action_traj, preds, elapsed) 
         self.save(state_traj, action_traj, preds, elapsed)
       
     def save(self, state_traj: list, input_traj: list, preds: list, elapsed: list):
-        np.savez(f"{self.name}.npz", state_traj=state_traj, input_traj=input_traj, preds=preds, elapsed=elapsed)  
+        np.savez(f"simulation/data/{self.name}.npz", state_traj=state_traj, input_traj=input_traj, preds=preds, elapsed=elapsed)  
     
     def load(self):
-        return np.load(f"{self.name}.npz")  
+        return np.load(f"simulation/data/{self.name}.npz")  
     
     def animate(self, state_traj: list, input_traj: list, preds: list, elapsed: list):
         assert isinstance(state_traj,list), "State trajectory has to be a list"
@@ -182,6 +181,6 @@ class RacingSimulation():
         fig_manager.window.showMaximized()
         plt.show(block=True) 
         plt.ioff() #interactive mode off
-        # animation.save(f"simulation/videos/{self.name}.gif",writer='pillow',fps=20, dpi=200)
+        animation.save(f"simulation/videos/{self.name}.gif",writer='pillow',fps=20, dpi=200)
         plt.ion() #interactive mode on
         print("ANIMATION SAVED")

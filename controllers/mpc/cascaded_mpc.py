@@ -70,7 +70,6 @@ class CascadedMPC(Controller):
         self.state_prediction = np.ones((self.ns, self.N+1)) # actual predicted state trajectory
         self.action_prediction = np.ones((self.na, self.N))+np.random.random((self.na, self.N)) # actual predicted control trajectory
         self.ds = opti.variable(self.N) # ds trajectory var (just for loggin purposes)
-        self.curvature = opti.variable(self.N) # curvature trajectory var (just for loggin purposes)
         self.state0 = opti.parameter(self.ns) # initial state
         opti.subject_to(self.state[:,0] == self.state0) # constraint on initial state
         
@@ -80,13 +79,12 @@ class CascadedMPC(Controller):
             self.state_pm_prediction = np.ones((self.ns_pm, self.M+1)) # actual predicted state trajectory
             self.action_pm_prediction = np.ones((self.na_pm, self.M))+np.random.random((self.na_pm, self.M))   # actual predicted control trajectory
             self.ds_pm = opti.variable(self.M) # ds trajectory var (just for loggin purposes)
-            self.curvature_pm = opti.variable(self.M) # curvature trajectory var (just for loggin purposes)
         
         # ======================== Slack Variables ============================================
         self.Fe_f = opti.variable(self.N) 
         self.Fe_r = opti.variable(self.N)
-        self.Fe_pm_f = opti.variable(self.M) 
-        self.Fe_pm_r = opti.variable(self.M)  
+        self.Fy_f = opti.variable(self.N)
+        self.Fy_r = opti.variable(self.N)
                                            
         # ======================= Cycle the entire horizon defining NLP problem ===============
         cost_weights = self.config['cost_weights'] 
@@ -112,6 +110,7 @@ class CascadedMPC(Controller):
             delta = state[self.car.state.index('delta')]
             Fx = input[self.car.input.index('Fx')]
             w = input[self.car.input.index('w')]
+            s = state[self.car.state.index('s')]
             
             # -------------------- Constraints --------------------------------------------------
             # state limits
@@ -123,13 +122,12 @@ class CascadedMPC(Controller):
             opti.subject_to(opti.bounded(input_constraints['w_min'],w,input_constraints['w_max']))
             
             # Discretization (Going on for dt with displacement snapshot) 
-            curvature = self.car.track.get_curvature(state[self.car.state.index('s')])
-            opti.subject_to(self.curvature[n] == curvature)
-            ds = self.dt * Ux #((Ux*cos(epsi) - Uy*sin(epsi)) / (1 - curvature))
+            curvature = self.car.track.curvatures(s)
+            ds = self.dt * Ux
             opti.subject_to(self.ds[n] == ds)
             
             # Model dynamics 
-            opti.subject_to(state_next == self.car.spatial_transition(state,input,self.curvature[n],self.ds[n])) 
+            opti.subject_to(state_next == self.car.spatial_transition(state,input,curvature,self.ds[n])) 
             
             # longitudinal force limits on tires
             bound_f = mu['f']*self.car.Fz_f(Ux,Fx)*cos(self.car.alpha_f(Ux,Uy,r,delta))
@@ -180,14 +178,16 @@ class CascadedMPC(Controller):
                 
                 input_pm_initial = self.action_pm[:,0]
                 Fx_bar_initial = input_pm_initial[self.point_mass.input.index('Fx')]
-                # Fy_bar_initial = input_pm_initial[self.point_mass.input.index('Fy')]
-                # Fy_f = self.car.Fy_f(Ux_final,Uy_final,r_final,delta_final,Fx)
-                # Fy_r = self.car.Fy_r(Ux_final,Uy_final,r_final,delta_final,Fx)
-                cost += (cost_weights['Fx']/ds) * (((Fx_bar_initial-Fx)**2)) #+ (Fy_bar_initial-Fy_f-Fy_r)**2)
+                Fy_bar_initial = input_pm_initial[self.point_mass.input.index('Fy')]
+                Fy_f = self.car.Fy_f(Ux_final,Uy_final,r_final,delta_final,Fx)
+                Fy_r = self.car.Fy_r(Ux_final,Uy_final,r_final,delta_final,Fx)
+                cost += (cost_weights['Fx']/ds) * (((Fx_bar_initial-Fx)**2)+ (Fy_bar_initial-Fy_f-Fy_r)**2)
 
             # --------- Stuff that breaks things (Friction Limits for real world experiments) -----
-            # opti.subject_to(self.Fx_f[n]**2 + self.Fy_f[n]**2 <= (input_constraints['mu_lim']*self.car.Fz_f(Ux,Fx))**2 + (self.Fe_f[n])**2)
-            # opti.subject_to(self.Fx_r[n]**2 + self.Fy_f[n]**2 <= (input_constraints['mu_lim']*self.car.Fz_r(Ux,Fx))**2 + (self.Fe_r[n])**2) 
+            # opti.subject_to(self.Fy_f[n] == self.car.Fy_f(Ux,Uy,r,delta,Fx))
+            # opti.subject_to(self.Fy_r[n] == self.car.Fy_r(Ux,Uy,r,delta,Fx))
+            # opti.subject_to(self.car.Fx_f(Fx)**2 + self.car.Fy_f(Ux,Uy,r,delta,Fx)**2 <= (input_constraints['mu_lim']*self.car.Fz_f(Ux,Fx))**2 + (self.Fe_f[n])**2)
+            # opti.subject_to(self.car.Fx_r(Fx)**2 + self.car.Fy_r(Ux,Uy,r,delta,Fx)**2 <= (input_constraints['mu_lim']*self.car.Fz_r(Ux,Fx))**2 + (self.Fe_r[n])**2) 
             # ---------------------------------------------------------------------
         
         # ===================== Point Mass Model =====================================
@@ -200,6 +200,7 @@ class CascadedMPC(Controller):
             epsi_bar = state_pm[self.point_mass.state.index('epsi')]
             Fx_bar = input_pm[self.point_mass.input.index('Fx')]
             Fy_bar = input_pm[self.point_mass.input.index('Fy')]
+            s_bar = state_pm[self.point_mass.state.index('s')]
             
             # -------------------- Constraints --------------------------------------------------
             # state limits
@@ -209,15 +210,11 @@ class CascadedMPC(Controller):
             opti.subject_to(Fx_bar <= Peng / V_bar)
             
             # Discretization (Going on for dt with displacement snapshot) 
-            curvature = self.point_mass.track.get_curvature(state_pm[self.point_mass.state.index('s')])
-            v_des = self.car.track.get_speed(state_pm[self.point_mass.state.index('s')])
-            # ds_bar = self.dt_pm * ((v_des) / (1 - curvature))
-            # ds_bar = ds_bar / (1 - curvature)
-            opti.subject_to(self.curvature_pm[m] == curvature)
+            curvature = self.car.track.curvatures(s_bar)
             opti.subject_to(self.ds_pm[m] == ds_bar)
             
             # Model dynamics 
-            opti.subject_to(state_pm_next == self.point_mass.spatial_transition(state_pm,input_pm,self.curvature_pm[m],self.ds_pm[m])) 
+            opti.subject_to(state_pm_next == self.point_mass.spatial_transition(state_pm,input_pm,curvature,self.ds_pm[m])) 
             
             # friction limits
             Fx_f_bar = self.car.Fx_f(Fx_bar)
