@@ -1,4 +1,4 @@
-name: casadi
+name: mpc
 channels:
   - defaults
 dependencies:

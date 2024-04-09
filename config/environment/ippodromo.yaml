@@ -1,42 +1,19 @@
 # track data
-wp_x:
-  #start
-  - 0
 
-  # bottom segment
-  - 60
+corners:
+  - [0, 0]
+  - [45, 0]
+  - [60, 15]
+  - [60, 45]
+  - [45, 60]
+  - [-45, 60]
+  - [-60, 45]
+  - [-60, 15]
+  - [-45, 0]
+  - [0, 0]
 
-  # right segment
-  - 60
-
-  # top segment
-  - -60
-
-  # left segment
-  - -60
-
-  # end
-  - 35
-
-wp_y:
-  #start
-  - 0
-
-  # bottom segment
-  - 0
-
-  # right segment
-  - 60
-
-  # top segment
-  - 60
-
-  # left segment
-  - 0
-
-  # end
-  - 0
+curves: [False, True, False, True, False, True, False, True, False]
 
 resolution: 0.1
-smoothing: 250
+smoothing: 110
 width: 9

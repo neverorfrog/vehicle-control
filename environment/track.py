@@ -49,25 +49,18 @@ class Waypoint:
     
 
 class Track:
-    def __init__(self, wp_x, wp_y, resolution, smoothing, width = 0.4):
+    def __init__(self, corners, curves, smoothing, resolution, width = 0.4):
         """
-        Track object. Create a reference trajectory from specified
-        corner points with given resolution. Smoothing around corners can be
-        applied. Waypoints represent center-line of the path with specified
-        maximum width to both sides. By default the track is anticlockwise.
-        :param map: map object on which path will be placed
-        :param wp_x: x coordinates of corner points in global coordinates
-        :param wp_y: y coordinates of corner points in global coordinates
-        :param resolution: resolution of the path in m/wp
-        :param smoothing: number of waypoints used for smoothing the path by averaging neighborhood of waypoints
-        :param width: width of path to both sides in m
+        Track object containing a list of waypoints and a spline constructed
         """
         self.width = width
         self.resolution = resolution
         self.smoothing = smoothing
-        self.waypoints: List[Waypoint] = self._construct_path(wp_x, wp_y)
+        self.waypoints: List[Waypoint] = self._construct_path(corners, curves)
         self.n_waypoints = len(self.waypoints)
         self._construct_spline()
+        self.ds = 0.03
+        self.curvatures = self._precompute_curvatures()
         
     def get_curvature(self, s):
         '''Get curvature (inverse of curvature radius) of a point along the spline'''
@@ -77,8 +70,9 @@ class Track:
         ddx_ds = self.ddx_ds(s)
         ddy_ds = self.ddy_ds(s)
         denom = ca.power(dx_ds**2 + dy_ds**2, 1.5)
-        num = dx_ds * ddy_ds - ddx_ds * dy_ds
-        return ca.fabs(num)/denom
+        num = ca.fabs(dx_ds * ddy_ds - ddx_ds * dy_ds)
+        curvature = num/denom
+        return curvature
     
     def get_orientation(self, s):
         '''Get orientation wrt horizontal line of a point along the spline'''
@@ -94,6 +88,14 @@ class Track:
         '''Get desired speed of a point along the spline'''
         s = ca.fmod(s,self.length) # need to module s (for successive laps)
         return 10 * (1 - self.get_curvature(s))
+    
+    def _precompute_curvatures(self):
+        curvatures = []
+        s_values = np.arange(0, self.length-0.1, self.ds)
+        for s in s_values:
+            curvatures.append(self.get_curvature(s).full().squeeze().item())
+        curvatures = ca.interpolant('curvatures', 'bspline', [s_values], curvatures)
+        return curvatures
         
     def _construct_spline(self):
         # waypoint list
@@ -123,26 +125,43 @@ class Track:
         self.ddx_ds = ca.Function("ddx_ds",[s],[ca.jacobian(self.dx_ds(s),s)])
         self.ddy_ds = ca.Function("ddy_ds",[s],[ca.jacobian(self.dy_ds(s),s)])
         
-    def _construct_path(self, wp_x, wp_y):
+    def _construct_path(self, corners, curves):
         """
         Construct path from given waypoints.
-        :param wp_x: x coordinates of waypoints in global coordinates
-        :param wp_y: y coordinates of waypoints in global coordinates
         :return: list of waypoint objects
         """
-
-        # Number of intermediate waypoints between one waypoint and the other
-        distance = lambda i: np.sqrt((wp_x[i + 1] - wp_x[i]) ** 2 + (wp_y[i + 1] - wp_y[i]) ** 2)
-        n_wp = [int(distance(i)/self.resolution) for i in range(len(wp_x) - 1)]
         
-        # Construct waypoints with specified resolution
-        gp_x, gp_y = wp_x[-1], wp_y[-1]
-        x_list = lambda i: np.linspace(wp_x[i], wp_x[i+1], n_wp[i], endpoint=False).tolist()
-        wp_x = [x_list(i) for i in range(len(wp_x)-1)]
-        wp_x = [wp for segment in wp_x for wp in segment] + [gp_x]
-        y_list = lambda i: np.linspace(wp_y[i], wp_y[i + 1], n_wp[i], endpoint=False).tolist()
-        wp_y = [y_list(i) for i in range(len(wp_y) - 1)]
-        wp_y = [wp for segment in wp_y for wp in segment] + [gp_y]
+        wp_x = []
+        wp_y = []
+        
+        angle = 0 # TODO hardcodato
+        for i in range(len(corners)-1):
+            start = [corners[i][0], corners[i][1]]
+            end = [corners[i + 1][0], corners[i + 1][1]]
+            distance = np.sqrt((end[0] - start[0]) ** 2 + (end[1] - start[1]) ** 2)
+            # if curves[i] == False:
+            n_wp = int(distance/self.resolution)
+            wp_x.extend(np.linspace(start[0], end[0], n_wp, endpoint=False).tolist())
+            wp_y.extend(np.linspace(start[1], end[1], n_wp, endpoint=False).tolist())
+            # else:
+            #     midpoint = ((start[0] + end[0]) / 2, (start[1] + end[1]) / 2)
+            #     radius = np.sqrt(distance**2 / 2)
+            #     centerx = start[0] + radius * np.sin(angle)
+            #     centery = start[1] + radius * np.cos(angle)
+            #     start_angle = np.arctan2(centery - start[1], centerx - start[0])
+            #     end_angle = np.arctan2(centery - end[1], centerx - end[0])
+            #     x_list = []
+            #     y_list = []
+            #     n_wp = 250
+            #     for i in range(n_wp):
+            #         angle = start_angle + i * wrap((end_angle - start_angle)) / n_wp
+            #         x = centerx - radius * np.cos(angle)
+            #         y = centery - radius * np.sin(angle)
+            #         x_list.append(x)
+            #         y_list.append(y)
+            #     wp_x.extend(x_list)
+            #     wp_y.extend(y_list)
+            # angle = np.arctan2(start[1] - end[1], end[0] - start[0])
 
         # Smooth path
         wp_xs = []
