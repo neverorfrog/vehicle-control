@@ -1,4 +1,5 @@
 import sys
+import os
 sys.path.append(".")
 
 import controllers
@@ -6,49 +7,49 @@ import models
 import environment as env
 from simulation.racing import RacingSimulation
 from utils.common_utils import load_config, ControlType, CarType, TrackType
+import matplotlib.pyplot as plt
 
-# Configuration
+# ======== Configuration ============
 control_type = ControlType.CAS 
 car_type = CarType.DYN
 track_name = TrackType.I.value
 
-# Track Definition
+# =========== Track Definition ============
 track_config = load_config(f"config/environment/{track_name}.yaml")
-track = env.Track(wp_x=track_config['wp_x'], 
-              wp_y=track_config['wp_y'], 
-              resolution=track_config['resolution'],
-              smoothing=track_config['smoothing'],
-              width=track_config['width'])
+track = env.Track(corners=track_config['corners'],
+                  smoothing=track_config['smoothing'],
+                  resolution=track_config['resolution'],
+                  width=track_config['width'])
 
-# Model and Controller Definition
-if control_type is ControlType.CAS:
-    controller_config = load_config(f"config/controllers/{track_name}/cascaded_{track_name}.yaml")
-    #DYNAMIC CAR
-    car_config = load_config(f"config/models/dynamic_car.yaml")
-    car = models.DynamicCar(config=car_config, track=track)
-    car.state = models.DynamicCarState(Ux = 4, s = 1)
-    #DYNAMIC POINT MASS
-    pm_config = load_config(f"config/models/dynamic_point_mass.yaml")
-    point_mass = models.DynamicPointMass(config=pm_config, track=track)
-    point_mass.state = models.DynamicPointMassState()
-    controller = controllers.CascadedMPC(car=car, point_mass=point_mass, config=controller_config)
-    simulation = RacingSimulation(f"cascaded_{track_name}",car,point_mass,controller)     
-elif control_type is ControlType.SIN:
-    controller_config = load_config(f"config/controllers/{track_name}/{car_type.value}_{track_name}.yaml")
-    car_config = load_config(f"config/models/{car_type.value}.yaml")
-    point_mass = None
-    if car_type is CarType.KIN:
-        car = models.KinematicCar(config=car_config, track = track)
-        car.state = models.KinematicState(v = 1, s = 30)
-        controller = controllers.KinematicMPC(car=car, config=controller_config)
-    elif car_type is CarType.DYN:
-        car = models.DynamicCar(config=car_config, track = track)
-        car.state = models.DynamicCarState(Ux = 4, s = 30)
-        controller = controllers.DynamicMPC(car=car, config=controller_config)
-    elif car_type is CarType.DPM:
-        car = models.DynamicPointMass(config=car_config, track = track)
-        car.state = models.DynamicPointMassState(V = 3, s = 30)
-        controller = controllers.PointMassMPC(car=car, config=controller_config)
-    simulation = RacingSimulation(f"{car_type.value}_{track_name}",car,point_mass,controller)  
+# track.plot(plt.gca())
+# plt.show()
+# exit() 
 
-simulation.run(N = 500)
+# ========= Model Definition ==============
+
+#DYNAMIC CAR
+car_config = load_config(f"config/models/dynamic_car.yaml")
+car = models.DynamicCar(config=car_config, track=track)
+car.state = models.DynamicCarState(Ux = 4, s = 1)
+#DYNAMIC POINT MASS
+pm_config = load_config(f"config/models/dynamic_point_mass.yaml")
+point_mass = models.DynamicPointMass(config=pm_config, track=track)
+point_mass.state = models.DynamicPointMassState()
+
+# ============ Controller Definition ================
+controller_config = load_config(f"config/controllers/{track_name}/cascaded_{track_name}.yaml")
+controller = controllers.CascadedMPC(car=car, point_mass=point_mass, config=controller_config)
+if controller.M > 0:
+    simulation = RacingSimulation(f"cascaded_{track_name}",car,point_mass,controller)  
+else:
+    simulation = RacingSimulation(f"singletrack_{track_name}",car,point_mass,controller)   
+
+
+src_dir = os.path.dirname(os.path.abspath(__file__))
+logfile = f'simulation/logs/{simulation.name}.log'
+with open(logfile, "w") as f:
+    sys.stdout = f
+    print(f"Car configuration: {car_config}")
+    print(f"Controller configuration: {controller_config}")
+    simulation.run(N = 500)
+sys.stdout = sys.__stdout__

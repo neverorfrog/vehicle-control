@@ -38,21 +38,21 @@ class DynamicPointMass(RacingCar):
         Xb = car['Xb'] # brake distribution
         
         Xf = (Xd['f']-Xb['f'])/2 * tanh(2*(Fx/1000 + 0.5)) + (Xd['f'] + Xb['f'])/2
-        self.Xf = ca.Function("Xf",[Fx],[Xf])
+        self.Xf = ca.Function("Xf",[Fx],[Xf]).expand()
         Fx_f = Fx*Xf
-        self.Fx_f = ca.Function("Fx_f",[Fx],[Fx_f])
+        self.Fx_f = ca.Function("Fx_f",[Fx],[Fx_f]).expand()
         
         Xr = (Xb['r']-Xd['r'])/2 * tanh(-2*(Fx/1000 + 0.5)) + (Xd['r'] + Xb['r'])/2
-        self.Xr = ca.Function("Xr",[Fx],[Xr])
+        self.Xr = ca.Function("Xr",[Fx],[Xr]).expand()
         Fx_r = Fx*Xr
-        self.Fx_r = ca.Function("Fx_r",[Fx],[Fx_r]) 
+        self.Fx_r = ca.Function("Fx_r",[Fx],[Fx_r]).expand()
         
         # ================= Normal Load ================================================
         Fz_f = (car['b']/car['l'])*car['m']*(g*cos(env['theta'])*cos(env['phi']) + env['Av2']*V**2) - car['h']*Fx/car['l']
-        self.Fz_f = ca.Function("Fz_f",[V,Fx],[Fz_f])
+        self.Fz_f = ca.Function("Fz_f",[V,Fx],[Fz_f]).expand()
         
         Fz_r = (car['a']/car['l'])*car['m']*(g*cos(env['theta'])*cos(env['phi']) + env['Av2']*V**2) + car['h']*Fx/car['l']
-        self.Fz_r = ca.Function("Fz_f",[V,Fx],[Fz_r])
+        self.Fz_r = ca.Function("Fz_f",[V,Fx],[Fz_r]).expand()
         
         # ===================== Differential Equations ===================================
         Fb = 0 #-p.m*g*ca.cos(theta)*ca.sin(phi) TODO if you want to change the angle modify this
@@ -67,9 +67,9 @@ class DynamicPointMass(RacingCar):
         epsi_dot = (Fy + Fb)/(car['m']*V) - curvature*s_dot
         t_dot = 1
         state_dot = ca.vertcat(V_dot,  s_dot, ey_dot, epsi_dot, t_dot)
-        t_ode = ca.Function('ode', [self.state.syms,self.input.syms,curvature], [state_dot])
+        t_ode = ca.Function('ode', [self.state.syms,self.input.syms,curvature], [state_dot]).expand()
         t_integrator = self.integrate(self.state.syms,self.input.syms,curvature,t_ode,self.dt)
-        self._temporal_transition = ca.Function('transition', [self.state.syms,self.input.syms,curvature], [t_integrator])
+        self._temporal_transition = ca.Function('transition', [self.state.syms,self.input.syms,curvature], [t_integrator]).expand()
 
         # SPATIAL transition (equations 41a to 41f)
         V_prime = V_dot / s_dot
@@ -78,9 +78,9 @@ class DynamicPointMass(RacingCar):
         epsi_prime = epsi_dot / s_dot
         t_prime = t_dot / s_dot
         state_prime = ca.vertcat(V_prime, s_prime, ey_prime, epsi_prime, t_prime)
-        s_ode = ca.Function('ode', [self.state.syms, self.input.syms, curvature], [state_prime])
+        s_ode = ca.Function('ode', [self.state.syms, self.input.syms, curvature], [state_prime]).expand()
         s_integrator = self.integrate(self.state.syms, self.input.syms, curvature, s_ode, h=ds)
-        self._spatial_transition = ca.Function('transition', [self.state.syms,self.input.syms,curvature,ds], [s_integrator])
+        self._spatial_transition = ca.Function('transition', [self.state.syms,self.input.syms,curvature,ds], [s_integrator]).expand()
 
     @property
     def transition(self):

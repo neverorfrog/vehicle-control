@@ -48,19 +48,6 @@ class RacingSimulation():
             state_prediction = self.controller.state_prediction
             if self.point_mass is not None and self.controller.M > 0:
                 state_pm_prediction = self.controller.state_pm_prediction
-
-            # ------------- DEBUG PRINTS -----------------
-            # print("------------------------------------------------------------------------------")
-            print(f"N: {n}")
-            print(f"STATE: {state}")
-            print(f"ACTION: {action}")
-            print(f"FINAL ST CURVATURE: {self.car.track.get_curvature(state_prediction[state.index('s'),-1])}")
-            if self.controller.M > 0:
-                print(f"FINAL PM CURVATURE: {self.car.track.get_curvature(state_pm_prediction[self.point_mass.state.index('s'),-1])}")
-            print(f"ELAPSED TIME: {elapsed_time}")
-            self.car.print(state,action)
-            print("------------------------------------------------------------------------------")
-            print(f"\n")
             
             # ----------- Logging -------------------------
             state_traj.append(state)
@@ -75,11 +62,39 @@ class RacingSimulation():
                 preds.append(np.array(preds_car + preds_pm).squeeze())
             except:
                 preds = None
+                
+            # ------------- DEBUG PRINTS -----------------
+            Fx = action[self.car.input.index('Fx')]
+            Ux = state[self.car.state.index('Ux')]
+            Uy = state[self.car.state.index('Uy')]
+            r = state[self.car.state.index('r')]
+            delta = state[self.car.state.index('delta')]
+            Ux_dot = self.car.Ux_dot(Fx,Ux,Uy,r,delta).full().squeeze().item()
+            Uy_dot = self.car.Uy_dot(Fx,Ux,Uy,r,delta).full().squeeze().item()
+            print("------------------------------------------------------------------------------")
+            print(f"N: {n}")
+            print(f"STATE: {state}")
+            print(f"ACTION: {action}")
+            print(f"UX ACCELERATION: {Ux_dot:.3f}, UY ACCELERATION: {Uy_dot:.3f}")
+            print(f"FINAL ST CURVATURE: {self.car.track.get_curvature(state_prediction[state.index('s'),-1])}")
+            if self.controller.M > 0:
+                print(f"FINAL PM CURVATURE: {self.car.track.get_curvature(state_pm_prediction[self.point_mass.state.index('s'),-1])}")
+            print(f"AVERAGE ELAPSED TIME: {np.mean(elapsed):.3f}")
+            self.car.print(state,action)
+            print("------------------------------------------------------------------------------")
+            print(f"\n")
+                
+            
         print("FINISHED")   
         if animate:
-            # plt.style.use('dark_background')
-            self.animate(state_traj, action_traj, preds, elapsed)   
-        
+            self.animate(state_traj, action_traj, preds, elapsed) 
+        self.save(state_traj, action_traj, preds, elapsed)
+      
+    def save(self, state_traj: list, input_traj: list, preds: list, elapsed: list):
+        np.savez(f"simulation/data/{self.name}.npz", state_traj=state_traj, input_traj=input_traj, preds=preds, elapsed=elapsed)  
+    
+    def load(self):
+        return np.load(f"simulation/data/{self.name}.npz")  
     
     def animate(self, state_traj: list, input_traj: list, preds: list, elapsed: list):
         assert isinstance(state_traj,list), "State trajectory has to be a list"
@@ -90,6 +105,7 @@ class RacingSimulation():
         ey_index = self.car.state.index('ey')
         error = np.array(state_traj)[:,ey_index:ey_index+2] # taking just ey and epsi
         v = np.array(state_traj)[:,0] # taking just velocity
+        delta = np.array(state_traj)[:,self.car.state.index('delta')]
         s = np.array(state_traj)[:,self.car.state.index('s')] # for ascissa in side plots
         input = np.array(input_traj)
         x_traj = []
@@ -126,7 +142,7 @@ class RacingSimulation():
             x,y = self.car.plot(ax_large, state)
             x_traj.append(x)
             y_traj.append(y)
-            ax_large.plot(x_traj[:i+1],y_traj[:i+1],'-',alpha=0.7,color="k",linewidth=2)
+            ax_large.plot(x_traj[:i+1],y_traj[:i+1],'-',alpha=0.8,color="r",linewidth=3)
             
             # Plot track
             if self.car.track is not None:
@@ -140,20 +156,20 @@ class RacingSimulation():
             ax_small1.axis((s[0], s[-1], -state_max*1.1, state_max*1.1))
             ax_small1.plot(s[:i],v[:i], '-', alpha=0.7,label='v',color='r')
             ax_small1.legend()
-                        
-            ax_small2.cla()
-            ax_small2.axis((s[0], s[-1], -error_max*1.1, error_max*1.1))
-            ax_small2.plot(s[:i],error[:i, :], '-', alpha=0.7,label=error_labels)
-            ax_small2.legend()
-
-            ax_small3.cla()
-            ax_small3.axis((s[0], s[-1], -input_max*1.1, input_max*1.1))
-            ax_small3.plot(s[:i],input[:i, 0], '-', alpha=0.7,label=input_labels[0], color='g')
-            ax_small3.legend()
             
+            ax_small2.cla()
+            ax_small2.axis((s[0], s[-1], -0.5, 0.5))
+            ax_small2.plot(s[:i],delta[:i], '-', alpha=0.7,label=r'$\delta$', color='c')
+            ax_small2.legend()
+                        
+            ax_small3.cla()
+            ax_small3.axis((s[0], s[-1], -error_max*1.1, error_max*1.1))
+            ax_small3.plot(s[:i],error[:i, :], '-', alpha=0.7,label=error_labels)
+            ax_small3.legend()
+
             ax_small4.cla()
-            ax_small4.axis((s[0], s[-1], -0.6, 0.6))
-            ax_small4.plot(s[:i],input[:i, 1], '-', alpha=0.7,label=input_labels[1], color='c')
+            ax_small4.axis((s[0], s[-1], -input_max*1.1, input_max*1.1))
+            ax_small4.plot(s[:i],input[:i, 0], '-', alpha=0.7,label=input_labels[0], color='g')
             ax_small4.legend()
 
         animation = FuncAnimation(

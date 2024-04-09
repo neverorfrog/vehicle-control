@@ -15,8 +15,8 @@ Implementation of some control algorithms, based on model-predictive control, fo
 
 ## Dependancies
 
-You 
-
+- coinhsl (open thirdparty/coinhsl for instructions)
+- packages listed in environment.yaml (you can install them with conda)
 
 ## References
 
