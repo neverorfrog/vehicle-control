@@ -55,6 +55,12 @@
 \subsection*{Overview of the paper}
 
 
+Nonlinear model predictive control (NMPC) is a powerful tool for the control of systems with a nonlinear dynamics 
+that tries to predict the evolution of the system over a prediction window. It is based on a cost function, which must
+be minimized at each time step according to a set of constraints.
+One of its highest problem is the computational power it can require. This entails the need of a high-performance hardware
+to solve the optimization problem in an acceptable time, but sometimes for high nonlinear dynamics systems this is not enough.
+Especially in a real environment, where the timeliness is fundamental to take a decision.
 
 \section{Methodology}
 
