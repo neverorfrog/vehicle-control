@@ -1,8 +1,8 @@
 # prediction and control horizon
-horizon: 20
+horizon: 45
 mpc_dt: 0.03
-horizon_pm: 25
-ds_bar: 1.5
+horizon_pm: 0
+ds_bar: 1.1
 mpc_dt_pm: 0.15
 
 # weights for the cost function
