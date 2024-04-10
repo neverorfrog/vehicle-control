@@ -18,6 +18,10 @@ Implementation of some control algorithms, based on model-predictive control, fo
 - coinhsl (open thirdparty/coinhsl for instructions)
 - packages listed in environment.yaml (you can install them with conda)
 
+## Results
+
+![alt](simulation/videos/cascaded_ippodromo.gif)
+
 ## References
 
 <a id="1">[1]</a> 
