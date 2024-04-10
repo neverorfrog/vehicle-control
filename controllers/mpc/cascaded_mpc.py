@@ -133,7 +133,7 @@ class CascadedMPC(Controller):
             
             # Discretization (Going on for dt with displacement snapshot) 
             curvature = self.car.track.curvatures(s)
-            ds = self.dt * (Ux / (1 - curvature*ey))
+            ds = self.dt * Ux
             opti.subject_to(self.ds[n] == ds)
             
             # Model dynamics 

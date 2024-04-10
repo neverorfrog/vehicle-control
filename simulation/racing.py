@@ -81,6 +81,7 @@ class RacingSimulation():
             if self.controller.M > 0:
                 print(f"FINAL PM CURVATURE: {self.car.track.get_curvature(state_pm_prediction[self.point_mass.state.index('s'),-1])}")
             print(f"AVERAGE ELAPSED TIME: {np.mean(elapsed):.3f}")
+            print(f"MEDIAN ELAPSED TIME: {np.median(elapsed):.3f}")
             print(sol.value(self.controller.ds))
             self.car.print(state,action)
             print("------------------------------------------------------------------------------")
