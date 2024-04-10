@@ -7,7 +7,6 @@ import models
 import environment as env
 from simulation.racing import RacingSimulation
 from utils.common_utils import load_config, ControlType, CarType, TrackType
-import matplotlib.pyplot as plt
 
 # ======== Configuration ============
 control_type = ControlType.CAS 
