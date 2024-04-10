@@ -32,23 +32,32 @@ class CascadedMPC(Controller):
     def command(self, state):
         self._init_horizon(state)
         sol = self.opti.solve()
-        self.action_prediction = sol.value(self.action)
-        self.state_prediction = sol.value(self.state)
-        print(f"Solver iterations: {sol.stats()["iter_count"]}")
-        if self.M > 0:
-            self.action_pm_prediction = sol.value(self.action_pm)
-            self.state_pm_prediction = sol.value(self.state_pm)
-        return DynamicCarInput(Fx=self.action_prediction[0][0], w=self.action_prediction[1][0])
+        self._save_horizon(sol)
+        return DynamicCarInput(Fx=self.action_prediction[0][0], w=self.action_prediction[1][0]), sol
     
     def _init_horizon(self, state):
         state = state.values.squeeze()
         self.opti.set_value(self.state0, state)
         self.opti.set_initial(self.action, self.action_prediction)
         self.opti.set_initial(self.state, self.state_prediction)
+        # s_traj = self.state_prediction[self.car.state.index('s'),:]
+        # curvatures = self.car.track.curvatures(s_traj)
+        # self.opti.set_value(self.curvature, curvatures[:-1])
         if self.M > 0:
             self.opti.set_initial(self.action_pm, self.action_pm_prediction)
             self.opti.set_initial(self.state_pm, self.state_pm_prediction)
-        
+            # s_traj = self.state_pm_prediction[self.point_mass.state.index('s'),:] + self.config['ds_bar']
+            # curvatures = self.point_mass.track.curvatures(s_traj)
+            # self.opti.set_value(self.curvature_pm, curvatures[:-1])
+    
+    def _save_horizon(self, sol):
+        # saving for warmstart
+        self.action_prediction = sol.value(self.action)
+        self.state_prediction = sol.value(self.state)
+        if self.M > 0:
+            self.action_pm_prediction = sol.value(self.action_pm)
+            self.state_pm_prediction = sol.value(self.state_pm)
+    
     def _init_opti(self):
         """
         Optimizer Initialization
@@ -70,6 +79,8 @@ class CascadedMPC(Controller):
         self.state_prediction = np.ones((self.ns, self.N+1)) # actual predicted state trajectory
         self.action_prediction = np.ones((self.na, self.N))+np.random.random((self.na, self.N)) # actual predicted control trajectory
         self.ds = opti.variable(self.N) # ds trajectory var (just for loggin purposes)
+        # self.curvature = opti.parameter(self.N) # curvature trajectory
+        # self.curvature_pm = opti.parameter(self.M)
         self.state0 = opti.parameter(self.ns) # initial state
         opti.subject_to(self.state[:,0] == self.state0) # constraint on initial state
         
@@ -105,7 +116,6 @@ class CascadedMPC(Controller):
             Ux = state[self.car.state.index('Ux')]
             Uy = state[self.car.state.index('Uy')]
             ey = state[self.car.state.index('ey')]
-            epsi = state[self.car.state.index('epsi')]
             r = state[self.car.state.index('r')]
             delta = state[self.car.state.index('delta')]
             Fx = input[self.car.input.index('Fx')]
@@ -123,7 +133,7 @@ class CascadedMPC(Controller):
             
             # Discretization (Going on for dt with displacement snapshot) 
             curvature = self.car.track.curvatures(s)
-            ds = self.dt * Ux
+            ds = self.dt * (Ux / (1 - curvature*ey))
             opti.subject_to(self.ds[n] == ds)
             
             # Model dynamics 
@@ -209,7 +219,7 @@ class CascadedMPC(Controller):
             # input limits
             opti.subject_to(Fx_bar <= Peng / V_bar)
             
-            # Discretization (Going on for dt with displacement snapshot) 
+            # Discretization (fixed ds this time)
             curvature = self.car.track.curvatures(s_bar)
             opti.subject_to(self.ds_pm[m] == ds_bar)
             

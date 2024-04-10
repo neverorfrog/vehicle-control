@@ -1,8 +1,8 @@
 # prediction and control horizon
-horizon: 45
+horizon: 20
 mpc_dt: 0.03
-horizon_pm: 0
-ds_bar: 1
+horizon_pm: 25
+ds_bar: 1.5
 mpc_dt_pm: 0.15
 
 # weights for the cost function
@@ -29,7 +29,7 @@ input_constraints:
 # state constraints
 state_constraints:
   Ux_min: 3
-  max_speed: 20
+  max_speed: 23
   delta_min: -0.5
   delta_max: 0.5
   ey_min: -4

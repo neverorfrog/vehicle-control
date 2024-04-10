@@ -60,7 +60,8 @@ class Track:
         self.n_waypoints = len(self.waypoints)
         self._construct_spline()
         self.ds = 0.03
-        self.curvatures = self._precompute_curvatures()
+        self._precompute_curvatures()
+        self._divide_track()
         
     def get_curvature(self, s):
         '''Get curvature (inverse of curvature radius) of a point along the spline'''
@@ -73,6 +74,9 @@ class Track:
         num = ca.fabs(dx_ds * ddy_ds - ddx_ds * dy_ds)
         curvature = num/denom
         return curvature
+    
+    def gaussian(self, x, A, mu, sigma):
+        return A * ca.exp(-((x - mu)**2) / (2 * sigma**2))
     
     def get_orientation(self, s):
         '''Get orientation wrt horizontal line of a point along the spline'''
@@ -89,9 +93,53 @@ class Track:
         s_values = np.arange(0, self.length-0.1, self.ds)
         for s in s_values:
             curvatures.append(self.get_curvature(s).full().squeeze().item())
-        curvatures = ca.interpolant('curvatures', 'bspline', [s_values], curvatures)
-        return curvatures
+        self.curvatures = ca.interpolant('curvatures', 'bspline', [s_values], curvatures)
         
+#     for segment in track.segments:
+#         if s < segment[1] and s > segment[0]:
+#             mu = (segment[0]+segment[1])/2
+#             sigma = (track.smoothing*track.resolution) / 2 + 0.1
+#             print(track.gaussian(s, segment[2], mu, sigma))
+#             break
+#     print(track.get_curvature(s))
+        
+    def _divide_track(self):
+        '''Divide the track into segments (straight and curve)'''
+        segments = []
+        s_values = np.arange(0, self.length-0.1, self.ds) 
+        eps = 1e-7 #curve threshold
+        start = 0
+        is_curve = False #by default the starting segment is straight
+        max_curv = 0
+        
+        for s in s_values:
+            curv = self.curvatures(s)
+            
+            # curve is starting while on a straight segment
+            if abs(curv) > eps and not is_curve:
+                if s - start > 1:
+                    is_curve = True
+                    segments.append([start, s, 0])
+                    start = s
+            
+            # take track of the maximum curvature if we are in a curve
+            if is_curve:
+                if curv > max_curv:
+                    max_curv = curv
+            
+            # curve ends
+            if abs(curv) < eps and is_curve == True:
+                if s - start > 1:
+                    is_curve = False
+                    segments.append([start, s, max_curv.full().squeeze().item()])
+                    start = s
+            
+            #track ends
+            if s >= self.length-0.15:
+                segments.append([start, s, False])
+                
+        self.segments = segments
+           
     def _construct_spline(self):
         # waypoint list
         waypoints_x = [waypoint.x for waypoint in self.waypoints]
@@ -125,11 +173,9 @@ class Track:
         Construct path from given waypoints.
         :return: list of waypoint objects
         """
-        
         wp_x = []
         wp_y = []
         
-        angle = 0 # TODO hardcodato
         for i in range(len(corners)-1):
             start = [corners[i][0], corners[i][1]]
             end = [corners[i + 1][0], corners[i + 1][1]]
@@ -137,13 +183,20 @@ class Track:
             n_wp = int(distance/self.resolution)
             wp_x.extend(np.linspace(start[0], end[0], n_wp, endpoint=False).tolist())
             wp_y.extend(np.linspace(start[1], end[1], n_wp, endpoint=False).tolist())
-
+            
         # Smooth path
         wp_xs = []
         wp_ys = []
-        for wp_id in range(self.smoothing, len(wp_x) - self.smoothing):
-            wp_xs.append(np.mean(wp_x[wp_id - self.smoothing : wp_id + self.smoothing + 1]))
-            wp_ys.append(np.mean(wp_y[wp_id - self.smoothing : wp_id + self.smoothing + 1]))
+        for wp_id in range(0, len(wp_x)):
+            if wp_id < self.smoothing:
+                wp_xs.append(wp_x[wp_id])
+                wp_ys.append(wp_y[wp_id])
+            elif wp_id > len(wp_x) - self.smoothing - 1:
+                wp_xs.append(wp_x[wp_id])
+                wp_ys.append(wp_y[wp_id])
+            else:
+                wp_xs.append(np.mean(wp_x[wp_id - self.smoothing : wp_id + self.smoothing + 1]))
+                wp_ys.append(np.mean(wp_y[wp_id - self.smoothing : wp_id + self.smoothing + 1]))
             
         # closing the circuit
         wp_xs.append(wp_xs[0])

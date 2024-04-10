@@ -37,7 +37,7 @@ class RacingSimulation():
             start = time.time()
             state_prediction = None
             try:
-                action = self.controller.command(state)
+                action, sol = self.controller.command(state)
             except Exception as e:
                 print(e)
                 break
@@ -73,6 +73,7 @@ class RacingSimulation():
             Uy_dot = self.car.Uy_dot(Fx,Ux,Uy,r,delta).full().squeeze().item()
             print("------------------------------------------------------------------------------")
             print(f"N: {n}")
+            print(f"Solver iterations: {sol.stats()["iter_count"]}")
             print(f"STATE: {state}")
             print(f"ACTION: {action}")
             print(f"UX ACCELERATION: {Ux_dot:.3f}, UY ACCELERATION: {Uy_dot:.3f}")
@@ -80,6 +81,7 @@ class RacingSimulation():
             if self.controller.M > 0:
                 print(f"FINAL PM CURVATURE: {self.car.track.get_curvature(state_pm_prediction[self.point_mass.state.index('s'),-1])}")
             print(f"AVERAGE ELAPSED TIME: {np.mean(elapsed):.3f}")
+            print(sol.value(self.controller.ds))
             self.car.print(state,action)
             print("------------------------------------------------------------------------------")
             print(f"\n")

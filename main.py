@@ -21,10 +21,6 @@ track = env.Track(corners=track_config['corners'],
                   resolution=track_config['resolution'],
                   width=track_config['width'])
 
-# track.plot(plt.gca())
-# plt.show()
-# exit() 
-
 # ========= Model Definition ==============
 
 #DYNAMIC CAR
