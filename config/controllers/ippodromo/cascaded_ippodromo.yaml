@@ -1,7 +1,7 @@
 # prediction and control horizon
-horizon: 45
+horizon: 20
 mpc_dt: 0.03
-horizon_pm: 0
+horizon_pm: 25
 ds_bar: 1.2
 mpc_dt_pm: 0.15
 

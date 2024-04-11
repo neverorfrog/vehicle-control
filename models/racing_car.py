@@ -30,8 +30,8 @@ class RacingCar(Robot):
         """
         :param input: vector of inputs
         """
-        curvature = self.track.get_curvature(self.state.s)
-        next_state = self.transition(self.state.values, input.values, curvature).full().squeeze()
+        curvature = self.track.curvatures(self.state.s)
+        next_state = self.transition(self.state.values, input.values, curvature, self.dt).full().squeeze()
         self.state = self.__class__.create_state(*next_state)
         self.input = input
         return self.state

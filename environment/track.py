@@ -59,7 +59,6 @@ class Track:
         self.waypoints: List[Waypoint] = self._construct_path(corners)
         self.n_waypoints = len(self.waypoints)
         self._construct_spline()
-        self.ds = 0.03
         self._precompute_curvatures()
         self._divide_track()
         
@@ -89,19 +88,12 @@ class Track:
         return np.arctan2(tangent_y, tangent_x)
     
     def _precompute_curvatures(self):
+        self.ds = 0.05
         curvatures = []
-        s_values = np.arange(0, self.length-0.1, self.ds)
+        s_values = np.arange(0, self.length - 0.1, self.ds)
         for s in s_values:
             curvatures.append(self.get_curvature(s).full().squeeze().item())
-        self.curvatures = ca.interpolant('curvatures', 'bspline', [s_values], curvatures)
-        
-#     for segment in track.segments:
-#         if s < segment[1] and s > segment[0]:
-#             mu = (segment[0]+segment[1])/2
-#             sigma = (track.smoothing*track.resolution) / 2 + 0.1
-#             print(track.gaussian(s, segment[2], mu, sigma))
-#             break
-#     print(track.get_curvature(s))
+        self.curvatures = ca.interpolant('curvatures', 'bspline', [s_values], curvatures, {'degree': [3]})
         
     def _divide_track(self):
         '''Divide the track into segments (straight and curve)'''
