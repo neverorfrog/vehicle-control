@@ -20,7 +20,11 @@ Implementation of some control algorithms, based on model-predictive control, fo
 
 ## Results
 
+### Cascaded MPC
 ![alt](simulation/videos/cascaded_ippodromo.gif)
+
+### Singletrack MPC
+![alt](simulation/videos/singletrack_ippodromo.gif)
 
 ## References
 
