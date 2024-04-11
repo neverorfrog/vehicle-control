@@ -1,6 +1,7 @@
 # Vehicle Control
 
-Implementation of some control algorithms, based on model-predictive control, for racing cars on a track. cascaded_mpc is based on [[1]](#1).
+Implementation of some control algorithms, based on model-predictive control, for racing cars on a track.  
+Cascaded MPC is an unofficial implementation of [[1]](#1).
 
 ## Project Structure
 
