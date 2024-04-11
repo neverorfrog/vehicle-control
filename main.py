@@ -8,7 +8,7 @@ import environment as env
 from simulation.racing import RacingSimulation
 from utils.common_utils import load_config, ControlType, CarType, TrackType
 
-# ======== Configuration ============
+# ======== Configuration ==================
 control_type = ControlType.CAS 
 car_type = CarType.DYN
 track_name = TrackType.I.value

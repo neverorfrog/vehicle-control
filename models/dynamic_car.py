@@ -2,7 +2,8 @@ import casadi as ca
 from models.racing_car import RacingCar
 from utils.fancy_vector import FancyVector
 from utils.common_utils import *
-from casadi import cos, sin, tan, atan, fabs, sign, tanh, atan2
+from casadi import cos, sin, tan, atan, fabs, sign, tanh
+from utils.integrators import CVODESIntegrator, EulerIntegrator, RK4Integrator
 
 class DynamicCar(RacingCar):
     
@@ -43,6 +44,7 @@ class DynamicCar(RacingCar):
         self.ey = ey
         self.epsi = epsi
         curvature = ca.SX.sym('curvature')
+        dt = ca.SX.sym('dt')
         ds = ca.SX.sym('ds')
         g =  9.88 # gravity
         car = self.config['car']
@@ -120,9 +122,8 @@ class DynamicCar(RacingCar):
         state_dot = ca.vertcat(Ux_dot, Uy_dot, r_dot, delta_dot, s_dot, ey_dot, epsi_dot, t_dot)
         self.Ux_dot = ca.Function("Ux_dot",[Fx,Ux,Uy,r,delta],[Ux_dot]).expand()
         self.Uy_dot = ca.Function("Uy_dot",[Fx,Ux,Uy,r,delta],[Uy_dot]).expand()
-        t_ode = ca.Function('ode', [self.state.syms,self.input.syms,curvature], [state_dot]).expand()
-        t_integrator = self.integrate(self.state.syms,self.input.syms,curvature,t_ode,self.dt)
-        self._temporal_transition = ca.Function('transition', [self.state.syms,self.input.syms,curvature], [t_integrator]).expand()
+        time_integrator = RK4Integrator(self.state.syms, self.input.syms, curvature, state_dot, dt)
+        self._temporal_transition = time_integrator.step
 
         # SPATIAL Transition (equations 41a to 41f)
         Ux_prime = Ux_dot / s_dot
@@ -134,9 +135,8 @@ class DynamicCar(RacingCar):
         epsi_prime = epsi_dot / s_dot
         t_prime = 1 / s_dot
         state_prime = ca.vertcat(Ux_prime, Uy_prime, r_prime, delta_prime, s_prime, ey_prime, epsi_prime, t_prime)
-        s_ode = ca.Function('ode', [self.state.syms, self.input.syms, curvature], [state_prime]).expand()
-        s_integrator = self.integrate(self.state.syms, self.input.syms, curvature, s_ode, h=ds)
-        self._spatial_transition = ca.Function('transition', [self.state.syms,self.input.syms,curvature,ds], [s_integrator]).expand()
+        space_integrator = RK4Integrator(self.state.syms, self.input.syms, curvature, state_prime, ds)
+        self._spatial_transition = space_integrator.step
     
     @property
     def transition(self):

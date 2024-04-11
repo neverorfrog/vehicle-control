@@ -4,6 +4,7 @@ from utils.fancy_vector import FancyVector
 from utils.common_utils import *
 from collections import namedtuple
 from casadi import cos, sin, tan, atan, fabs, sign, tanh
+from utils.integrators import EulerIntegrator, RK4Integrator
 
 class DynamicPointMass(RacingCar):
 
@@ -30,6 +31,7 @@ class DynamicPointMass(RacingCar):
         V,s,ey,epsi,t = self.state.variables
         curvature = ca.SX.sym('curvature')
         ds = ca.SX.sym('ds')
+        dt = ca.SX.sym('dt')
         g = 9.88
         
         # ====== Input Model ==========================================================
@@ -67,9 +69,8 @@ class DynamicPointMass(RacingCar):
         epsi_dot = (Fy + Fb)/(car['m']*V) - curvature*s_dot
         t_dot = 1
         state_dot = ca.vertcat(V_dot,  s_dot, ey_dot, epsi_dot, t_dot)
-        t_ode = ca.Function('ode', [self.state.syms,self.input.syms,curvature], [state_dot]).expand()
-        t_integrator = self.integrate(self.state.syms,self.input.syms,curvature,t_ode,self.dt)
-        self._temporal_transition = ca.Function('transition', [self.state.syms,self.input.syms,curvature], [t_integrator]).expand()
+        time_integrator = EulerIntegrator(self.state.syms, self.input.syms, curvature, state_dot, dt)
+        self._temporal_transition = time_integrator.step
 
         # SPATIAL transition (equations 41a to 41f)
         V_prime = V_dot / s_dot
@@ -78,9 +79,8 @@ class DynamicPointMass(RacingCar):
         epsi_prime = epsi_dot / s_dot
         t_prime = t_dot / s_dot
         state_prime = ca.vertcat(V_prime, s_prime, ey_prime, epsi_prime, t_prime)
-        s_ode = ca.Function('ode', [self.state.syms, self.input.syms, curvature], [state_prime]).expand()
-        s_integrator = self.integrate(self.state.syms, self.input.syms, curvature, s_ode, h=ds)
-        self._spatial_transition = ca.Function('transition', [self.state.syms,self.input.syms,curvature,ds], [s_integrator]).expand()
+        space_integrator = EulerIntegrator(self.state.syms, self.input.syms, curvature, state_prime, ds)
+        self._spatial_transition = space_integrator.step
 
     @property
     def transition(self):
