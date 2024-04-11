@@ -26,6 +26,7 @@ dependencies:
   - xz=5.4.6=h5eee18b_0
   - zlib=1.2.13=h5eee18b_0
   - pip:
+      - antlr4-python3-runtime==4.9.3
       - casadi==3.6.5
       - contourpy==1.2.1
       - cycler==0.12.1
@@ -33,6 +34,7 @@ dependencies:
       - kiwisolver==1.4.5
       - matplotlib==3.8.3
       - numpy==1.26.4
+      - omegaconf==2.3.0
       - packaging==24.0
       - pillow==10.3.0
       - pyparsing==3.1.2

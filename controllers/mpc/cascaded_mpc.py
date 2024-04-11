@@ -1,27 +1,28 @@
 import random
+from omegaconf import OmegaConf
 from models.dynamic_car import DynamicCar, DynamicCarInput
 from models.dynamic_point_mass import DynamicPointMass
 import casadi as ca
 import numpy as np
-from casadi import cos, sin, tan, fabs, atan2, atan
+from casadi import cos, tan, fabs
 from controllers.controller import Controller
 np.random.seed(3)
 random.seed(3)
 
 class CascadedMPC(Controller):
-    def __init__(self, car: DynamicCar, point_mass: DynamicPointMass, config):
+    def __init__(self, car: DynamicCar, point_mass: DynamicPointMass, config: OmegaConf):
         self.config = config
         
         # single-track
-        self.dt = config['mpc_dt']
+        self.dt = config.mpc_dt
         self.car = car
-        self.N = config['horizon']
+        self.N = config.horizon
         self.ns = len(self.car.state) # number of state variables
         self.na = len(self.car.input) # number of action variables
         
         # point-mass
-        self.M = config['horizon_pm']
-        self.dt_pm = config['mpc_dt_pm']
+        self.M = config.horizon_pm
+        self.dt_pm = config.mpc_dt_pm
         self.point_mass = point_mass
         self.ns_pm = len(self.point_mass.state) # number of state variables
         self.na_pm = len(self.point_mass.input) # number of action variables
@@ -98,13 +99,13 @@ class CascadedMPC(Controller):
         self.Fy_r = opti.variable(self.N)
                                            
         # ======================= Cycle the entire horizon defining NLP problem ===============
-        cost_weights = self.config['cost_weights'] 
-        state_constraints = self.config['state_constraints']
-        state_pm_constraints = self.config['state_pm_constraints']
-        input_constraints = self.config['input_constraints']
-        Peng = self.car.config['car']['Peng']
-        mu = self.car.config['env']['mu']
-        ds_bar = self.config['ds_bar']
+        cost_weights = self.config.cost_weights
+        state_constraints = self.config.state_constraints
+        state_pm_constraints = self.config.state_pm_constraints
+        input_constraints = self.config.input_constraints
+        Peng = self.car.config.car.Peng
+        mu = self.car.config.env.mu
+        ds_bar = self.config.ds_bar
         cost = 0
         
         # ============================ Single Track Model =================================
@@ -124,12 +125,12 @@ class CascadedMPC(Controller):
             
             # -------------------- Constraints --------------------------------------------------
             # state limits
-            opti.subject_to(Ux >= state_constraints['Ux_min'])
-            opti.subject_to(opti.bounded(state_constraints['delta_min'],delta,state_constraints['delta_max']))
+            opti.subject_to(Ux >= state_constraints.Ux_min)
+            opti.subject_to(opti.bounded(state_constraints.delta_min,delta,state_constraints.delta_max))
             
             # input limits
             opti.subject_to(Fx <= Peng / Ux)
-            opti.subject_to(opti.bounded(input_constraints['w_min'],w,input_constraints['w_max']))
+            opti.subject_to(opti.bounded(input_constraints.w_min,w,input_constraints.w_max))
             
             # Discretization (Going on for dt with displacement snapshot) 
             curvature = self.car.track.curvatures(s)
@@ -140,34 +141,34 @@ class CascadedMPC(Controller):
             opti.subject_to(state_next == self.car.spatial_transition(state,input,curvature,self.ds[n])) 
             
             # longitudinal force limits on tires
-            bound_f = mu['f']*self.car.Fz_f(Ux,Fx)*cos(self.car.alpha_f(Ux,Uy,r,delta))
+            bound_f = mu.f*self.car.Fz_f(Ux,Fx)*cos(self.car.alpha_f(Ux,Uy,r,delta))
             opti.subject_to(opti.bounded(-bound_f,self.car.Fx_f(Fx),bound_f))
-            bound_r = mu['r']*self.car.Fz_r(Ux,Fx)*cos(self.car.alpha_r(Ux,Uy,r,delta))
+            bound_r = mu.r*self.car.Fz_r(Ux,Fx)*cos(self.car.alpha_r(Ux,Uy,r,delta))
             opti.subject_to(opti.bounded(-bound_r,self.car.Fx_r(Fx),bound_r))   
             
             # -------------------- Stage Cost -------------------------------------
-            cost += ca.if_else(ey < state_constraints['ey_min'], # violation of road bounds
-                       cost_weights['boundary']*ds*(ey - state_constraints['ey_min'])**2, 0)
+            cost += ca.if_else(ey < state_constraints.ey_min, # violation of road bounds
+                       cost_weights.boundary*ds*(ey - state_constraints.ey_min)**2, 0)
             
-            cost += ca.if_else(ey > state_constraints['ey_max'], # violation of road bounds
-                       cost_weights['boundary']*ds*(ey - state_constraints['ey_max'])**2, 0)
+            cost += ca.if_else(ey > state_constraints.ey_max, # violation of road bounds
+                       cost_weights.boundary*ds*(ey - state_constraints.ey_max)**2, 0)
                 
-            cost += cost_weights['deviation_st']*ds*(ey**2) # deviation from road desciptor
+            cost += cost_weights.deviation_st*ds*(ey**2) # deviation from road desciptor
             
-            cost += cost_weights['w']*(w**2) # steer angle rate
+            cost += cost_weights.w*(w**2) # steer angle rate
 
             cost += ca.if_else(fabs(tan(self.car.alpha_f(Ux,Uy,r,delta))) >= tan(self.car.alphamod_f(Fx)),  # slip angle front
-                        cost_weights['slip']*(fabs(tan(self.car.alpha_f(Ux,Uy,r,delta))) - tan(self.car.alphamod_f(Fx)))**2, 0)
+                        cost_weights.slip*(fabs(tan(self.car.alpha_f(Ux,Uy,r,delta))) - tan(self.car.alphamod_f(Fx)))**2, 0)
                         
             cost += ca.if_else(fabs(tan(self.car.alpha_r(Ux,Uy,r,delta))) >= tan(self.car.alphamod_r(Fx)),  # slip angle rear
-                        cost_weights['slip']*(fabs(tan(self.car.alpha_r(Ux,Uy,r,delta))) - tan(self.car.alphamod_r(Fx)))**2, 0)
+                        cost_weights.slip*(fabs(tan(self.car.alpha_r(Ux,Uy,r,delta))) - tan(self.car.alphamod_r(Fx)))**2, 0)
             
-            cost += cost_weights['friction']*((self.Fe_f[n]**2)**2 + (self.Fe_r[n]**2)**2) # slack variables for sparsity
+            cost += cost_weights.friction*((self.Fe_f[n]**2)**2 + (self.Fe_r[n]**2)**2) # slack variables for sparsity
             
             if n < self.N-1: #Force Input Continuity
                 next_input = self.action[:,n+1]
                 Fx_next = next_input[self.car.input.index('Fx')]
-                cost += (cost_weights['Fx']/ds) * (Fx_next - Fx)**2
+                cost += (cost_weights.Fx/ds) * (Fx_next - Fx)**2
                 
             if n == self.N-1 and self.M > 0: #SINGLETRACK/POINTMASS Continuity
                 Ux_final = state_next[self.car.state.index('Ux')]
@@ -191,13 +192,13 @@ class CascadedMPC(Controller):
                 Fy_bar_initial = input_pm_initial[self.point_mass.input.index('Fy')]
                 Fy_f = self.car.Fy_f(Ux_final,Uy_final,r_final,delta_final,Fx)
                 Fy_r = self.car.Fy_r(Ux_final,Uy_final,r_final,delta_final,Fx)
-                cost += (cost_weights['Fx']/ds) * (((Fx_bar_initial-Fx)**2)+ (Fy_bar_initial-Fy_f-Fy_r)**2)
+                cost += (cost_weights.Fx/ds) * (((Fx_bar_initial-Fx)**2)+ (Fy_bar_initial-Fy_f-Fy_r)**2)
 
             # --------- Stuff that breaks things (Friction Limits for real world experiments) -----
             # opti.subject_to(self.Fy_f[n] == self.car.Fy_f(Ux,Uy,r,delta,Fx))
             # opti.subject_to(self.Fy_r[n] == self.car.Fy_r(Ux,Uy,r,delta,Fx))
-            # opti.subject_to(self.car.Fx_f(Fx)**2 + self.car.Fy_f(Ux,Uy,r,delta,Fx)**2 <= (input_constraints['mu_lim']*self.car.Fz_f(Ux,Fx))**2 + (self.Fe_f[n])**2)
-            # opti.subject_to(self.car.Fx_r(Fx)**2 + self.car.Fy_r(Ux,Uy,r,delta,Fx)**2 <= (input_constraints['mu_lim']*self.car.Fz_r(Ux,Fx))**2 + (self.Fe_r[n])**2) 
+            # opti.subject_to(self.car.Fx_f(Fx)**2 + self.Fy_f[n]**2 <= (input_constraints['mu_lim']*self.car.Fz_f(Ux,Fx))**2 + (self.Fe_f[n])**2)
+            # opti.subject_to(self.car.Fx_r(Fx)**2 + self.Fy_r[n]**2 <= (input_constraints['mu_lim']*self.car.Fz_r(Ux,Fx))**2 + (self.Fe_r[n])**2) 
             # ---------------------------------------------------------------------
         
         # ===================== Point Mass Model =====================================
@@ -214,7 +215,7 @@ class CascadedMPC(Controller):
             
             # -------------------- Constraints --------------------------------------------------
             # state limits
-            opti.subject_to(V_bar >= state_pm_constraints['V_bar_min'])
+            opti.subject_to(V_bar >= state_pm_constraints.V_bar_min)
             
             # input limits
             opti.subject_to(Fx_bar <= Peng / V_bar)
@@ -229,24 +230,24 @@ class CascadedMPC(Controller):
             # friction limits
             Fx_f_bar = self.car.Fx_f(Fx_bar)
             Fx_r_bar = self.car.Fx_r(Fx_bar)
-            opti.subject_to(Fx_f_bar**2 + (self.car.config['car']['b']/self.car.config['car']['l']*Fy_bar)**2 <= (input_constraints['mu_lim']*self.car.Fz_f(V_bar,Fx_bar))**2)
-            opti.subject_to(Fx_r_bar**2 + (self.car.config['car']['a']/self.car.config['car']['l']*Fy_bar)**2 <= (input_constraints['mu_lim']*self.car.Fz_r(V_bar,Fx_bar))**2)
+            opti.subject_to(Fx_f_bar**2 + (self.car.config.car.b/self.car.config.car.l*Fy_bar)**2 <= (input_constraints.mu_lim*self.car.Fz_f(V_bar,Fx_bar))**2)
+            opti.subject_to(Fx_r_bar**2 + (self.car.config.car.a/self.car.config.car.l*Fy_bar)**2 <= (input_constraints.mu_lim*self.car.Fz_r(V_bar,Fx_bar))**2)
             
             # -------------------- Stage Cost -------------------------------------
-            cost += ca.if_else(ey_bar < state_pm_constraints['ey_bar_min'], # 3) road boundary intrusion
-                       cost_weights['boundary']*ds_bar*(ey_bar - state_pm_constraints['ey_bar_min'])**2, 0)
+            cost += ca.if_else(ey_bar < state_pm_constraints.ey_bar_min, # 3) road boundary intrusion
+                       cost_weights.boundary*ds_bar*(ey_bar - state_pm_constraints.ey_bar_min)**2, 0)
             
-            cost += ca.if_else(ey_bar > state_pm_constraints['ey_bar_max'], # 3) road boundary intrusion
-                       cost_weights['boundary']*ds_bar*(ey_bar - state_pm_constraints['ey_bar_max'])**2, 0)
+            cost += ca.if_else(ey_bar > state_pm_constraints.ey_bar_max, # 3) road boundary intrusion
+                       cost_weights.boundary*ds_bar*(ey_bar - state_pm_constraints.ey_bar_max)**2, 0)
             
-            cost += cost_weights['deviation_pm']*ds_bar*(ey_bar**2) # 4) deviation from road descriptor path
+            cost += cost_weights.deviation_pm*ds_bar*(ey_bar**2) # 4) deviation from road descriptor path
             
             if m < self.M-1: # 5) Slew Rate
                 next_input_pm = self.action_pm[:,m+1]
                 Fy_bar_next = next_input_pm[self.point_mass.input.index('Fy')]
                 Fx_bar_next = next_input_pm[self.point_mass.input.index('Fx')]
-                cost += cost_weights['Fy']*(1/ds_bar)*(Fy_bar_next - Fy_bar)**2
-                cost += cost_weights['Fx']*(1/ds_bar)*(Fx_bar_next - Fx_bar)**2 
+                cost += cost_weights.Fy*(1/ds_bar)*(Fy_bar_next - Fy_bar)**2
+                cost += cost_weights.Fx*(1/ds_bar)*(Fx_bar_next - Fx_bar)**2 
 
         # -------------------- Terminal Cost -----------------------------------------
         if self.M > 0:
@@ -257,9 +258,9 @@ class CascadedMPC(Controller):
             final_state = self.state[:,-1]
             final_model = self.car
             final_speed = final_state[final_model.state.index('Ux')]
-        cost += ca.if_else(final_speed >= state_constraints['max_speed'],cost_weights['speed']*(final_speed - state_constraints['max_speed'])**2, 0) # excessive speed
-        cost += cost_weights['time']*(final_state[final_model.state.index('t'),-1]) # final cost (minimize time)
-        cost += cost_weights['ey']*final_state[final_model.state.index('ey'),-1]**2 # final cost (minimize terminal lateral error) hardcodato
-        cost += cost_weights['epsi']*final_state[final_model.state.index('epsi'),-1]**2 # final cost (minimize terminal course error) hardcodato
+        cost += ca.if_else(final_speed >= state_constraints.max_speed,cost_weights.speed*(final_speed - state_constraints.max_speed)**2, 0) # excessive speed
+        cost += cost_weights.time*(final_state[final_model.state.index('t'),-1]) # final cost (minimize time)
+        cost += cost_weights.ey*final_state[final_model.state.index('ey'),-1]**2 # final cost (minimize terminal lateral error) hardcodato
+        cost += cost_weights.epsi*final_state[final_model.state.index('epsi'),-1]**2 # final cost (minimize terminal course error) hardcodato
         opti.minimize(cost)
         return opti

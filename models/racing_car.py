@@ -1,6 +1,7 @@
 from matplotlib import pyplot as plt
 from matplotlib.axes import Axes
 import numpy as np
+from omegaconf import OmegaConf
 from models.robot import Robot
 from utils.fancy_vector import FancyVector
 from environment.track import Track
@@ -9,7 +10,7 @@ from casadi import sin,cos
 from abc import abstractmethod
 
 class RacingCar(Robot):
-    def __init__(self, config: dict, track: Track):
+    def __init__(self, config: OmegaConf, track: Track):
         """
         Abstract racing Car Model
         :param track: reference path object to follow
@@ -17,7 +18,7 @@ class RacingCar(Robot):
         :param dt: sampling time of model
         """
         # Car Parameters
-        self.length = config['car']['l']
+        self.length = config.car.l
         # Reference Path
         self.track = track
         super().__init__(config)

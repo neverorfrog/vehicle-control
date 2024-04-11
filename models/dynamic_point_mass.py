@@ -2,8 +2,7 @@ import casadi as ca
 from models.racing_car import RacingCar
 from utils.fancy_vector import FancyVector
 from utils.common_utils import *
-from collections import namedtuple
-from casadi import cos, sin, tan, atan, fabs, sign, tanh
+from casadi import cos, tanh
 from utils.integrators import EulerIntegrator, RK4Integrator
 
 class DynamicPointMass(RacingCar):
@@ -36,37 +35,40 @@ class DynamicPointMass(RacingCar):
         
         # ====== Input Model ==========================================================
         Fx, Fy = self.input.variables
-        Xd = car['Xd'] # drive distribution
-        Xb = car['Xb'] # brake distribution
+        Xd = car.Xd; Xdf = Xd.f; Xdr = Xd.r; # drive distribution
+        Xb = car.Xb; Xbf = Xb.f; Xbr = Xb.r; # brake distribution
         
-        Xf = (Xd['f']-Xb['f'])/2 * tanh(2*(Fx/1000 + 0.5)) + (Xd['f'] + Xb['f'])/2
+        Xf = (Xdf - Xbf)/2 * tanh(2*(Fx/1000 + 0.5)) + (Xdf + Xbf)/2
         self.Xf = ca.Function("Xf",[Fx],[Xf]).expand()
         Fx_f = Fx*Xf
         self.Fx_f = ca.Function("Fx_f",[Fx],[Fx_f]).expand()
         
-        Xr = (Xb['r']-Xd['r'])/2 * tanh(-2*(Fx/1000 + 0.5)) + (Xd['r'] + Xb['r'])/2
+        Xr = (Xbr-Xdr)/2 * tanh(-2*(Fx/1000 + 0.5)) + (Xdr + Xbr)/2
         self.Xr = ca.Function("Xr",[Fx],[Xr]).expand()
         Fx_r = Fx*Xr
         self.Fx_r = ca.Function("Fx_r",[Fx],[Fx_r]).expand()
         
         # ================= Normal Load ================================================
-        Fz_f = (car['b']/car['l'])*car['m']*(g*cos(env['theta'])*cos(env['phi']) + env['Av2']*V**2) - car['h']*Fx/car['l']
+        a = car.a; b = car.b; l = car.l; m = car.m; h = car.h
+        theta = env.theta; phi = env.phi; Av2 = env.Av2
+        
+        Fz_f = (b/l)*m*(g*cos(theta)*cos(phi) + Av2*V**2) - h*Fx/l
         self.Fz_f = ca.Function("Fz_f",[V,Fx],[Fz_f]).expand()
         
-        Fz_r = (car['a']/car['l'])*car['m']*(g*cos(env['theta'])*cos(env['phi']) + env['Av2']*V**2) + car['h']*Fx/car['l']
+        Fz_r = (a/l)*m*(g*cos(theta)*cos(phi) + Av2*V**2) + h*Fx/l
         self.Fz_r = ca.Function("Fz_f",[V,Fx],[Fz_r]).expand()
         
         # ===================== Differential Equations ===================================
         Fb = 0 #-p.m*g*ca.cos(theta)*ca.sin(phi) TODO if you want to change the angle modify this
-        Fn = -car['m']*g #ca.cos(theta) is 1 for theta=0, might aswell not write it
-        Frr = env['Frr'] #env['Crr']*Fn #rolling resistance = coefficient*normal force (not specified in the paper)
-        Fd = Frr + env['Cd']*(V**2) #p.m*g*ca.sin(theta)
+        Fn = -m*g #ca.cos(theta) is 1 for theta=0, might aswell not write it
+        Frr = env.Frr #env['Crr']*Fn #rolling resistance = coefficient*normal force (not specified in the paper)
+        Fd = Frr + env.Cd*(V**2) #p.m*g*ca.sin(theta)
 
         # TEMPORAL transition (equations 1a to 1f)
-        V_dot = (Fx - Fd)/car['m']
+        V_dot = (Fx - Fd)/m
         s_dot = (V*ca.cos(epsi))/(1-curvature*ey)
         ey_dot = V*ca.sin(epsi)
-        epsi_dot = (Fy + Fb)/(car['m']*V) - curvature*s_dot
+        epsi_dot = (Fy + Fb)/(m*V) - curvature*s_dot
         t_dot = 1
         state_dot = ca.vertcat(V_dot,  s_dot, ey_dot, epsi_dot, t_dot)
         time_integrator = EulerIntegrator(self.state.syms, self.input.syms, curvature, state_dot, dt)
