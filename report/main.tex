@@ -7,8 +7,8 @@
 \usepackage[T1]{fontenc}
 \usepackage{lipsum} %placeholder text
 \usepackage{amsthm} %theorems
-% \usepackage{amsmath}
-% \usepackage{mathtools}
+\usepackage{amsmath}
+\usepackage{mathtools}
 % \usepackage{physics}
 % \usepackage{xcolor}
 % \usepackage{graphicx}
@@ -41,10 +41,10 @@
 \end{abstract}
 
 
-\section{Introduction}
+\section*{Introduction}
 
 \begin{itemize}
-    \item Overview of the paper
+    \item Concepts of MPC
     \item Problem statement
     \item Literature review (?)
     \item Report outline
@@ -52,24 +52,62 @@
 
 % Using the star (*) form of the sectioning command suppresses the numbering for
 % that particular section or subsection.
-\subsection*{Overview of the paper}
+Model predictive control (MPC for short) is a control technique which, in closed-loop,
+computes the control inputs by means of an optimization algorithm, which uses a
+\textbf{model} of the system and measurements to \textbf{predict} future states and act
+accordingly by choosing the "best" control action. 
+
+\begin{equation}
+\begin{aligned}
+    \min_{u_0,...,u_{N-1}}{J(x,u)} \\
+    \text{ subject to }
+        \quad x_{k+1} = f(x_k,u_k) \\
+        \quad x_0 = x(t)
+        \quad 
+\end{aligned}
+\end{equation}
+
+We call $J(x)$ the \textbf{cost function} and $g(x)$ the \textbf{constraints}.
+In particular, the sequence of control actions is generated such that the cost
+function is minimized over the \textbf{prediction horizon} by solving a
+constrained optimization problem that depends on the evolution of the model over
+the horizon itself. Then, the controller applies just the first action: in this
+way the system has advanced one step, a new optimization problem with a new
+initial state is produced, and the process goes on. The advantages of MPC are
+many: it is a multivaribale controller, so it can control outputs by handling
+simultaneously all the interactions between system variables; it can handle
+constraints, so it allows to avoid possible undesired states; it predicts the
+future states, allowing to incorporate their information in the actual control.
+It is particulary useful for a real-time control that adapts to \textbf{changes
+in the environment}.\\
+When dealing with nonlinear dynamics, a nonlinear MPC (or NMPC) can be used to
+capture more accurately the nonlinear behavior of a system. This entails a more
+robust manipulation of both nonlinearities and uncertainties in dynamics models
+and constraints. However, one of its highest problem is the computational power
+it can require, especially when dealing with highly nonlinear systems. This
+entails the need of a high-performance hardware to solve the optimization
+problem in an acceptable time, but sometimes this is not enough. Especially in a
+real environment, where the timeliness is fundamental to take a decision, fast
+computations are of utmost importance.\\
+The purpose of \cite{paper} is to develop a novel approach for a real-time NMPC
+for an autonomous vehicle, which was tested in a race environment, where the
+objective was to complete a lap in the minimum possible time, while also
+enhancing computational efficiency. The architecture is a cascaded model
+composed by a detailed model of the car for the near term, and a less complex
+model used for a long horizon planning. This concept will be addressed more in
+detail.\\
+In this report we tried to replicate the architecture of the paper, and we
+tested it in a simulation environment we created. Our purpose was to show the
+mean computation time for the cascaded model is lower than the mean computation
+time for a complete detailed model, with respect to the same length of the
+horizon.
+
+\subsection*{Report outline}
+
+\section*{Related Work}
 
 
-Nonlinear model predictive control (NMPC) is a powerful tool for the control of systems with a nonlinear dynamics 
-that tries to predict the evolution of the system over a prediction window. It is based on a cost function, which must
-be minimized at each time step according to a set of constraints.
-One of its highest problem is the computational power it can require. This entails the need of a high-performance hardware
-to solve the optimization problem in an acceptable time, but sometimes for high nonlinear dynamics systems this is not enough.
-Especially in a real environment, where the timeliness is fundamental to take a decision.\\
-The purpose of the article is to develop a novel approach for a real-time NMPC, which was tested in a race environment, where the 
-objective was to complete a lap in the minimum possible time. The architecture is a cascaded model composed by a detailed model
-of the car for the near term, and a less complex model used for a long horizon planning.
-
-In this report we tried to replicate the architecture of the paper, and we tested it in a simulation environment we created.
-Our purpose was to show the mean computation time for the cascaded model is lower than the mean computation time for a complete
-detailed model, with respect to the same length of the horizon.
-
-\section{Methodology}
+\section*{Methodology}
 
 \begin{itemize}
     \item Overview/Introduction
@@ -85,19 +123,7 @@ detailed model, with respect to the same length of the horizon.
     \end{itemize}    
 \end{itemize}
 
-\subsection*{Overview}
-MPC is a predictive control algorthm, which essentially predicts and plans for future states by continuously generating a series 
-of control actions that will get the vehicle closer to its desired trajectory. In particular, the sequence of control actions 
-is generated such that it minimizes the cost function over the established horizon by solving a constrained optimization problem
-that depends on the current state. Then the controller applies just the first action: in this way the system has advanced one step,
-a new optimization problem with a new initial state is produced, and the process goes on.
-The advantages of MPC are many: it is a multivaribale controller, so it can control outputs by handling simultaneously all the 
-interactions between system variables; it can handle constraints, so it allows to avoid possible undesired states;
-it predicts the future states, allowing to incorporate their information in the actual control. \\
-When dealing with nonlinear dynamics, a nonlinear MPC (or NMPC) can be used to capture more accurately the nonlinear behavior
-of a system. This entails a more robust manipulation of both nonlinearities and uncertainties in dynamics models and constraints.
-
-\section{Implementation}
+\section*{Implementation}
 
 \begin{itemize}
     \item Tools and libraries
@@ -105,25 +131,26 @@ of a system. This entails a more robust manipulation of both nonlinearities and 
     \item Modifications or adaptations wrt the paper
 \end{itemize}
 
-\section{Experimental Setup}
+\section*{Experimental Setup}
 
 \begin{itemize}
     \item Simulation setting (track etc.)
     \item Different configuration scenarios
 \end{itemize}
 
-\section{Results}
+\section*{Results}
 
 \begin{itemize}
     \item Guess what
 \end{itemize}
 
-\section{Conclusion}
+\section*{Conclusion}
 
 \begin{itemize}
     \item Take-away message
     \item Pitfalls and future work
 \end{itemize}
+
 
 \bibliographystyle{apalike}
 \bibliography{references}
