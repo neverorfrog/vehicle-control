@@ -9,3 +9,6 @@
 *.bbl
 *.blg
 *.pyc
+*.fdb_latexmk
+*.fls
+*.pdf

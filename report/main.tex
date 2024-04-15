@@ -60,7 +60,15 @@ that tries to predict the evolution of the system over a prediction window. It i
 be minimized at each time step according to a set of constraints.
 One of its highest problem is the computational power it can require. This entails the need of a high-performance hardware
 to solve the optimization problem in an acceptable time, but sometimes for high nonlinear dynamics systems this is not enough.
-Especially in a real environment, where the timeliness is fundamental to take a decision.
+Especially in a real environment, where the timeliness is fundamental to take a decision.\\
+The purpose of the article is to develop a novel approach for a real-time NMPC, which was tested in a race environment, where the 
+objective was to complete a lap in the minimum possible time. The architecture is a cascaded model composed by a detailed model
+of the car for the near term , and a less complex model used for a long horizon planning.
+
+In this report we tried to replicate the architecture of the paper, and we tested it in a simulation environment we created.
+Our purpose was to show the mean computation time for the cascaded model is lower than the mean computation time for a complete
+detailed model, with respect to the same length of the horizon. Our limitations in 
+
 
 \section{Methodology}
 
@@ -68,6 +76,10 @@ Especially in a real environment, where the timeliness is fundamental to take a 
     \item Concept of MPC for vehicle control
     \item Concept of serially cascaded models
 \end{itemize}
+
+\subsection*{MPC for vehicle control}
+MPC is an predictive control algorthm, which essentially predicts and plans for future states by continuously generating a series 
+of control actions that will get the vehicle closer to its desired trajectory. The advantage of MPC is the prediction of future states
 
 \section{Implementation}
 
