@@ -91,10 +91,12 @@ of control actions that will get the vehicle closer to its desired trajectory. I
 is generated such that it minimizes the cost function over the established horizon by solving a constrained optimization problem
 that depends on the current state. Then the controller applies just the first action: in this way the system has advanced one step,
 a new optimization problem with a new initial state is produced, and the process goes on.
-
 The advantages of MPC are many: it is a multivaribale controller, so it can control outputs by handling simultaneously all the 
 interactions between system variables; it can handle constraints, so it allows to avoid possible undesired states;
-it predicts the future states, allowing to incorporate their information in the actual control. 
+it predicts the future states, allowing to incorporate their information in the actual control. \\
+When dealing with nonlinear dynamics, a nonlinear MPC (or NMPC) can be used to capture more accurately the nonlinear behavior
+of a system. This entails a more robust manipulation of both nonlinearities and uncertainties in dynamics models and constraints.
+
 \section{Implementation}
 
 \begin{itemize}
