@@ -63,24 +63,38 @@ to solve the optimization problem in an acceptable time, but sometimes for high 
 Especially in a real environment, where the timeliness is fundamental to take a decision.\\
 The purpose of the article is to develop a novel approach for a real-time NMPC, which was tested in a race environment, where the 
 objective was to complete a lap in the minimum possible time. The architecture is a cascaded model composed by a detailed model
-of the car for the near term , and a less complex model used for a long horizon planning.
+of the car for the near term, and a less complex model used for a long horizon planning.
 
 In this report we tried to replicate the architecture of the paper, and we tested it in a simulation environment we created.
 Our purpose was to show the mean computation time for the cascaded model is lower than the mean computation time for a complete
-detailed model, with respect to the same length of the horizon. Our limitations in 
-
+detailed model, with respect to the same length of the horizon.
 
 \section{Methodology}
 
 \begin{itemize}
-    \item Concept of MPC for vehicle control
-    \item Concept of serially cascaded models
+    \item Overview/Introduction
+    \begin{itemize}
+        \item Concept of MPC for vehicle control
+        \item Concept of serially cascaded models 
+    \end{itemize}
+
+    \item Paper
+    \begin{itemize}
+        \item Vehicle dynamic models
+        \item NLP
+    \end{itemize}    
 \end{itemize}
 
-\subsection*{MPC for vehicle control}
-MPC is an predictive control algorthm, which essentially predicts and plans for future states by continuously generating a series 
-of control actions that will get the vehicle closer to its desired trajectory. The advantage of MPC is the prediction of future states
+\subsection*{Overview}
+MPC is a predictive control algorthm, which essentially predicts and plans for future states by continuously generating a series 
+of control actions that will get the vehicle closer to its desired trajectory. In particular, the sequence of control actions 
+is generated such that it minimizes the cost function over the established horizon by solving a constrained optimization problem
+that depends on the current state. Then the controller applies just the first action: in this way the system has advanced one step,
+a new optimization problem with a new initial state is produced, and the process goes on.
 
+The advantages of MPC are many: it is a multivaribale controller, so it can control outputs by handling simultaneously all the 
+interactions between system variables; it can handle constraints, so it allows to avoid possible undesired states;
+it predicts the future states, allowing to incorporate their information in the actual control. 
 \section{Implementation}
 
 \begin{itemize}
