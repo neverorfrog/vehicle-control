@@ -1,9 +1,11 @@
+from matplotlib import pyplot as plt
 from matplotlib.axes import Axes
 import numpy as np
 from scipy.integrate import trapezoid
 from utils.common_utils import wrap
 from typing import List
 import casadi as ca
+import matplotlib.patches as plt_patches
 
 class Waypoint:
     def __init__(self, x, y, psi):
@@ -47,9 +49,34 @@ class Waypoint:
         """
         return ((self.x - other.x)**2 + (self.y - other.y)**2)**0.5
     
+class Obstacle:
+    def __init__(self, cx, cy, s, ey, radius):
+        """
+        Constructor for a circular obstacle to be placed on a map.
+        :param cx: x coordinate of center of obstacle in world coordinates
+        :param cy: y coordinate of center of obstacle in world coordinates
+        :param radius: radius of circular obstacle in m
+        """
+        self.cx = cx
+        self.cy = cy
+        self.radius = radius
+        self.s = s
+        self.ey = ey
+        
+    def __repr__(self) -> str:
+        return f"Obstacle(cx={self.cx}, cy={self.cy}, radius={self.radius})"
+
+    def plot(self, axis: Axes):
+        """
+        Display obstacle on given axis.
+        """
+        # Draw circle
+        circle = plt_patches.Circle(xy=(self.cx, self.cy), radius=self.radius, color='#2E4053', zorder=20)
+        axis.add_patch(circle)
+    
 
 class Track:
-    def __init__(self, corners, smoothing, resolution, width = 0.4):
+    def __init__(self, corners, smoothing, resolution, width, obstacle_data):
         """
         Track object containing a list of waypoints and a spline constructed
         """
@@ -58,9 +85,17 @@ class Track:
         self.smoothing = smoothing
         self.waypoints: List[Waypoint] = self._construct_path(corners)
         self.n_waypoints = len(self.waypoints)
-        self._construct_spline()
-        self._precompute_curvatures()
+        self.x, self.y, self.dx_ds, self.dy_ds, self.ddx_ds, self.ddy_ds = self._construct_spline()
+        self.curvatures = self._precompute_curvatures()
         self._divide_track()
+        self.obstacles: List[Obstacle] = self._construct_obstacles(obstacle_data)
+        
+    def rel2glob(self, s, ey, epsi):
+        orientation = self.get_orientation(s)
+        x = self.x(s) - ca.sin(orientation) * ey
+        y = self.y(s) + ca.cos(orientation) * ey
+        psi = wrap(orientation + epsi)
+        return x.full().squeeze(), y.full().squeeze(), psi.full().squeeze()
         
     def get_curvature(self, s):
         '''Get curvature (inverse of curvature radius) of a point along the spline'''
@@ -74,9 +109,6 @@ class Track:
         curvature = num/denom
         return curvature
     
-    def gaussian(self, x, A, mu, sigma):
-        return A * ca.exp(-((x - mu)**2) / (2 * sigma**2))
-    
     def get_orientation(self, s):
         '''Get orientation wrt horizontal line of a point along the spline'''
         s = ca.fmod(s,self.length) # need to module s (for successive laps)
@@ -87,13 +119,36 @@ class Track:
         tangent_y = dy_ds / magnitude
         return np.arctan2(tangent_y, tangent_x)
     
+    def _construct_obstacles(self, obstacle_data):
+        obstacles = []
+        
+        # obstacle list
+        for obstacle_data in obstacle_data:
+            s, ey, radius = obstacle_data
+            x, y, _ = self.rel2glob(s, ey, 0)
+            obstacles.append(Obstacle(x, y, s, ey, radius))
+            
+        # 2D binary occupancy grid
+        s_values = np.arange(0, self.length - 0.1, 0.5)
+        ey_values = np.arange(0, self.width, 0.01) - self.width/2
+        S,EY = np.meshgrid(s_values,ey_values,indexing='ij')
+        Z = np.zeros_like(S)
+        orientation = self.get_orientation(S)
+        X = (self.x(S) - ca.sin(orientation) * EY).full().squeeze()
+        Y = (self.y(S) + ca.cos(orientation) * EY).full().squeeze()
+        for obs in obstacles:
+            Z += np.sqrt((X - obs.cx)**2 + (Y - obs.cy)**2) <= (obs.radius+1)**2
+        data_flat = Z.ravel(order='F')
+        self.occupancy: ca.Function  = ca.interpolant('occupancy', 'linear', [s_values,ey_values], data_flat, {'inline': True})
+        return obstacles
+            
     def _precompute_curvatures(self):
         self.ds = 0.05
         curvatures = []
         s_values = np.arange(0, self.length - 0.1, self.ds)
         for s in s_values:
             curvatures.append(self.get_curvature(s).full().squeeze().item())
-        self.curvatures = ca.interpolant('curvatures', 'bspline', [s_values], curvatures, {'degree': [3]})
+        return ca.interpolant('curvatures', 'bspline', [s_values], curvatures, {'degree': [3]})
         
     def _divide_track(self):
         '''Divide the track into segments (straight and curve)'''
@@ -139,13 +194,13 @@ class Track:
         s_values = np.arange(len(waypoints_x))  # Assuming waypoints are evenly spaced along the track
         
         # spline function definition
-        self.x_spline = ca.interpolant('x_spline', 'bspline', [s_values], waypoints_x)
-        self.y_spline = ca.interpolant('y_spline', 'bspline', [s_values], waypoints_y)
+        x_spline = ca.interpolant('x_spline', 'bspline', [s_values], waypoints_x)
+        y_spline = ca.interpolant('y_spline', 'bspline', [s_values], waypoints_y)
         
         #computing the length
         s = ca.MX.sym('s')
-        x = ca.Function("x_pos",[s],[self.x_spline(s)])
-        y = ca.Function("y_pos",[s],[self.y_spline(s)])
+        x = ca.Function("x_pos",[s],[x_spline(s)])
+        y = ca.Function("y_pos",[s],[y_spline(s)])
         dx_ds = ca.Function("dx_ds",[s],[ca.jacobian(x(s),s)])
         dy_ds = ca.Function("dy_ds",[s],[ca.jacobian(y(s),s)])
         one_lap_range = np.arange(0, len(self.waypoints))
@@ -153,12 +208,13 @@ class Track:
         self.length = trapezoid(compute_segment_length(one_lap_range), one_lap_range,dx=0.1)
         
         # redefining casadi functions (because s has to be spread from range [0,length] to [0,len(waypoints)])
-        self.x = ca.Function("x_pos",[s],[self.x_spline((s/self.length) * len(self.waypoints))])
-        self.y = ca.Function("y_pos",[s],[self.y_spline((s/self.length) * len(self.waypoints))])
-        self.dx_ds = ca.Function("dx_ds",[s],[ca.jacobian(self.x(s),s)])
-        self.dy_ds = ca.Function("dy_ds",[s],[ca.jacobian(self.y(s),s)])
-        self.ddx_ds = ca.Function("ddx_ds",[s],[ca.jacobian(self.dx_ds(s),s)])
-        self.ddy_ds = ca.Function("ddy_ds",[s],[ca.jacobian(self.dy_ds(s),s)])
+        x = ca.Function("x_pos",[s],[x_spline((s/self.length) * len(self.waypoints))])
+        y = ca.Function("y_pos",[s],[y_spline((s/self.length) * len(self.waypoints))])
+        dx_ds = ca.Function("dx_ds",[s],[ca.jacobian(x(s),s)])
+        dy_ds = ca.Function("dy_ds",[s],[ca.jacobian(y(s),s)])
+        ddx_ds = ca.Function("ddx_ds",[s],[ca.jacobian(dx_ds(s),s)])
+        ddy_ds = ca.Function("ddy_ds",[s],[ca.jacobian(dy_ds(s),s)])
+        return x, y, dx_ds, dy_ds, ddx_ds, ddy_ds
         
     def _construct_path(self, corners):
         """
@@ -264,3 +320,7 @@ class Track:
         axis.plot(lb_x, lb_y, color='k')
         axis.fill(lb_x, lb_y, "grey",alpha=0.3)
         axis.fill(rb_x, rb_y, "w",alpha=0.9)
+        
+        # Plot obstacles
+        for obs in self.obstacles:
+            obs.plot(axis)

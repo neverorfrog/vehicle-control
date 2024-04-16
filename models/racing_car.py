@@ -40,13 +40,8 @@ class RacingCar(Robot):
     def rel2glob(self, state):
         s = state[self.state.index('s')]
         ey = state[self.state.index('ey')] 
-        epsi = state[self.state.index('epsi')]    
-        track_psi = wrap(self.track.get_orientation(s))
-        x = self.track.x(s) - sin(track_psi) * ey
-        y = self.track.y(s) + cos(track_psi) * ey
-        psi = wrap(track_psi + epsi)
-        return x.full().squeeze(),y.full().squeeze(),psi.full().squeeze()
-    
+        epsi = state[self.state.index('epsi')]   
+        return self.track.rel2glob(s, ey, epsi)
     
     def integrate(self,state,action,curvature,ode,h):
         '''
