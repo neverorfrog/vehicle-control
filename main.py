@@ -8,6 +8,7 @@ import environment as env
 from simulation.racing import RacingSimulation
 from utils.common_utils import load_config, ControlType, CarType, TrackType
 from omegaconf import OmegaConf
+import casadi as ca
 
 # ======== Configuration =========================
 control_type = ControlType.CAS 
@@ -21,7 +22,8 @@ OmegaConf.set_struct(track_config, True)
 track = env.Track(corners=track_config.corners,
                   smoothing=track_config.smoothing,
                   resolution=track_config.resolution,
-                  width=track_config.width)
+                  width=track_config.width,
+                  obstacle_data=track_config.obstacle_data)
 
 # ========= Model Definition =======================
 
