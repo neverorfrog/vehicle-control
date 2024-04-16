@@ -13,7 +13,10 @@ corners: # [x, y]
   - [0, 0]
 
 obstacle_data: # [s, ey, r]
-  - [20, 0, 1]
+  - [40, -3, 4]
+  - [60, 3, 4]
+  - [80, 3, 1]
+  - [80, -3, 1]
 
 resolution: 0.1
 smoothing: 110

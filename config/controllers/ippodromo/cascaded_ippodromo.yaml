@@ -9,8 +9,8 @@ mpc_dt_pm: 0.15
 cost_weights:
   time: 1
   speed: 0.1
-  ey: 0.2
-  epsi: 0.8
+  ey: 0.05
+  epsi: 0.5
   w:  0.001
   Fx: 0.000001
   Fy: 0.000001
