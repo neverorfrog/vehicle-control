@@ -77,9 +77,9 @@ class RacingSimulation():
             print(f"STATE: {state}")
             print(f"ACTION: {action}")
             print(f"UX ACCELERATION: {Ux_dot:.3f}, UY ACCELERATION: {Uy_dot:.3f}")
-            print(f"FINAL ST CURVATURE: {self.car.track.curvatures(state_prediction[state.index('s'),-1])}")
+            print(f"FINAL ST CURVATURE: {self.car.track.k(state_prediction[state.index('s'),-1])}")
             if self.controller.M > 0:
-                print(f"FINAL PM CURVATURE: {self.car.track.curvatures(state_pm_prediction[self.point_mass.state.index('s'),-1])}")
+                print(f"FINAL PM CURVATURE: {self.car.track.k(state_pm_prediction[self.point_mass.state.index('s'),-1])}")
             print(f"AVERAGE ELAPSED TIME: {np.mean(elapsed):.3f}")
             print(f"MEDIAN ELAPSED TIME: {np.median(elapsed):.3f}")
             # print(sol.value(self.controller.ds))
