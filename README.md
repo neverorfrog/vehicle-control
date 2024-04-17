@@ -3,6 +3,13 @@
 Implementation of some control algorithms, based on model-predictive control, for racing cars on a track.  
 Cascaded MPC is an unofficial implementation of [[1]](#1).
 
+## Install
+
+To execute the code you need to install the following packages
+- [miniconda](https://docs.anaconda.com/free/miniconda/index.html#quick-command-line-install)
+- [coinhsl](https://github.com/neverorfrog/vehicle-control/tree/main/thirdparty/coinhsl#thirdparty-hsl)
+- Create a conda environment with the required packages executing ```conda env create --name vehicle-control -f environment.yaml``` from the project root directory
+
 ## Project Structure
 
 - config: Contains configuration files encoded in a yaml format for different controllers, models and environments (track or trajectory). 
@@ -13,11 +20,6 @@ Cascaded MPC is an unofficial implementation of [[1]](#1).
 - models: Classes representing different models (dynamic, kinematic, etc.)
 - simulation: Python modules defining the simulation cycle 
 - thirdparty: Third-party libraries (for now hsl libraries which deliver fast linear solvers for ipopt)
-
-## Dependancies
-
-- coinhsl (open thirdparty/coinhsl for instructions)
-- packages listed in environment.yaml (you can install them with conda)
 
 ## Results
 
