@@ -93,7 +93,10 @@ class Track:
         s_values = np.arange(0, self.length - 0.1, self.ds)
         for s in s_values:
             curvatures.append(self.get_curvature(s).full().squeeze().item())
-        self.curvatures = ca.interpolant('curvatures', 'bspline', [s_values], curvatures, {'degree': [3]})
+        k_spline = ca.interpolant('curvatures', 'bspline', [s_values], curvatures, {'degree': [3]})
+        s = ca.MX.sym('s')
+        self.k = ca.Function("curvature",[s],[k_spline(s)])
+        self.dk_ds = ca.Function("dk_ds",[s],[ca.jacobian(self.k(s),s)])
         
     def _divide_track(self):
         '''Divide the track into segments (straight and curve)'''
@@ -105,7 +108,7 @@ class Track:
         max_curv = 0
         
         for s in s_values:
-            curv = self.curvatures(s)
+            curv = self.k(s)
             
             # curve is starting while on a straight segment
             if abs(curv) > eps and not is_curve:

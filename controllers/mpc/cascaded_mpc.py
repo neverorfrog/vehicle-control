@@ -133,7 +133,7 @@ class CascadedMPC(Controller):
             opti.subject_to(opti.bounded(input_constraints.w_min,w,input_constraints.w_max))
             
             # Discretization (Going on for dt with displacement snapshot) 
-            curvature = self.car.track.curvatures(s)
+            curvature = self.car.track.k(s)
             ds = self.dt * Ux
             opti.subject_to(self.ds[n] == ds)
             
@@ -221,7 +221,7 @@ class CascadedMPC(Controller):
             opti.subject_to(Fx_bar <= Peng / V_bar)
             
             # Discretization (fixed ds this time)
-            curvature = self.car.track.curvatures(s_bar)
+            curvature = self.car.track.k(s_bar)
             opti.subject_to(self.ds_pm[m] == ds_bar)
             
             # Model dynamics 
