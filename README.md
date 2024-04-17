@@ -8,7 +8,8 @@ Cascaded MPC is an unofficial implementation of [[1]](#1).
 To execute the code you need to install the following packages
 - [miniconda](https://docs.anaconda.com/free/miniconda/index.html#quick-command-line-install)
 - [coinhsl](https://github.com/neverorfrog/vehicle-control/tree/main/thirdparty/coinhsl#thirdparty-hsl)
-- Create a conda environment with the required packages executing ```conda env create --name vehicle-control -f environment.yaml``` from the project root directory
+- Create a conda environment with the required packages executing from the project root directory the command  
+```conda env create --name vehicle-control -f environment.yaml``` 
 
 ## Project Structure
 
