@@ -92,8 +92,7 @@ detail.\\
 In this report we tried to replicate the architecture of the paper, and we
 tested it in a simulation environment we created. Our purpose was to show the
 mean computation time for the cascaded model is lower than the mean computation
-time for a complete detailed model, with respect to the same length of the
-horizon.
+time for a complete detailed model, achieving also better results.
 
 \subsection*{Report outline}
 
@@ -115,6 +114,28 @@ horizon.
         \item NLP
     \end{itemize}    
 \end{itemize}
+
+\section*{Serially cascaded models}
+While a single control loop system is a simple structure that consists in
+just one primary loop that regulates directly the system, the cascade control
+makes use of multiple control loops nested within each other. The requirements
+for an effective cascade control are that the inner loops variables must be 
+faster-responding than the outer ones, and the major disturbances enter in the 
+inner loops. Considering the simplest cascade control structure,\\
+... (aggiungi schema/equazioni generiche del cascade semplice)
+
+According to the control objectives, a cascade control scheme can include also 
+more than one model in its control loops, such that each model capture different
+relevant dynamics meeting different control tasks. In this way there is not the 
+need to use a high-fidelity model for every objective, because some of them can 
+be achieved considering simpler dynamic models. Furthermore, in optimal control
+the usage of detailed models for long horizon can bring to an explosion of the 
+complexity of the problem; instead, using more detailed models for near terms 
+to have a high-fidelity of the real robot, and easier models for planning purpose
+in long terms, allows to achieve good performances with computational limits.
+
+
+
 
 \section*{Implementation}
 
