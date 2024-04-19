@@ -11,13 +11,10 @@ class Waypoint:
     def __init__(self, x, y, psi):
         """
         Waypoint object containing x, y location in global coordinate system,
-        orientation of waypoint psi and local curvature kappa. Waypoint further
-        contains an associated reference velocity computed by the speed profile
-        and a path width specified by upper and lower bounds.
-        :param x: x position in global coordinate system | [m]
-        :param y: y position in global coordinate system | [m]
+        orientation of waypoint psi.  
+        :param x: x position in global coordinate system | [m] 
+        :param y: y position in global coordinate system | [m] 
         :param psi: orientation of waypoint | [rad]
-        :param kappa: local curvature | [1 / m]
         """
         self.x = x
         'x position of waypoint'
