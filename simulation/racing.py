@@ -150,6 +150,9 @@ class RacingSimulation():
             # Plot track
             if self.car.track is not None:
                 self.car.track.plot(ax_large)
+                if self.controller.config.obstacles:
+                    for obs in self.car.track.obstacles:
+                        obs.plot(ax_large)
                 
             # Plot state predictions of MPC
             if preds is not None and i <= N:

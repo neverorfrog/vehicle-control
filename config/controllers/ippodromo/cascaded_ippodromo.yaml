@@ -4,6 +4,7 @@ mpc_dt: 0.03
 horizon_pm: 25
 ds_bar: 1.2
 mpc_dt_pm: 0.15
+obstacles: False
 
 # weights for the cost function
 cost_weights:

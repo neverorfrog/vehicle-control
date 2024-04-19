@@ -153,19 +153,14 @@ class CascadedMPC(Controller):
             cost += ca.if_else(ey > state_constraints.ey_max, # violation of road bounds
                        cost_weights.boundary*ds*(ey - state_constraints.ey_max)**2, 0)
             
-
-            # occupancy = self.car.track.occupancy(ca.horzcat(s,ey))
-            # for obs in self.car.track.obstacles:
-            #     distance = ca.fabs(ca.sqrt((s - obs.s)**2 + (ey - obs.ey)**2) - (obs.radius))
-            #     cost += occupancy / distance
-                
-            
-            orientation = self.car.track.get_orientation(s)
-            x = self.car.track.x(s) - ca.sin(orientation) * ey
-            y = self.car.track.y(s) + ca.cos(orientation) * ey    
-            for obs in self.car.track.obstacles:
-                distance = ca.fabs(ca.sqrt((x - obs.cx)**2 + (y - obs.cy)**2) - (obs.radius))
-                cost += 1/distance
+            if self.config.obstacles:
+                orientation = self.car.track.get_orientation(s)
+                x = self.car.track.x(s) - ca.sin(orientation) * ey
+                y = self.car.track.y(s) + ca.cos(orientation) * ey
+                # occupancy = self.car.track.occupancy(ca.horzcat(s,ey))    
+                for obs in self.car.track.obstacles:
+                    distance = ca.fabs(ca.sqrt((x - obs.cx)**2 + (y - obs.cy)**2) - (obs.radius))
+                    cost += 1/distance # obstacle avoidance
             
             cost += cost_weights.deviation_st*ds*(ey**2) # deviation from road desciptor
             
@@ -256,19 +251,15 @@ class CascadedMPC(Controller):
             
             cost += cost_weights.deviation_pm*ds_bar*(ey_bar**2) # 4) deviation from road descriptor path
             
-            orientation = self.car.track.get_orientation(s_bar)
-            x = self.car.track.x(s_bar) - ca.sin(orientation) * ey_bar
-            y = self.car.track.y(s_bar) + ca.cos(orientation) * ey_bar  
-            for obs in self.car.track.obstacles:
-                distance = ca.fabs(ca.sqrt((x - obs.cx)**2 + (y - obs.cy)**2) - (obs.radius))
-                cost += 1/distance
-                
-            # occupancy = self.car.track.occupancy(ca.horzcat(s_bar,ey_bar))
-            # for obs in self.car.track.obstacles:
-            #     distance = ca.fabs(ca.sqrt((s_bar - obs.s)**2 + (ey_bar - obs.ey)**2) - (obs.radius))
-            #     cost += occupancy / distance
-                
-                
+            if self.config.obstacles:
+                orientation = self.car.track.get_orientation(s_bar)
+                x = self.car.track.x(s_bar) - ca.sin(orientation) * ey_bar
+                y = self.car.track.y(s_bar) + ca.cos(orientation) * ey_bar  
+                # occupancy = self.car.track.occupancy(ca.horzcat(s_bar,ey_bar))
+                for obs in self.car.track.obstacles:
+                    distance = ca.fabs(ca.sqrt((x - obs.cx)**2 + (y - obs.cy)**2) - (obs.radius))
+                    cost += 1/distance #5) Obstacle Avoidance
+
             if m < self.M-1: # 5) Slew Rate
                 next_input_pm = self.action_pm[:,m+1]
                 Fy_bar_next = next_input_pm[self.point_mass.input.index('Fy')]

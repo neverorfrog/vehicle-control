@@ -320,7 +320,3 @@ class Track:
         axis.plot(lb_x, lb_y, color='k')
         axis.fill(lb_x, lb_y, "grey",alpha=0.3)
         axis.fill(rb_x, rb_y, "w",alpha=0.9)
-        
-        # Plot obstacles
-        for obs in self.obstacles:
-            obs.plot(axis)

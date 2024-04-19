@@ -19,11 +19,13 @@ track_name = TrackType.I.value
 track_config = OmegaConf.create(load_config(f"config/environment/{track_name}.yaml"))
 OmegaConf.set_readonly(track_config, True)
 OmegaConf.set_struct(track_config, True)
-track = env.Track(corners=track_config.corners,
-                  smoothing=track_config.smoothing,
-                  resolution=track_config.resolution,
-                  width=track_config.width,
-                  obstacle_data=track_config.obstacle_data)
+track = env.Track(
+    corners=track_config.corners,
+    smoothing=track_config.smoothing,
+    resolution=track_config.resolution,
+    width=track_config.width,
+    obstacle_data=track_config.obstacle_data
+)
 
 # ========= Model Definition =======================
 
