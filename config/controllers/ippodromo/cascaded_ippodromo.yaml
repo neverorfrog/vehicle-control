@@ -9,14 +9,14 @@ obstacles: False
 # weights for the cost function
 cost_weights:
   time: 1
-  speed: 0.1
-  ey: 0.05
-  epsi: 0.5
+  speed: 0.2
+  ey: 0.2
+  epsi: 0.8
   w:  0.001
   Fx: 0.000001
   Fy: 0.000001
   deviation_st: 0.001
-  deviation_pm: 0.001
+  deviation_pm: 0.0001
   boundary: 1
   slip : 1000
   friction: 0.0001

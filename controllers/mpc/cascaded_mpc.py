@@ -5,7 +5,7 @@ import casadi as ca
 import numpy as np
 from casadi import cos, tan, fabs
 from controllers.controller import Controller
-np.random.seed(123)
+np.random.seed(31)
 
 class CascadedMPC(Controller):
     def __init__(self, car: DynamicCar, point_mass: DynamicPointMass, config: OmegaConf):
@@ -45,7 +45,7 @@ class CascadedMPC(Controller):
     def _init_opti(self):
         self.opti = ca.Opti('nlp')
         ipopt_options = {'print_level': 1, 'linear_solver': 'ma27', 'hsllib': '/usr/local/lib/libcoinhsl.so', 'fixed_variable_treatment': 'relax_bounds'}
-        options = {'print_time': False, 'expand': False, 'ipopt': ipopt_options}
+        options = {'print_time': False, 'expand': True, 'ipopt': ipopt_options}
         self.opti.solver("ipopt", options)
     
     def _init_variables(self):
@@ -55,8 +55,9 @@ class CascadedMPC(Controller):
         # single-track
         self.state = self.opti.variable(self.ns, self.N+1) # state trajectory var
         self.action = self.opti.variable(self.na, self.N)  # control trajectory var
-        self.ds = self.opti.variable(self.N) # ds trajectory var (just for loggin purposes)
+        self.ds = self.opti.parameter(self.N) # ds trajectory var (just for loggin purposes)
         self.state_prediction = np.ones((self.ns, self.N+1))
+        self.state_prediction[self.car.state.index('Ux'),:] += 4
         self.action_prediction = np.ones((self.na, self.N)) + np.random.random((self.na, self.N))
         self.curvature = self.opti.parameter(self.N) # curvature trajectory
         self.Fe_f = self.opti.variable(self.N) 
@@ -65,7 +66,7 @@ class CascadedMPC(Controller):
         # point-mass
         self.state_pm = self.opti.variable(self.ns_pm, self.M+1)
         self.action_pm = self.opti.variable(self.na_pm, self.M)
-        self.ds_pm = self.opti.variable(self.M) # ds trajectory var (just for loggin purposes)
+        self.ds_pm = self.opti.parameter(self.M) # ds trajectory var (just for loggin purposes)
         self.state_pm_prediction = np.ones((self.ns_pm, self.M+1))
         self.action_pm_prediction = np.ones((self.na_pm, self.M)) + np.random.random((self.na_pm, self.M))
         self.curvature_pm = self.opti.parameter(self.M)
@@ -88,9 +89,10 @@ class CascadedMPC(Controller):
         self.opti.subject_to(self.opti.bounded(input_constraints.w_min,w,input_constraints.w_max))
             
         # Model dynamics 
-        curvature = self.car.track.k(s)
-        ds = self.dt * Ux
-        self.opti.subject_to(self.ds[n] == ds)
+        curvature = self.curvature[n]
+        # curvature = self.car.track.k(s)
+        # ds = self.dt * Ux
+        # self.opti.subject_to(self.ds[n] == ds)
         self.opti.subject_to(self.state[:,n+1] == self.car.spatial_transition(state,action,curvature,self.ds[n]))
         
         # longitudinal force limits on tires
@@ -103,7 +105,8 @@ class CascadedMPC(Controller):
     def _stage_cost(self, n):
         Ux,Uy,r,delta,s,ey,epsi,t = self._unpack_state(self.state[:,n])
         Fx,w = self._unpack_action(self.action[:,n])
-        ds = self.dt * Ux
+        # ds = self.dt * Ux
+        ds = self.ds[n]
         cost_weights = self.config.cost_weights
         state_constraints = self.config.state_constraints
 
@@ -157,8 +160,9 @@ class CascadedMPC(Controller):
         self.opti.subject_to(Fx <= Peng / V)
         
         # Model dynamics
-        curvature = self.point_mass.track.k(s)
-        self.opti.subject_to(self.ds_pm[m] == self.config.ds_bar)
+        # curvature = self.point_mass.track.k(s)
+        curvature = self.curvature_pm[m]
+        # self.opti.subject_to(self.ds_pm[m] == self.config.ds_bar)
         self.opti.subject_to(self.state_pm[:,m+1] == self.point_mass.spatial_transition(self.state_pm[:,m],self.action_pm[:,m],curvature,self.ds_pm[m]))
         
         # friction limits
@@ -172,7 +176,7 @@ class CascadedMPC(Controller):
         cost = 0
         V,s,ey,epsi,t = self._unpack_pm_state(self.state_pm[:,m])
         Fx, Fy = self._unpack_pm_action(self.action_pm[:,m])
-        ds = self.config.ds_bar
+        ds = self.ds_pm[m]
         cost_weights = self.config.cost_weights
         state_pm_constraints = self.config.state_pm_constraints
         
@@ -207,7 +211,8 @@ class CascadedMPC(Controller):
         Fx_bar_initial, Fy_bar_initial = self._unpack_pm_action(self.action_pm[:,0])
         Fy_f = self.car.Fy_f(Ux_final,Uy_final,r_final,delta_final,Fx_final)
         Fy_r = self.car.Fy_r(Ux_final,Uy_final,r_final,delta_final,Fx_final)
-        ds = self.dt * Ux_final
+        # ds = self.dt * Ux_final
+        ds = self.ds[-1]
         return (cost_weights.Fx/ds) * (((Fx_bar_initial-Fx_final)**2)+ (Fy_bar_initial-Fy_f-Fy_r)**2)
         
     
@@ -254,27 +259,21 @@ class CascadedMPC(Controller):
         # initializing state and action prediction
         self.opti.set_initial(self.action, self.action_prediction)
         self.opti.set_initial(self.state, self.state_prediction)
-        
-        #initializing s trajectory
-        # ds_traj = np.full(self.N+1, self.config.ds); ds_traj[1:] = ds_traj[1:] * self.action_prediction[self.car.state.index('Ux'),:]
-        # self.opti.subject_to(self.ds == ds_traj[1:])
-        # ds_traj[0] = 0; s_traj = np.cumsum(ds_traj) + state[self.car.state.index('s')]
-        # self.opti.set_initial(self.state[self.car.state.index('s'),:], s_traj)
-        
-        #initializing curvature trajectory
-        # curvatures = self.car.track.k(s_traj)
-        # self.opti.set_value(self.curvature, curvatures[:-1])
+        #initializing s and k trajectory
+        ds_traj = np.full(self.N+1, self.config.mpc_dt) * self.state_prediction[self.car.state.index('Ux'),:]
+        self.opti.set_value(self.ds, ds_traj[:-1])
+        ds_traj[0] = 0; s_traj = np.cumsum(ds_traj) + state[self.car.state.index('s')]
+        self.opti.set_value(self.curvature, self.car.track.k(s_traj[:-1]))
         
         # same for point-mass
         if self.M > 0:
             self.opti.set_initial(self.action_pm, self.action_pm_prediction)
             self.opti.set_initial(self.state_pm, self.state_pm_prediction)
-            # self.ds_bar = self.config.ds_bar
-            # ds_bar_traj = np.full(self.M+1, self.config.ds_bar); ds_bar_traj[1:] = ds_bar_traj[1:] * self.action_pm_prediction[self.point_mass.state.index('V'),:]
-            # ds_bar_traj[0] = 0; s_bar_traj = np.cumsum(ds_bar_traj) + state[self.point_mass.state.index('s')]
-            # self.opti.set_initial(self.state_pm[self.point_mass.state.index('s'),:], s_bar_traj)
-            # curvatures_pm = self.car.track.k(s_bar_traj)
-            # self.opti.set_value(self.curvature_pm, curvatures_pm[:-1])
+            #initializing s and k trajectory
+            ds_bar_traj = np.full(self.M+1, self.config.ds_bar)
+            self.opti.set_value(self.ds_pm, ds_bar_traj[:-1])
+            ds_bar_traj[0] = 0; s_bar_traj = np.cumsum(ds_bar_traj) + s_traj[-1]
+            self.opti.set_value(self.curvature_pm, self.car.track.k(s_bar_traj[:-1]))
             
     def _save_horizon(self, sol):
         # saving for warmstart
