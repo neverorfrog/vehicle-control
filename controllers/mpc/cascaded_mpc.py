@@ -56,7 +56,9 @@ class CascadedMPC(Controller):
         self.state = self.opti.variable(self.ns, self.N+1) # state trajectory var
         self.action = self.opti.variable(self.na, self.N)  # control trajectory var
         self.ds = self.opti.parameter(self.N) # ds trajectory var (just for loggin purposes)
-        self.state_prediction = np.ones((self.ns, self.N+1)); self.state_prediction[self.car.state.index('Ux'),:] += 4
+        self.state_prediction = np.zeros((self.ns, self.N+1)); 
+        self.state_prediction[self.car.state.index('Ux'),:] += 4
+        self.state_prediction[self.car.state.index('s'),:] += 1
         self.action_prediction = np.ones((self.na, self.N)) + np.random.random((self.na, self.N))
         self.curvature = self.opti.parameter(self.N) # curvature trajectory
         
@@ -133,7 +135,7 @@ class CascadedMPC(Controller):
         if self.config.obstacles: #Obstacle avoidance
             for obs in self.car.track.obstacles:
                 distance = ca.fabs(ca.sqrt((s - obs.s)**2 + (ey - obs.ey)**2) - (obs.radius))
-                cost += 1/distance 
+                cost += 10*(1/distance)
                 
         return cost
     
@@ -185,7 +187,7 @@ class CascadedMPC(Controller):
         if self.config.obstacles:
             for obs in self.car.track.obstacles:
                 distance = ca.fabs(ca.sqrt((s - obs.s)**2 + (ey - obs.ey)**2) - (obs.radius))
-                cost += 1/distance #5) Obstacle Avoidance
+                cost += 10*(1/distance) #5) Obstacle Avoidance
         
         return cost  
     
@@ -253,7 +255,8 @@ class CascadedMPC(Controller):
             self.opti.set_initial(self.action_pm, self.action_pm_prediction)
             self.opti.set_initial(self.state_pm, self.state_pm_prediction)
             #initializing s and k trajectory
-            ds_bar_traj = np.full(self.M+1, self.config.ds_bar)
+            ds_bar_traj = np.full(self.M+1, self.config.mpc_dt_pm) * self.state_pm_prediction[self.point_mass.state.index('V'),:]
+            # ds_bar_traj = np.full(self.M+1, self.config.ds_bar)
             self.opti.set_value(self.ds_pm, ds_bar_traj[:-1])
             ds_bar_traj[0] = 0; s_bar_traj = np.cumsum(ds_bar_traj) + s_traj[-1]
             self.opti.set_value(self.curvature_pm, self.car.track.k(s_bar_traj[:-1]))

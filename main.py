@@ -51,7 +51,7 @@ else:
 src_dir = os.path.dirname(os.path.abspath(__file__))
 logfile = f'simulation/logs/{simulation.name}.log'
 with open(logfile, "w") as f:
-    sys.stdout = f
+    # sys.stdout = f
     print(f"Car configuration: {car_config}")
     print(f"Controller configuration: {controller_config}")
     simulation.run(N = 500)
