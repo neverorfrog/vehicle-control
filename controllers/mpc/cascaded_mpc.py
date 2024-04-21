@@ -5,7 +5,7 @@ import casadi as ca
 import numpy as np
 from casadi import cos, tan, fabs
 from controllers.controller import Controller
-np.random.seed(31)
+np.random.seed(123)
 
 class CascadedMPC(Controller):
     def __init__(self, car: DynamicCar, point_mass: DynamicPointMass, config: OmegaConf):
@@ -17,6 +17,7 @@ class CascadedMPC(Controller):
         self._init_opti()
         self._init_variables()
         cost = 0
+        self.opti.subject_to(self.state[:,0] == self.state0) # constraint on initial state
         for n in range(self.N):
             self._stage_constraints(n) 
             cost += self._stage_cost(n)
@@ -171,7 +172,7 @@ class CascadedMPC(Controller):
         cost = 0
         V,s,ey,epsi,t = self._unpack_pm_state(self.state_pm[:,m])
         Fx, Fy = self._unpack_pm_action(self.action_pm[:,m])
-        ds = self.ds_pm[m]
+        ds = self.config.ds_bar
         cost_weights = self.config.cost_weights
         state_pm_constraints = self.config.state_pm_constraints
         
@@ -206,7 +207,8 @@ class CascadedMPC(Controller):
         Fx_bar_initial, Fy_bar_initial = self._unpack_pm_action(self.action_pm[:,0])
         Fy_f = self.car.Fy_f(Ux_final,Uy_final,r_final,delta_final,Fx_final)
         Fy_r = self.car.Fy_r(Ux_final,Uy_final,r_final,delta_final,Fx_final)
-        return (cost_weights.Fx/self.ds[-1]) * (((Fx_bar_initial-Fx_final)**2)+ (Fy_bar_initial-Fy_f-Fy_r)**2)
+        ds = self.dt * Ux_final
+        return (cost_weights.Fx/ds) * (((Fx_bar_initial-Fx_final)**2)+ (Fy_bar_initial-Fy_f-Fy_r)**2)
         
     
     def _switching_constraints(self):
