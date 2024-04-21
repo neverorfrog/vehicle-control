@@ -56,12 +56,9 @@ class CascadedMPC(Controller):
         self.state = self.opti.variable(self.ns, self.N+1) # state trajectory var
         self.action = self.opti.variable(self.na, self.N)  # control trajectory var
         self.ds = self.opti.parameter(self.N) # ds trajectory var (just for loggin purposes)
-        self.state_prediction = np.ones((self.ns, self.N+1))
-        self.state_prediction[self.car.state.index('Ux'),:] += 4
+        self.state_prediction = np.ones((self.ns, self.N+1)); self.state_prediction[self.car.state.index('Ux'),:] += 4
         self.action_prediction = np.ones((self.na, self.N)) + np.random.random((self.na, self.N))
         self.curvature = self.opti.parameter(self.N) # curvature trajectory
-        self.Fe_f = self.opti.variable(self.N) 
-        self.Fe_r = self.opti.variable(self.N)
         
         # point-mass
         self.state_pm = self.opti.variable(self.ns_pm, self.M+1)
@@ -70,6 +67,10 @@ class CascadedMPC(Controller):
         self.state_pm_prediction = np.ones((self.ns_pm, self.M+1))
         self.action_pm_prediction = np.ones((self.na_pm, self.M)) + np.random.random((self.na_pm, self.M))
         self.curvature_pm = self.opti.parameter(self.M)
+        
+        # slack variables
+        self.Fe_f = self.opti.variable(self.N) 
+        self.Fe_r = self.opti.variable(self.N)
     
     def _stage_constraints(self, n):
         state = self.state[:,n]; action = self.action[:,n]
@@ -89,11 +90,7 @@ class CascadedMPC(Controller):
         self.opti.subject_to(self.opti.bounded(input_constraints.w_min,w,input_constraints.w_max))
             
         # Model dynamics 
-        curvature = self.curvature[n]
-        # curvature = self.car.track.k(s)
-        # ds = self.dt * Ux
-        # self.opti.subject_to(self.ds[n] == ds)
-        self.opti.subject_to(self.state[:,n+1] == self.car.spatial_transition(state,action,curvature,self.ds[n]))
+        self.opti.subject_to(self.state[:,n+1] == self.car.spatial_transition(state,action,self.curvature[n],self.ds[n]))
         
         # longitudinal force limits on tires
         bound_f = mu.f*self.car.Fz_f(Ux,Fx)*cos(self.car.alpha_f(Ux,Uy,r,delta))
@@ -105,7 +102,6 @@ class CascadedMPC(Controller):
     def _stage_cost(self, n):
         Ux,Uy,r,delta,s,ey,epsi,t = self._unpack_state(self.state[:,n])
         Fx,w = self._unpack_action(self.action[:,n])
-        # ds = self.dt * Ux
         ds = self.ds[n]
         cost_weights = self.config.cost_weights
         state_constraints = self.config.state_constraints
@@ -135,12 +131,8 @@ class CascadedMPC(Controller):
             cost += (cost_weights.Fx/ds) * (next_action[self.car.input.index('Fx')] - Fx)**2
             
         if self.config.obstacles: #Obstacle avoidance
-            orientation = self.car.track.get_orientation(s)
-            x = self.car.track.x(s) - ca.sin(orientation) * ey
-            y = self.car.track.y(s) + ca.cos(orientation) * ey
-            # occupancy = self.car.track.occupancy(ca.horzcat(s,ey))    
             for obs in self.car.track.obstacles:
-                distance = ca.fabs(ca.sqrt((x - obs.cx)**2 + (y - obs.cy)**2) - (obs.radius))
+                distance = ca.fabs(ca.sqrt((s - obs.s)**2 + (ey - obs.ey)**2) - (obs.radius))
                 cost += 1/distance 
                 
         return cost
@@ -160,10 +152,7 @@ class CascadedMPC(Controller):
         self.opti.subject_to(Fx <= Peng / V)
         
         # Model dynamics
-        # curvature = self.point_mass.track.k(s)
-        curvature = self.curvature_pm[m]
-        # self.opti.subject_to(self.ds_pm[m] == self.config.ds_bar)
-        self.opti.subject_to(self.state_pm[:,m+1] == self.point_mass.spatial_transition(self.state_pm[:,m],self.action_pm[:,m],curvature,self.ds_pm[m]))
+        self.opti.subject_to(self.state_pm[:,m+1] == self.point_mass.spatial_transition(self.state_pm[:,m],self.action_pm[:,m],self.curvature_pm[m],self.ds_pm[m]))
         
         # friction limits
         Fx_f_bar = self.car.Fx_f(Fx)
@@ -194,12 +183,8 @@ class CascadedMPC(Controller):
             cost += cost_weights.Fx*(1/ds)*(Fx_next - Fx)**2 
         
         if self.config.obstacles:
-            orientation = self.point_mass.track.get_orientation(s)
-            x = self.car.track.x(s) - ca.sin(orientation) * ey
-            y = self.car.track.y(s) + ca.cos(orientation) * ey
-            # occupancy = self.car.track.occupancy(ca.horzcat(s,ey))
             for obs in self.car.track.obstacles:
-                distance = ca.fabs(ca.sqrt((x - obs.cx)**2 + (y - obs.cy)**2) - (obs.radius))
+                distance = ca.fabs(ca.sqrt((s - obs.s)**2 + (ey - obs.ey)**2) - (obs.radius))
                 cost += 1/distance #5) Obstacle Avoidance
         
         return cost  
@@ -211,9 +196,7 @@ class CascadedMPC(Controller):
         Fx_bar_initial, Fy_bar_initial = self._unpack_pm_action(self.action_pm[:,0])
         Fy_f = self.car.Fy_f(Ux_final,Uy_final,r_final,delta_final,Fx_final)
         Fy_r = self.car.Fy_r(Ux_final,Uy_final,r_final,delta_final,Fx_final)
-        # ds = self.dt * Ux_final
-        ds = self.ds[-1]
-        return (cost_weights.Fx/ds) * (((Fx_bar_initial-Fx_final)**2)+ (Fy_bar_initial-Fy_f-Fy_r)**2)
+        return (cost_weights.Fx/self.ds[-1]) * (((Fx_bar_initial-Fx_final)**2)+ (Fy_bar_initial-Fy_f-Fy_r)**2)
         
     
     def _switching_constraints(self):
@@ -262,8 +245,8 @@ class CascadedMPC(Controller):
         #initializing s and k trajectory
         ds_traj = np.full(self.N+1, self.config.mpc_dt) * self.state_prediction[self.car.state.index('Ux'),:]
         self.opti.set_value(self.ds, ds_traj[:-1])
-        ds_traj[0] = 0; s_traj = np.cumsum(ds_traj) + state[self.car.state.index('s')]
-        self.opti.set_value(self.curvature, self.car.track.k(s_traj[:-1]))
+        ds_traj[0] = 0; s_traj = np.cumsum(ds_traj) + state[self.car.state.index('s')]; s_traj = s_traj[:-1]
+        self.opti.set_value(self.curvature, self.car.track.k(s_traj))
         
         # same for point-mass
         if self.M > 0:
