@@ -1,0 +1,5043 @@
+Car configuration: {'dt': 0.07, 'car': {'l': 3, 'm': 1500, 'Izz': 3000, 'a': 1.5, 'b': 1.5, 'h': 0.55, 'eps': 0.8, 'Peng': 130000, 'Xd': {'f': 1, 'r': 0}, 'Xb': {'f': 0.78, 'r': 0.22}, 'C_alpha': {'f': 80000, 'r': 130000}}, 'env': {'Crr': 0.01, 'Cd': 0.4243, 'mu': {'f': 0.9, 'r': 0.95}, 'theta': 0, 'phi': 0, 'Av2': 0, 'Frr': 230}}
+Controller configuration: {'horizon': 20, 'mpc_dt': 0.03, 'horizon_pm': 30, 'mpc_dt_pm': 0.08, 'obstacles': True, 'cost_weights': {'time': 1, 'speed': 0.2, 'ey': 0.2, 'epsi': 0.8, 'w': 0.001, 'Fx': 1e-06, 'Fy': 1e-06, 'deviation_st': 0.001, 'deviation_pm': 0.001, 'boundary': 1, 'slip': 1000, 'friction': 0.0001}, 'input_constraints': {'w_min': -0.4, 'w_max': 0.4, 'mu_lim': 0.95}, 'state_constraints': {'Ux_min': 3, 'max_speed': 20, 'delta_min': -0.5, 'delta_max': 0.5, 'ey_min': -4, 'ey_max': 4}, 'state_pm_constraints': {'V_bar_min': 3, 'ey_bar_min': -4, 'ey_bar_max': 4}}
+
+******************************************************************************
+This program contains Ipopt, a library for large-scale nonlinear optimization.
+ Ipopt is released as open source code under the Eclipse Public License (EPL).
+         For more information visit https://github.com/coin-or/Ipopt
+******************************************************************************
+
+------------------------------------------------------------------------------
+N: 0
+Solver iterations: 102
+STATE: {'Ux': '4.26', 'Uy': '-0.00', 'r': '-0.00', 'delta': '-0.00', 's': '1.29', 'ey': '-0.00', 'epsi': '-0.00', 't': '0.07'}
+ACTION: {'Fx': '5724.46', 'w': '-0.00'}
+UX ACCELERATION: 3.658, UY ACCELERATION: -0.000
+FINAL ST CURVATURE: 0
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.809
+MEDIAN ELAPSED TIME: 0.809
+Fx_f: 5724.46
+Fx_r: 1.93713e-08
+Fy_f: -0.0558434
+Fy_r: -0.0123226
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 1
+Solver iterations: 38
+STATE: {'Ux': '4.51', 'Uy': '-0.00', 'r': '-0.00', 'delta': '-0.00', 's': '1.60', 'ey': '-0.00', 'epsi': '-0.00', 't': '0.14'}
+ACTION: {'Fx': '5724.46', 'w': '-0.00'}
+UX ACCELERATION: 3.657, UY ACCELERATION: -0.000
+FINAL ST CURVATURE: 0
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.461
+MEDIAN ELAPSED TIME: 0.461
+Fx_f: 5724.46
+Fx_r: 1.93713e-08
+Fy_f: -0.585965
+Fy_r: -0.112859
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 2
+Solver iterations: 27
+STATE: {'Ux': '4.77', 'Uy': '-0.00', 'r': '-0.00', 'delta': '-0.00', 's': '1.92', 'ey': '-0.00', 'epsi': '-0.00', 't': '0.21'}
+ACTION: {'Fx': '5724.46', 'w': '-0.00'}
+UX ACCELERATION: 3.657, UY ACCELERATION: -0.001
+FINAL ST CURVATURE: 0
+FINAL PM CURVATURE: 4.44533e-25
+AVERAGE ELAPSED TIME: 0.335
+MEDIAN ELAPSED TIME: 0.112
+Fx_f: 5724.46
+Fx_r: 1.93713e-08
+Fy_f: -0.943701
+Fy_r: -0.23637
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 3
+Solver iterations: 25
+STATE: {'Ux': '5.02', 'Uy': '-0.00', 'r': '-0.00', 'delta': '-0.00', 's': '2.26', 'ey': '-0.00', 'epsi': '-0.00', 't': '0.28'}
+ACTION: {'Fx': '5724.46', 'w': '-0.00'}
+UX ACCELERATION: 3.656, UY ACCELERATION: -0.001
+FINAL ST CURVATURE: 0
+FINAL PM CURVATURE: 1.13027e-10
+AVERAGE ELAPSED TIME: 0.270
+MEDIAN ELAPSED TIME: 0.098
+Fx_f: 5724.46
+Fx_r: 1.93713e-08
+Fy_f: -0.962084
+Fy_r: -0.356263
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 4
+Solver iterations: 24
+STATE: {'Ux': '5.28', 'Uy': '-0.00', 'r': '-0.00', 'delta': '-0.00', 's': '2.62', 'ey': '-0.00', 'epsi': '-0.00', 't': '0.35'}
+ACTION: {'Fx': '5724.46', 'w': '-0.00'}
+UX ACCELERATION: 3.655, UY ACCELERATION: -0.001
+FINAL ST CURVATURE: 0
+FINAL PM CURVATURE: 8.08675e-08
+AVERAGE ELAPSED TIME: 0.231
+MEDIAN ELAPSED TIME: 0.083
+Fx_f: 5724.46
+Fx_r: 1.93713e-08
+Fy_f: -0.840275
+Fy_r: -0.469442
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 5
+Solver iterations: 23
+STATE: {'Ux': '5.54', 'Uy': '-0.00', 'r': '-0.00', 'delta': '-0.00', 's': '3.00', 'ey': '-0.00', 'epsi': '-0.00', 't': '0.42'}
+ACTION: {'Fx': '5724.46', 'w': '-0.00'}
+UX ACCELERATION: 3.654, UY ACCELERATION: -0.000
+FINAL ST CURVATURE: 0
+FINAL PM CURVATURE: 0.0324557
+AVERAGE ELAPSED TIME: 0.205
+MEDIAN ELAPSED TIME: 0.080
+Fx_f: 5724.46
+Fx_r: 1.93713e-08
+Fy_f: -0.733884
+Fy_r: -0.574912
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 6
+Solver iterations: 32
+STATE: {'Ux': '5.79', 'Uy': '-0.01', 'r': '-0.00', 'delta': '-0.00', 's': '3.40', 'ey': '-0.00', 'epsi': '-0.00', 't': '0.49'}
+ACTION: {'Fx': '5724.46', 'w': '-0.07'}
+UX ACCELERATION: 3.653, UY ACCELERATION: -0.126
+FINAL ST CURVATURE: 0
+FINAL PM CURVATURE: 0.0340092
+AVERAGE ELAPSED TIME: 0.189
+MEDIAN ELAPSED TIME: 0.083
+Fx_f: 5724.46
+Fx_r: 1.93713e-08
+Fy_f: -184.324
+Fy_r: -17.725
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 7
+Solver iterations: 60
+STATE: {'Ux': '6.05', 'Uy': '-0.02', 'r': '-0.01', 'delta': '-0.01', 's': '3.81', 'ey': '-0.00', 'epsi': '-0.00', 't': '0.56'}
+ACTION: {'Fx': '5724.45', 'w': '-0.10'}
+UX ACCELERATION: 3.650, UY ACCELERATION: -0.222
+FINAL ST CURVATURE: 0
+FINAL PM CURVATURE: 0.0354204
+AVERAGE ELAPSED TIME: 0.187
+MEDIAN ELAPSED TIME: 0.089
+Fx_f: 5724.45
+Fx_r: 1.93724e-08
+Fy_f: -338.801
+Fy_r: -60.1125
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 8
+Solver iterations: 148
+STATE: {'Ux': '6.30', 'Uy': '-0.04', 'r': '-0.03', 'delta': '-0.02', 's': '4.25', 'ey': '-0.00', 'epsi': '-0.00', 't': '0.63'}
+ACTION: {'Fx': '5724.40', 'w': '-0.12'}
+UX ACCELERATION: 3.646, UY ACCELERATION: -0.285
+FINAL ST CURVATURE: 0
+FINAL PM CURVATURE: 0.0367323
+AVERAGE ELAPSED TIME: 0.213
+MEDIAN ELAPSED TIME: 0.095
+Fx_f: 5724.4
+Fx_r: 1.93759e-08
+Fy_f: -461.101
+Fy_r: -124.439
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 9
+Solver iterations: 48
+STATE: {'Ux': '6.56', 'Uy': '-0.06', 'r': '-0.05', 'delta': '-0.03', 's': '4.70', 'ey': '-0.01', 'epsi': '-0.00', 't': '0.70'}
+ACTION: {'Fx': '5724.33', 'w': '-0.13'}
+UX ACCELERATION: 3.641, UY ACCELERATION: -0.318
+FINAL ST CURVATURE: 0
+FINAL PM CURVATURE: 0.0379087
+AVERAGE ELAPSED TIME: 0.205
+MEDIAN ELAPSED TIME: 0.104
+Fx_f: 5724.33
+Fx_r: 1.93814e-08
+Fy_f: -556.989
+Fy_r: -206.519
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 10
+Solver iterations: 42
+STATE: {'Ux': '6.81', 'Uy': '-0.08', 'r': '-0.06', 'delta': '-0.04', 's': '5.16', 'ey': '-0.02', 'epsi': '-0.01', 't': '0.77'}
+ACTION: {'Fx': '5724.23', 'w': '-0.12'}
+UX ACCELERATION: 3.636, UY ACCELERATION: -0.321
+FINAL ST CURVATURE: 0
+FINAL PM CURVATURE: 0.0389116
+AVERAGE ELAPSED TIME: 0.198
+MEDIAN ELAPSED TIME: 0.112
+Fx_f: 5724.23
+Fx_r: 1.93887e-08
+Fy_f: -624.121
+Fy_r: -301.506
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 11
+Solver iterations: 45
+STATE: {'Ux': '7.07', 'Uy': '-0.10', 'r': '-0.08', 'delta': '-0.05', 's': '5.65', 'ey': '-0.03', 'epsi': '-0.01', 't': '0.84'}
+ACTION: {'Fx': '5724.12', 'w': '-0.11'}
+UX ACCELERATION: 3.633, UY ACCELERATION: -0.296
+FINAL ST CURVATURE: 0
+FINAL PM CURVATURE: 0.0397039
+AVERAGE ELAPSED TIME: 0.192
+MEDIAN ELAPSED TIME: 0.118
+Fx_f: 5724.12
+Fx_r: 1.93966e-08
+Fy_f: -664.731
+Fy_r: -403.623
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 12
+Solver iterations: 37
+STATE: {'Ux': '7.32', 'Uy': '-0.12', 'r': '-0.10', 'delta': '-0.05', 's': '6.15', 'ey': '-0.05', 'epsi': '-0.02', 't': '0.91'}
+ACTION: {'Fx': '5724.03', 'w': '-0.03'}
+UX ACCELERATION: 3.636, UY ACCELERATION: -0.194
+FINAL ST CURVATURE: 0
+FINAL PM CURVATURE: 0.0402519
+AVERAGE ELAPSED TIME: 0.185
+MEDIAN ELAPSED TIME: 0.112
+Fx_f: 5724.03
+Fx_r: 1.94032e-08
+Fy_f: -603.388
+Fy_r: -500.587
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 13
+Solver iterations: 245
+STATE: {'Ux': '7.58', 'Uy': '-0.13', 'r': '-0.11', 'delta': '-0.05', 's': '6.67', 'ey': '-0.07', 'epsi': '-0.03', 't': '0.98'}
+ACTION: {'Fx': '5724.16', 'w': '-0.01'}
+UX ACCELERATION: 3.638, UY ACCELERATION: -0.115
+FINAL ST CURVATURE: 0
+FINAL PM CURVATURE: 0.0405304
+AVERAGE ELAPSED TIME: 0.226
+MEDIAN ELAPSED TIME: 0.118
+Fx_f: 5724.16
+Fx_r: 1.93938e-08
+Fy_f: -560.053
+Fy_r: -580.372
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 14
+Solver iterations: 56
+STATE: {'Ux': '7.83', 'Uy': '-0.13', 'r': '-0.12', 'delta': '-0.05', 's': '7.21', 'ey': '-0.09', 'epsi': '-0.04', 't': '1.05'}
+ACTION: {'Fx': '5724.22', 'w': '0.01'}
+UX ACCELERATION: 3.640, UY ACCELERATION: -0.040
+FINAL ST CURVATURE: 0
+FINAL PM CURVATURE: 0.0405173
+AVERAGE ELAPSED TIME: 0.222
+MEDIAN ELAPSED TIME: 0.124
+Fx_f: 5724.22
+Fx_r: 1.9389e-08
+Fy_f: -510.466
+Fy_r: -642.979
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 15
+Solver iterations: 57
+STATE: {'Ux': '8.09', 'Uy': '-0.14', 'r': '-0.12', 'delta': '-0.05', 's': '7.77', 'ey': '-0.12', 'epsi': '-0.04', 't': '1.12'}
+ACTION: {'Fx': '5724.28', 'w': '0.02'}
+UX ACCELERATION: 3.641, UY ACCELERATION: 0.011
+FINAL ST CURVATURE: 0
+FINAL PM CURVATURE: 0.0402083
+AVERAGE ELAPSED TIME: 0.218
+MEDIAN ELAPSED TIME: 0.127
+Fx_f: 5724.28
+Fx_r: 1.93846e-08
+Fy_f: -481.271
+Fy_r: -688.755
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 16
+Solver iterations: 42
+STATE: {'Ux': '8.34', 'Uy': '-0.13', 'r': '-0.12', 'delta': '-0.05', 's': '8.34', 'ey': '-0.16', 'epsi': '-0.05', 't': '1.19'}
+ACTION: {'Fx': '5717.45', 'w': '0.02'}
+UX ACCELERATION: 3.636, UY ACCELERATION: 0.037
+FINAL ST CURVATURE: 0
+FINAL PM CURVATURE: 0.0396169
+AVERAGE ELAPSED TIME: 0.212
+MEDIAN ELAPSED TIME: 0.124
+Fx_f: 5717.45
+Fx_r: 1.98979e-08
+Fy_f: -478.826
+Fy_r: -722.68
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 17
+Solver iterations: 48
+STATE: {'Ux': '8.59', 'Uy': '-0.13', 'r': '-0.12', 'delta': '-0.05', 's': '8.93', 'ey': '-0.20', 'epsi': '-0.06', 't': '1.26'}
+ACTION: {'Fx': '5688.21', 'w': '0.00'}
+UX ACCELERATION: 3.614, UY ACCELERATION: 0.019
+FINAL ST CURVATURE: 0
+FINAL PM CURVATURE: 0.0387663
+AVERAGE ELAPSED TIME: 0.207
+MEDIAN ELAPSED TIME: 0.121
+Fx_f: 5688.21
+Fx_r: 2.22523e-08
+Fy_f: -542.557
+Fy_r: -753.664
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 18
+Solver iterations: 50
+STATE: {'Ux': '8.84', 'Uy': '-0.13', 'r': '-0.12', 'delta': '-0.04', 's': '9.54', 'ey': '-0.25', 'epsi': '-0.07', 't': '1.33'}
+ACTION: {'Fx': '5652.97', 'w': '0.02'}
+UX ACCELERATION: 3.589, UY ACCELERATION: 0.038
+FINAL ST CURVATURE: 0
+FINAL PM CURVATURE: 0.0376953
+AVERAGE ELAPSED TIME: 0.203
+MEDIAN ELAPSED TIME: 0.124
+Fx_f: 5652.97
+Fx_r: 2.54621e-08
+Fy_f: -555.511
+Fy_r: -785.319
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 19
+Solver iterations: 49
+STATE: {'Ux': '9.09', 'Uy': '-0.12', 'r': '-0.12', 'delta': '-0.04', 's': '10.17', 'ey': '-0.31', 'epsi': '-0.08', 't': '1.40'}
+ACTION: {'Fx': '5627.58', 'w': '0.07'}
+UX ACCELERATION: 3.576, UY ACCELERATION: 0.150
+FINAL ST CURVATURE: 0
+FINAL PM CURVATURE: 0.0364412
+AVERAGE ELAPSED TIME: 0.199
+MEDIAN ELAPSED TIME: 0.125
+Fx_f: 5627.58
+Fx_r: 2.80572e-08
+Fy_f: -406.671
+Fy_r: -800.83
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 20
+Solver iterations: 50
+STATE: {'Ux': '9.34', 'Uy': '-0.11', 'r': '-0.11', 'delta': '-0.03', 's': '10.81', 'ey': '-0.37', 'epsi': '-0.09', 't': '1.47'}
+ACTION: {'Fx': '5596.05', 'w': '0.07'}
+UX ACCELERATION: 3.556, UY ACCELERATION: 0.201
+FINAL ST CURVATURE: 0
+FINAL PM CURVATURE: 0.034993
+AVERAGE ELAPSED TIME: 0.196
+MEDIAN ELAPSED TIME: 0.125
+Fx_f: 5596.05
+Fx_r: 3.16508e-08
+Fy_f: -305.952
+Fy_r: -783.333
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 21
+Solver iterations: 97
+STATE: {'Ux': '9.59', 'Uy': '-0.10', 'r': '-0.10', 'delta': '-0.03', 's': '11.47', 'ey': '-0.44', 'epsi': '-0.09', 't': '1.54'}
+ACTION: {'Fx': '5547.84', 'w': '0.07'}
+UX ACCELERATION: 3.522, UY ACCELERATION: 0.204
+FINAL ST CURVATURE: 0
+FINAL PM CURVATURE: 0.0328459
+AVERAGE ELAPSED TIME: 0.201
+MEDIAN ELAPSED TIME: 0.127
+Fx_f: 5547.84
+Fx_r: 3.80522e-08
+Fy_f: -258.692
+Fy_r: -741.551
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 22
+Solver iterations: 48
+STATE: {'Ux': '9.83', 'Uy': '-0.08', 'r': '-0.09', 'delta': '-0.02', 's': '12.15', 'ey': '-0.51', 'epsi': '-0.10', 't': '1.61'}
+ACTION: {'Fx': '5491.39', 'w': '0.08'}
+UX ACCELERATION: 3.484, UY ACCELERATION: 0.231
+FINAL ST CURVATURE: 0
+FINAL PM CURVATURE: 0.0305901
+AVERAGE ELAPSED TIME: 0.199
+MEDIAN ELAPSED TIME: 0.129
+Fx_f: 5491.39
+Fx_r: 4.72051e-08
+Fy_f: -161.601
+Fy_r: -682.489
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 23
+Solver iterations: 50
+STATE: {'Ux': '10.07', 'Uy': '-0.06', 'r': '-0.07', 'delta': '-0.02', 's': '12.84', 'ey': '-0.59', 'epsi': '-0.11', 't': '1.68'}
+ACTION: {'Fx': '5428.60', 'w': '0.10'}
+UX ACCELERATION: 3.441, UY ACCELERATION: 0.293
+FINAL ST CURVATURE: 0
+FINAL PM CURVATURE: 0.0347261
+AVERAGE ELAPSED TIME: 0.196
+MEDIAN ELAPSED TIME: 0.129
+Fx_f: 5428.6
+Fx_r: 5.99891e-08
+Fy_f: 21.7795
+Fy_r: -598.033
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 24
+Solver iterations: 44
+STATE: {'Ux': '10.31', 'Uy': '-0.05', 'r': '-0.06', 'delta': '-0.02', 's': '13.55', 'ey': '-0.67', 'epsi': '-0.11', 't': '1.75'}
+ACTION: {'Fx': '5333.42', 'w': '-0.01'}
+UX ACCELERATION: 3.372, UY ACCELERATION: 0.053
+FINAL ST CURVATURE: 0
+FINAL PM CURVATURE: 0.0361087
+AVERAGE ELAPSED TIME: 0.194
+MEDIAN ELAPSED TIME: 0.129
+Fx_f: 5333.42
+Fx_r: 8.62452e-08
+Fy_f: -281.346
+Fy_r: -513.296
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 25
+Solver iterations: 44
+STATE: {'Ux': '10.54', 'Uy': '-0.04', 'r': '-0.05', 'delta': '-0.01', 's': '14.27', 'ey': '-0.75', 'epsi': '-0.12', 't': '1.82'}
+ACTION: {'Fx': '5273.13', 'w': '0.08'}
+UX ACCELERATION: 3.332, UY ACCELERATION: 0.178
+FINAL ST CURVATURE: 0
+FINAL PM CURVATURE: 0.0372832
+AVERAGE ELAPSED TIME: 0.191
+MEDIAN ELAPSED TIME: 0.130
+Fx_f: 5273.13
+Fx_r: 1.08525e-07
+Fy_f: -63.521
+Fy_r: -458.705
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 26
+Solver iterations: 45
+STATE: {'Ux': '10.77', 'Uy': '-0.07', 'r': '-0.07', 'delta': '-0.04', 's': '15.01', 'ey': '-0.84', 'epsi': '-0.12', 't': '1.89'}
+ACTION: {'Fx': '5113.46', 'w': '-0.40'}
+UX ACCELERATION: 3.184, UY ACCELERATION: -0.679
+FINAL ST CURVATURE: 0
+FINAL PM CURVATURE: 0.0383841
+AVERAGE ELAPSED TIME: 0.189
+MEDIAN ELAPSED TIME: 0.132
+Fx_f: 5113.46
+Fx_r: 1.99325e-07
+Fy_f: -1515.23
+Fy_r: -499.166
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 27
+Solver iterations: 43
+STATE: {'Ux': '10.98', 'Uy': '-0.12', 'r': '-0.12', 'delta': '-0.06', 's': '15.77', 'ey': '-0.94', 'epsi': '-0.13', 't': '1.96'}
+ACTION: {'Fx': '4883.93', 'w': '-0.27'}
+UX ACCELERATION: 2.999, UY ACCELERATION: -0.659
+FINAL ST CURVATURE: 0
+FINAL PM CURVATURE: 0.0391844
+AVERAGE ELAPSED TIME: 0.187
+MEDIAN ELAPSED TIME: 0.130
+Fx_f: 4883.93
+Fx_r: 4.76821e-07
+Fy_f: -1960.36
+Fy_r: -768.535
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 28
+Solver iterations: 37
+STATE: {'Ux': '11.18', 'Uy': '-0.12', 'r': '-0.14', 'delta': '-0.04', 's': '16.53', 'ey': '-1.05', 'epsi': '-0.14', 't': '2.03'}
+ACTION: {'Fx': '4597.26', 'w': '0.34'}
+UX ACCELERATION: 2.879, UY ACCELERATION: 0.460
+FINAL ST CURVATURE: 0
+FINAL PM CURVATURE: 0.0396876
+AVERAGE ELAPSED TIME: 0.184
+MEDIAN ELAPSED TIME: 0.129
+Fx_f: 4597.26
+Fx_r: 1.4128e-06
+Fy_f: -487.147
+Fy_r: -1028.85
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 29
+Solver iterations: 31
+STATE: {'Ux': '11.36', 'Uy': '-0.13', 'r': '-0.16', 'delta': '-0.06', 's': '17.31', 'ey': '-1.17', 'epsi': '-0.15', 't': '2.10'}
+ACTION: {'Fx': '4241.61', 'w': '-0.40'}
+UX ACCELERATION: 2.565, UY ACCELERATION: -0.526
+FINAL ST CURVATURE: 0
+FINAL PM CURVATURE: 0.0399683
+AVERAGE ELAPSED TIME: 0.181
+MEDIAN ELAPSED TIME: 0.129
+Fx_f: 4241.61
+Fx_r: 5.40674e-06
+Fy_f: -2058.53
+Fy_r: -1170.46
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 30
+Solver iterations: 39
+STATE: {'Ux': '11.53', 'Uy': '-0.12', 'r': '-0.16', 'delta': '-0.04', 's': '18.10', 'ey': '-1.30', 'epsi': '-0.16', 't': '2.17'}
+ACTION: {'Fx': '4008.12', 'w': '0.40'}
+UX ACCELERATION: 2.490, UY ACCELERATION: 0.659
+FINAL ST CURVATURE: 5.96599e-62
+FINAL PM CURVATURE: 0.0400838
+AVERAGE ELAPSED TIME: 0.179
+MEDIAN ELAPSED TIME: 0.129
+Fx_f: 4008.12
+Fx_r: 1.30004e-05
+Fy_f: -355.341
+Fy_r: -1325.58
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 31
+Solver iterations: 30
+STATE: {'Ux': '11.69', 'Uy': '-0.12', 'r': '-0.16', 'delta': '-0.06', 's': '18.91', 'ey': '-1.44', 'epsi': '-0.17', 't': '2.24'}
+ACTION: {'Fx': '3771.76', 'w': '-0.32'}
+UX ACCELERATION: 2.265, UY ACCELERATION: -0.361
+FINAL ST CURVATURE: 2.44298e-44
+FINAL PM CURVATURE: 0.0403367
+AVERAGE ELAPSED TIME: 0.176
+MEDIAN ELAPSED TIME: 0.129
+Fx_f: 3771.76
+Fx_r: 3.14888e-05
+Fy_f: -1857.73
+Fy_r: -1352.32
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 32
+Solver iterations: 32
+STATE: {'Ux': '11.83', 'Uy': '-0.10', 'r': '-0.16', 'delta': '-0.03', 's': '19.72', 'ey': '-1.59', 'epsi': '-0.18', 't': '2.31'}
+ACTION: {'Fx': '3268.85', 'w': '0.40'}
+UX ACCELERATION: 1.997, UY ACCELERATION: 0.719
+FINAL ST CURVATURE: 8.39194e-33
+FINAL PM CURVATURE: 0.0404457
+AVERAGE ELAPSED TIME: 0.174
+MEDIAN ELAPSED TIME: 0.129
+Fx_f: 3268.85
+Fx_r: 0.000204012
+Fy_f: -184.437
+Fy_r: -1393.8
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 33
+Solver iterations: 34
+STATE: {'Ux': '11.98', 'Uy': '-0.05', 'r': '-0.11', 'delta': '-0.02', 's': '20.53', 'ey': '-1.75', 'epsi': '-0.19', 't': '2.38'}
+ACTION: {'Fx': '3370.06', 'w': '0.17'}
+UX ACCELERATION: 2.059, UY ACCELERATION: 0.556
+FINAL ST CURVATURE: 2.38243e-26
+FINAL PM CURVATURE: 0.0404396
+AVERAGE ELAPSED TIME: 0.172
+MEDIAN ELAPSED TIME: 0.127
+Fx_f: 3370.06
+Fx_r: 0.000140306
+Fy_f: 53.5139
+Fy_r: -1213.66
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 34
+Solver iterations: 33
+STATE: {'Ux': '12.11', 'Uy': '-0.07', 'r': '-0.11', 'delta': '-0.05', 's': '21.36', 'ey': '-1.92', 'epsi': '-0.20', 't': '2.45'}
+ACTION: {'Fx': '3138.27', 'w': '-0.40'}
+UX ACCELERATION: 1.846, UY ACCELERATION: -0.644
+FINAL ST CURVATURE: -3.41078e-25
+FINAL PM CURVATURE: 0.0405608
+AVERAGE ELAPSED TIME: 0.170
+MEDIAN ELAPSED TIME: 0.125
+Fx_f: 3138.27
+Fx_r: 0.00033021
+Fy_f: -1839.84
+Fy_r: -1065.31
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 35
+Solver iterations: 38
+STATE: {'Ux': '12.21', 'Uy': '-0.06', 'r': '-0.11', 'delta': '-0.02', 's': '22.19', 'ey': '-2.09', 'epsi': '-0.21', 't': '2.52'}
+ACTION: {'Fx': '2492.10', 'w': '0.40'}
+UX ACCELERATION: 1.473, UY ACCELERATION: 0.621
+FINAL ST CURVATURE: 4.49135e-20
+FINAL PM CURVATURE: 0.0405193
+AVERAGE ELAPSED TIME: 0.168
+MEDIAN ELAPSED TIME: 0.125
+Fx_f: 2492.1
+Fx_r: 0.00347672
+Fy_f: 24.8847
+Fy_r: -1061.92
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 36
+Solver iterations: 30
+STATE: {'Ux': '12.33', 'Uy': '-0.00', 'r': '-0.05', 'delta': '0.01', 's': '23.03', 'ey': '-2.27', 'epsi': '-0.21', 't': '2.59'}
+ACTION: {'Fx': '2835.54', 'w': '0.40'}
+UX ACCELERATION: 1.686, UY ACCELERATION: 0.949
+FINAL ST CURVATURE: 1.23561e-12
+FINAL PM CURVATURE: 0.0405613
+AVERAGE ELAPSED TIME: 0.166
+MEDIAN ELAPSED TIME: 0.124
+Fx_f: 2835.54
+Fx_r: 0.00100144
+Fy_f: 1214.08
+Fy_r: -804.596
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 37
+Solver iterations: 29
+STATE: {'Ux': '12.43', 'Uy': '-0.00', 'r': '-0.03', 'delta': '-0.02', 's': '23.88', 'ey': '-2.46', 'epsi': '-0.21', 't': '2.66'}
+ACTION: {'Fx': '2539.42', 'w': '-0.40'}
+UX ACCELERATION: 1.483, UY ACCELERATION: -0.634
+FINAL ST CURVATURE: 1.24756e-10
+FINAL PM CURVATURE: 0.0401917
+AVERAGE ELAPSED TIME: 0.164
+MEDIAN ELAPSED TIME: 0.121
+Fx_f: 2539.41
+Fx_r: 0.00293188
+Fy_f: -1042.23
+Fy_r: -479.954
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 38
+Solver iterations: 33
+STATE: {'Ux': '12.51', 'Uy': '0.01', 'r': '-0.02', 'delta': '0.01', 's': '24.73', 'ey': '-2.64', 'epsi': '-0.22', 't': '2.73'}
+ACTION: {'Fx': '2004.96', 'w': '0.40'}
+UX ACCELERATION: 1.133, UY ACCELERATION: 0.603
+FINAL ST CURVATURE: 2.36921e-10
+FINAL PM CURVATURE: 0.0400417
+AVERAGE ELAPSED TIME: 0.162
+MEDIAN ELAPSED TIME: 0.118
+Fx_f: 2004.94
+Fx_r: 0.0196312
+Fy_f: 882.752
+Fy_r: -345.053
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 39
+Solver iterations: 34
+STATE: {'Ux': '12.61', 'Uy': '0.06', 'r': '0.04', 'delta': '0.04', 's': '25.59', 'ey': '-2.83', 'epsi': '-0.22', 't': '2.80'}
+ACTION: {'Fx': '2380.78', 'w': '0.40'}
+UX ACCELERATION: 1.340, UY ACCELERATION: 0.863
+FINAL ST CURVATURE: 1.17013e-06
+FINAL PM CURVATURE: 0.0401575
+AVERAGE ELAPSED TIME: 0.161
+MEDIAN ELAPSED TIME: 0.117
+Fx_f: 2380.77
+Fx_r: 0.00518456
+Fy_f: 1974.4
+Fy_r: 13.4877
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 40
+Solver iterations: 30
+STATE: {'Ux': '12.71', 'Uy': '0.06', 'r': '0.07', 'delta': '0.01', 's': '26.46', 'ey': '-3.01', 'epsi': '-0.21', 't': '2.87'}
+ACTION: {'Fx': '2421.15', 'w': '-0.34'}
+UX ACCELERATION: 1.418, UY ACCELERATION: -0.525
+FINAL ST CURVATURE: 0.0327444
+FINAL PM CURVATURE: 0.039109
+AVERAGE ELAPSED TIME: 0.159
+MEDIAN ELAPSED TIME: 0.116
+Fx_f: 2421.15
+Fx_r: 0.00448617
+Fy_f: 88.9622
+Fy_r: 408.428
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 41
+Solver iterations: 31
+STATE: {'Ux': '12.77', 'Uy': '0.07', 'r': '0.09', 'delta': '0.04', 's': '27.33', 'ey': '-3.19', 'epsi': '-0.21', 't': '2.94'}
+ACTION: {'Fx': '1617.03', 'w': '0.40'}
+UX ACCELERATION: 0.832, UY ACCELERATION: 0.539
+FINAL ST CURVATURE: 0.0335724
+FINAL PM CURVATURE: 0.0380482
+AVERAGE ELAPSED TIME: 0.157
+MEDIAN ELAPSED TIME: 0.116
+Fx_f: 1616.95
+Fx_r: 0.074713
+Fy_f: 1852.18
+Fy_r: 621.509
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 42
+Solver iterations: 33
+STATE: {'Ux': '12.84', 'Uy': '0.12', 'r': '0.15', 'delta': '0.07', 's': '28.21', 'ey': '-3.37', 'epsi': '-0.20', 't': '3.01'}
+ACTION: {'Fx': '2032.80', 'w': '0.40'}
+UX ACCELERATION: 1.037, UY ACCELERATION: 0.736
+FINAL ST CURVATURE: 0.0346086
+FINAL PM CURVATURE: 0.0384856
+AVERAGE ELAPSED TIME: 0.156
+MEDIAN ELAPSED TIME: 0.115
+Fx_f: 2032.79
+Fx_r: 0.0178061
+Fy_f: 2847.56
+Fy_r: 1003.3
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 43
+Solver iterations: 33
+STATE: {'Ux': '12.92', 'Uy': '0.17', 'r': '0.22', 'delta': '0.10', 's': '29.10', 'ey': '-3.53', 'epsi': '-0.18', 't': '3.08'}
+ACTION: {'Fx': '2262.23', 'w': '0.40'}
+UX ACCELERATION: 1.105, UY ACCELERATION: 0.656
+FINAL ST CURVATURE: 0.0357134
+FINAL PM CURVATURE: 0.0365637
+AVERAGE ELAPSED TIME: 0.155
+MEDIAN ELAPSED TIME: 0.115
+Fx_f: 2262.23
+Fx_r: 0.00791521
+Fy_f: 3576.55
+Fy_r: 1549.58
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 44
+Solver iterations: 33
+STATE: {'Ux': '13.01', 'Uy': '0.21', 'r': '0.30', 'delta': '0.13', 's': '29.99', 'ey': '-3.68', 'epsi': '-0.17', 't': '3.15'}
+ACTION: {'Fx': '2494.80', 'w': '0.40'}
+UX ACCELERATION: 1.163, UY ACCELERATION: 0.479
+FINAL ST CURVATURE: 0.0367338
+FINAL PM CURVATURE: 0.0350125
+AVERAGE ELAPSED TIME: 0.153
+MEDIAN ELAPSED TIME: 0.115
+Fx_f: 2494.79
+Fx_r: 0.00344317
+Fy_f: 4165.27
+Fy_r: 2188.46
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 45
+Solver iterations: 32
+STATE: {'Ux': '13.09', 'Uy': '0.24', 'r': '0.38', 'delta': '0.15', 's': '30.90', 'ey': '-3.80', 'epsi': '-0.14', 't': '3.22'}
+ACTION: {'Fx': '2528.49', 'w': '0.40'}
+UX ACCELERATION: 1.074, UY ACCELERATION: 0.265
+FINAL ST CURVATURE: 0.0376754
+FINAL PM CURVATURE: 0.0329831
+AVERAGE ELAPSED TIME: 0.152
+MEDIAN ELAPSED TIME: 0.114
+Fx_f: 2528.48
+Fx_r: 0.00304972
+Fy_f: 4681.15
+Fy_r: 2857.73
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 46
+Solver iterations: 32
+STATE: {'Ux': '13.16', 'Uy': '0.25', 'r': '0.45', 'delta': '0.18', 's': '31.81', 'ey': '-3.90', 'epsi': '-0.11', 't': '3.29'}
+ACTION: {'Fx': '2612.40', 'w': '0.40'}
+UX ACCELERATION: 1.008, UY ACCELERATION: 0.029
+FINAL ST CURVATURE: 0.038499
+FINAL PM CURVATURE: 0.000106418
+AVERAGE ELAPSED TIME: 0.151
+MEDIAN ELAPSED TIME: 0.112
+Fx_f: 2612.4
+Fx_r: 0.0022525
+Fy_f: 5081.39
+Fy_r: 3513.56
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 47
+Solver iterations: 40
+STATE: {'Ux': '13.23', 'Uy': '0.24', 'r': '0.52', 'delta': '0.21', 's': '32.73', 'ey': '-3.97', 'epsi': '-0.08', 't': '3.36'}
+ACTION: {'Fx': '2610.28', 'w': '0.40'}
+UX ACCELERATION: 0.873, UY ACCELERATION: -0.208
+FINAL ST CURVATURE: 0.0392109
+FINAL PM CURVATURE: 1.30105e-11
+AVERAGE ELAPSED TIME: 0.150
+MEDIAN ELAPSED TIME: 0.113
+Fx_f: 2610.28
+Fx_r: 0.00226985
+Fy_f: 5393.25
+Fy_r: 4125.46
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 48
+Solver iterations: 32
+STATE: {'Ux': '13.28', 'Uy': '0.22', 'r': '0.57', 'delta': '0.24', 's': '33.66', 'ey': '-4.01', 'epsi': '-0.04', 't': '3.43'}
+ACTION: {'Fx': '2504.92', 'w': '0.40'}
+UX ACCELERATION: 0.658, UY ACCELERATION: -0.428
+FINAL ST CURVATURE: 0.0397842
+FINAL PM CURVATURE: 1.19076e-12
+AVERAGE ELAPSED TIME: 0.149
+MEDIAN ELAPSED TIME: 0.112
+Fx_f: 2504.92
+Fx_r: 0.00331994
+Fy_f: 5638.07
+Fy_r: 4673.89
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 49
+Solver iterations: 33
+STATE: {'Ux': '13.33', 'Uy': '0.17', 'r': '0.61', 'delta': '0.21', 's': '34.48', 'ey': '-4.03', 'epsi': '-0.03', 't': '3.50'}
+ACTION: {'Fx': '2448.62', 'w': '-0.40'}
+UX ACCELERATION: 0.748, UY ACCELERATION: -0.818
+FINAL ST CURVATURE: 0.0401997
+FINAL PM CURVATURE: 1.45023e-12
+AVERAGE ELAPSED TIME: 0.148
+MEDIAN ELAPSED TIME: 0.110
+Fx_f: 2448.61
+Fx_r: 0.00406509
+Fy_f: 5401.56
+Fy_r: 5133.16
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 50
+Solver iterations: 39
+STATE: {'Ux': '13.38', 'Uy': '0.11', 'r': '0.62', 'delta': '0.18', 's': '35.30', 'ey': '-4.04', 'epsi': '-0.01', 't': '3.57'}
+ACTION: {'Fx': '2400.48', 'w': '-0.40'}
+UX ACCELERATION: 0.832, UY ACCELERATION: -1.052
+FINAL ST CURVATURE: 0.0404432
+FINAL PM CURVATURE: 7.2406e-13
+AVERAGE ELAPSED TIME: 0.147
+MEDIAN ELAPSED TIME: 0.108
+Fx_f: 2400.47
+Fx_r: 0.00483141
+Fy_f: 5007.79
+Fy_r: 5463.46
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 51
+Solver iterations: 43
+STATE: {'Ux': '13.45', 'Uy': '0.03', 'r': '0.60', 'delta': '0.15', 's': '36.13', 'ey': '-4.04', 'epsi': '0.00', 't': '3.64'}
+ACTION: {'Fx': '2613.06', 'w': '-0.40'}
+UX ACCELERATION: 1.080, UY ACCELERATION: -1.107
+FINAL ST CURVATURE: 0.0405535
+FINAL PM CURVATURE: 3.7454e-13
+AVERAGE ELAPSED TIME: 0.147
+MEDIAN ELAPSED TIME: 0.110
+Fx_f: 2613.06
+Fx_r: 0.00224716
+Fy_f: 4452.46
+Fy_r: 5654.89
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 52
+Solver iterations: 38
+STATE: {'Ux': '13.52', 'Uy': '-0.04', 'r': '0.56', 'delta': '0.13', 's': '36.95', 'ey': '-4.03', 'epsi': '0.01', 't': '3.71'}
+ACTION: {'Fx': '2370.21', 'w': '-0.40'}
+UX ACCELERATION: 1.011, UY ACCELERATION: -1.000
+FINAL ST CURVATURE: 0.0405298
+FINAL PM CURVATURE: 1.72385e-06
+AVERAGE ELAPSED TIME: 0.146
+MEDIAN ELAPSED TIME: 0.110
+Fx_f: 2370.21
+Fx_r: 0.00538434
+Fy_f: 3902.87
+Fy_r: 5674.25
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 53
+Solver iterations: 41
+STATE: {'Ux': '13.59', 'Uy': '-0.09', 'r': '0.51', 'delta': '0.12', 's': '37.78', 'ey': '-4.02', 'epsi': '0.02', 't': '3.78'}
+ACTION: {'Fx': '2449.95', 'w': '-0.08'}
+UX ACCELERATION: 1.048, UY ACCELERATION: -0.380
+FINAL ST CURVATURE: 0.0403784
+FINAL PM CURVATURE: 0.000962328
+AVERAGE ELAPSED TIME: 0.145
+MEDIAN ELAPSED TIME: 0.111
+Fx_f: 2449.95
+Fx_r: 0.00404566
+Fy_f: 4017.69
+Fy_r: 5560.79
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 54
+Solver iterations: 41
+STATE: {'Ux': '13.66', 'Uy': '-0.08', 'r': '0.49', 'delta': '0.15', 's': '38.61', 'ey': '-4.01', 'epsi': '0.02', 't': '3.85'}
+ACTION: {'Fx': '2421.09', 'w': '0.40'}
+UX ACCELERATION: 0.865, UY ACCELERATION: 0.407
+FINAL ST CURVATURE: 0.040091
+FINAL PM CURVATURE: 0.0332817
+AVERAGE ELAPSED TIME: 0.145
+MEDIAN ELAPSED TIME: 0.112
+Fx_f: 2421.09
+Fx_r: 0.00448718
+Fy_f: 4915.45
+Fy_r: 5379.75
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 55
+Solver iterations: 40
+STATE: {'Ux': '13.73', 'Uy': '-0.05', 'r': '0.49', 'delta': '0.17', 's': '39.44', 'ey': '-3.99', 'epsi': '0.03', 't': '3.92'}
+ACTION: {'Fx': '2684.63', 'w': '0.26'}
+UX ACCELERATION: 0.966, UY ACCELERATION: 0.463
+FINAL ST CURVATURE: 0.0396789
+FINAL PM CURVATURE: 0.0345555
+AVERAGE ELAPSED TIME: 0.144
+MEDIAN ELAPSED TIME: 0.113
+Fx_f: 2684.62
+Fx_r: 0.00173397
+Fy_f: 5137.04
+Fy_r: 5253.42
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 56
+Solver iterations: 41
+STATE: {'Ux': '13.79', 'Uy': '-0.03', 'r': '0.50', 'delta': '0.17', 's': '40.27', 'ey': '-3.96', 'epsi': '0.03', 't': '3.99'}
+ACTION: {'Fx': '2512.74', 'w': '0.09'}
+UX ACCELERATION: 0.831, UY ACCELERATION: 0.284
+FINAL ST CURVATURE: 0.0391213
+FINAL PM CURVATURE: 0.0364454
+AVERAGE ELAPSED TIME: 0.144
+MEDIAN ELAPSED TIME: 0.114
+Fx_f: 2512.73
+Fx_r: 0.00322782
+Fy_f: 5246.22
+Fy_r: 5197.55
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 57
+Solver iterations: 34
+STATE: {'Ux': '13.85', 'Uy': '-0.01', 'r': '0.52', 'delta': '0.20', 's': '41.11', 'ey': '-3.94', 'epsi': '0.03', 't': '4.06'}
+ACTION: {'Fx': '2625.99', 'w': '0.32'}
+UX ACCELERATION: 0.802, UY ACCELERATION: 0.194
+FINAL ST CURVATURE: 0.0384852
+FINAL PM CURVATURE: 0.0370411
+AVERAGE ELAPSED TIME: 0.143
+MEDIAN ELAPSED TIME: 0.113
+Fx_f: 2625.99
+Fx_r: 0.00214442
+Fy_f: 5445.62
+Fy_r: 5229.95
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 58
+Solver iterations: 34
+STATE: {'Ux': '13.91', 'Uy': '-0.00', 'r': '0.54', 'delta': '0.20', 's': '41.95', 'ey': '-3.90', 'epsi': '0.03', 't': '4.13'}
+ACTION: {'Fx': '2701.52', 'w': '0.08'}
+UX ACCELERATION: 0.832, UY ACCELERATION: -0.041
+FINAL ST CURVATURE: 0.0377191
+FINAL PM CURVATURE: 0.0382537
+AVERAGE ELAPSED TIME: 0.142
+MEDIAN ELAPSED TIME: 0.112
+Fx_f: 2701.52
+Fx_r: 0.00163089
+Fy_f: 5439.21
+Fy_r: 5325.51
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 59
+Solver iterations: 39
+STATE: {'Ux': '13.98', 'Uy': '-0.02', 'r': '0.55', 'delta': '0.18', 's': '42.79', 'ey': '-3.87', 'epsi': '0.04', 't': '4.20'}
+ACTION: {'Fx': '2881.27', 'w': '-0.24'}
+UX ACCELERATION: 1.038, UY ACCELERATION: -0.324
+FINAL ST CURVATURE: 0.0368568
+FINAL PM CURVATURE: 0.0392008
+AVERAGE ELAPSED TIME: 0.142
+MEDIAN ELAPSED TIME: 0.113
+Fx_f: 2881.27
+Fx_r: 0.000847508
+Fy_f: 5184.45
+Fy_r: 5446.18
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 60
+Solver iterations: 42
+STATE: {'Ux': '14.05', 'Uy': '-0.04', 'r': '0.56', 'delta': '0.19', 's': '43.64', 'ey': '-3.83', 'epsi': '0.04', 't': '4.27'}
+ACTION: {'Fx': '2895.04', 'w': '0.09'}
+UX ACCELERATION: 0.999, UY ACCELERATION: -0.316
+FINAL ST CURVATURE: 0.0358811
+FINAL PM CURVATURE: 0.0400575
+AVERAGE ELAPSED TIME: 0.142
+MEDIAN ELAPSED TIME: 0.113
+Fx_f: 2895.04
+Fx_r: 0.000805923
+Fy_f: 5262.12
+Fy_r: 5551.33
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 61
+Solver iterations: 43
+STATE: {'Ux': '14.09', 'Uy': '-0.07', 'r': '0.56', 'delta': '0.16', 's': '44.49', 'ey': '-3.79', 'epsi': '0.05', 't': '4.34'}
+ACTION: {'Fx': '2320.57', 'w': '-0.40'}
+UX ACCELERATION: 0.730, UY ACCELERATION: -0.534
+FINAL ST CURVATURE: 0.034855
+FINAL PM CURVATURE: 0.0404364
+AVERAGE ELAPSED TIME: 0.141
+MEDIAN ELAPSED TIME: 0.113
+Fx_f: 2320.56
+Fx_r: 0.00642958
+Fy_f: 5090.92
+Fy_r: 5626.07
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 62
+Solver iterations: 36
+STATE: {'Ux': '14.16', 'Uy': '-0.09', 'r': '0.56', 'delta': '0.19', 's': '45.35', 'ey': '-3.75', 'epsi': '0.05', 't': '4.41'}
+ACTION: {'Fx': '2736.48', 'w': '0.40'}
+UX ACCELERATION: 0.850, UY ACCELERATION: -0.209
+FINAL ST CURVATURE: 0.0338
+FINAL PM CURVATURE: 0.040207
+AVERAGE ELAPSED TIME: 0.141
+MEDIAN ELAPSED TIME: 0.113
+Fx_f: 2736.48
+Fx_r: 0.00143639
+Fy_f: 5380.93
+Fy_r: 5706.34
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 63
+Solver iterations: 36
+STATE: {'Ux': '14.23', 'Uy': '-0.12', 'r': '0.55', 'delta': '0.16', 's': '46.21', 'ey': '-3.70', 'epsi': '0.06', 't': '4.48'}
+ACTION: {'Fx': '2937.67', 'w': '-0.40'}
+UX ACCELERATION: 1.122, UY ACCELERATION: -0.419
+FINAL ST CURVATURE: 0.0654251
+FINAL PM CURVATURE: 0.0405235
+AVERAGE ELAPSED TIME: 0.140
+MEDIAN ELAPSED TIME: 0.113
+Fx_f: 2937.66
+Fx_r: 0.000689586
+Fy_f: 4969.54
+Fy_r: 5752.96
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 64
+Solver iterations: 45
+STATE: {'Ux': '14.30', 'Uy': '-0.15', 'r': '0.53', 'delta': '0.13', 's': '47.08', 'ey': '-3.65', 'epsi': '0.06', 't': '4.55'}
+ACTION: {'Fx': '2675.02', 'w': '-0.40'}
+UX ACCELERATION: 1.070, UY ACCELERATION: -0.523
+FINAL ST CURVATURE: 0.0336611
+FINAL PM CURVATURE: 0.0401588
+AVERAGE ELAPSED TIME: 0.140
+MEDIAN ELAPSED TIME: 0.113
+Fx_f: 2675.02
+Fx_r: 0.00179542
+Fy_f: 4556.41
+Fy_r: 5731.24
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 65
+Solver iterations: 43
+STATE: {'Ux': '14.39', 'Uy': '-0.19', 'r': '0.49', 'delta': '0.11', 's': '47.96', 'ey': '-3.60', 'epsi': '0.06', 't': '4.62'}
+ACTION: {'Fx': '2840.92', 'w': '-0.38'}
+UX ACCELERATION: 1.298, UY ACCELERATION: -0.495
+FINAL ST CURVATURE: 0.0346708
+FINAL PM CURVATURE: 0.0400057
+AVERAGE ELAPSED TIME: 0.140
+MEDIAN ELAPSED TIME: 0.113
+Fx_f: 2840.92
+Fx_r: 0.000982006
+Fy_f: 3923.14
+Fy_r: 5635.01
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 66
+Solver iterations: 44
+STATE: {'Ux': '14.46', 'Uy': '-0.18', 'r': '0.46', 'delta': '0.14', 's': '48.84', 'ey': '-3.56', 'epsi': '0.06', 't': '4.69'}
+ACTION: {'Fx': '2560.57', 'w': '0.40'}
+UX ACCELERATION: 0.953, UY ACCELERATION: 0.383
+FINAL ST CURVATURE: 0.0357663
+FINAL PM CURVATURE: 0.0390731
+AVERAGE ELAPSED TIME: 0.140
+MEDIAN ELAPSED TIME: 0.114
+Fx_f: 2560.57
+Fx_r: 0.00271647
+Fy_f: 4871.17
+Fy_r: 5445.4
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 67
+Solver iterations: 47
+STATE: {'Ux': '14.52', 'Uy': '-0.15', 'r': '0.46', 'delta': '0.16', 's': '49.74', 'ey': '-3.51', 'epsi': '0.06', 't': '4.76'}
+ACTION: {'Fx': '2499.75', 'w': '0.34'}
+UX ACCELERATION: 0.802, UY ACCELERATION: 0.533
+FINAL ST CURVATURE: 0.0367402
+FINAL PM CURVATURE: 0.0385767
+AVERAGE ELAPSED TIME: 0.140
+MEDIAN ELAPSED TIME: 0.114
+Fx_f: 2499.74
+Fx_r: 0.00338238
+Fy_f: 5286.35
+Fy_r: 5306.24
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 68
+Solver iterations: 34
+STATE: {'Ux': '14.58', 'Uy': '-0.12', 'r': '0.48', 'delta': '0.18', 's': '50.64', 'ey': '-3.46', 'epsi': '0.06', 't': '4.83'}
+ACTION: {'Fx': '2610.91', 'w': '0.25'}
+UX ACCELERATION: 0.808, UY ACCELERATION: 0.376
+FINAL ST CURVATURE: 0.0376415
+FINAL PM CURVATURE: 0.0380095
+AVERAGE ELAPSED TIME: 0.139
+MEDIAN ELAPSED TIME: 0.114
+Fx_f: 2610.91
+Fx_r: 0.00226471
+Fy_f: 5416.32
+Fy_r: 5258.57
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 69
+Solver iterations: 34
+STATE: {'Ux': '14.64', 'Uy': '-0.10', 'r': '0.50', 'delta': '0.20', 's': '51.54', 'ey': '-3.41', 'epsi': '0.06', 't': '4.90'}
+ACTION: {'Fx': '2643.34', 'w': '0.40'}
+UX ACCELERATION: 0.705, UY ACCELERATION: 0.193
+FINAL ST CURVATURE: 0.0384681
+FINAL PM CURVATURE: 0.0367134
+AVERAGE ELAPSED TIME: 0.138
+MEDIAN ELAPSED TIME: 0.113
+Fx_f: 2643.34
+Fx_r: 0.00201386
+Fy_f: 5580.64
+Fy_r: 5298.15
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 70
+Solver iterations: 32
+STATE: {'Ux': '14.68', 'Uy': '-0.09', 'r': '0.53', 'delta': '0.22', 's': '52.46', 'ey': '-3.35', 'epsi': '0.06', 't': '4.97'}
+ACTION: {'Fx': '2677.10', 'w': '0.20'}
+UX ACCELERATION: 0.668, UY ACCELERATION: -0.070
+FINAL ST CURVATURE: 0.0391717
+FINAL PM CURVATURE: 0.0353728
+AVERAGE ELAPSED TIME: 0.138
+MEDIAN ELAPSED TIME: 0.113
+Fx_f: 2677.09
+Fx_r: 0.00178199
+Fy_f: 5603.34
+Fy_r: 5409.95
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 71
+Solver iterations: 31
+STATE: {'Ux': '14.72', 'Uy': '-0.11', 'r': '0.55', 'delta': '0.22', 's': '53.38', 'ey': '-3.30', 'epsi': '0.07', 't': '5.04'}
+ACTION: {'Fx': '2510.86', 'w': '-0.01'}
+UX ACCELERATION: 0.541, UY ACCELERATION: -0.282
+FINAL ST CURVATURE: 0.0397446
+FINAL PM CURVATURE: 0.0340012
+AVERAGE ELAPSED TIME: 0.137
+MEDIAN ELAPSED TIME: 0.113
+Fx_f: 2510.85
+Fx_r: 0.00324972
+Fy_f: 5690.52
+Fy_r: 5556.77
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 72
+Solver iterations: 43
+STATE: {'Ux': '14.77', 'Uy': '-0.13', 'r': '0.56', 'delta': '0.22', 's': '54.31', 'ey': '-3.23', 'epsi': '0.08', 't': '5.11'}
+ACTION: {'Fx': '2607.17', 'w': '-0.03'}
+UX ACCELERATION: 0.604, UY ACCELERATION: -0.440
+FINAL ST CURVATURE: 0.0401649
+FINAL PM CURVATURE: 0.0724913
+AVERAGE ELAPSED TIME: 0.137
+MEDIAN ELAPSED TIME: 0.113
+Fx_f: 2607.17
+Fx_r: 0.00229549
+Fy_f: 5631.61
+Fy_r: 5720.65
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 73
+Solver iterations: 37
+STATE: {'Ux': '14.81', 'Uy': '-0.17', 'r': '0.57', 'delta': '0.21', 's': '55.17', 'ey': '-3.17', 'epsi': '0.06', 't': '5.18'}
+ACTION: {'Fx': '2733.33', 'w': '-0.07'}
+UX ACCELERATION: 0.697, UY ACCELERATION: -0.519
+FINAL ST CURVATURE: 0.040445
+FINAL PM CURVATURE: 0.033817
+AVERAGE ELAPSED TIME: 0.136
+MEDIAN ELAPSED TIME: 0.113
+Fx_f: 2733.33
+Fx_r: 0.00145291
+Fy_f: 5547.46
+Fy_r: 5867
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 74
+Solver iterations: 39
+STATE: {'Ux': '14.87', 'Uy': '-0.20', 'r': '0.57', 'delta': '0.21', 's': '56.10', 'ey': '-3.12', 'epsi': '0.07', 't': '5.25'}
+ACTION: {'Fx': '2795.84', 'w': '-0.02'}
+UX ACCELERATION: 0.726, UY ACCELERATION: -0.510
+FINAL ST CURVATURE: 0.0405565
+FINAL PM CURVATURE: 0.0354742
+AVERAGE ELAPSED TIME: 0.136
+MEDIAN ELAPSED TIME: 0.113
+Fx_f: 2795.84
+Fx_r: 0.00115737
+Fy_f: 5514.26
+Fy_r: 5981.53
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 75
+Solver iterations: 32
+STATE: {'Ux': '14.91', 'Uy': '-0.24', 'r': '0.57', 'delta': '0.21', 's': '57.04', 'ey': '-3.06', 'epsi': '0.07', 't': '5.32'}
+ACTION: {'Fx': '2692.88', 'w': '0.01'}
+UX ACCELERATION: 0.628, UY ACCELERATION: -0.448
+FINAL ST CURVATURE: 0.0405126
+FINAL PM CURVATURE: 0.0365336
+AVERAGE ELAPSED TIME: 0.136
+MEDIAN ELAPSED TIME: 0.113
+Fx_f: 2692.88
+Fx_r: 0.00168283
+Fy_f: 5584.76
+Fy_r: 6062.83
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 76
+Solver iterations: 41
+STATE: {'Ux': '14.95', 'Uy': '-0.27', 'r': '0.57', 'delta': '0.20', 's': '57.98', 'ey': '-3.00', 'epsi': '0.08', 't': '5.39'}
+ACTION: {'Fx': '2687.74', 'w': '-0.08'}
+UX ACCELERATION: 0.632, UY ACCELERATION: -0.400
+FINAL ST CURVATURE: 0.0403055
+FINAL PM CURVATURE: 0.0371871
+AVERAGE ELAPSED TIME: 0.135
+MEDIAN ELAPSED TIME: 0.113
+Fx_f: 2687.74
+Fx_r: 0.00171448
+Fy_f: 5576.3
+Fy_r: 6126.33
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 77
+Solver iterations: 32
+STATE: {'Ux': '15.01', 'Uy': '-0.29', 'r': '0.56', 'delta': '0.20', 's': '58.93', 'ey': '-2.93', 'epsi': '0.09', 't': '5.46'}
+ACTION: {'Fx': '2826.74', 'w': '-0.06'}
+UX ACCELERATION: 0.739, UY ACCELERATION: -0.336
+FINAL ST CURVATURE: 0.0399286
+FINAL PM CURVATURE: 0.038538
+AVERAGE ELAPSED TIME: 0.135
+MEDIAN ELAPSED TIME: 0.113
+Fx_f: 2826.74
+Fx_r: 0.0010341
+Fy_f: 5487.29
+Fy_r: 6169.49
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 78
+Solver iterations: 39
+STATE: {'Ux': '15.06', 'Uy': '-0.31', 'r': '0.55', 'delta': '0.20', 's': '59.87', 'ey': '-2.86', 'epsi': '0.09', 't': '5.53'}
+ACTION: {'Fx': '2906.49', 'w': '-0.05'}
+UX ACCELERATION: 0.805, UY ACCELERATION: -0.242
+FINAL ST CURVATURE: 0.0393867
+FINAL PM CURVATURE: 0.0393931
+AVERAGE ELAPSED TIME: 0.135
+MEDIAN ELAPSED TIME: 0.113
+Fx_f: 2906.49
+Fx_r: 0.000772883
+Fy_f: 5433.19
+Fy_r: 6180.47
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 79
+Solver iterations: 33
+STATE: {'Ux': '15.11', 'Uy': '-0.33', 'r': '0.54', 'delta': '0.20', 's': '60.82', 'ey': '-2.79', 'epsi': '0.09', 't': '5.60'}
+ACTION: {'Fx': '2788.55', 'w': '0.05'}
+UX ACCELERATION: 0.698, UY ACCELERATION: -0.121
+FINAL ST CURVATURE: 0.0386935
+FINAL PM CURVATURE: 0.0399432
+AVERAGE ELAPSED TIME: 0.134
+MEDIAN ELAPSED TIME: 0.113
+Fx_f: 2788.55
+Fx_r: 0.0011885
+Fy_f: 5522.98
+Fy_r: 6163.03
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 80
+Solver iterations: 39
+STATE: {'Ux': '15.16', 'Uy': '-0.33', 'r': '0.53', 'delta': '0.17', 's': '61.78', 'ey': '-2.72', 'epsi': '0.09', 't': '5.67'}
+ACTION: {'Fx': '2759.02', 'w': '-0.40'}
+UX ACCELERATION: 0.802, UY ACCELERATION: -0.149
+FINAL ST CURVATURE: 0.0378858
+FINAL PM CURVATURE: 0.0401609
+AVERAGE ELAPSED TIME: 0.134
+MEDIAN ELAPSED TIME: 0.112
+Fx_f: 2759.02
+Fx_r: 0.00132338
+Fy_f: 5393.29
+Fy_r: 6138.05
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 81
+Solver iterations: 32
+STATE: {'Ux': '15.23', 'Uy': '-0.35', 'r': '0.52', 'delta': '0.15', 's': '62.74', 'ey': '-2.64', 'epsi': '0.09', 't': '5.74'}
+ACTION: {'Fx': '2973.93', 'w': '-0.32'}
+UX ACCELERATION: 1.059, UY ACCELERATION: -0.147
+FINAL ST CURVATURE: 0.0369198
+FINAL PM CURVATURE: 0.0405234
+AVERAGE ELAPSED TIME: 0.133
+MEDIAN ELAPSED TIME: 0.111
+Fx_f: 2973.93
+Fx_r: 0.000603826
+Fy_f: 5081.49
+Fy_r: 6093
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 82
+Solver iterations: 33
+STATE: {'Ux': '15.31', 'Uy': '-0.36', 'r': '0.49', 'delta': '0.12', 's': '63.70', 'ey': '-2.58', 'epsi': '0.08', 't': '5.81'}
+ACTION: {'Fx': '2868.09', 'w': '-0.40'}
+UX ACCELERATION: 1.126, UY ACCELERATION: -0.155
+FINAL ST CURVATURE: 0.0358353
+FINAL PM CURVATURE: 0.0405388
+AVERAGE ELAPSED TIME: 0.133
+MEDIAN ELAPSED TIME: 0.110
+Fx_f: 2868.09
+Fx_r: 0.000889296
+Fy_f: 4689.36
+Fy_r: 5982.37
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 83
+Solver iterations: 39
+STATE: {'Ux': '15.38', 'Uy': '-0.35', 'r': '0.47', 'delta': '0.14', 's': '64.67', 'ey': '-2.51', 'epsi': '0.08', 't': '5.88'}
+ACTION: {'Fx': '2858.42', 'w': '0.33'}
+UX ACCELERATION: 1.012, UY ACCELERATION: 0.375
+FINAL ST CURVATURE: 0.0346639
+FINAL PM CURVATURE: 0.0403807
+AVERAGE ELAPSED TIME: 0.132
+MEDIAN ELAPSED TIME: 0.111
+Fx_f: 2858.42
+Fx_r: 0.000921234
+Fy_f: 5132.95
+Fy_r: 5830.89
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 84
+Solver iterations: 40
+STATE: {'Ux': '15.45', 'Uy': '-0.32', 'r': '0.45', 'delta': '0.13', 's': '65.65', 'ey': '-2.46', 'epsi': '0.07', 't': '5.95'}
+ACTION: {'Fx': '2684.25', 'w': '-0.23'}
+UX ACCELERATION: 0.986, UY ACCELERATION: 0.260
+FINAL ST CURVATURE: 0.0334235
+FINAL PM CURVATURE: 0.0399758
+AVERAGE ELAPSED TIME: 0.132
+MEDIAN ELAPSED TIME: 0.110
+Fx_f: 2684.25
+Fx_r: 0.00173635
+Fy_f: 4930.33
+Fy_r: 5673.43
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 85
+Solver iterations: 33
+STATE: {'Ux': '15.52', 'Uy': '-0.31', 'r': '0.44', 'delta': '0.12', 's': '66.64', 'ey': '-2.41', 'epsi': '0.06', 't': '6.02'}
+ACTION: {'Fx': '2699.74', 'w': '-0.18'}
+UX ACCELERATION: 1.074, UY ACCELERATION: 0.199
+FINAL ST CURVATURE: 0.0380004
+FINAL PM CURVATURE: 0.039668
+AVERAGE ELAPSED TIME: 0.132
+MEDIAN ELAPSED TIME: 0.109
+Fx_f: 2699.74
+Fx_r: 0.00164143
+Fy_f: 4654.83
+Fy_r: 5515.03
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 86
+Solver iterations: 41
+STATE: {'Ux': '15.61', 'Uy': '-0.30', 'r': '0.40', 'delta': '0.09', 's': '67.63', 'ey': '-2.37', 'epsi': '0.05', 't': '6.09'}
+ACTION: {'Fx': '2824.32', 'w': '-0.40'}
+UX ACCELERATION: 1.305, UY ACCELERATION: -0.034
+FINAL ST CURVATURE: 6.94924e-08
+FINAL PM CURVATURE: 0.0388846
+AVERAGE ELAPSED TIME: 0.132
+MEDIAN ELAPSED TIME: 0.110
+Fx_f: 2824.32
+Fx_r: 0.00104327
+Fy_f: 3869.31
+Fy_r: 5317.6
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 87
+Solver iterations: 39
+STATE: {'Ux': '15.69', 'Uy': '-0.28', 'r': '0.38', 'delta': '0.11', 's': '68.63', 'ey': '-2.34', 'epsi': '0.04', 't': '6.16'}
+ACTION: {'Fx': '2677.16', 'w': '0.34'}
+UX ACCELERATION: 1.099, UY ACCELERATION: 0.657
+FINAL ST CURVATURE: 4.90102e-12
+FINAL PM CURVATURE: 0.0374825
+AVERAGE ELAPSED TIME: 0.131
+MEDIAN ELAPSED TIME: 0.111
+Fx_f: 2677.16
+Fx_r: 0.00178158
+Fy_f: 4651.2
+Fy_r: 5065.49
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 88
+Solver iterations: 39
+STATE: {'Ux': '15.76', 'Uy': '-0.24', 'r': '0.37', 'delta': '0.09', 's': '69.64', 'ey': '-2.32', 'epsi': '0.03', 't': '6.23'}
+ACTION: {'Fx': '2399.43', 'w': '-0.26'}
+UX ACCELERATION: 1.022, UY ACCELERATION: 0.259
+FINAL ST CURVATURE: 4.28107e-14
+FINAL PM CURVATURE: 0.0366381
+AVERAGE ELAPSED TIME: 0.131
+MEDIAN ELAPSED TIME: 0.110
+Fx_f: 2399.42
+Fx_r: 0.00484958
+Fy_f: 4122.18
+Fy_r: 4850.87
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 89
+Solver iterations: 39
+STATE: {'Ux': '15.83', 'Uy': '-0.21', 'r': '0.37', 'delta': '0.12', 's': '70.66', 'ey': '-2.31', 'epsi': '0.01', 't': '6.30'}
+ACTION: {'Fx': '2598.96', 'w': '0.40'}
+UX ACCELERATION: 1.029, UY ACCELERATION: 0.651
+FINAL ST CURVATURE: 3.90957e-13
+FINAL PM CURVATURE: 0.0362365
+AVERAGE ELAPSED TIME: 0.131
+MEDIAN ELAPSED TIME: 0.109
+Fx_f: 2598.96
+Fx_r: 0.00236466
+Fy_f: 4826.99
+Fy_r: 4686.91
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 90
+Solver iterations: 40
+STATE: {'Ux': '15.90', 'Uy': '-0.16', 'r': '0.40', 'delta': '0.15', 's': '71.68', 'ey': '-2.32', 'epsi': '0.00', 't': '6.37'}
+ACTION: {'Fx': '2567.80', 'w': '0.40'}
+UX ACCELERATION: 0.880, UY ACCELERATION: 0.525
+FINAL ST CURVATURE: 1.5444e-12
+FINAL PM CURVATURE: 0.0339783
+AVERAGE ELAPSED TIME: 0.130
+MEDIAN ELAPSED TIME: 0.109
+Fx_f: 2567.8
+Fx_r: 0.00264645
+Fy_f: 5266.4
+Fy_r: 4648.21
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 91
+Solver iterations: 40
+STATE: {'Ux': '15.95', 'Uy': '-0.14', 'r': '0.43', 'delta': '0.18', 's': '72.71', 'ey': '-2.33', 'epsi': '-0.01', 't': '6.44'}
+ACTION: {'Fx': '2426.46', 'w': '0.40'}
+UX ACCELERATION: 0.650, UY ACCELERATION: 0.197
+FINAL ST CURVATURE: 4.30301e-11
+FINAL PM CURVATURE: 0.0327529
+AVERAGE ELAPSED TIME: 0.130
+MEDIAN ELAPSED TIME: 0.109
+Fx_f: 2426.46
+Fx_r: 0.00440155
+Fy_f: 5588.49
+Fy_r: 4763.57
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 92
+Solver iterations: 41
+STATE: {'Ux': '15.98', 'Uy': '-0.14', 'r': '0.47', 'delta': '0.17', 's': '73.74', 'ey': '-2.35', 'epsi': '-0.01', 't': '6.51'}
+ACTION: {'Fx': '2211.63', 'w': '-0.06'}
+UX ACCELERATION: 0.516, UY ACCELERATION: -0.289
+FINAL ST CURVATURE: 4.80965e-05
+FINAL PM CURVATURE: 0.00135702
+AVERAGE ELAPSED TIME: 0.130
+MEDIAN ELAPSED TIME: 0.110
+Fx_f: 2211.62
+Fx_r: 0.00947417
+Fy_f: 5601.05
+Fy_r: 4987.36
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 93
+Solver iterations: 33
+STATE: {'Ux': '16.01', 'Uy': '-0.17', 'r': '0.50', 'delta': '0.20', 's': '74.78', 'ey': '-2.37', 'epsi': '-0.01', 't': '6.58'}
+ACTION: {'Fx': '2201.01', 'w': '0.40'}
+UX ACCELERATION: 0.352, UY ACCELERATION: -0.472
+FINAL ST CURVATURE: 0.0327464
+FINAL PM CURVATURE: 3.51537e-05
+AVERAGE ELAPSED TIME: 0.130
+MEDIAN ELAPSED TIME: 0.109
+Fx_f: 2201
+Fx_r: 0.00983802
+Fy_f: 5822.66
+Fy_r: 5256.98
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 94
+Solver iterations: 41
+STATE: {'Ux': '16.04', 'Uy': '-0.21', 'r': '0.53', 'delta': '0.19', 's': '75.82', 'ey': '-2.39', 'epsi': '-0.01', 't': '6.65'}
+ACTION: {'Fx': '2141.21', 'w': '-0.17'}
+UX ACCELERATION: 0.340, UY ACCELERATION: -0.758
+FINAL ST CURVATURE: 0.0340736
+FINAL PM CURVATURE: 9.77586e-11
+AVERAGE ELAPSED TIME: 0.130
+MEDIAN ELAPSED TIME: 0.110
+Fx_f: 2141.2
+Fx_r: 0.0121567
+Fy_f: 5773.16
+Fy_r: 5528.44
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 95
+Solver iterations: 40
+STATE: {'Ux': '16.04', 'Uy': '-0.26', 'r': '0.55', 'delta': '0.22', 's': '76.94', 'ey': '-2.40', 'epsi': '0.03', 't': '6.72'}
+ACTION: {'Fx': '1790.17', 'w': '0.40'}
+UX ACCELERATION: -0.078, UY ACCELERATION: -0.773
+FINAL ST CURVATURE: 0.0353275
+FINAL PM CURVATURE: 1.37587e-10
+AVERAGE ELAPSED TIME: 0.130
+MEDIAN ELAPSED TIME: 0.111
+Fx_f: 1790.13
+Fx_r: 0.0413842
+Fy_f: 6074.99
+Fy_r: 5766.07
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 96
+Solver iterations: 40
+STATE: {'Ux': '16.03', 'Uy': '-0.32', 'r': '0.56', 'delta': '0.21', 's': '78.07', 'ey': '-2.37', 'epsi': '0.07', 't': '6.79'}
+ACTION: {'Fx': '1869.54', 'w': '-0.09'}
+UX ACCELERATION: -0.032, UY ACCELERATION: -0.871
+FINAL ST CURVATURE: 0.03653
+FINAL PM CURVATURE: 2.95335e-12
+AVERAGE ELAPSED TIME: 0.129
+MEDIAN ELAPSED TIME: 0.112
+Fx_f: 1869.51
+Fx_r: 0.0314641
+Fy_f: 6029.35
+Fy_r: 5993.58
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 97
+Solver iterations: 41
+STATE: {'Ux': '16.02', 'Uy': '-0.38', 'r': '0.57', 'delta': '0.22', 's': '79.19', 'ey': '-2.29', 'epsi': '0.11', 't': '6.86'}
+ACTION: {'Fx': '1762.02', 'w': '0.08'}
+UX ACCELERATION: -0.173, UY ACCELERATION: -0.848
+FINAL ST CURVATURE: 0.0376644
+FINAL PM CURVATURE: -7.28972e-25
+AVERAGE ELAPSED TIME: 0.129
+MEDIAN ELAPSED TIME: 0.112
+Fx_f: 1761.97
+Fx_r: 0.0455881
+Fy_f: 6102.25
+Fy_r: 6171.07
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 98
+Solver iterations: 32
+STATE: {'Ux': '16.00', 'Uy': '-0.44', 'r': '0.58', 'delta': '0.21', 's': '80.30', 'ey': '-2.18', 'epsi': '0.15', 't': '6.93'}
+ACTION: {'Fx': '1507.13', 'w': '-0.10'}
+UX ACCELERATION: -0.355, UY ACCELERATION: -0.807
+FINAL ST CURVATURE: 0.0386103
+FINAL PM CURVATURE: 3.1954e-25
+AVERAGE ELAPSED TIME: 0.129
+MEDIAN ELAPSED TIME: 0.112
+Fx_f: 1507.02
+Fx_r: 0.108066
+Fy_f: 6186.3
+Fy_r: 6303.58
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 99
+Solver iterations: 32
+STATE: {'Ux': '15.99', 'Uy': '-0.49', 'r': '0.58', 'delta': '0.20', 's': '81.41', 'ey': '-2.02', 'epsi': '0.19', 't': '7.00'}
+ACTION: {'Fx': '1774.04', 'w': '-0.09'}
+UX ACCELERATION: -0.171, UY ACCELERATION: -0.712
+FINAL ST CURVATURE: 0.0393766
+FINAL PM CURVATURE: 2.75199e-26
+AVERAGE ELAPSED TIME: 0.128
+MEDIAN ELAPSED TIME: 0.111
+Fx_f: 1773.99
+Fx_r: 0.0437453
+Fy_f: 6075.7
+Fy_r: 6433.72
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 100
+Solver iterations: 31
+STATE: {'Ux': '15.98', 'Uy': '-0.54', 'r': '0.57', 'delta': '0.20', 's': '82.51', 'ey': '-1.82', 'epsi': '0.23', 't': '7.07'}
+ACTION: {'Fx': '1796.78', 'w': '-0.01'}
+UX ACCELERATION: -0.175, UY ACCELERATION: -0.561
+FINAL ST CURVATURE: 0.0399848
+FINAL PM CURVATURE: 1.89492e-46
+AVERAGE ELAPSED TIME: 0.128
+MEDIAN ELAPSED TIME: 0.110
+Fx_f: 1796.74
+Fx_r: 0.0404542
+Fy_f: 6074.78
+Fy_r: 6508.71
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 101
+Solver iterations: 39
+STATE: {'Ux': '15.97', 'Uy': '-0.57', 'r': '0.56', 'delta': '0.17', 's': '83.61', 'ey': '-1.59', 'epsi': '0.27', 't': '7.14'}
+ACTION: {'Fx': '1870.07', 'w': '-0.40'}
+UX ACCELERATION: -0.005, UY ACCELERATION: -0.464
+FINAL ST CURVATURE: 0.0403722
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.128
+MEDIAN ELAPSED TIME: 0.111
+Fx_f: 1870.04
+Fx_r: 0.0314065
+Fy_f: 5919.01
+Fy_r: 6554.37
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 102
+Solver iterations: 42
+STATE: {'Ux': '15.99', 'Uy': '-0.60', 'r': '0.54', 'delta': '0.18', 's': '84.64', 'ey': '-1.33', 'epsi': '0.27', 't': '7.21'}
+ACTION: {'Fx': '2309.49', 'w': '0.04'}
+UX ACCELERATION: 0.286, UY ACCELERATION: -0.206
+FINAL ST CURVATURE: 0.0405523
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.128
+MEDIAN ELAPSED TIME: 0.112
+Fx_f: 2309.48
+Fx_r: 0.00668882
+Fy_f: 5771.5
+Fy_r: 6585.75
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 103
+Solver iterations: 33
+STATE: {'Ux': '16.01', 'Uy': '-0.60', 'r': '0.53', 'delta': '0.19', 's': '85.69', 'ey': '-1.07', 'epsi': '0.27', 't': '7.28'}
+ACTION: {'Fx': '2313.80', 'w': '0.12'}
+UX ACCELERATION: 0.255, UY ACCELERATION: 0.046
+FINAL ST CURVATURE: 0.0405102
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.127
+MEDIAN ELAPSED TIME: 0.111
+Fx_f: 2313.8
+Fx_r: 0.00658671
+Fy_f: 5811.41
+Fy_r: 6546.54
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 104
+Solver iterations: 33
+STATE: {'Ux': '16.02', 'Uy': '-0.59', 'r': '0.51', 'delta': '0.19', 's': '86.75', 'ey': '-0.80', 'epsi': '0.27', 't': '7.35'}
+ACTION: {'Fx': '2125.34', 'w': '0.06'}
+UX ACCELERATION: 0.114, UY ACCELERATION: 0.212
+FINAL ST CURVATURE: 0.0402661
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.127
+MEDIAN ELAPSED TIME: 0.110
+Fx_f: 2125.33
+Fx_r: 0.0128573
+Fy_f: 5917.27
+Fy_r: 6476.41
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 105
+Solver iterations: 27
+STATE: {'Ux': '16.02', 'Uy': '-0.58', 'r': '0.51', 'delta': '0.19', 's': '87.81', 'ey': '-0.54', 'epsi': '0.27', 't': '7.42'}
+ACTION: {'Fx': '2026.07', 'w': '-0.02'}
+UX ACCELERATION: 0.063, UY ACCELERATION: 0.290
+FINAL ST CURVATURE: 0.0398361
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.127
+MEDIAN ELAPSED TIME: 0.109
+Fx_f: 2026.05
+Fx_r: 0.0182319
+Fy_f: 5956.79
+Fy_r: 6407.34
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 106
+Solver iterations: 33
+STATE: {'Ux': '16.03', 'Uy': '-0.55', 'r': '0.50', 'delta': '0.19', 's': '88.89', 'ey': '-0.28', 'epsi': '0.26', 't': '7.49'}
+ACTION: {'Fx': '2110.79', 'w': '0.01'}
+UX ACCELERATION: 0.136, UY ACCELERATION: 0.326
+FINAL ST CURVATURE: 0.0392144
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.126
+MEDIAN ELAPSED TIME: 0.109
+Fx_f: 2110.78
+Fx_r: 0.0135345
+Fy_f: 5916.66
+Fy_r: 6346.62
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 107
+Solver iterations: 40
+STATE: {'Ux': '16.05', 'Uy': '-0.53', 'r': '0.49', 'delta': '0.16', 's': '89.98', 'ey': '-0.03', 'epsi': '0.26', 't': '7.56'}
+ACTION: {'Fx': '2261.93', 'w': '-0.40'}
+UX ACCELERATION: 0.390, UY ACCELERATION: 0.250
+FINAL ST CURVATURE: 0.0383996
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.126
+MEDIAN ELAPSED TIME: 0.108
+Fx_f: 2261.92
+Fx_r: 0.00792382
+Fy_f: 5686.53
+Fy_r: 6281.16
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 108
+Solver iterations: 39
+STATE: {'Ux': '16.10', 'Uy': '-0.51', 'r': '0.48', 'delta': '0.18', 's': '91.08', 'ey': '0.21', 'epsi': '0.25', 't': '7.63'}
+ACTION: {'Fx': '2662.06', 'w': '0.23'}
+UX ACCELERATION: 0.617, UY ACCELERATION: 0.368
+FINAL ST CURVATURE: 0.0373718
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.126
+MEDIAN ELAPSED TIME: 0.108
+Fx_f: 2662.06
+Fx_r: 0.00188182
+Fy_f: 5586.28
+Fy_r: 6209.29
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 109
+Solver iterations: 28
+STATE: {'Ux': '16.15', 'Uy': '-0.49', 'r': '0.47', 'delta': '0.17', 's': '92.20', 'ey': '0.45', 'epsi': '0.24', 't': '7.70'}
+ACTION: {'Fx': '2822.77', 'w': '-0.13'}
+UX ACCELERATION: 0.790, UY ACCELERATION: 0.358
+FINAL ST CURVATURE: 0.0361884
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.125
+MEDIAN ELAPSED TIME: 0.108
+Fx_f: 2822.77
+Fx_r: 0.0010492
+Fy_f: 5451.96
+Fy_r: 6108.27
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 110
+Solver iterations: 46
+STATE: {'Ux': '16.19', 'Uy': '-0.46', 'r': '0.47', 'delta': '0.20', 's': '93.33', 'ey': '0.67', 'epsi': '0.22', 't': '7.77'}
+ACTION: {'Fx': '2494.10', 'w': '0.39'}
+UX ACCELERATION: 0.446, UY ACCELERATION: 0.438
+FINAL ST CURVATURE: 0.0348555
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.125
+MEDIAN ELAPSED TIME: 0.108
+Fx_f: 2494.1
+Fx_r: 0.00345179
+Fy_f: 5733.54
+Fy_r: 5996.7
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 111
+Solver iterations: 38
+STATE: {'Ux': '16.20', 'Uy': '-0.43', 'r': '0.48', 'delta': '0.17', 's': '94.49', 'ey': '0.89', 'epsi': '0.21', 't': '7.84'}
+ACTION: {'Fx': '2103.65', 'w': '-0.40'}
+UX ACCELERATION: 0.309, UY ACCELERATION: 0.221
+FINAL ST CURVATURE: 0.0333737
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.125
+MEDIAN ELAPSED TIME: 0.108
+Fx_f: 2103.64
+Fx_r: 0.0138797
+Fy_f: 5761.63
+Fy_r: 5926.94
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 112
+Solver iterations: 32
+STATE: {'Ux': '16.24', 'Uy': '-0.42', 'r': '0.48', 'delta': '0.20', 's': '95.65', 'ey': '1.09', 'epsi': '0.20', 't': '7.91'}
+ACTION: {'Fx': '2475.82', 'w': '0.40'}
+UX ACCELERATION: 0.448, UY ACCELERATION: 0.192
+FINAL ST CURVATURE: 0.0722931
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.125
+MEDIAN ELAPSED TIME: 0.108
+Fx_f: 2475.82
+Fx_r: 0.0036864
+Fy_f: 5732.49
+Fy_r: 5919.7
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 113
+Solver iterations: 36
+STATE: {'Ux': '16.27', 'Uy': '-0.41', 'r': '0.49', 'delta': '0.17', 's': '96.83', 'ey': '1.27', 'epsi': '0.18', 't': '7.98'}
+ACTION: {'Fx': '2274.49', 'w': '-0.40'}
+UX ACCELERATION: 0.436, UY ACCELERATION: -0.016
+FINAL ST CURVATURE: 0.034525
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.125
+MEDIAN ELAPSED TIME: 0.108
+Fx_f: 2274.48
+Fx_r: 0.00757746
+Fy_f: 5674.25
+Fy_r: 5907.62
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 114
+Solver iterations: 28
+STATE: {'Ux': '16.33', 'Uy': '-0.42', 'r': '0.48', 'delta': '0.17', 's': '98.02', 'ey': '1.44', 'epsi': '0.17', 't': '8.05'}
+ACTION: {'Fx': '2898.72', 'w': '0.11'}
+UX ACCELERATION: 0.845, UY ACCELERATION: -0.047
+FINAL ST CURVATURE: 0.0359259
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.124
+MEDIAN ELAPSED TIME: 0.108
+Fx_f: 2898.72
+Fx_r: 0.00079515
+Fy_f: 5413.56
+Fy_r: 5931.07
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 115
+Solver iterations: 31
+STATE: {'Ux': '16.38', 'Uy': '-0.42', 'r': '0.48', 'delta': '0.18', 's': '99.23', 'ey': '1.60', 'epsi': '0.16', 't': '8.12'}
+ACTION: {'Fx': '2855.98', 'w': '0.09'}
+UX ACCELERATION: 0.785, UY ACCELERATION: -0.019
+FINAL ST CURVATURE: 0.0372484
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.124
+MEDIAN ELAPSED TIME: 0.108
+Fx_f: 2855.98
+Fx_r: 0.000929493
+Fy_f: 5466.48
+Fy_r: 5915.12
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 116
+Solver iterations: 31
+STATE: {'Ux': '16.43', 'Uy': '-0.42', 'r': '0.48', 'delta': '0.19', 's': '100.44', 'ey': '1.74', 'epsi': '0.14', 't': '8.19'}
+ACTION: {'Fx': '2804.97', 'w': '0.07'}
+UX ACCELERATION: 0.727, UY ACCELERATION: -0.028
+FINAL ST CURVATURE: 0.0383715
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.124
+MEDIAN ELAPSED TIME: 0.107
+Fx_f: 2804.97
+Fx_r: 0.00111951
+Fy_f: 5513.44
+Fy_r: 5907.46
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 117
+Solver iterations: 38
+STATE: {'Ux': '16.48', 'Uy': '-0.42', 'r': '0.48', 'delta': '0.19', 's': '101.67', 'ey': '1.87', 'epsi': '0.13', 't': '8.26'}
+ACTION: {'Fx': '2697.88', 'w': '-0.01'}
+UX ACCELERATION: 0.648, UY ACCELERATION: -0.064
+FINAL ST CURVATURE: 0.0392933
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.123
+MEDIAN ELAPSED TIME: 0.107
+Fx_f: 2697.88
+Fx_r: 0.00165254
+Fy_f: 5575.52
+Fy_r: 5909.8
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 118
+Solver iterations: 29
+STATE: {'Ux': '16.53', 'Uy': '-0.43', 'r': '0.49', 'delta': '0.18', 's': '102.90', 'ey': '1.99', 'epsi': '0.12', 't': '8.33'}
+ACTION: {'Fx': '2716.52', 'w': '-0.00'}
+UX ACCELERATION: 0.658, UY ACCELERATION: -0.110
+FINAL ST CURVATURE: 0.0399818
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.123
+MEDIAN ELAPSED TIME: 0.107
+Fx_f: 2716.52
+Fx_r: 0.00154442
+Fy_f: 5564.66
+Fy_r: 5927.04
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 119
+Solver iterations: 39
+STATE: {'Ux': '16.57', 'Uy': '-0.44', 'r': '0.49', 'delta': '0.18', 's': '104.14', 'ey': '2.10', 'epsi': '0.12', 't': '8.40'}
+ACTION: {'Fx': '2707.77', 'w': '-0.00'}
+UX ACCELERATION: 0.647, UY ACCELERATION: -0.137
+FINAL ST CURVATURE: 0.0404118
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.123
+MEDIAN ELAPSED TIME: 0.107
+Fx_f: 2707.77
+Fx_r: 0.0015943
+Fy_f: 5571.06
+Fy_r: 5946.9
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 120
+Solver iterations: 40
+STATE: {'Ux': '16.61', 'Uy': '-0.45', 'r': '0.49', 'delta': '0.19', 's': '105.48', 'ey': '2.17', 'epsi': '0.07', 't': '8.47'}
+ACTION: {'Fx': '2669.67', 'w': '0.01'}
+UX ACCELERATION: 0.610, UY ACCELERATION: -0.151
+FINAL ST CURVATURE: 0.0405613
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.123
+MEDIAN ELAPSED TIME: 0.107
+Fx_f: 2669.67
+Fx_r: 0.00183059
+Fy_f: 5597.61
+Fy_r: 5968.12
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 121
+Solver iterations: 32
+STATE: {'Ux': '16.65', 'Uy': '-0.46', 'r': '0.49', 'delta': '0.19', 's': '106.74', 'ey': '2.21', 'epsi': '0.06', 't': '8.54'}
+ACTION: {'Fx': '2596.81', 'w': '0.01'}
+UX ACCELERATION: 0.547, UY ACCELERATION: -0.160
+FINAL ST CURVATURE: 0.0403999
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.123
+MEDIAN ELAPSED TIME: 0.107
+Fx_f: 2596.81
+Fx_r: 0.00238316
+Fy_f: 5643.64
+Fy_r: 5990.76
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 122
+Solver iterations: 31
+STATE: {'Ux': '16.69', 'Uy': '-0.47', 'r': '0.49', 'delta': '0.19', 's': '108.01', 'ey': '2.24', 'epsi': '0.05', 't': '8.61'}
+ACTION: {'Fx': '2553.95', 'w': '-0.01'}
+UX ACCELERATION: 0.512, UY ACCELERATION: -0.174
+FINAL ST CURVATURE: 0.0399509
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.122
+MEDIAN ELAPSED TIME: 0.107
+Fx_f: 2553.95
+Fx_r: 0.00278213
+Fy_f: 5667.26
+Fy_r: 6017.02
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 123
+Solver iterations: 31
+STATE: {'Ux': '16.72', 'Uy': '-0.48', 'r': '0.49', 'delta': '0.19', 's': '109.29', 'ey': '2.26', 'epsi': '0.03', 't': '8.68'}
+ACTION: {'Fx': '2550.11', 'w': '-0.01'}
+UX ACCELERATION: 0.504, UY ACCELERATION: -0.179
+FINAL ST CURVATURE: 0.0392214
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.122
+MEDIAN ELAPSED TIME: 0.107
+Fx_f: 2550.11
+Fx_r: 0.00282097
+Fy_f: 5670.47
+Fy_r: 6044.1
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 124
+Solver iterations: 33
+STATE: {'Ux': '16.76', 'Uy': '-0.49', 'r': '0.49', 'delta': '0.19', 's': '110.57', 'ey': '2.25', 'epsi': '0.02', 't': '8.75'}
+ACTION: {'Fx': '2527.96', 'w': '-0.00'}
+UX ACCELERATION: 0.483, UY ACCELERATION: -0.172
+FINAL ST CURVATURE: 0.0382306
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.122
+MEDIAN ELAPSED TIME: 0.107
+Fx_f: 2527.96
+Fx_r: 0.00305547
+Fy_f: 5684.29
+Fy_r: 6067.17
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 125
+Solver iterations: 32
+STATE: {'Ux': '16.79', 'Uy': '-0.51', 'r': '0.49', 'delta': '0.18', 's': '111.86', 'ey': '2.23', 'epsi': '0.00', 't': '8.82'}
+ACTION: {'Fx': '2508.54', 'w': '-0.01'}
+UX ACCELERATION: 0.466, UY ACCELERATION: -0.161
+FINAL ST CURVATURE: 0.037012
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.122
+MEDIAN ELAPSED TIME: 0.106
+Fx_f: 2508.54
+Fx_r: 0.00327697
+Fy_f: 5695.28
+Fy_r: 6086.78
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 126
+Solver iterations: 35
+STATE: {'Ux': '16.82', 'Uy': '-0.52', 'r': '0.49', 'delta': '0.18', 's': '113.15', 'ey': '2.18', 'epsi': '-0.02', 't': '8.89'}
+ACTION: {'Fx': '2491.01', 'w': '-0.00'}
+UX ACCELERATION: 0.448, UY ACCELERATION: -0.144
+FINAL ST CURVATURE: 0.0356028
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.121
+MEDIAN ELAPSED TIME: 0.105
+Fx_f: 2491.01
+Fx_r: 0.00349037
+Fy_f: 5706.79
+Fy_r: 6102.47
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 127
+Solver iterations: 32
+STATE: {'Ux': '16.85', 'Uy': '-0.53', 'r': '0.49', 'delta': '0.18', 's': '114.44', 'ey': '2.12', 'epsi': '-0.03', 't': '8.96'}
+ACTION: {'Fx': '2470.78', 'w': '-0.01'}
+UX ACCELERATION: 0.433, UY ACCELERATION: -0.126
+FINAL ST CURVATURE: 0.0340457
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.121
+MEDIAN ELAPSED TIME: 0.105
+Fx_f: 2470.77
+Fx_r: 0.00375392
+Fy_f: 5717.56
+Fy_r: 6114.14
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 128
+Solver iterations: 33
+STATE: {'Ux': '16.88', 'Uy': '-0.53', 'r': '0.49', 'delta': '0.18', 's': '115.72', 'ey': '2.03', 'epsi': '-0.05', 't': '9.03'}
+ACTION: {'Fx': '2462.73', 'w': '-0.00'}
+UX ACCELERATION: 0.424, UY ACCELERATION: -0.108
+FINAL ST CURVATURE: 0.0328639
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.121
+MEDIAN ELAPSED TIME: 0.105
+Fx_f: 2462.72
+Fx_r: 0.00386414
+Fy_f: 5723.25
+Fy_r: 6122.65
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 129
+Solver iterations: 36
+STATE: {'Ux': '16.91', 'Uy': '-0.54', 'r': '0.49', 'delta': '0.18', 's': '117.01', 'ey': '1.92', 'epsi': '-0.07', 't': '9.10'}
+ACTION: {'Fx': '2450.63', 'w': '-0.01'}
+UX ACCELERATION: 0.415, UY ACCELERATION: -0.090
+FINAL ST CURVATURE: 1.12178e-08
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.121
+MEDIAN ELAPSED TIME: 0.105
+Fx_f: 2450.62
+Fx_r: 0.00403584
+Fy_f: 5729.31
+Fy_r: 6127.43
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 130
+Solver iterations: 33
+STATE: {'Ux': '16.94', 'Uy': '-0.55', 'r': '0.48', 'delta': '0.18', 's': '118.28', 'ey': '1.79', 'epsi': '-0.09', 't': '9.17'}
+ACTION: {'Fx': '2455.44', 'w': '-0.01'}
+UX ACCELERATION: 0.419, UY ACCELERATION: -0.074
+FINAL ST CURVATURE: 6.947e-11
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.121
+MEDIAN ELAPSED TIME: 0.105
+Fx_f: 2455.43
+Fx_r: 0.00396668
+Fy_f: 5726.69
+Fy_r: 6129.78
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 131
+Solver iterations: 37
+STATE: {'Ux': '16.97', 'Uy': '-0.55', 'r': '0.48', 'delta': '0.18', 's': '119.54', 'ey': '1.64', 'epsi': '-0.10', 't': '9.24'}
+ACTION: {'Fx': '2450.42', 'w': '-0.03'}
+UX ACCELERATION: 0.422, UY ACCELERATION: -0.060
+FINAL ST CURVATURE: 3.60585e-15
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.121
+MEDIAN ELAPSED TIME: 0.104
+Fx_f: 2450.42
+Fx_r: 0.00403877
+Fy_f: 5724.5
+Fy_r: 6128.43
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 132
+Solver iterations: 32
+STATE: {'Ux': '17.00', 'Uy': '-0.56', 'r': '0.48', 'delta': '0.17', 's': '120.79', 'ey': '1.48', 'epsi': '-0.12', 't': '9.31'}
+ACTION: {'Fx': '2444.85', 'w': '-0.08'}
+UX ACCELERATION: 0.442, UY ACCELERATION: -0.055
+FINAL ST CURVATURE: 1.42191e-24
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.120
+MEDIAN ELAPSED TIME: 0.104
+Fx_f: 2444.84
+Fx_r: 0.00412045
+Fy_f: 5707.12
+Fy_r: 6123.83
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 133
+Solver iterations: 31
+STATE: {'Ux': '17.03', 'Uy': '-0.56', 'r': '0.48', 'delta': '0.17', 's': '122.03', 'ey': '1.29', 'epsi': '-0.13', 't': '9.38'}
+ACTION: {'Fx': '2435.78', 'w': '-0.08'}
+UX ACCELERATION: 0.461, UY ACCELERATION: -0.044
+FINAL ST CURVATURE: 3.59753e-27
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.120
+MEDIAN ELAPSED TIME: 0.103
+Fx_f: 2435.78
+Fx_r: 0.00425681
+Fy_f: 5686.67
+Fy_r: 6114.75
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 134
+Solver iterations: 35
+STATE: {'Ux': '17.07', 'Uy': '-0.56', 'r': '0.47', 'delta': '0.15', 's': '123.26', 'ey': '1.10', 'epsi': '-0.14', 't': '9.45'}
+ACTION: {'Fx': '2433.86', 'w': '-0.21'}
+UX ACCELERATION: 0.529, UY ACCELERATION: -0.062
+FINAL ST CURVATURE: 1.24082e-50
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.120
+MEDIAN ELAPSED TIME: 0.102
+Fx_f: 2433.86
+Fx_r: 0.00428622
+Fy_f: 5589.79
+Fy_r: 6098.77
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 135
+Solver iterations: 32
+STATE: {'Ux': '17.11', 'Uy': '-0.57', 'r': '0.46', 'delta': '0.14', 's': '124.48', 'ey': '0.89', 'epsi': '-0.15', 't': '9.52'}
+ACTION: {'Fx': '2416.55', 'w': '-0.21'}
+UX ACCELERATION: 0.591, UY ACCELERATION: -0.053
+FINAL ST CURVATURE: 0
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.120
+MEDIAN ELAPSED TIME: 0.102
+Fx_f: 2416.55
+Fx_r: 0.00456083
+Fy_f: 5454.16
+Fy_r: 6066.94
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 136
+Solver iterations: 32
+STATE: {'Ux': '17.15', 'Uy': '-0.57', 'r': '0.45', 'delta': '0.11', 's': '125.69', 'ey': '0.67', 'epsi': '-0.15', 't': '9.59'}
+ACTION: {'Fx': '2378.55', 'w': '-0.40'}
+UX ACCELERATION: 0.711, UY ACCELERATION: -0.120
+FINAL ST CURVATURE: 0
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.120
+MEDIAN ELAPSED TIME: 0.101
+Fx_f: 2378.54
+Fx_r: 0.00522612
+Fy_f: 5034.43
+Fy_r: 6004.34
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 137
+Solver iterations: 37
+STATE: {'Ux': '17.20', 'Uy': '-0.57', 'r': '0.42', 'delta': '0.10', 's': '126.88', 'ey': '0.46', 'epsi': '-0.12', 't': '9.66'}
+ACTION: {'Fx': '2348.89', 'w': '-0.19'}
+UX ACCELERATION: 0.769, UY ACCELERATION: 0.086
+FINAL ST CURVATURE: 0
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.119
+MEDIAN ELAPSED TIME: 0.102
+Fx_f: 2348.89
+Fx_r: 0.00581093
+Fy_f: 4791.07
+Fy_r: 5885.38
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 138
+Solver iterations: 31
+STATE: {'Ux': '17.26', 'Uy': '-0.56', 'r': '0.38', 'delta': '0.08', 's': '128.07', 'ey': '0.29', 'epsi': '-0.10', 't': '9.73'}
+ACTION: {'Fx': '2304.40', 'w': '-0.30'}
+UX ACCELERATION: 0.860, UY ACCELERATION: 0.198
+FINAL ST CURVATURE: 0
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.119
+MEDIAN ELAPSED TIME: 0.101
+Fx_f: 2304.39
+Fx_r: 0.00681141
+Fy_f: 4264.65
+Fy_r: 5690.84
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 139
+Solver iterations: 30
+STATE: {'Ux': '17.32', 'Uy': '-0.54', 'r': '0.33', 'delta': '0.06', 's': '129.28', 'ey': '0.15', 'epsi': '-0.07', 't': '9.80'}
+ACTION: {'Fx': '2258.72', 'w': '-0.28'}
+UX ACCELERATION: 0.944, UY ACCELERATION: 0.406
+FINAL ST CURVATURE: 0
+FINAL PM CURVATURE: 1.73453e-31
+AVERAGE ELAPSED TIME: 0.119
+MEDIAN ELAPSED TIME: 0.101
+Fx_f: 2258.72
+Fx_r: 0.00801463
+Fy_f: 3656.19
+Fy_r: 5386.52
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 140
+Solver iterations: 28
+STATE: {'Ux': '17.39', 'Uy': '-0.50', 'r': '0.27', 'delta': '0.04', 's': '130.49', 'ey': '0.04', 'epsi': '-0.05', 't': '9.87'}
+ACTION: {'Fx': '2214.02', 'w': '-0.22'}
+UX ACCELERATION: 1.012, UY ACCELERATION: 0.708
+FINAL ST CURVATURE: 0
+FINAL PM CURVATURE: 5.4837e-26
+AVERAGE ELAPSED TIME: 0.119
+MEDIAN ELAPSED TIME: 0.101
+Fx_f: 2214.01
+Fx_r: 0.00939424
+Fy_f: 3087.03
+Fy_r: 4938.42
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 141
+Solver iterations: 27
+STATE: {'Ux': '17.46', 'Uy': '-0.44', 'r': '0.21', 'delta': '0.03', 's': '131.70', 'ey': '-0.04', 'epsi': '-0.03', 't': '9.94'}
+ACTION: {'Fx': '2170.56', 'w': '-0.16'}
+UX ACCELERATION: 1.060, UY ACCELERATION: 0.989
+FINAL ST CURVATURE: 0
+FINAL PM CURVATURE: 6.63661e-19
+AVERAGE ELAPSED TIME: 0.118
+MEDIAN ELAPSED TIME: 0.101
+Fx_f: 2170.55
+Fx_r: 0.0109583
+Fy_f: 2580.48
+Fy_r: 4338.12
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 142
+Solver iterations: 27
+STATE: {'Ux': '17.53', 'Uy': '-0.37', 'r': '0.16', 'delta': '0.02', 's': '132.93', 'ey': '-0.10', 'epsi': '-0.02', 't': '10.01'}
+ACTION: {'Fx': '2128.35', 'w': '-0.12'}
+UX ACCELERATION: 1.089, UY ACCELERATION: 1.142
+FINAL ST CURVATURE: 0
+FINAL PM CURVATURE: 7.83338e-11
+AVERAGE ELAPSED TIME: 0.118
+MEDIAN ELAPSED TIME: 0.100
+Fx_f: 2128.34
+Fx_r: 0.0127214
+Fy_f: 2128.82
+Fy_r: 3621.35
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 143
+Solver iterations: 24
+STATE: {'Ux': '17.61', 'Uy': '-0.29', 'r': '0.11', 'delta': '0.02', 's': '134.16', 'ey': '-0.15', 'epsi': '-0.01', 't': '10.08'}
+ACTION: {'Fx': '2087.31', 'w': '-0.08'}
+UX ACCELERATION: 1.099, UY ACCELERATION: 1.128
+FINAL ST CURVATURE: 0
+FINAL PM CURVATURE: 3.15777e-10
+AVERAGE ELAPSED TIME: 0.118
+MEDIAN ELAPSED TIME: 0.100
+Fx_f: 2087.29
+Fx_r: 0.0147022
+Fy_f: 1719.52
+Fy_r: 2866.55
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 144
+Solver iterations: 36
+STATE: {'Ux': '17.68', 'Uy': '-0.18', 'r': '0.11', 'delta': '0.05', 's': '135.39', 'ey': '-0.17', 'epsi': '-0.00', 't': '10.15'}
+ACTION: {'Fx': '2064.90', 'w': '0.40'}
+UX ACCELERATION: 1.024, UY ACCELERATION: 1.631
+FINAL ST CURVATURE: 0
+FINAL PM CURVATURE: 0.0296932
+AVERAGE ELAPSED TIME: 0.118
+MEDIAN ELAPSED TIME: 0.100
+Fx_f: 2064.88
+Fx_r: 0.0159081
+Fy_f: 2987.07
+Fy_r: 2255.35
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 145
+Solver iterations: 35
+STATE: {'Ux': '17.75', 'Uy': '-0.08', 'r': '0.16', 'delta': '0.07', 's': '136.63', 'ey': '-0.18', 'epsi': '0.00', 't': '10.22'}
+ACTION: {'Fx': '2033.69', 'w': '0.40'}
+UX ACCELERATION: 0.911, UY ACCELERATION: 1.217
+FINAL ST CURVATURE: 0
+FINAL PM CURVATURE: 0.0338939
+AVERAGE ELAPSED TIME: 0.118
+MEDIAN ELAPSED TIME: 0.101
+Fx_f: 2033.68
+Fx_r: 0.0177506
+Fy_f: 3814.54
+Fy_r: 2080.35
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 146
+Solver iterations: 32
+STATE: {'Ux': '17.81', 'Uy': '-0.02', 'r': '0.23', 'delta': '0.10', 's': '137.88', 'ey': '-0.17', 'epsi': '0.02', 't': '10.29'}
+ACTION: {'Fx': '1992.58', 'w': '0.40'}
+UX ACCELERATION: 0.773, UY ACCELERATION: 0.541
+FINAL ST CURVATURE: 0
+FINAL PM CURVATURE: 0.0354218
+AVERAGE ELAPSED TIME: 0.118
+MEDIAN ELAPSED TIME: 0.100
+Fx_f: 1992.56
+Fx_r: 0.0205003
+Fy_f: 4488.2
+Fy_r: 2360.55
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 147
+Solver iterations: 28
+STATE: {'Ux': '17.85', 'Uy': '-0.00', 'r': '0.31', 'delta': '0.13', 's': '139.12', 'ey': '-0.14', 'epsi': '0.04', 't': '10.36'}
+ACTION: {'Fx': '1954.23', 'w': '0.40'}
+UX ACCELERATION: 0.613, UY ACCELERATION: -0.139
+FINAL ST CURVATURE: 0
+FINAL PM CURVATURE: 0.0368424
+AVERAGE ELAPSED TIME: 0.117
+MEDIAN ELAPSED TIME: 0.100
+Fx_f: 1954.21
+Fx_r: 0.0234388
+Fy_f: 5067.56
+Fy_r: 2946.02
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 148
+Solver iterations: 30
+STATE: {'Ux': '17.89', 'Uy': '-0.04', 'r': '0.39', 'delta': '0.15', 's': '140.37', 'ey': '-0.08', 'epsi': '0.06', 't': '10.43'}
+ACTION: {'Fx': '1952.17', 'w': '0.28'}
+UX ACCELERATION: 0.495, UY ACCELERATION: -0.792
+FINAL ST CURVATURE: 0
+FINAL PM CURVATURE: 0.038076
+AVERAGE ELAPSED TIME: 0.117
+MEDIAN ELAPSED TIME: 0.100
+Fx_f: 1952.14
+Fx_r: 0.0236083
+Fy_f: 5396.15
+Fy_r: 3659.29
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 149
+Solver iterations: 34
+STATE: {'Ux': '17.93', 'Uy': '-0.12', 'r': '0.44', 'delta': '0.12', 's': '141.62', 'ey': '0.01', 'epsi': '0.09', 't': '10.50'}
+ACTION: {'Fx': '1804.30', 'w': '-0.40'}
+UX ACCELERATION: 0.510, UY ACCELERATION: -1.618
+FINAL ST CURVATURE: 0
+FINAL PM CURVATURE: 0.0391219
+AVERAGE ELAPSED TIME: 0.117
+MEDIAN ELAPSED TIME: 0.100
+Fx_f: 1804.26
+Fx_r: 0.0394194
+Fy_f: 4795.03
+Fy_r: 4326.23
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 150
+Solver iterations: 34
+STATE: {'Ux': '17.97', 'Uy': '-0.25', 'r': '0.44', 'delta': '0.09', 's': '142.87', 'ey': '0.14', 'epsi': '0.12', 't': '10.57'}
+ACTION: {'Fx': '1947.05', 'w': '-0.40'}
+UX ACCELERATION: 0.687, UY ACCELERATION: -1.833
+FINAL ST CURVATURE: 0
+FINAL PM CURVATURE: 0.0398122
+AVERAGE ELAPSED TIME: 0.117
+MEDIAN ELAPSED TIME: 0.100
+Fx_f: 1947.03
+Fx_r: 0.0240332
+Fy_f: 4069.19
+Fy_r: 4798.97
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 151
+Solver iterations: 28
+STATE: {'Ux': '18.02', 'Uy': '-0.37', 'r': '0.40', 'delta': '0.07', 's': '144.12', 'ey': '0.29', 'epsi': '0.15', 't': '10.64'}
+ACTION: {'Fx': '1898.27', 'w': '-0.40'}
+UX ACCELERATION: 0.727, UY ACCELERATION: -1.565
+FINAL ST CURVATURE: 0
+FINAL PM CURVATURE: 0.0403981
+AVERAGE ELAPSED TIME: 0.117
+MEDIAN ELAPSED TIME: 0.100
+Fx_f: 1898.24
+Fx_r: 0.0284793
+Fy_f: 3302.89
+Fy_r: 5011.55
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 152
+Solver iterations: 27
+STATE: {'Ux': '18.07', 'Uy': '-0.46', 'r': '0.33', 'delta': '0.04', 's': '145.38', 'ey': '0.47', 'epsi': '0.18', 't': '10.71'}
+ACTION: {'Fx': '1850.24', 'w': '-0.40'}
+UX ACCELERATION: 0.777, UY ACCELERATION: -0.968
+FINAL ST CURVATURE: 0
+FINAL PM CURVATURE: 0.0405613
+AVERAGE ELAPSED TIME: 0.116
+MEDIAN ELAPSED TIME: 0.100
+Fx_f: 1850.21
+Fx_r: 0.0336379
+Fy_f: 2413.54
+Fy_r: 4943.47
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 153
+Solver iterations: 27
+STATE: {'Ux': '18.13', 'Uy': '-0.50', 'r': '0.23', 'delta': '0.01', 's': '146.63', 'ey': '0.67', 'epsi': '0.20', 't': '10.78'}
+ACTION: {'Fx': '1806.45', 'w': '-0.40'}
+UX ACCELERATION: 0.836, UY ACCELERATION: -0.208
+FINAL ST CURVATURE: 0
+FINAL PM CURVATURE: 0.0403979
+AVERAGE ELAPSED TIME: 0.116
+MEDIAN ELAPSED TIME: 0.100
+Fx_f: 1806.41
+Fx_r: 0.0391288
+Fy_f: 1322.7
+Fy_r: 4544.83
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 154
+Solver iterations: 27
+STATE: {'Ux': '18.19', 'Uy': '-0.49', 'r': '0.10', 'delta': '-0.02', 's': '147.88', 'ey': '0.89', 'epsi': '0.21', 't': '10.85'}
+ACTION: {'Fx': '1768.42', 'w': '-0.40'}
+UX ACCELERATION: 0.880, UY ACCELERATION: 0.525
+FINAL ST CURVATURE: 0
+FINAL PM CURVATURE: 0.0399234
+AVERAGE ELAPSED TIME: 0.116
+MEDIAN ELAPSED TIME: 0.100
+Fx_f: 1768.37
+Fx_r: 0.044598
+Fy_f: -49.2176
+Fy_r: 3725.47
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 155
+Solver iterations: 27
+STATE: {'Ux': '18.25', 'Uy': '-0.43', 'r': '-0.03', 'delta': '-0.05', 's': '149.13', 'ey': '1.13', 'epsi': '0.21', 't': '10.92'}
+ACTION: {'Fx': '1741.57', 'w': '-0.40'}
+UX ACCELERATION: 0.880, UY ACCELERATION: 1.150
+FINAL ST CURVATURE: 0
+FINAL PM CURVATURE: 0.0391617
+AVERAGE ELAPSED TIME: 0.116
+MEDIAN ELAPSED TIME: 0.100
+Fx_f: 1741.52
+Fx_r: 0.0488987
+Fy_f: -1504.35
+Fy_r: 2393.52
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 156
+Solver iterations: 27
+STATE: {'Ux': '18.31', 'Uy': '-0.34', 'r': '-0.17', 'delta': '-0.07', 's': '150.39', 'ey': '1.36', 'epsi': '0.20', 't': '10.99'}
+ACTION: {'Fx': '1709.45', 'w': '-0.40'}
+UX ACCELERATION: 0.803, UY ACCELERATION: 1.481
+FINAL ST CURVATURE: 0
+FINAL PM CURVATURE: 0.0381416
+AVERAGE ELAPSED TIME: 0.116
+MEDIAN ELAPSED TIME: 0.100
+Fx_f: 1709.4
+Fx_r: 0.0545766
+Fy_f: -2836.15
+Fy_r: 597.303
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 157
+Solver iterations: 26
+STATE: {'Ux': '18.36', 'Uy': '-0.23', 'r': '-0.28', 'delta': '-0.10', 's': '151.65', 'ey': '1.60', 'epsi': '0.19', 't': '11.06'}
+ACTION: {'Fx': '1679.39', 'w': '-0.40'}
+UX ACCELERATION: 0.656, UY ACCELERATION: 1.532
+FINAL ST CURVATURE: 0
+FINAL PM CURVATURE: 0.0369086
+AVERAGE ELAPSED TIME: 0.115
+MEDIAN ELAPSED TIME: 0.099
+Fx_f: 1679.33
+Fx_r: 0.0604669
+Fy_f: -3985.58
+Fy_r: -1247.67
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 158
+Solver iterations: 37
+STATE: {'Ux': '18.40', 'Uy': '-0.12', 'r': '-0.37', 'delta': '-0.13', 's': '152.92', 'ey': '1.81', 'epsi': '0.17', 't': '11.13'}
+ACTION: {'Fx': '1655.96', 'w': '-0.40'}
+UX ACCELERATION: 0.464, UY ACCELERATION: 1.666
+FINAL ST CURVATURE: 0
+FINAL PM CURVATURE: 0.0355027
+AVERAGE ELAPSED TIME: 0.115
+MEDIAN ELAPSED TIME: 0.100
+Fx_f: 1655.89
+Fx_r: 0.0654802
+Fy_f: -4896.17
+Fy_r: -2674.63
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 159
+Solver iterations: 183
+STATE: {'Ux': '18.42', 'Uy': '0.00', 'r': '-0.45', 'delta': '-0.16', 's': '154.19', 'ey': '2.00', 'epsi': '0.14', 't': '11.20'}
+ACTION: {'Fx': '1616.05', 'w': '-0.40'}
+UX ACCELERATION: 0.226, UY ACCELERATION: 1.872
+FINAL ST CURVATURE: 0
+FINAL PM CURVATURE: 0.0339581
+AVERAGE ELAPSED TIME: 0.118
+MEDIAN ELAPSED TIME: 0.100
+Fx_f: 1615.97
+Fx_r: 0.0749604
+Fy_f: -5558.54
+Fy_r: -3803.02
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 160
+Solver iterations: 37
+STATE: {'Ux': '18.44', 'Uy': '0.16', 'r': '-0.49', 'delta': '-0.13', 's': '155.47', 'ey': '2.16', 'epsi': '0.10', 't': '11.27'}
+ACTION: {'Fx': '1632.82', 'w': '0.40'}
+UX ACCELERATION: 0.311, UY ACCELERATION: 2.444
+FINAL ST CURVATURE: 0
+FINAL PM CURVATURE: 0.0655383
+AVERAGE ELAPSED TIME: 0.118
+MEDIAN ELAPSED TIME: 0.100
+Fx_f: 1632.75
+Fx_r: 0.0708249
+Fy_f: -5055.75
+Fy_r: -4667.44
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 161
+Solver iterations: 34
+STATE: {'Ux': '18.46', 'Uy': '0.31', 'r': '-0.51', 'delta': '-0.15', 's': '156.76', 'ey': '2.29', 'epsi': '0.07', 't': '11.34'}
+ACTION: {'Fx': '1679.53', 'w': '-0.22'}
+UX ACCELERATION: 0.160, UY ACCELERATION: 2.047
+FINAL ST CURVATURE: 0
+FINAL PM CURVATURE: 0.0343471
+AVERAGE ELAPSED TIME: 0.118
+MEDIAN ELAPSED TIME: 0.100
+Fx_f: 1679.47
+Fx_r: 0.0604372
+Fy_f: -5535
+Fy_r: -5268.55
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 162
+Solver iterations: 32
+STATE: {'Ux': '18.43', 'Uy': '0.46', 'r': '-0.51', 'delta': '-0.12', 's': '158.05', 'ey': '2.38', 'epsi': '0.03', 't': '11.41'}
+ACTION: {'Fx': '792.16', 'w': '0.40'}
+UX ACCELERATION: -0.373, UY ACCELERATION: 2.120
+FINAL ST CURVATURE: 0
+FINAL PM CURVATURE: 0.0359491
+AVERAGE ELAPSED TIME: 0.118
+MEDIAN ELAPSED TIME: 0.100
+Fx_f: 791.172
+Fx_r: 0.986416
+Fy_f: -5229.58
+Fy_r: -5646.99
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 163
+Solver iterations: 40
+STATE: {'Ux': '18.45', 'Uy': '0.60', 'r': '-0.48', 'delta': '-0.09', 's': '159.34', 'ey': '2.44', 'epsi': '-0.00', 't': '11.48'}
+ACTION: {'Fx': '1727.48', 'w': '0.40'}
+UX ACCELERATION: 0.333, UY ACCELERATION: 1.784
+FINAL ST CURVATURE: 0
+FINAL PM CURVATURE: 0.0359778
+AVERAGE ELAPSED TIME: 0.118
+MEDIAN ELAPSED TIME: 0.100
+Fx_f: 1727.43
+Fx_r: 0.0513156
+Fy_f: -4573.7
+Fy_r: -5931.82
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 164
+Solver iterations: 36
+STATE: {'Ux': '18.47', 'Uy': '0.71', 'r': '-0.43', 'delta': '-0.06', 's': '160.63', 'ey': '2.46', 'epsi': '-0.03', 't': '11.55'}
+ACTION: {'Fx': '1712.33', 'w': '0.40'}
+UX ACCELERATION: 0.425, UY ACCELERATION: 1.196
+FINAL ST CURVATURE: 0
+FINAL PM CURVATURE: 0.0384983
+AVERAGE ELAPSED TIME: 0.118
+MEDIAN ELAPSED TIME: 0.100
+Fx_f: 1712.28
+Fx_r: 0.0540426
+Fy_f: -3925.73
+Fy_r: -5978.26
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 165
+Solver iterations: 33
+STATE: {'Ux': '18.51', 'Uy': '0.76', 'r': '-0.35', 'delta': '-0.04', 's': '161.92', 'ey': '2.45', 'epsi': '-0.06', 't': '11.62'}
+ACTION: {'Fx': '1692.53', 'w': '0.35'}
+UX ACCELERATION: 0.531, UY ACCELERATION: 0.346
+FINAL ST CURVATURE: 0
+FINAL PM CURVATURE: 0.0394677
+AVERAGE ELAPSED TIME: 0.118
+MEDIAN ELAPSED TIME: 0.100
+Fx_f: 1692.47
+Fx_r: 0.0578203
+Fy_f: -3241.09
+Fy_r: -5822.38
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 166
+Solver iterations: 32
+STATE: {'Ux': '18.55', 'Uy': '0.75', 'r': '-0.25', 'delta': '-0.02', 's': '163.22', 'ey': '2.41', 'epsi': '-0.08', 't': '11.69'}
+ACTION: {'Fx': '1667.16', 'w': '0.28'}
+UX ACCELERATION: 0.639, UY ACCELERATION: -0.633
+FINAL ST CURVATURE: 0
+FINAL PM CURVATURE: 0.0401377
+AVERAGE ELAPSED TIME: 0.118
+MEDIAN ELAPSED TIME: 0.100
+Fx_f: 1667.1
+Fx_r: 0.0630344
+Fy_f: -2574.78
+Fy_r: -5413.09
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 167
+Solver iterations: 31
+STATE: {'Ux': '18.59', 'Uy': '0.69', 'r': '-0.14', 'delta': '0.01', 's': '164.52', 'ey': '2.35', 'epsi': '-0.10', 't': '11.76'}
+ACTION: {'Fx': '1626.96', 'w': '0.40'}
+UX ACCELERATION: 0.743, UY ACCELERATION: -1.210
+FINAL ST CURVATURE: 0
+FINAL PM CURVATURE: 0.0404969
+AVERAGE ELAPSED TIME: 0.117
+MEDIAN ELAPSED TIME: 0.100
+Fx_f: 1626.89
+Fx_r: 0.0722438
+Fy_f: -1160.86
+Fy_r: -4662.81
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 168
+Solver iterations: 31
+STATE: {'Ux': '18.65', 'Uy': '0.58', 'r': '-0.01', 'delta': '0.04', 's': '165.82', 'ey': '2.26', 'epsi': '-0.10', 't': '11.83'}
+ACTION: {'Fx': '1580.51', 'w': '0.40'}
+UX ACCELERATION: 0.781, UY ACCELERATION: -1.686
+FINAL ST CURVATURE: 0
+FINAL PM CURVATURE: 0.040535
+AVERAGE ELAPSED TIME: 0.117
+MEDIAN ELAPSED TIME: 0.100
+Fx_f: 1580.42
+Fx_r: 0.0845087
+Fy_f: 565.808
+Fy_r: -3427.01
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 169
+Solver iterations: 36
+STATE: {'Ux': '18.70', 'Uy': '0.45', 'r': '0.13', 'delta': '0.07', 's': '167.13', 'ey': '2.17', 'epsi': '-0.10', 't': '11.90'}
+ACTION: {'Fx': '1520.62', 'w': '0.40'}
+UX ACCELERATION: 0.723, UY ACCELERATION: -2.033
+FINAL ST CURVATURE: 0
+FINAL PM CURVATURE: 0.0402617
+AVERAGE ELAPSED TIME: 0.117
+MEDIAN ELAPSED TIME: 0.100
+Fx_f: 1520.51
+Fx_r: 0.103308
+Fy_f: 2172.88
+Fy_r: -1628.35
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 170
+Solver iterations: 33
+STATE: {'Ux': '18.64', 'Uy': '0.30', 'r': '0.25', 'delta': '0.09', 's': '168.43', 'ey': '2.07', 'epsi': '-0.08', 't': '11.97'}
+ACTION: {'Fx': '-847.42', 'w': '0.38'}
+UX ACCELERATION: -0.957, UY ACCELERATION: -2.024
+FINAL ST CURVATURE: 0
+FINAL PM CURVATURE: 0.0397117
+AVERAGE ELAPSED TIME: 0.117
+MEDIAN ELAPSED TIME: 0.100
+Fx_f: -698.172
+Fx_r: -149.246
+Fy_f: 3563.51
+Fy_r: 490.659
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 171
+Solver iterations: 38
+STATE: {'Ux': '18.68', 'Uy': '0.13', 'r': '0.31', 'delta': '0.06', 's': '169.73', 'ey': '1.99', 'epsi': '-0.06', 't': '12.04'}
+ACTION: {'Fx': '1549.87', 'w': '-0.40'}
+UX ACCELERATION: 0.721, UY ACCELERATION: -2.785
+FINAL ST CURVATURE: 0
+FINAL PM CURVATURE: 0.0399563
+AVERAGE ELAPSED TIME: 0.117
+MEDIAN ELAPSED TIME: 0.100
+Fx_f: 1549.77
+Fx_r: 0.0936733
+Fy_f: 2272.25
+Fy_r: 2071.53
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 172
+Solver iterations: 44
+STATE: {'Ux': '18.58', 'Uy': '-0.05', 'r': '0.29', 'delta': '0.05', 's': '171.04', 'ey': '1.93', 'epsi': '-0.04', 't': '12.11'}
+ACTION: {'Fx': '-1840.03', 'w': '-0.20'}
+UX ACCELERATION: -1.561, UY ACCELERATION: -2.188
+FINAL ST CURVATURE: 0
+FINAL PM CURVATURE: 0.0377138
+AVERAGE ELAPSED TIME: 0.117
+MEDIAN ELAPSED TIME: 0.100
+Fx_f: -1437.12
+Fx_r: -402.912
+Fy_f: 2079.98
+Fy_r: 2876.68
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 173
+Solver iterations: 40
+STATE: {'Ux': '18.63', 'Uy': '-0.15', 'r': '0.27', 'delta': '0.06', 's': '172.34', 'ey': '1.88', 'epsi': '-0.02', 't': '12.18'}
+ACTION: {'Fx': '1618.66', 'w': '0.09'}
+UX ACCELERATION: 0.679, UY ACCELERATION: -0.979
+FINAL ST CURVATURE: 0
+FINAL PM CURVATURE: 0.0395475
+AVERAGE ELAPSED TIME: 0.117
+MEDIAN ELAPSED TIME: 0.100
+Fx_f: 1618.59
+Fx_r: 0.0743006
+Fy_f: 2808.62
+Fy_r: 3265.87
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 174
+Solver iterations: 37
+STATE: {'Ux': '18.49', 'Uy': '-0.20', 'r': '0.27', 'delta': '0.07', 's': '173.64', 'ey': '1.85', 'epsi': '-0.00', 't': '12.25'}
+ACTION: {'Fx': '-2202.98', 'w': '0.15'}
+UX ACCELERATION: -1.929, UY ACCELERATION: -0.372
+FINAL ST CURVATURE: 1.69845e-47
+FINAL PM CURVATURE: 0.03506
+AVERAGE ELAPSED TIME: 0.117
+MEDIAN ELAPSED TIME: 0.100
+Fx_f: -1718.85
+Fx_r: -484.122
+Fy_f: 3570.9
+Fy_r: 3393.83
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 175
+Solver iterations: 34
+STATE: {'Ux': '18.54', 'Uy': '-0.24', 'r': '0.25', 'delta': '0.04', 's': '174.93', 'ey': '1.84', 'epsi': '0.01', 't': '12.32'}
+ACTION: {'Fx': '1590.87', 'w': '-0.40'}
+UX ACCELERATION: 0.693, UY ACCELERATION: -0.735
+FINAL ST CURVATURE: 1.04168e-29
+FINAL PM CURVATURE: 0.0401501
+AVERAGE ELAPSED TIME: 0.117
+MEDIAN ELAPSED TIME: 0.100
+Fx_f: 1590.79
+Fx_r: 0.0816091
+Fy_f: 2204.02
+Fy_r: 3498.4
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 176
+Solver iterations: 47
+STATE: {'Ux': '18.38', 'Uy': '-0.25', 'r': '0.23', 'delta': '0.06', 's': '176.22', 'ey': '1.85', 'epsi': '0.03', 't': '12.39'}
+ACTION: {'Fx': '-2727.14', 'w': '0.37'}
+UX ACCELERATION: -2.281, UY ACCELERATION: 0.385
+FINAL ST CURVATURE: -6.69863e-25
+FINAL PM CURVATURE: 0.0335633
+AVERAGE ELAPSED TIME: 0.117
+MEDIAN ELAPSED TIME: 0.100
+Fx_f: -2127.25
+Fx_r: -599.889
+Fy_f: 3724.76
+Fy_r: 3364.32
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 177
+Solver iterations: 35
+STATE: {'Ux': '18.41', 'Uy': '-0.24', 'r': '0.22', 'delta': '0.04', 's': '177.51', 'ey': '1.88', 'epsi': '0.05', 't': '12.46'}
+ACTION: {'Fx': '1172.74', 'w': '-0.40'}
+UX ACCELERATION: 0.425, UY ACCELERATION: -0.272
+FINAL ST CURVATURE: -3.37962e-19
+FINAL PM CURVATURE: 0.0403656
+AVERAGE ELAPSED TIME: 0.117
+MEDIAN ELAPSED TIME: 0.100
+Fx_f: 1172.42
+Fx_r: 0.320063
+Fy_f: 2235.97
+Fy_r: 3322.93
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 178
+Solver iterations: 48
+STATE: {'Ux': '18.25', 'Uy': '-0.23', 'r': '0.21', 'delta': '0.06', 's': '178.79', 'ey': '1.94', 'epsi': '0.06', 't': '12.53'}
+ACTION: {'Fx': '-2839.62', 'w': '0.39'}
+UX ACCELERATION: -2.341, UY ACCELERATION: 0.651
+FINAL ST CURVATURE: 6.50963e-11
+FINAL PM CURVATURE: 2.77796e-09
+AVERAGE ELAPSED TIME: 0.117
+MEDIAN ELAPSED TIME: 0.101
+Fx_f: -2214.95
+Fx_r: -624.662
+Fy_f: 3701.6
+Fy_r: 3129.74
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 179
+Solver iterations: 43
+STATE: {'Ux': '18.15', 'Uy': '-0.21', 'r': '0.20', 'delta': '0.04', 's': '180.07', 'ey': '2.01', 'epsi': '0.08', 't': '12.60'}
+ACTION: {'Fx': '-1597.10', 'w': '-0.40'}
+UX ACCELERATION: -1.405, UY ACCELERATION: -0.188
+FINAL ST CURVATURE: 2.20691e-10
+FINAL PM CURVATURE: 0.0405077
+AVERAGE ELAPSED TIME: 0.117
+MEDIAN ELAPSED TIME: 0.101
+Fx_f: -1250.05
+Fx_r: -347.051
+Fy_f: 2170.97
+Fy_r: 3046.84
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 180
+Solver iterations: 34
+STATE: {'Ux': '18.02', 'Uy': '-0.24', 'r': '0.15', 'delta': '0.01', 's': '181.33', 'ey': '2.10', 'epsi': '0.09', 't': '12.67'}
+ACTION: {'Fx': '-2273.87', 'w': '-0.40'}
+UX ACCELERATION: -1.799, UY ACCELERATION: -0.359
+FINAL ST CURVATURE: 0.00139147
+FINAL PM CURVATURE: 0.036506
+AVERAGE ELAPSED TIME: 0.117
+MEDIAN ELAPSED TIME: 0.101
+Fx_f: -1774.04
+Fx_r: -499.838
+Fy_f: 653.726
+Fy_r: 2768.31
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 181
+Solver iterations: 35
+STATE: {'Ux': '17.92', 'Uy': '-0.25', 'r': '0.06', 'delta': '-0.02', 's': '182.58', 'ey': '2.20', 'epsi': '0.10', 't': '12.74'}
+ACTION: {'Fx': '-1733.64', 'w': '-0.40'}
+UX ACCELERATION: -1.425, UY ACCELERATION: -0.092
+FINAL ST CURVATURE: 0.0332537
+FINAL PM CURVATURE: 0.0379027
+AVERAGE ELAPSED TIME: 0.117
+MEDIAN ELAPSED TIME: 0.100
+Fx_f: -1354.96
+Fx_r: -378.677
+Fy_f: -838.615
+Fy_r: 2155.7
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 182
+Solver iterations: 33
+STATE: {'Ux': '17.83', 'Uy': '-0.23', 'r': '-0.03', 'delta': '-0.03', 's': '183.83', 'ey': '2.30', 'epsi': '0.10', 't': '12.81'}
+ACTION: {'Fx': '-1526.90', 'w': '-0.13'}
+UX ACCELERATION: -1.273, UY ACCELERATION: 0.737
+FINAL ST CURVATURE: 0.0347785
+FINAL PM CURVATURE: 0.0350231
+AVERAGE ELAPSED TIME: 0.117
+MEDIAN ELAPSED TIME: 0.100
+Fx_f: -1196.42
+Fx_r: -330.482
+Fy_f: -1046.39
+Fy_r: 1184.37
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 183
+Solver iterations: 35
+STATE: {'Ux': '17.72', 'Uy': '-0.12', 'r': '-0.06', 'delta': '-0.00', 's': '185.07', 'ey': '2.41', 'epsi': '0.09', 't': '12.88'}
+ACTION: {'Fx': '-2057.47', 'w': '0.40'}
+UX ACCELERATION: -1.606, UY ACCELERATION: 1.772
+FINAL ST CURVATURE: 0.036156
+FINAL PM CURVATURE: 0.0333316
+AVERAGE ELAPSED TIME: 0.117
+MEDIAN ELAPSED TIME: 0.100
+Fx_f: -1605.72
+Fx_r: -451.754
+Fy_f: 819.74
+Fy_r: 253.401
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 184
+Solver iterations: 28
+STATE: {'Ux': '17.65', 'Uy': '-0.01', 'r': '-0.01', 'delta': '0.03', 's': '186.30', 'ey': '2.51', 'epsi': '0.09', 't': '12.95'}
+ACTION: {'Fx': '-1013.59', 'w': '0.40'}
+UX ACCELERATION: -0.952, UY ACCELERATION: 1.461
+FINAL ST CURVATURE: 0.0373224
+FINAL PM CURVATURE: 0.0338187
+AVERAGE ELAPSED TIME: 0.117
+MEDIAN ELAPSED TIME: 0.100
+Fx_f: -815.937
+Fx_r: -197.656
+Fy_f: 1997.93
+Fy_r: -68.183
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 185
+Solver iterations: 35
+STATE: {'Ux': '17.55', 'Uy': '0.07', 'r': '0.07', 'delta': '0.05', 's': '187.53', 'ey': '2.63', 'epsi': '0.09', 't': '13.02'}
+ACTION: {'Fx': '-1660.13', 'w': '0.40'}
+UX ACCELERATION: -1.448, UY ACCELERATION: 0.823
+FINAL ST CURVATURE: 0.0384661
+FINAL PM CURVATURE: 8.04633e-13
+AVERAGE ELAPSED TIME: 0.117
+MEDIAN ELAPSED TIME: 0.100
+Fx_f: -1298.39
+Fx_r: -361.737
+Fy_f: 2963.36
+Fy_r: 261.226
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 186
+Solver iterations: 35
+STATE: {'Ux': '17.48', 'Uy': '0.11', 'r': '0.17', 'delta': '0.08', 's': '188.75', 'ey': '2.75', 'epsi': '0.10', 't': '13.09'}
+ACTION: {'Fx': '-930.29', 'w': '0.40'}
+UX ACCELERATION: -1.051, UY ACCELERATION: 0.236
+FINAL ST CURVATURE: 0.0392754
+FINAL PM CURVATURE: 1.68979e-10
+AVERAGE ELAPSED TIME: 0.117
+MEDIAN ELAPSED TIME: 0.101
+Fx_f: -756.678
+Fx_r: -173.612
+Fy_f: 3845.16
+Fy_r: 1004.82
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 187
+Solver iterations: 39
+STATE: {'Ux': '17.39', 'Uy': '0.11', 'r': '0.26', 'delta': '0.11', 's': '189.96', 'ey': '2.89', 'epsi': '0.12', 't': '13.16'}
+ACTION: {'Fx': '-1325.97', 'w': '0.40'}
+UX ACCELERATION: -1.434, UY ACCELERATION: -0.268
+FINAL ST CURVATURE: 0.0399593
+FINAL PM CURVATURE: 1.42812e-12
+AVERAGE ELAPSED TIME: 0.117
+MEDIAN ELAPSED TIME: 0.101
+Fx_f: -1044.59
+Fx_r: -281.375
+Fy_f: 4675.31
+Fy_r: 1920.95
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 188
+Solver iterations: 37
+STATE: {'Ux': '17.30', 'Uy': '0.08', 'r': '0.35', 'delta': '0.14', 's': '191.17', 'ey': '3.05', 'epsi': '0.14', 't': '13.23'}
+ACTION: {'Fx': '-884.62', 'w': '0.40'}
+UX ACCELERATION: -1.293, UY ACCELERATION: -0.673
+FINAL ST CURVATURE: 0.0403618
+FINAL PM CURVATURE: 2.34727e-13
+AVERAGE ELAPSED TIME: 0.116
+MEDIAN ELAPSED TIME: 0.101
+Fx_f: -724.402
+Fx_r: -160.216
+Fy_f: 5385.76
+Fy_r: 2859.84
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 189
+Solver iterations: 37
+STATE: {'Ux': '17.22', 'Uy': '0.02', 'r': '0.43', 'delta': '0.17', 's': '192.50', 'ey': '3.20', 'epsi': '0.12', 't': '13.30'}
+ACTION: {'Fx': '-475.53', 'w': '0.40'}
+UX ACCELERATION: -1.201, UY ACCELERATION: -1.031
+FINAL ST CURVATURE: 0.0405527
+FINAL PM CURVATURE: 7.98712e-12
+AVERAGE ELAPSED TIME: 0.116
+MEDIAN ELAPSED TIME: 0.101
+Fx_f: -425.777
+Fx_r: -49.7496
+Fy_f: 5946.74
+Fy_r: 3739.24
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 190
+Solver iterations: 39
+STATE: {'Ux': '17.13', 'Uy': '-0.07', 'r': '0.49', 'delta': '0.19', 's': '193.84', 'ey': '3.34', 'epsi': '0.11', 't': '13.37'}
+ACTION: {'Fx': '-530.76', 'w': '0.40'}
+UX ACCELERATION: -1.439, UY ACCELERATION: -1.351
+FINAL ST CURVATURE: 0.0404715
+FINAL PM CURVATURE: 0.0325132
+AVERAGE ELAPSED TIME: 0.116
+MEDIAN ELAPSED TIME: 0.101
+Fx_f: -468.786
+Fx_r: -61.9699
+Fy_f: 6369.2
+Fy_r: 4504.86
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 191
+Solver iterations: 39
+STATE: {'Ux': '17.04', 'Uy': '-0.17', 'r': '0.54', 'delta': '0.22', 's': '195.20', 'ey': '3.45', 'epsi': '0.10', 't': '13.44'}
+ACTION: {'Fx': '-204.58', 'w': '0.40'}
+UX ACCELERATION: -1.431, UY ACCELERATION: -1.589
+FINAL ST CURVATURE: 0.0400999
+FINAL PM CURVATURE: 0.0335656
+AVERAGE ELAPSED TIME: 0.116
+MEDIAN ELAPSED TIME: 0.101
+Fx_f: -194.01
+Fx_r: -10.5652
+Fy_f: 6586.8
+Fy_r: 5153.32
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 192
+Solver iterations: 42
+STATE: {'Ux': '16.94', 'Uy': '-0.29', 'r': '0.58', 'delta': '0.25', 's': '196.56', 'ey': '3.54', 'epsi': '0.08', 't': '13.51'}
+ACTION: {'Fx': '10.36', 'w': '0.33'}
+UX ACCELERATION: -1.473, UY ACCELERATION: -1.737
+FINAL ST CURVATURE: 0.0394262
+FINAL PM CURVATURE: 0.0357453
+AVERAGE ELAPSED TIME: 0.116
+MEDIAN ELAPSED TIME: 0.101
+Fx_f: 10.0958
+Fx_r: 0.261869
+Fy_f: 6659.54
+Fy_r: 5667.78
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 193
+Solver iterations: 36
+STATE: {'Ux': '16.81', 'Uy': '-0.41', 'r': '0.60', 'delta': '0.22', 's': '197.93', 'ey': '3.61', 'epsi': '0.07', 't': '13.58'}
+ACTION: {'Fx': '-503.17', 'w': '-0.40'}
+UX ACCELERATION: -1.765, UY ACCELERATION: -1.820
+FINAL ST CURVATURE: 0.0384808
+FINAL PM CURVATURE: 0.0374187
+AVERAGE ELAPSED TIME: 0.116
+MEDIAN ELAPSED TIME: 0.102
+Fx_f: -447.469
+Fx_r: -55.6993
+Fy_f: 6638.98
+Fy_r: 6012.49
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 194
+Solver iterations: 40
+STATE: {'Ux': '16.72', 'Uy': '-0.53', 'r': '0.61', 'delta': '0.23', 's': '199.30', 'ey': '3.66', 'epsi': '0.06', 't': '13.65'}
+ACTION: {'Fx': '177.88', 'w': '0.19'}
+UX ACCELERATION: -1.450, UY ACCELERATION: -1.628
+FINAL ST CURVATURE: 0.0373407
+FINAL PM CURVATURE: 0.038305
+AVERAGE ELAPSED TIME: 0.116
+MEDIAN ELAPSED TIME: 0.102
+Fx_f: 175.44
+Fx_r: 2.4379
+Fy_f: 6621.94
+Fy_r: 6335.52
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 195
+Solver iterations: 39
+STATE: {'Ux': '16.60', 'Uy': '-0.64', 'r': '0.61', 'delta': '0.20', 's': '200.66', 'ey': '3.68', 'epsi': '0.05', 't': '13.72'}
+ACTION: {'Fx': '-146.28', 'w': '-0.40'}
+UX ACCELERATION: -1.604, UY ACCELERATION: -1.517
+FINAL ST CURVATURE: 0.0359443
+FINAL PM CURVATURE: 0.0394026
+AVERAGE ELAPSED TIME: 0.116
+MEDIAN ELAPSED TIME: 0.102
+Fx_f: -139.989
+Fx_r: -6.29037
+Fy_f: 6588.44
+Fy_r: 6494.89
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 196
+Solver iterations: 38
+STATE: {'Ux': '16.52', 'Uy': '-0.74', 'r': '0.60', 'delta': '0.22', 's': '202.03', 'ey': '3.68', 'epsi': '0.04', 't': '13.79'}
+ACTION: {'Fx': '556.20', 'w': '0.19'}
+UX ACCELERATION: -1.248, UY ACCELERATION: -1.190
+FINAL ST CURVATURE: 0.0344353
+FINAL PM CURVATURE: 0.0401452
+AVERAGE ELAPSED TIME: 0.116
+MEDIAN ELAPSED TIME: 0.102
+Fx_f: 554.435
+Fx_r: 1.76417
+Fy_f: 6540.34
+Fy_r: 6693.37
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 197
+Solver iterations: 41
+STATE: {'Ux': '16.41', 'Uy': '-0.82', 'r': '0.60', 'delta': '0.19', 's': '203.38', 'ey': '3.67', 'epsi': '0.02', 't': '13.86'}
+ACTION: {'Fx': '99.71', 'w': '-0.40'}
+UX ACCELERATION: -1.466, UY ACCELERATION: -1.024
+FINAL ST CURVATURE: 0.0662838
+FINAL PM CURVATURE: 0.0405377
+AVERAGE ELAPSED TIME: 0.116
+MEDIAN ELAPSED TIME: 0.103
+Fx_f: 97.8854
+Fx_r: 1.82646
+Fy_f: 6538.29
+Fy_r: 6728.04
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 198
+Solver iterations: 40
+STATE: {'Ux': '16.31', 'Uy': '-0.87', 'r': '0.59', 'delta': '0.22', 's': '204.73', 'ey': '3.63', 'epsi': '0.01', 't': '13.93'}
+ACTION: {'Fx': '256.28', 'w': '0.40'}
+UX ACCELERATION: -1.523, UY ACCELERATION: -0.692
+FINAL ST CURVATURE: 0.0339142
+FINAL PM CURVATURE: 0.0405265
+AVERAGE ELAPSED TIME: 0.116
+MEDIAN ELAPSED TIME: 0.104
+Fx_f: 253.667
+Fx_r: 2.61068
+Fy_f: 6633.77
+Fy_r: 6801.38
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 199
+Solver iterations: 39
+STATE: {'Ux': '16.17', 'Uy': '-0.92', 'r': '0.58', 'delta': '0.19', 's': '206.05', 'ey': '3.57', 'epsi': '-0.00', 't': '14.00'}
+ACTION: {'Fx': '-515.40', 'w': '-0.40'}
+UX ACCELERATION: -1.927, UY ACCELERATION: -0.561
+FINAL ST CURVATURE: 0.0354455
+FINAL PM CURVATURE: 0.0404694
+AVERAGE ELAPSED TIME: 0.116
+MEDIAN ELAPSED TIME: 0.104
+Fx_f: -456.962
+Fx_r: -58.44
+Fy_f: 6652.75
+Fy_r: 6742.22
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 200
+Solver iterations: 36
+STATE: {'Ux': '16.08', 'Uy': '-0.94', 'r': '0.57', 'delta': '0.19', 's': '207.36', 'ey': '3.50', 'epsi': '-0.01', 't': '14.07'}
+ACTION: {'Fx': '449.20', 'w': '0.10'}
+UX ACCELERATION: -1.310, UY ACCELERATION: -0.164
+FINAL ST CURVATURE: 0.036788
+FINAL PM CURVATURE: 0.0402503
+AVERAGE ELAPSED TIME: 0.116
+MEDIAN ELAPSED TIME: 0.104
+Fx_f: 447.032
+Fx_r: 2.16917
+Fy_f: 6546.47
+Fy_r: 6880.01
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 201
+Solver iterations: 30
+STATE: {'Ux': '15.98', 'Uy': '-0.95', 'r': '0.55', 'delta': '0.18', 's': '208.65', 'ey': '3.41', 'epsi': '-0.02', 't': '14.14'}
+ACTION: {'Fx': '243.41', 'w': '-0.20'}
+UX ACCELERATION: -1.374, UY ACCELERATION: 0.051
+FINAL ST CURVATURE: 0.0380247
+FINAL PM CURVATURE: 0.0394643
+AVERAGE ELAPSED TIME: 0.116
+MEDIAN ELAPSED TIME: 0.104
+Fx_f: 240.807
+Fx_r: 2.6042
+Fy_f: 6540.85
+Fy_r: 6850.15
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 202
+Solver iterations: 34
+STATE: {'Ux': '15.91', 'Uy': '-0.93', 'r': '0.54', 'delta': '0.19', 's': '209.92', 'ey': '3.32', 'epsi': '-0.03', 't': '14.21'}
+ACTION: {'Fx': '702.33', 'w': '0.17'}
+UX ACCELERATION: -1.095, UY ACCELERATION: 0.362
+FINAL ST CURVATURE: 0.0390034
+FINAL PM CURVATURE: 0.0387414
+AVERAGE ELAPSED TIME: 0.116
+MEDIAN ELAPSED TIME: 0.104
+Fx_f: 701.075
+Fx_r: 1.24963
+Fy_f: 6488.65
+Fy_r: 6883.94
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 203
+Solver iterations: 29
+STATE: {'Ux': '15.82', 'Uy': '-0.90', 'r': '0.53', 'delta': '0.18', 's': '211.17', 'ey': '3.22', 'epsi': '-0.04', 't': '14.28'}
+ACTION: {'Fx': '287.72', 'w': '-0.16'}
+UX ACCELERATION: -1.295, UY ACCELERATION: 0.513
+FINAL ST CURVATURE: 0.0397805
+FINAL PM CURVATURE: 0.0372718
+AVERAGE ELAPSED TIME: 0.116
+MEDIAN ELAPSED TIME: 0.104
+Fx_f: 285.125
+Fx_r: 2.59881
+Fy_f: 6532.56
+Fy_r: 6796.4
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 204
+Solver iterations: 28
+STATE: {'Ux': '15.74', 'Uy': '-0.86', 'r': '0.52', 'delta': '0.20', 's': '212.41', 'ey': '3.12', 'epsi': '-0.04', 't': '14.35'}
+ACTION: {'Fx': '558.47', 'w': '0.24'}
+UX ACCELERATION: -1.157, UY ACCELERATION: 0.735
+FINAL ST CURVATURE: 0.0402729
+FINAL PM CURVATURE: 0.0367087
+AVERAGE ELAPSED TIME: 0.116
+MEDIAN ELAPSED TIME: 0.104
+Fx_f: 556.71
+Fx_r: 1.7556
+Fy_f: 6531.56
+Fy_r: 6774.05
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 205
+Solver iterations: 29
+STATE: {'Ux': '15.65', 'Uy': '-0.80', 'r': '0.51', 'delta': '0.18', 's': '213.76', 'ey': '2.99', 'epsi': '-0.09', 't': '14.42'}
+ACTION: {'Fx': '372.77', 'w': '-0.29'}
+UX ACCELERATION: -1.149, UY ACCELERATION: 0.799
+FINAL ST CURVATURE: 0.04053
+FINAL PM CURVATURE: 0.0354627
+AVERAGE ELAPSED TIME: 0.116
+MEDIAN ELAPSED TIME: 0.103
+Fx_f: 370.346
+Fx_r: 2.42478
+Fy_f: 6476.46
+Fy_r: 6683.67
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 206
+Solver iterations: 32
+STATE: {'Ux': '15.58', 'Uy': '-0.74', 'r': '0.50', 'delta': '0.21', 's': '214.96', 'ey': '2.83', 'epsi': '-0.10', 't': '14.49'}
+ACTION: {'Fx': '652.65', 'w': '0.40'}
+UX ACCELERATION: -1.054, UY ACCELERATION: 0.948
+FINAL ST CURVATURE: 0.0405158
+FINAL PM CURVATURE: 0.033709
+AVERAGE ELAPSED TIME: 0.116
+MEDIAN ELAPSED TIME: 0.104
+Fx_f: 651.231
+Fx_r: 1.41401
+Fy_f: 6515.35
+Fy_r: 6625.13
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 207
+Solver iterations: 29
+STATE: {'Ux': '15.49', 'Uy': '-0.68', 'r': '0.50', 'delta': '0.19', 's': '216.16', 'ey': '2.68', 'epsi': '-0.10', 't': '14.56'}
+ACTION: {'Fx': '278.15', 'w': '-0.27'}
+UX ACCELERATION: -1.180, UY ACCELERATION: 0.891
+FINAL ST CURVATURE: 0.0402435
+FINAL PM CURVATURE: 0.065531
+AVERAGE ELAPSED TIME: 0.116
+MEDIAN ELAPSED TIME: 0.103
+Fx_f: 275.541
+Fx_r: 2.60624
+Fy_f: 6502.09
+Fy_r: 6495.39
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 208
+Solver iterations: 33
+STATE: {'Ux': '15.44', 'Uy': '-0.61', 'r': '0.50', 'delta': '0.21', 's': '217.35', 'ey': '2.51', 'epsi': '-0.11', 't': '14.63'}
+ACTION: {'Fx': '1041.91', 'w': '0.36'}
+UX ACCELERATION: -0.742, UY ACCELERATION: 0.952
+FINAL ST CURVATURE: 0.039757
+FINAL PM CURVATURE: 0.033805
+AVERAGE ELAPSED TIME: 0.116
+MEDIAN ELAPSED TIME: 0.104
+Fx_f: 1041.43
+Fx_r: 0.479479
+Fy_f: 6405.62
+Fy_r: 6456.88
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 209
+Solver iterations: 33
+STATE: {'Ux': '15.37', 'Uy': '-0.55', 'r': '0.50', 'delta': '0.19', 's': '218.52', 'ey': '2.34', 'epsi': '-0.12', 't': '14.70'}
+ACTION: {'Fx': '484.92', 'w': '-0.24'}
+UX ACCELERATION: -1.013, UY ACCELERATION: 0.800
+FINAL ST CURVATURE: 0.0390055
+FINAL PM CURVATURE: 0.0361409
+AVERAGE ELAPSED TIME: 0.116
+MEDIAN ELAPSED TIME: 0.104
+Fx_f: 482.883
+Fx_r: 2.03584
+Fy_f: 6463.81
+Fy_r: 6311.85
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 210
+Solver iterations: 34
+STATE: {'Ux': '15.33', 'Uy': '-0.49', 'r': '0.50', 'delta': '0.21', 's': '219.69', 'ey': '2.17', 'epsi': '-0.13', 't': '14.77'}
+ACTION: {'Fx': '1238.60', 'w': '0.29'}
+UX ACCELERATION: -0.562, UY ACCELERATION: 0.753
+FINAL ST CURVATURE: 0.0381368
+FINAL PM CURVATURE: 0.0367927
+AVERAGE ELAPSED TIME: 0.116
+MEDIAN ELAPSED TIME: 0.104
+Fx_f: 1238.34
+Fx_r: 0.259825
+Fy_f: 6328.56
+Fy_r: 6277.87
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 211
+Solver iterations: 30
+STATE: {'Ux': '15.28', 'Uy': '-0.45', 'r': '0.51', 'delta': '0.20', 's': '220.84', 'ey': '1.99', 'epsi': '-0.15', 't': '14.84'}
+ACTION: {'Fx': '894.47', 'w': '-0.18'}
+UX ACCELERATION: -0.719, UY ACCELERATION: 0.571
+FINAL ST CURVATURE: 0.0370155
+FINAL PM CURVATURE: 0.038567
+AVERAGE ELAPSED TIME: 0.116
+MEDIAN ELAPSED TIME: 0.104
+Fx_f: 893.731
+Fx_r: 0.741147
+Fy_f: 6369.05
+Fy_r: 6182.04
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 212
+Solver iterations: 32
+STATE: {'Ux': '15.25', 'Uy': '-0.41', 'r': '0.52', 'delta': '0.22', 's': '221.98', 'ey': '1.80', 'epsi': '-0.15', 't': '14.91'}
+ACTION: {'Fx': '1360.01', 'w': '0.24'}
+UX ACCELERATION: -0.457, UY ACCELERATION: 0.466
+FINAL ST CURVATURE: 0.0358368
+FINAL PM CURVATURE: 0.039402
+AVERAGE ELAPSED TIME: 0.115
+MEDIAN ELAPSED TIME: 0.104
+Fx_f: 1359.83
+Fx_r: 0.17561
+Fy_f: 6278.46
+Fy_r: 6164.82
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 213
+Solver iterations: 34
+STATE: {'Ux': '15.21', 'Uy': '-0.39', 'r': '0.53', 'delta': '0.21', 's': '223.10', 'ey': '1.60', 'epsi': '-0.16', 't': '14.98'}
+ACTION: {'Fx': '1061.44', 'w': '-0.14'}
+UX ACCELERATION: -0.608, UY ACCELERATION: 0.292
+FINAL ST CURVATURE: 0.0345018
+FINAL PM CURVATURE: 0.0400295
+AVERAGE ELAPSED TIME: 0.115
+MEDIAN ELAPSED TIME: 0.104
+Fx_f: 1060.99
+Fx_r: 0.451832
+Fy_f: 6328.25
+Fy_r: 6123.97
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 214
+Solver iterations: 32
+STATE: {'Ux': '15.18', 'Uy': '-0.37', 'r': '0.54', 'delta': '0.22', 's': '224.22', 'ey': '1.40', 'epsi': '-0.17', 't': '15.05'}
+ACTION: {'Fx': '1410.87', 'w': '0.16'}
+UX ACCELERATION: -0.412, UY ACCELERATION: 0.190
+FINAL ST CURVATURE: 0.0331567
+FINAL PM CURVATURE: 0.0404018
+AVERAGE ELAPSED TIME: 0.115
+MEDIAN ELAPSED TIME: 0.104
+Fx_f: 1410.72
+Fx_r: 0.148658
+Fy_f: 6251.13
+Fy_r: 6146.84
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 215
+Solver iterations: 32
+STATE: {'Ux': '15.14', 'Uy': '-0.36', 'r': '0.55', 'delta': '0.22', 's': '225.31', 'ey': '1.19', 'epsi': '-0.18', 't': '15.12'}
+ACTION: {'Fx': '1159.78', 'w': '-0.08'}
+UX ACCELERATION: -0.559, UY ACCELERATION: 0.064
+FINAL ST CURVATURE: 0.000526939
+FINAL PM CURVATURE: 0.0405536
+AVERAGE ELAPSED TIME: 0.115
+MEDIAN ELAPSED TIME: 0.104
+Fx_f: 1159.45
+Fx_r: 0.333343
+Fy_f: 6308.78
+Fy_r: 6150.05
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 216
+Solver iterations: 40
+STATE: {'Ux': '15.12', 'Uy': '-0.36', 'r': '0.55', 'delta': '0.22', 's': '226.40', 'ey': '0.97', 'epsi': '-0.18', 't': '15.19'}
+ACTION: {'Fx': '1572.22', 'w': '0.00'}
+UX ACCELERATION: -0.272, UY ACCELERATION: -0.012
+FINAL ST CURVATURE: 5.61835e-10
+FINAL PM CURVATURE: 0.0405382
+AVERAGE ELAPSED TIME: 0.115
+MEDIAN ELAPSED TIME: 0.104
+Fx_f: 1572.14
+Fx_r: 0.0868975
+Fy_f: 6166.74
+Fy_r: 6204.42
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 217
+Solver iterations: 32
+STATE: {'Ux': '15.10', 'Uy': '-0.36', 'r': '0.56', 'delta': '0.21', 's': '227.47', 'ey': '0.76', 'epsi': '-0.18', 't': '15.26'}
+ACTION: {'Fx': '1648.67', 'w': '-0.02'}
+UX ACCELERATION: -0.216, UY ACCELERATION: -0.059
+FINAL ST CURVATURE: 1.34194e-12
+FINAL PM CURVATURE: 0.0401828
+AVERAGE ELAPSED TIME: 0.115
+MEDIAN ELAPSED TIME: 0.104
+Fx_f: 1648.6
+Fx_r: 0.0671206
+Fy_f: 6133.2
+Fy_r: 6235.73
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 218
+Solver iterations: 38
+STATE: {'Ux': '15.09', 'Uy': '-0.37', 'r': '0.56', 'delta': '0.22', 's': '228.53', 'ey': '0.54', 'epsi': '-0.19', 't': '15.33'}
+ACTION: {'Fx': '1669.69', 'w': '0.02'}
+UX ACCELERATION: -0.210, UY ACCELERATION: -0.080
+FINAL ST CURVATURE: 3.34271e-12
+FINAL PM CURVATURE: 0.0395903
+AVERAGE ELAPSED TIME: 0.115
+MEDIAN ELAPSED TIME: 0.104
+Fx_f: 1669.62
+Fx_r: 0.0624963
+Fy_f: 6129.18
+Fy_r: 6263.69
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 219
+Solver iterations: 32
+STATE: {'Ux': '15.08', 'Uy': '-0.37', 'r': '0.56', 'delta': '0.21', 's': '229.58', 'ey': '0.32', 'epsi': '-0.19', 't': '15.40'}
+ACTION: {'Fx': '1746.08', 'w': '-0.06'}
+UX ACCELERATION: -0.139, UY ACCELERATION: -0.097
+FINAL ST CURVATURE: 2.2887e-12
+FINAL PM CURVATURE: 0.0389834
+AVERAGE ELAPSED TIME: 0.115
+MEDIAN ELAPSED TIME: 0.104
+Fx_f: 1746.04
+Fx_r: 0.048149
+Fy_f: 6084.29
+Fy_r: 6292.36
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 220
+Solver iterations: 39
+STATE: {'Ux': '15.08', 'Uy': '-0.38', 'r': '0.56', 'delta': '0.21', 's': '230.62', 'ey': '0.09', 'epsi': '-0.18', 't': '15.47'}
+ACTION: {'Fx': '1973.62', 'w': '-0.03'}
+UX ACCELERATION: 0.029, UY ACCELERATION: -0.087
+FINAL ST CURVATURE: 3.71906e-12
+FINAL PM CURVATURE: 0.0376308
+AVERAGE ELAPSED TIME: 0.115
+MEDIAN ELAPSED TIME: 0.104
+Fx_f: 1973.59
+Fx_r: 0.0219055
+Fy_f: 5983.65
+Fy_r: 6320.97
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 221
+Solver iterations: 32
+STATE: {'Ux': '15.08', 'Uy': '-0.38', 'r': '0.56', 'delta': '0.21', 's': '231.65', 'ey': '-0.12', 'epsi': '-0.18', 't': '15.54'}
+ACTION: {'Fx': '1979.24', 'w': '0.02'}
+UX ACCELERATION: 0.024, UY ACCELERATION: -0.051
+FINAL ST CURVATURE: 1.40608e-08
+FINAL PM CURVATURE: 0.0362243
+AVERAGE ELAPSED TIME: 0.115
+MEDIAN ELAPSED TIME: 0.104
+Fx_f: 1979.22
+Fx_r: 0.021479
+Fy_f: 5987.24
+Fy_r: 6325.14
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 222
+Solver iterations: 32
+STATE: {'Ux': '15.07', 'Uy': '-0.39', 'r': '0.56', 'delta': '0.22', 's': '232.68', 'ey': '-0.34', 'epsi': '-0.18', 't': '15.61'}
+ACTION: {'Fx': '1744.50', 'w': '0.07'}
+UX ACCELERATION: -0.167, UY ACCELERATION: -0.016
+FINAL ST CURVATURE: 0.0018813
+FINAL PM CURVATURE: 0.0351842
+AVERAGE ELAPSED TIME: 0.115
+MEDIAN ELAPSED TIME: 0.104
+Fx_f: 1744.46
+Fx_r: 0.0484101
+Fy_f: 6103.1
+Fy_r: 6313.83
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 223
+Solver iterations: 32
+STATE: {'Ux': '15.05', 'Uy': '-0.39', 'r': '0.56', 'delta': '0.21', 's': '233.70', 'ey': '-0.55', 'epsi': '-0.17', 't': '15.68'}
+ACTION: {'Fx': '1573.48', 'w': '-0.02'}
+UX ACCELERATION: -0.282, UY ACCELERATION: -0.019
+FINAL ST CURVATURE: 0.0332692
+FINAL PM CURVATURE: 0.0347984
+AVERAGE ELAPSED TIME: 0.115
+MEDIAN ELAPSED TIME: 0.104
+Fx_f: 1573.4
+Fx_r: 0.08653
+Fy_f: 6164.61
+Fy_r: 6312.32
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 224
+Solver iterations: 32
+STATE: {'Ux': '15.03', 'Uy': '-0.39', 'r': '0.56', 'delta': '0.22', 's': '234.73', 'ey': '-0.73', 'epsi': '-0.13', 't': '15.75'}
+ACTION: {'Fx': '1550.28', 'w': '0.04'}
+UX ACCELERATION: -0.313, UY ACCELERATION: -0.018
+FINAL ST CURVATURE: 0.0344992
+FINAL PM CURVATURE: 0.0340147
+AVERAGE ELAPSED TIME: 0.115
+MEDIAN ELAPSED TIME: 0.104
+Fx_f: 1550.18
+Fx_r: 0.0935443
+Fy_f: 6181.95
+Fy_r: 6323.2
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 225
+Solver iterations: 26
+STATE: {'Ux': '15.01', 'Uy': '-0.39', 'r': '0.57', 'delta': '0.21', 's': '235.78', 'ey': '-0.87', 'epsi': '-0.09', 't': '15.82'}
+ACTION: {'Fx': '1512.58', 'w': '-0.03'}
+UX ACCELERATION: -0.329, UY ACCELERATION: -0.024
+FINAL ST CURVATURE: 0.0356933
+FINAL PM CURVATURE: 0.0330541
+AVERAGE ELAPSED TIME: 0.115
+MEDIAN ELAPSED TIME: 0.103
+Fx_f: 1512.47
+Fx_r: 0.10612
+Fy_f: 6187.45
+Fy_r: 6333.04
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 226
+Solver iterations: 38
+STATE: {'Ux': '14.99', 'Uy': '-0.39', 'r': '0.57', 'delta': '0.21', 's': '236.82', 'ey': '-0.98', 'epsi': '-0.05', 't': '15.89'}
+ACTION: {'Fx': '1621.67', 'w': '0.00'}
+UX ACCELERATION: -0.255, UY ACCELERATION: -0.016
+FINAL ST CURVATURE: 0.0368061
+FINAL PM CURVATURE: 0.000526662
+AVERAGE ELAPSED TIME: 0.115
+MEDIAN ELAPSED TIME: 0.104
+Fx_f: 1621.6
+Fx_r: 0.0735486
+Fy_f: 6147.88
+Fy_r: 6349.69
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 227
+Solver iterations: 32
+STATE: {'Ux': '14.97', 'Uy': '-0.39', 'r': '0.57', 'delta': '0.21', 's': '237.87', 'ey': '-1.04', 'epsi': '-0.01', 't': '15.96'}
+ACTION: {'Fx': '1648.01', 'w': '-0.02'}
+UX ACCELERATION: -0.230, UY ACCELERATION: -0.004
+FINAL ST CURVATURE: 0.0378204
+FINAL PM CURVATURE: 2.72783e-10
+AVERAGE ELAPSED TIME: 0.115
+MEDIAN ELAPSED TIME: 0.103
+Fx_f: 1647.94
+Fx_r: 0.0672705
+Fy_f: 6133.51
+Fy_r: 6355.63
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 228
+Solver iterations: 32
+STATE: {'Ux': '14.96', 'Uy': '-0.39', 'r': '0.56', 'delta': '0.21', 's': '238.92', 'ey': '-1.06', 'epsi': '0.03', 't': '16.03'}
+ACTION: {'Fx': '1751.08', 'w': '-0.02'}
+UX ACCELERATION: -0.149, UY ACCELERATION: 0.012
+FINAL ST CURVATURE: 0.0387003
+FINAL PM CURVATURE: 6.44065e-11
+AVERAGE ELAPSED TIME: 0.115
+MEDIAN ELAPSED TIME: 0.102
+Fx_f: 1751.04
+Fx_r: 0.0473309
+Fy_f: 6088.01
+Fy_r: 6361.36
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 229
+Solver iterations: 33
+STATE: {'Ux': '14.96', 'Uy': '-0.39', 'r': '0.56', 'delta': '0.21', 's': '239.96', 'ey': '-1.04', 'epsi': '0.07', 't': '16.10'}
+ACTION: {'Fx': '1851.72', 'w': '-0.02'}
+UX ACCELERATION: -0.070, UY ACCELERATION: 0.032
+FINAL ST CURVATURE: 0.0394333
+FINAL PM CURVATURE: 1.4987e-16
+AVERAGE ELAPSED TIME: 0.115
+MEDIAN ELAPSED TIME: 0.102
+Fx_f: 1851.69
+Fx_r: 0.0334662
+Fy_f: 6042.38
+Fy_r: 6359.71
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 230
+Solver iterations: 40
+STATE: {'Ux': '14.94', 'Uy': '-0.39', 'r': '0.56', 'delta': '0.22', 's': '241.01', 'ey': '-0.97', 'epsi': '0.11', 't': '16.17'}
+ACTION: {'Fx': '1611.67', 'w': '0.13'}
+UX ACCELERATION: -0.281, UY ACCELERATION: 0.068
+FINAL ST CURVATURE: 0.0399941
+FINAL PM CURVATURE: 1.00319e-24
+AVERAGE ELAPSED TIME: 0.115
+MEDIAN ELAPSED TIME: 0.102
+Fx_f: 1611.59
+Fx_r: 0.0760787
+Fy_f: 6168.43
+Fy_r: 6335.74
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 231
+Solver iterations: 39
+STATE: {'Ux': '14.91', 'Uy': '-0.38', 'r': '0.56', 'delta': '0.21', 's': '242.02', 'ey': '-0.88', 'epsi': '0.11', 't': '16.24'}
+ACTION: {'Fx': '1452.49', 'w': '-0.10'}
+UX ACCELERATION: -0.358, UY ACCELERATION: 0.043
+FINAL ST CURVATURE: 0.0403553
+FINAL PM CURVATURE: 4.4928e-25
+AVERAGE ELAPSED TIME: 0.115
+MEDIAN ELAPSED TIME: 0.103
+Fx_f: 1452.36
+Fx_r: 0.129581
+Fy_f: 6200.35
+Fy_r: 6325.02
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 232
+Solver iterations: 33
+STATE: {'Ux': '14.90', 'Uy': '-0.38', 'r': '0.56', 'delta': '0.22', 's': '243.03', 'ey': '-0.79', 'epsi': '0.12', 't': '16.31'}
+ACTION: {'Fx': '1686.94', 'w': '0.05'}
+UX ACCELERATION: -0.208, UY ACCELERATION: 0.048
+FINAL ST CURVATURE: 0.0405366
+FINAL PM CURVATURE: 3.53026e-30
+AVERAGE ELAPSED TIME: 0.115
+MEDIAN ELAPSED TIME: 0.102
+Fx_f: 1686.89
+Fx_r: 0.0589309
+Fy_f: 6125.65
+Fy_r: 6340.35
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 233
+Solver iterations: 40
+STATE: {'Ux': '14.89', 'Uy': '-0.38', 'r': '0.56', 'delta': '0.21', 's': '244.04', 'ey': '-0.69', 'epsi': '0.12', 't': '16.38'}
+ACTION: {'Fx': '1769.86', 'w': '-0.14'}
+UX ACCELERATION: -0.102, UY ACCELERATION: 0.033
+FINAL ST CURVATURE: 0.0405394
+FINAL PM CURVATURE: 1.72596e-41
+AVERAGE ELAPSED TIME: 0.115
+MEDIAN ELAPSED TIME: 0.103
+Fx_f: 1769.82
+Fx_r: 0.0443769
+Fy_f: 6057.1
+Fy_r: 6339.04
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 234
+Solver iterations: 32
+STATE: {'Ux': '14.90', 'Uy': '-0.38', 'r': '0.56', 'delta': '0.21', 's': '245.06', 'ey': '-0.59', 'epsi': '0.12', 't': '16.45'}
+ACTION: {'Fx': '2124.59', 'w': '0.05'}
+UX ACCELERATION: 0.138, UY ACCELERATION: 0.059
+FINAL ST CURVATURE: 0.0403522
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.115
+MEDIAN ELAPSED TIME: 0.102
+Fx_f: 2124.58
+Fx_r: 0.0128915
+Fy_f: 5916.8
+Fy_r: 6344.2
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 235
+Solver iterations: 33
+STATE: {'Ux': '14.90', 'Uy': '-0.37', 'r': '0.56', 'delta': '0.21', 's': '246.07', 'ey': '-0.49', 'epsi': '0.13', 't': '16.52'}
+ACTION: {'Fx': '1970.73', 'w': '0.01'}
+UX ACCELERATION: 0.027, UY ACCELERATION: 0.090
+FINAL ST CURVATURE: 0.0399728
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.115
+MEDIAN ELAPSED TIME: 0.102
+Fx_f: 1970.71
+Fx_r: 0.0221275
+Fy_f: 5989.44
+Fy_r: 6310.59
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 236
+Solver iterations: 33
+STATE: {'Ux': '14.90', 'Uy': '-0.36', 'r': '0.56', 'delta': '0.21', 's': '247.09', 'ey': '-0.38', 'epsi': '0.13', 't': '16.59'}
+ACTION: {'Fx': '1968.46', 'w': '-0.01'}
+UX ACCELERATION: 0.033, UY ACCELERATION: 0.090
+FINAL ST CURVATURE: 0.0394358
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.115
+MEDIAN ELAPSED TIME: 0.102
+Fx_f: 1968.44
+Fx_r: 0.0223035
+Fy_f: 5987.29
+Fy_r: 6290.46
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 237
+Solver iterations: 33
+STATE: {'Ux': '14.91', 'Uy': '-0.36', 'r': '0.55', 'delta': '0.21', 's': '248.12', 'ey': '-0.27', 'epsi': '0.13', 't': '16.66'}
+ACTION: {'Fx': '2037.72', 'w': '-0.01'}
+UX ACCELERATION: 0.090, UY ACCELERATION: 0.083
+FINAL ST CURVATURE: 0.0387254
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.115
+MEDIAN ELAPSED TIME: 0.102
+Fx_f: 2037.7
+Fx_r: 0.0175016
+Fy_f: 5952.61
+Fy_r: 6275.49
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 238
+Solver iterations: 33
+STATE: {'Ux': '14.92', 'Uy': '-0.35', 'r': '0.55', 'delta': '0.21', 's': '249.15', 'ey': '-0.17', 'epsi': '0.12', 't': '16.73'}
+ACTION: {'Fx': '2131.71', 'w': '-0.03'}
+UX ACCELERATION: 0.169, UY ACCELERATION: 0.074
+FINAL ST CURVATURE: 0.0378549
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.114
+MEDIAN ELAPSED TIME: 0.102
+Fx_f: 2131.7
+Fx_r: 0.0125714
+Fy_f: 5902.79
+Fy_r: 6260.78
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 239
+Solver iterations: 41
+STATE: {'Ux': '14.94', 'Uy': '-0.35', 'r': '0.55', 'delta': '0.20', 's': '250.19', 'ey': '-0.07', 'epsi': '0.12', 't': '16.80'}
+ACTION: {'Fx': '2293.64', 'w': '-0.05'}
+UX ACCELERATION: 0.306, UY ACCELERATION: 0.063
+FINAL ST CURVATURE: 0.0368381
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.115
+MEDIAN ELAPSED TIME: 0.102
+Fx_f: 2293.64
+Fx_r: 0.00707762
+Fy_f: 5811.65
+Fy_r: 6245.83
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 240
+Solver iterations: 33
+STATE: {'Ux': '14.97', 'Uy': '-0.34', 'r': '0.54', 'delta': '0.20', 's': '251.23', 'ey': '0.03', 'epsi': '0.12', 't': '16.87'}
+ACTION: {'Fx': '2502.06', 'w': '-0.06'}
+UX ACCELERATION: 0.477, UY ACCELERATION: 0.060
+FINAL ST CURVATURE: 0.0356818
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.114
+MEDIAN ELAPSED TIME: 0.102
+Fx_f: 2502.06
+Fx_r: 0.00335433
+Fy_f: 5691.36
+Fy_r: 6224.43
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 241
+Solver iterations: 33
+STATE: {'Ux': '15.02', 'Uy': '-0.34', 'r': '0.54', 'delta': '0.20', 's': '252.28', 'ey': '0.13', 'epsi': '0.11', 't': '16.94'}
+ACTION: {'Fx': '2684.89', 'w': '-0.06'}
+UX ACCELERATION: 0.631, UY ACCELERATION: 0.071
+FINAL ST CURVATURE: 0.034409
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.114
+MEDIAN ELAPSED TIME: 0.102
+Fx_f: 2684.88
+Fx_r: 0.00173234
+Fy_f: 5577.8
+Fy_r: 6189.6
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 242
+Solver iterations: 34
+STATE: {'Ux': '15.05', 'Uy': '-0.33', 'r': '0.53', 'delta': '0.21', 's': '253.33', 'ey': '0.22', 'epsi': '0.11', 't': '17.01'}
+ACTION: {'Fx': '2546.93', 'w': '0.16'}
+UX ACCELERATION: 0.487, UY ACCELERATION: 0.130
+FINAL ST CURVATURE: 0.0689761
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.114
+MEDIAN ELAPSED TIME: 0.102
+Fx_f: 2546.93
+Fx_r: 0.00285345
+Fy_f: 5691.87
+Fy_r: 6137.19
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 243
+Solver iterations: 42
+STATE: {'Ux': '15.08', 'Uy': '-0.32', 'r': '0.53', 'delta': '0.20', 's': '254.40', 'ey': '0.30', 'epsi': '0.10', 't': '17.08'}
+ACTION: {'Fx': '2310.62', 'w': '-0.07'}
+UX ACCELERATION: 0.341, UY ACCELERATION: 0.100
+FINAL ST CURVATURE: 0.0335569
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.114
+MEDIAN ELAPSED TIME: 0.102
+Fx_f: 2310.61
+Fx_r: 0.00666198
+Fy_f: 5798.3
+Fy_r: 6097.12
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 244
+Solver iterations: 33
+STATE: {'Ux': '15.12', 'Uy': '-0.32', 'r': '0.53', 'delta': '0.20', 's': '255.46', 'ey': '0.39', 'epsi': '0.10', 't': '17.15'}
+ACTION: {'Fx': '2594.65', 'w': '-0.06'}
+UX ACCELERATION: 0.569, UY ACCELERATION: 0.032
+FINAL ST CURVATURE: 0.0346696
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.114
+MEDIAN ELAPSED TIME: 0.102
+Fx_f: 2594.64
+Fx_r: 0.00240187
+Fy_f: 5632.39
+Fy_r: 6091.58
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 245
+Solver iterations: 32
+STATE: {'Ux': '15.17', 'Uy': '-0.32', 'r': '0.53', 'delta': '0.19', 's': '256.54', 'ey': '0.46', 'epsi': '0.09', 't': '17.22'}
+ACTION: {'Fx': '2794.74', 'w': '-0.05'}
+UX ACCELERATION: 0.731, UY ACCELERATION: 0.007
+FINAL ST CURVATURE: 0.0359641
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.114
+MEDIAN ELAPSED TIME: 0.102
+Fx_f: 2794.74
+Fx_r: 0.00116204
+Fy_f: 5506.36
+Fy_r: 6073.71
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 246
+Solver iterations: 31
+STATE: {'Ux': '15.23', 'Uy': '-0.32', 'r': '0.52', 'delta': '0.19', 's': '257.62', 'ey': '0.53', 'epsi': '0.09', 't': '17.29'}
+ACTION: {'Fx': '2926.92', 'w': '-0.05'}
+UX ACCELERATION: 0.843, UY ACCELERATION: 0.008
+FINAL ST CURVATURE: 0.037148
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.114
+MEDIAN ELAPSED TIME: 0.102
+Fx_f: 2926.92
+Fx_r: 0.000717248
+Fy_f: 5416.23
+Fy_r: 6043.72
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 247
+Solver iterations: 40
+STATE: {'Ux': '15.29', 'Uy': '-0.32', 'r': '0.51', 'delta': '0.19', 's': '258.71', 'ey': '0.60', 'epsi': '0.08', 't': '17.36'}
+ACTION: {'Fx': '3023.89', 'w': '-0.03'}
+UX ACCELERATION: 0.926, UY ACCELERATION: 0.021
+FINAL ST CURVATURE: 0.0381972
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.114
+MEDIAN ELAPSED TIME: 0.102
+Fx_f: 3023.89
+Fx_r: 0.000502768
+Fy_f: 5348.8
+Fy_r: 6004.4
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 248
+Solver iterations: 32
+STATE: {'Ux': '15.36', 'Uy': '-0.32', 'r': '0.51', 'delta': '0.19', 's': '259.81', 'ey': '0.66', 'epsi': '0.08', 't': '17.43'}
+ACTION: {'Fx': '3070.90', 'w': '-0.01'}
+UX ACCELERATION: 0.967, UY ACCELERATION: 0.039
+FINAL ST CURVATURE: 0.0390828
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.114
+MEDIAN ELAPSED TIME: 0.102
+Fx_f: 3070.9
+Fx_r: 0.000423055
+Fy_f: 5316.51
+Fy_r: 5958.62
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 249
+Solver iterations: 33
+STATE: {'Ux': '15.42', 'Uy': '-0.32', 'r': '0.50', 'delta': '0.19', 's': '260.91', 'ey': '0.72', 'epsi': '0.07', 't': '17.50'}
+ACTION: {'Fx': '3051.94', 'w': '0.02'}
+UX ACCELERATION: 0.950, UY ACCELERATION: 0.052
+FINAL ST CURVATURE: 0.0397777
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.114
+MEDIAN ELAPSED TIME: 0.102
+Fx_f: 3051.94
+Fx_r: 0.00045358
+Fy_f: 5334.11
+Fy_r: 5912.64
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 250
+Solver iterations: 32
+STATE: {'Ux': '15.49', 'Uy': '-0.31', 'r': '0.50', 'delta': '0.19', 's': '262.02', 'ey': '0.78', 'epsi': '0.07', 't': '17.57'}
+ACTION: {'Fx': '3015.50', 'w': '-0.00'}
+UX ACCELERATION: 0.926, UY ACCELERATION: 0.040
+FINAL ST CURVATURE: 0.0402613
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.114
+MEDIAN ELAPSED TIME: 0.102
+Fx_f: 3015.5
+Fx_r: 0.000518477
+Fy_f: 5357.79
+Fy_r: 5875.4
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 251
+Solver iterations: 34
+STATE: {'Ux': '15.55', 'Uy': '-0.31', 'r': '0.50', 'delta': '0.19', 's': '263.16', 'ey': '0.82', 'epsi': '0.03', 't': '17.64'}
+ACTION: {'Fx': '3021.55', 'w': '-0.00'}
+UX ACCELERATION: 0.932, UY ACCELERATION: 0.008
+FINAL ST CURVATURE: 0.0405193
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.114
+MEDIAN ELAPSED TIME: 0.102
+Fx_f: 3021.55
+Fx_r: 0.000507096
+Fy_f: 5353.57
+Fy_r: 5850.83
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 252
+Solver iterations: 30
+STATE: {'Ux': '15.61', 'Uy': '-0.31', 'r': '0.50', 'delta': '0.19', 's': '264.29', 'ey': '0.83', 'epsi': '0.03', 't': '17.71'}
+ACTION: {'Fx': '2949.75', 'w': '0.05'}
+UX ACCELERATION: 0.862, UY ACCELERATION: -0.012
+FINAL ST CURVATURE: 0.0405383
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.114
+MEDIAN ELAPSED TIME: 0.102
+Fx_f: 2949.75
+Fx_r: 0.000659743
+Fy_f: 5412.87
+Fy_r: 5836.42
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 253
+Solver iterations: 30
+STATE: {'Ux': '15.67', 'Uy': '-0.31', 'r': '0.50', 'delta': '0.19', 's': '265.41', 'ey': '0.84', 'epsi': '0.02', 't': '17.78'}
+ACTION: {'Fx': '2850.56', 'w': '-0.01'}
+UX ACCELERATION: 0.789, UY ACCELERATION: -0.059
+FINAL ST CURVATURE: 0.0403141
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.114
+MEDIAN ELAPSED TIME: 0.102
+Fx_f: 2850.56
+Fx_r: 0.000948059
+Fy_f: 5473.98
+Fy_r: 5838.09
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 254
+Solver iterations: 31
+STATE: {'Ux': '15.73', 'Uy': '-0.32', 'r': '0.51', 'delta': '0.19', 's': '266.55', 'ey': '0.84', 'epsi': '0.02', 't': '17.85'}
+ACTION: {'Fx': '2867.87', 'w': '-0.01'}
+UX ACCELERATION: 0.799, UY ACCELERATION: -0.115
+FINAL ST CURVATURE: 0.0398572
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.114
+MEDIAN ELAPSED TIME: 0.102
+Fx_f: 2867.87
+Fx_r: 0.000889994
+Fy_f: 5462.68
+Fy_r: 5856.7
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 255
+Solver iterations: 29
+STATE: {'Ux': '15.78', 'Uy': '-0.33', 'r': '0.51', 'delta': '0.19', 's': '267.69', 'ey': '0.83', 'epsi': '0.01', 't': '17.92'}
+ACTION: {'Fx': '2872.26', 'w': '-0.01'}
+UX ACCELERATION: 0.799, UY ACCELERATION: -0.151
+FINAL ST CURVATURE: 0.0391694
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.114
+MEDIAN ELAPSED TIME: 0.102
+Fx_f: 2872.26
+Fx_r: 0.000875864
+Fy_f: 5460.07
+Fy_r: 5879.89
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 256
+Solver iterations: 30
+STATE: {'Ux': '15.84', 'Uy': '-0.34', 'r': '0.51', 'delta': '0.19', 's': '268.83', 'ey': '0.82', 'epsi': '0.00', 't': '17.99'}
+ACTION: {'Fx': '2857.30', 'w': '-0.00'}
+UX ACCELERATION: 0.781, UY ACCELERATION: -0.169
+FINAL ST CURVATURE: 0.0382713
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.114
+MEDIAN ELAPSED TIME: 0.102
+Fx_f: 2857.3
+Fx_r: 0.000925016
+Fy_f: 5471.58
+Fy_r: 5904.31
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 257
+Solver iterations: 30
+STATE: {'Ux': '15.89', 'Uy': '-0.35', 'r': '0.51', 'delta': '0.19', 's': '269.98', 'ey': '0.79', 'epsi': '-0.01', 't': '18.06'}
+ACTION: {'Fx': '2837.21', 'w': '-0.01'}
+UX ACCELERATION: 0.763, UY ACCELERATION: -0.179
+FINAL ST CURVATURE: 0.0371875
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.114
+MEDIAN ELAPSED TIME: 0.102
+Fx_f: 2837.21
+Fx_r: 0.000995387
+Fy_f: 5484.09
+Fy_r: 5928.61
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 258
+Solver iterations: 34
+STATE: {'Ux': '15.94', 'Uy': '-0.36', 'r': '0.51', 'delta': '0.19', 's': '271.13', 'ey': '0.75', 'epsi': '-0.02', 't': '18.13'}
+ACTION: {'Fx': '2825.38', 'w': '-0.01'}
+UX ACCELERATION: 0.749, UY ACCELERATION: -0.179
+FINAL ST CURVATURE: 0.0359452
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.114
+MEDIAN ELAPSED TIME: 0.102
+Fx_f: 2825.38
+Fx_r: 0.00103924
+Fy_f: 5493.1
+Fy_r: 5951.45
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 259
+Solver iterations: 31
+STATE: {'Ux': '15.99', 'Uy': '-0.37', 'r': '0.51', 'delta': '0.19', 's': '272.28', 'ey': '0.70', 'epsi': '-0.03', 't': '18.20'}
+ACTION: {'Fx': '2809.39', 'w': '-0.01'}
+UX ACCELERATION: 0.734, UY ACCELERATION: -0.174
+FINAL ST CURVATURE: 0.0345734
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.114
+MEDIAN ELAPSED TIME: 0.102
+Fx_f: 2809.39
+Fx_r: 0.00110164
+Fy_f: 5502.93
+Fy_r: 5971.01
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 260
+Solver iterations: 33
+STATE: {'Ux': '16.04', 'Uy': '-0.39', 'r': '0.51', 'delta': '0.19', 's': '273.43', 'ey': '0.63', 'epsi': '-0.04', 't': '18.27'}
+ACTION: {'Fx': '2795.30', 'w': '-0.00'}
+UX ACCELERATION: 0.719, UY ACCELERATION: -0.161
+FINAL ST CURVATURE: 0.0331054
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.113
+MEDIAN ELAPSED TIME: 0.101
+Fx_f: 2795.3
+Fx_r: 0.00115965
+Fy_f: 5513.61
+Fy_r: 5987.02
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 261
+Solver iterations: 31
+STATE: {'Ux': '16.09', 'Uy': '-0.40', 'r': '0.50', 'delta': '0.19', 's': '274.58', 'ey': '0.55', 'epsi': '-0.05', 't': '18.34'}
+ACTION: {'Fx': '2766.82', 'w': '-0.01'}
+UX ACCELERATION: 0.695, UY ACCELERATION: -0.147
+FINAL ST CURVATURE: 2.5728e-05
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.113
+MEDIAN ELAPSED TIME: 0.101
+Fx_f: 2766.82
+Fx_r: 0.00128634
+Fy_f: 5532.27
+Fy_r: 5999.17
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 262
+Solver iterations: 37
+STATE: {'Ux': '16.14', 'Uy': '-0.41', 'r': '0.50', 'delta': '0.19', 's': '275.73', 'ey': '0.46', 'epsi': '-0.06', 't': '18.41'}
+ACTION: {'Fx': '2758.16', 'w': '-0.02'}
+UX ACCELERATION: 0.688, UY ACCELERATION: -0.136
+FINAL ST CURVATURE: 2.36332e-10
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.113
+MEDIAN ELAPSED TIME: 0.101
+Fx_f: 2758.16
+Fx_r: 0.00132749
+Fy_f: 5536.6
+Fy_r: 6009.18
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 263
+Solver iterations: 29
+STATE: {'Ux': '16.19', 'Uy': '-0.42', 'r': '0.50', 'delta': '0.19', 's': '276.87', 'ey': '0.35', 'epsi': '-0.07', 't': '18.48'}
+ACTION: {'Fx': '2768.49', 'w': '-0.01'}
+UX ACCELERATION: 0.695, UY ACCELERATION: -0.123
+FINAL ST CURVATURE: 1.28399e-11
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.113
+MEDIAN ELAPSED TIME: 0.101
+Fx_f: 2768.48
+Fx_r: 0.00127856
+Fy_f: 5530.05
+Fy_r: 6016.03
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 264
+Solver iterations: 31
+STATE: {'Ux': '16.24', 'Uy': '-0.42', 'r': '0.50', 'delta': '0.19', 's': '278.01', 'ey': '0.24', 'epsi': '-0.08', 't': '18.55'}
+ACTION: {'Fx': '2769.41', 'w': '-0.01'}
+UX ACCELERATION: 0.695, UY ACCELERATION: -0.106
+FINAL ST CURVATURE: 3.00772e-17
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.113
+MEDIAN ELAPSED TIME: 0.101
+Fx_f: 2769.4
+Fx_r: 0.00127429
+Fy_f: 5529.89
+Fy_r: 6018.28
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 265
+Solver iterations: 36
+STATE: {'Ux': '16.29', 'Uy': '-0.43', 'r': '0.50', 'delta': '0.18', 's': '279.15', 'ey': '0.11', 'epsi': '-0.09', 't': '18.62'}
+ACTION: {'Fx': '2766.61', 'w': '-0.03'}
+UX ACCELERATION: 0.700, UY ACCELERATION: -0.094
+FINAL ST CURVATURE: -2.24072e-25
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.113
+MEDIAN ELAPSED TIME: 0.101
+Fx_f: 2766.6
+Fx_r: 0.00128734
+Fy_f: 5526.16
+Fy_r: 6016.85
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 266
+Solver iterations: 37
+STATE: {'Ux': '16.34', 'Uy': '-0.44', 'r': '0.49', 'delta': '0.18', 's': '280.29', 'ey': '-0.03', 'epsi': '-0.10', 't': '18.69'}
+ACTION: {'Fx': '2759.72', 'w': '-0.11'}
+UX ACCELERATION: 0.725, UY ACCELERATION: -0.094
+FINAL ST CURVATURE: 7.91351e-28
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.113
+MEDIAN ELAPSED TIME: 0.101
+Fx_f: 2759.72
+Fx_r: 0.00132001
+Fy_f: 5502.81
+Fy_r: 6011.32
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 267
+Solver iterations: 30
+STATE: {'Ux': '16.39', 'Uy': '-0.44', 'r': '0.49', 'delta': '0.17', 's': '281.42', 'ey': '-0.17', 'epsi': '-0.10', 't': '18.76'}
+ACTION: {'Fx': '2745.48', 'w': '-0.11'}
+UX ACCELERATION: 0.747, UY ACCELERATION: -0.086
+FINAL ST CURVATURE: 4.90373e-40
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.113
+MEDIAN ELAPSED TIME: 0.101
+Fx_f: 2745.48
+Fx_r: 0.00139015
+Fy_f: 5474.09
+Fy_r: 5999.73
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 268
+Solver iterations: 37
+STATE: {'Ux': '16.44', 'Uy': '-0.45', 'r': '0.48', 'delta': '0.15', 's': '282.55', 'ey': '-0.32', 'epsi': '-0.11', 't': '18.83'}
+ACTION: {'Fx': '2738.93', 'w': '-0.29'}
+UX ACCELERATION: 0.837, UY ACCELERATION: -0.130
+FINAL ST CURVATURE: 4.69811e-62
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.113
+MEDIAN ELAPSED TIME: 0.101
+Fx_f: 2738.93
+Fx_r: 0.00142366
+Fy_f: 5314.05
+Fy_r: 5977.47
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 269
+Solver iterations: 1060
+STATE: {'Ux': '16.51', 'Uy': '-0.46', 'r': '0.46', 'delta': '0.12', 's': '283.68', 'ey': '-0.48', 'epsi': '-0.11', 't': '18.90'}
+ACTION: {'Fx': '2701.26', 'w': '-0.40'}
+UX ACCELERATION: 0.949, UY ACCELERATION: -0.202
+FINAL ST CURVATURE: 0
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.126
+MEDIAN ELAPSED TIME: 0.102
+Fx_f: 2701.26
+Fx_r: 0.00163241
+Fy_f: 4937.47
+Fy_r: 5924.72
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 270
+Solver iterations: 323
+STATE: {'Ux': '16.57', 'Uy': '-0.47', 'r': '0.44', 'delta': '0.11', 's': '284.83', 'ey': '-0.62', 'epsi': '-0.08', 't': '18.97'}
+ACTION: {'Fx': '2662.35', 'w': '-0.16'}
+UX ACCELERATION: 0.984, UY ACCELERATION: -0.007
+FINAL ST CURVATURE: 0
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.129
+MEDIAN ELAPSED TIME: 0.102
+Fx_f: 2662.35
+Fx_r: 0.00187984
+Fy_f: 4763.25
+Fy_r: 5818.69
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 271
+Solver iterations: 28
+STATE: {'Ux': '16.64', 'Uy': '-0.47', 'r': '0.40', 'delta': '0.09', 's': '285.99', 'ey': '-0.73', 'epsi': '-0.05', 't': '19.04'}
+ACTION: {'Fx': '2610.37', 'w': '-0.33'}
+UX ACCELERATION: 1.072, UY ACCELERATION: 0.031
+FINAL ST CURVATURE: 0
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.129
+MEDIAN ELAPSED TIME: 0.102
+Fx_f: 2610.36
+Fx_r: 0.00226915
+Fy_f: 4225.61
+Fy_r: 5645.12
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 272
+Solver iterations: 25
+STATE: {'Ux': '16.72', 'Uy': '-0.46', 'r': '0.35', 'delta': '0.06', 's': '287.15', 'ey': '-0.80', 'epsi': '-0.02', 't': '19.11'}
+ACTION: {'Fx': '2557.16', 'w': '-0.32'}
+UX ACCELERATION: 1.156, UY ACCELERATION: 0.169
+FINAL ST CURVATURE: 0
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.129
+MEDIAN ELAPSED TIME: 0.101
+Fx_f: 2557.16
+Fx_r: 0.00275008
+Fy_f: 3559.72
+Fy_r: 5365.66
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 273
+Solver iterations: 25
+STATE: {'Ux': '16.80', 'Uy': '-0.44', 'r': '0.29', 'delta': '0.04', 's': '288.33', 'ey': '-0.85', 'epsi': '-0.00', 't': '19.18'}
+ACTION: {'Fx': '2505.23', 'w': '-0.27'}
+UX ACCELERATION: 1.222, UY ACCELERATION: 0.433
+FINAL ST CURVATURE: 0
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.129
+MEDIAN ELAPSED TIME: 0.101
+Fx_f: 2505.23
+Fx_r: 0.00331624
+Fy_f: 2890.14
+Fy_r: 4936.54
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 274
+Solver iterations: 24
+STATE: {'Ux': '16.89', 'Uy': '-0.40', 'r': '0.22', 'delta': '0.03', 's': '289.50', 'ey': '-0.87', 'epsi': '0.02', 't': '19.25'}
+ACTION: {'Fx': '2454.94', 'w': '-0.21'}
+UX ACCELERATION: 1.269, UY ACCELERATION: 0.735
+FINAL ST CURVATURE: 0
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.128
+MEDIAN ELAPSED TIME: 0.101
+Fx_f: 2454.93
+Fx_r: 0.0039738
+Fy_f: 2282.49
+Fy_r: 4333.65
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 275
+Solver iterations: 24
+STATE: {'Ux': '16.98', 'Uy': '-0.34', 'r': '0.15', 'delta': '0.02', 's': '290.69', 'ey': '-0.87', 'epsi': '0.03', 't': '19.32'}
+ACTION: {'Fx': '2406.20', 'w': '-0.16'}
+UX ACCELERATION: 1.295, UY ACCELERATION: 0.953
+FINAL ST CURVATURE: 0
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.128
+MEDIAN ELAPSED TIME: 0.101
+Fx_f: 2406.19
+Fx_r: 0.00473333
+Fy_f: 1743.82
+Fy_r: 3577.65
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 276
+Solver iterations: 24
+STATE: {'Ux': '17.07', 'Uy': '-0.27', 'r': '0.10', 'delta': '0.01', 's': '291.88', 'ey': '-0.85', 'epsi': '0.04', 't': '19.39'}
+ACTION: {'Fx': '2358.85', 'w': '-0.12'}
+UX ACCELERATION: 1.302, UY ACCELERATION: 1.014
+FINAL ST CURVATURE: 0
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.128
+MEDIAN ELAPSED TIME: 0.101
+Fx_f: 2358.84
+Fx_r: 0.00560779
+Fy_f: 1262.95
+Fy_r: 2742.94
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 277
+Solver iterations: 24
+STATE: {'Ux': '17.16', 'Uy': '-0.20', 'r': '0.05', 'delta': '0.00', 's': '293.08', 'ey': '-0.81', 'epsi': '0.04', 't': '19.46'}
+ACTION: {'Fx': '2312.75', 'w': '-0.08'}
+UX ACCELERATION: 1.292, UY ACCELERATION: 0.927
+FINAL ST CURVATURE: 0
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.128
+MEDIAN ELAPSED TIME: 0.101
+Fx_f: 2312.74
+Fx_r: 0.00661154
+Fy_f: 836.944
+Fy_r: 1932.73
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 278
+Solver iterations: 24
+STATE: {'Ux': '17.24', 'Uy': '-0.14', 'r': '0.02', 'delta': '-0.00', 's': '294.28', 'ey': '-0.77', 'epsi': '0.05', 't': '19.53'}
+ACTION: {'Fx': '2267.80', 'w': '-0.06'}
+UX ACCELERATION: 1.271, UY ACCELERATION: 0.754
+FINAL ST CURVATURE: 0
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.128
+MEDIAN ELAPSED TIME: 0.101
+Fx_f: 2267.79
+Fx_r: 0.00775994
+Fy_f: 470.55
+Fy_r: 1233.29
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 279
+Solver iterations: 24
+STATE: {'Ux': '17.33', 'Uy': '-0.09', 'r': '0.00', 'delta': '-0.00', 's': '295.49', 'ey': '-0.72', 'epsi': '0.05', 't': '19.60'}
+ACTION: {'Fx': '2223.94', 'w': '-0.04'}
+UX ACCELERATION: 1.245, UY ACCELERATION: 0.562
+FINAL ST CURVATURE: 0
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.128
+MEDIAN ELAPSED TIME: 0.101
+Fx_f: 2223.93
+Fx_r: 0.0090693
+Fy_f: 168.497
+Fy_r: 683.939
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 280
+Solver iterations: 24
+STATE: {'Ux': '17.42', 'Uy': '-0.06', 'r': '-0.01', 'delta': '-0.01', 's': '296.71', 'ey': '-0.67', 'epsi': '0.05', 't': '19.67'}
+ACTION: {'Fx': '2181.11', 'w': '-0.03'}
+UX ACCELERATION: 1.216, UY ACCELERATION: 0.395
+FINAL ST CURVATURE: 0
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.127
+MEDIAN ELAPSED TIME: 0.101
+Fx_f: 2181.1
+Fx_r: 0.0105567
+Fy_f: -67.0184
+Fy_r: 279.971
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 281
+Solver iterations: 24
+STATE: {'Ux': '17.50', 'Uy': '-0.04', 'r': '-0.03', 'delta': '-0.01', 's': '297.93', 'ey': '-0.61', 'epsi': '0.05', 't': '19.74'}
+ACTION: {'Fx': '2139.28', 'w': '-0.02'}
+UX ACCELERATION: 1.186, UY ACCELERATION: 0.271
+FINAL ST CURVATURE: 0
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.127
+MEDIAN ELAPSED TIME: 0.101
+Fx_f: 2139.26
+Fx_r: 0.0122401
+Fy_f: -236.495
+Fy_r: -5.80176
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 282
+Solver iterations: 24
+STATE: {'Ux': '17.58', 'Uy': '-0.02', 'r': '-0.03', 'delta': '-0.01', 's': '299.15', 'ey': '-0.56', 'epsi': '0.04', 't': '19.81'}
+ACTION: {'Fx': '2098.42', 'w': '-0.02'}
+UX ACCELERATION: 1.157, UY ACCELERATION: 0.189
+FINAL ST CURVATURE: 0
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.127
+MEDIAN ELAPSED TIME: 0.101
+Fx_f: 2098.4
+Fx_r: 0.0141381
+Fy_f: -351.248
+Fy_r: -200.832
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 283
+Solver iterations: 24
+STATE: {'Ux': '17.66', 'Uy': '-0.01', 'r': '-0.04', 'delta': '-0.01', 's': '300.39', 'ey': '-0.51', 'epsi': '0.04', 't': '19.88'}
+ACTION: {'Fx': '2058.50', 'w': '-0.01'}
+UX ACCELERATION: 1.129, UY ACCELERATION: 0.137
+FINAL ST CURVATURE: 0
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.127
+MEDIAN ELAPSED TIME: 0.101
+Fx_f: 2058.49
+Fx_r: 0.0162698
+Fy_f: -424.065
+Fy_r: -332.956
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 284
+Solver iterations: 24
+STATE: {'Ux': '17.74', 'Uy': '-0.00', 'r': '-0.04', 'delta': '-0.01', 's': '301.62', 'ey': '-0.46', 'epsi': '0.04', 't': '19.95'}
+ACTION: {'Fx': '2019.52', 'w': '-0.00'}
+UX ACCELERATION: 1.101, UY ACCELERATION: 0.104
+FINAL ST CURVATURE: 0
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.127
+MEDIAN ELAPSED TIME: 0.101
+Fx_f: 2019.5
+Fx_r: 0.0186551
+Fy_f: -465.98
+Fy_r: -422.511
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 285
+Solver iterations: 24
+STATE: {'Ux': '17.81', 'Uy': '0.01', 'r': '-0.04', 'delta': '-0.01', 's': '302.87', 'ey': '-0.42', 'epsi': '0.04', 't': '20.02'}
+ACTION: {'Fx': '1981.45', 'w': '0.00'}
+UX ACCELERATION: 1.075, UY ACCELERATION: 0.080
+FINAL ST CURVATURE: 0
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.126
+MEDIAN ELAPSED TIME: 0.101
+Fx_f: 1981.43
+Fx_r: 0.0213142
+Fy_f: -485.457
+Fy_r: -481.067
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 286
+Solver iterations: 24
+STATE: {'Ux': '17.89', 'Uy': '0.01', 'r': '-0.04', 'delta': '-0.01', 's': '304.12', 'ey': '-0.37', 'epsi': '0.03', 't': '20.09'}
+ACTION: {'Fx': '1944.26', 'w': '0.00'}
+UX ACCELERATION: 1.049, UY ACCELERATION: 0.062
+FINAL ST CURVATURE: 0
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.126
+MEDIAN ELAPSED TIME: 0.101
+Fx_f: 1944.24
+Fx_r: 0.0242678
+Fy_f: -488.778
+Fy_r: -515.734
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 287
+Solver iterations: 24
+STATE: {'Ux': '17.96', 'Uy': '0.01', 'r': '-0.04', 'delta': '-0.01', 's': '305.37', 'ey': '-0.33', 'epsi': '0.03', 't': '20.16'}
+ACTION: {'Fx': '1907.96', 'w': '0.01'}
+UX ACCELERATION: 1.024, UY ACCELERATION: 0.046
+FINAL ST CURVATURE: 0
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.126
+MEDIAN ELAPSED TIME: 0.101
+Fx_f: 1907.93
+Fx_r: 0.0275369
+Fy_f: -480.567
+Fy_r: -531.457
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 288
+Solver iterations: 24
+STATE: {'Ux': '18.03', 'Uy': '0.02', 'r': '-0.04', 'delta': '-0.01', 's': '306.63', 'ey': '-0.30', 'epsi': '0.03', 't': '20.23'}
+ACTION: {'Fx': '1872.50', 'w': '0.01'}
+UX ACCELERATION: 1.000, UY ACCELERATION: 0.032
+FINAL ST CURVATURE: 0
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.126
+MEDIAN ELAPSED TIME: 0.101
+Fx_f: 1872.47
+Fx_r: 0.0311424
+Fy_f: -464.243
+Fy_r: -532.148
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 289
+Solver iterations: 24
+STATE: {'Ux': '18.10', 'Uy': '0.02', 'r': '-0.04', 'delta': '-0.01', 's': '307.89', 'ey': '-0.26', 'epsi': '0.02', 't': '20.30'}
+ACTION: {'Fx': '1837.89', 'w': '0.01'}
+UX ACCELERATION: 0.976, UY ACCELERATION: 0.019
+FINAL ST CURVATURE: 0
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.126
+MEDIAN ELAPSED TIME: 0.101
+Fx_f: 1837.85
+Fx_r: 0.0351056
+Fy_f: -442.357
+Fy_r: -521.172
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 290
+Solver iterations: 24
+STATE: {'Ux': '18.16', 'Uy': '0.02', 'r': '-0.03', 'delta': '-0.01', 's': '309.16', 'ey': '-0.23', 'epsi': '0.02', 't': '20.37'}
+ACTION: {'Fx': '1804.09', 'w': '0.01'}
+UX ACCELERATION: 0.953, UY ACCELERATION: 0.009
+FINAL ST CURVATURE: 0
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.125
+MEDIAN ELAPSED TIME: 0.101
+Fx_f: 1804.05
+Fx_r: 0.0394475
+Fy_f: -416.828
+Fy_r: -501.496
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 291
+Solver iterations: 24
+STATE: {'Ux': '18.23', 'Uy': '0.02', 'r': '-0.03', 'delta': '-0.01', 's': '310.44', 'ey': '-0.20', 'epsi': '0.02', 't': '20.44'}
+ACTION: {'Fx': '1771.10', 'w': '0.01'}
+UX ACCELERATION: 0.931, UY ACCELERATION: 0.001
+FINAL ST CURVATURE: 0
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.125
+MEDIAN ELAPSED TIME: 0.100
+Fx_f: 1771.05
+Fx_r: 0.0441889
+Fy_f: -389.122
+Fy_r: -475.705
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 292
+Solver iterations: 24
+STATE: {'Ux': '18.29', 'Uy': '0.02', 'r': '-0.03', 'delta': '-0.01', 's': '311.71', 'ey': '-0.18', 'epsi': '0.02', 't': '20.51'}
+ACTION: {'Fx': '1738.89', 'w': '0.01'}
+UX ACCELERATION: 0.909, UY ACCELERATION: -0.005
+FINAL ST CURVATURE: 0
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.125
+MEDIAN ELAPSED TIME: 0.100
+Fx_f: 1738.84
+Fx_r: 0.0493503
+Fy_f: -360.357
+Fy_r: -445.976
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 293
+Solver iterations: 24
+STATE: {'Ux': '18.35', 'Uy': '0.02', 'r': '-0.03', 'delta': '-0.01', 's': '313.00', 'ey': '-0.16', 'epsi': '0.02', 't': '20.58'}
+ACTION: {'Fx': '1707.45', 'w': '0.01'}
+UX ACCELERATION: 0.888, UY ACCELERATION: -0.010
+FINAL ST CURVATURE: 0
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.125
+MEDIAN ELAPSED TIME: 0.100
+Fx_f: 1707.39
+Fx_r: 0.0549516
+Fy_f: -331.391
+Fy_r: -414.071
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 294
+Solver iterations: 24
+STATE: {'Ux': '18.41', 'Uy': '0.02', 'r': '-0.02', 'delta': '-0.00', 's': '314.28', 'ey': '-0.14', 'epsi': '0.01', 't': '20.65'}
+ACTION: {'Fx': '1676.75', 'w': '0.01'}
+UX ACCELERATION: 0.867, UY ACCELERATION: -0.013
+FINAL ST CURVATURE: 0
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.125
+MEDIAN ELAPSED TIME: 0.100
+Fx_f: 1676.69
+Fx_r: 0.0610123
+Fy_f: -302.87
+Fy_r: -381.355
+------------------------------------------------------------------------------
+
+
+------------------------------------------------------------------------------
+N: 295
+Solver iterations: 24
+STATE: {'Ux': '18.47', 'Uy': '0.02', 'r': '-0.02', 'delta': '-0.00', 's': '315.57', 'ey': '-0.12', 'epsi': '0.01', 't': '20.72'}
+ACTION: {'Fx': '1646.78', 'w': '0.01'}
+UX ACCELERATION: 0.847, UY ACCELERATION: -0.015
+FINAL ST CURVATURE: 0
+FINAL PM CURVATURE: 0
+AVERAGE ELAPSED TIME: 0.125
+MEDIAN ELAPSED TIME: 0.100
+Fx_f: 1646.72
+Fx_r: 0.0675509
+Fy_f: -275.273
+Fy_r: -348.836
+------------------------------------------------------------------------------
+
+
+FINISHED
+ANIMATION SAVED

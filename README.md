@@ -30,6 +30,9 @@ To execute the code you need to install the following packages
 ### Singletrack MPC
 ![alt](simulation/videos/singletrack_ippodromo.gif)
 
+### Cascaded MPC with obstacles
+![alt](simulation/videos/cascaded_ippodromo_obstacles.gif)
+
 ## References
 
 <a id="1">[1]</a> 

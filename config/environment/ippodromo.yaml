@@ -1,6 +1,6 @@
 # track data
 
-corners:
+corners: # [x, y]
   - [0, 0]
   - [45, 0]
   - [60, 15]
@@ -11,6 +11,12 @@ corners:
   - [-60, 15]
   - [-45, 0]
   - [0, 0]
+
+obstacle_data: # [s, ey, r]
+  - [60, 2, 3]
+  - [90,  3, 2]
+  - [90, -3, 2]
+  - [190, 0, 2]
 
 resolution: 0.1
 smoothing: 110
