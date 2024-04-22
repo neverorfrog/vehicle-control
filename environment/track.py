@@ -1,7 +1,9 @@
 from matplotlib import pyplot as plt
 from matplotlib.axes import Axes
 import numpy as np
+import scipy
 from scipy.integrate import trapezoid
+import scipy.interpolate
 from utils.common_utils import wrap
 from typing import List
 import casadi as ca
@@ -194,8 +196,17 @@ class Track:
         s_values = np.arange(len(waypoints_x))  # Assuming waypoints are evenly spaced along the track
         
         # spline function definition
-        x_spline = ca.interpolant('x_spline', 'bspline', [s_values], waypoints_x)
-        y_spline = ca.interpolant('y_spline', 'bspline', [s_values], waypoints_y)
+        x_spline = scipy.interpolate.InterpolatedUnivariateSpline(s_values, waypoints_x, k=3, ext=3)
+        y_spline = scipy.interpolate.InterpolatedUnivariateSpline(s_values, waypoints_y, k=3, ext=3)
+        
+        x_values = []
+        y_values = []
+        for s in s_values:
+            x_values.append(x_spline(s))
+            y_values.append(y_spline(s))
+        
+        x_spline = ca.interpolant('x_spline', 'bspline', [s_values], x_values)
+        y_spline = ca.interpolant('y_spline', 'bspline', [s_values], y_values)
         
         #computing the length
         s = ca.MX.sym('s')
