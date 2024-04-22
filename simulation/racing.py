@@ -102,7 +102,7 @@ class RacingSimulation():
         
         # figure params
         grid = GridSpec(4, 2, width_ratios=[3, 1])
-        plt.subplots_adjust(left=0.05, bottom=0.05, right=0.95, top=0.95, hspace=0.3, wspace=0.1)
+        plt.subplots_adjust(left=0.05, bottom=0.05, right=0.95, top=0.9, hspace=0.3, wspace=0.1)
         ax_large = plt.subplot(grid[:, 0])
         ax_small1 = plt.subplot(grid[0, 1])
         ax_small2 = plt.subplot(grid[1, 1])
@@ -116,7 +116,8 @@ class RacingSimulation():
         
         # fig titles
         lap_time = plt.gcf().text(0.4, 0.95, 'Laptime', fontsize=16, ha='center', va='center')
-        elapsed_time = plt.gcf().text(0.4, 0.9, 'Mean computation time', fontsize=16, ha='center', va='center')
+        elapsed_time = plt.gcf().text(0.4, 0.9, 'Average time', fontsize=16, ha='center', va='center')
+        mean_speed = plt.gcf().text(0.4, 0.85, 'Mean speed', fontsize=16, ha='center', va='center')
         
         def update(i):
             state = state_traj[i]
@@ -124,7 +125,8 @@ class RacingSimulation():
             lap_time.set_text(f"Lap time: {state.t:.2f} s | Iteration n.{i}") 
             
             if np.mod(i,5) == 0 and i > 0:
-                elapsed_time.set_text(f"Average computation time: {np.mean(elapsed[:i])*1000:.2f} ms")
+                elapsed_time.set_text(f"Average computation time: {np.mean(elapsed[:i])*1000:.2f} ms | Median computation time: {np.median(elapsed[:i])*1000:.2f} ms")
+                mean_speed.set_text(f"Mean speed: {np.mean(v):.2f} m/s")
             
             ax_large.cla()
             ax_large.set_aspect('equal')

@@ -20,6 +20,9 @@ class DynamicCar(RacingCar):
         Fx, w = input
         print(f"Fx_f: {self.Fx_f(Fx)}")
         print(f"Fx_r: {self.Fx_r(Fx)}")
+        Ux_dot = self.Ux_dot(Fx,Ux,Uy,r,delta).full().squeeze().item()
+        Uy_dot = self.Uy_dot(Fx,Ux,Uy,r,delta).full().squeeze().item()
+        print(f"UX ACCELERATION: {Ux_dot:.3f}, UY ACCELERATION: {Uy_dot:.3f}")
         # print(f"Xf: {self.Xf(Fx)}")
         # print(f"Xr: {self.Xr(Fx)}")
         # env = self.config['env']

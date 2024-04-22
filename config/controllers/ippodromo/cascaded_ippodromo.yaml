@@ -11,7 +11,7 @@ cost_weights:
   speed: 0.2
   ey: 0.2
   epsi: 0.8
-  w:  0.001
+  w:  0.0001
   Fx: 0.000001
   Fy: 0.000001
   deviation_st: 0.001
@@ -29,7 +29,7 @@ input_constraints:
 # state constraints
 state_constraints:
   Ux_min: 3
-  max_speed: 20
+  max_speed: 30
   delta_min: -0.5
   delta_max: 0.5
   ey_min: -4
