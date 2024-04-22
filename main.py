@@ -28,7 +28,6 @@ track = env.Track(
 )
 
 # ========= Model Definition =======================
-
 car_config = OmegaConf.create(load_config(f"config/models/dynamic_car.yaml"))
 OmegaConf.set_readonly(car_config, True)
 OmegaConf.set_struct(car_config, True)
@@ -43,15 +42,18 @@ OmegaConf.set_readonly(controller_config, True)
 OmegaConf.set_struct(controller_config, True)
 controller = controllers.CascadedMPC(car=car, point_mass=point_mass, config=controller_config)
 if controller.M > 0:
-    simulation = RacingSimulation(f"cascaded_{track_name}",car,point_mass,controller)  
+    name = f"cascaded_{track_name}"
 else:
-    simulation = RacingSimulation(f"singletrack_{track_name}",car,point_mass,controller)   
+    name = f"singletrack_{track_name}"
+if controller.config.obstacles:
+    name += "_obstacles"
+simulation = RacingSimulation(name,car,point_mass,controller)  
 
 # ============ Simulation ============================
 src_dir = os.path.dirname(os.path.abspath(__file__))
 logfile = f'simulation/logs/{simulation.name}.log'
 with open(logfile, "w") as f:
-    # sys.stdout = f
+    sys.stdout = f
     print(f"Car configuration: {car_config}")
     print(f"Controller configuration: {controller_config}")
     simulation.run(N = 500)

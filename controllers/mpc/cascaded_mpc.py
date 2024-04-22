@@ -135,7 +135,7 @@ class CascadedMPC(Controller):
         if self.config.obstacles: #Obstacle avoidance
             for obs in self.car.track.obstacles:
                 distance = ca.fabs(ca.sqrt((s - obs.s)**2 + (ey - obs.ey)**2) - (obs.radius))
-                cost += 10*(1/distance)
+                cost += ds/((n+1)*distance)
                 
         return cost
     
@@ -187,7 +187,7 @@ class CascadedMPC(Controller):
         if self.config.obstacles:
             for obs in self.car.track.obstacles:
                 distance = ca.fabs(ca.sqrt((s - obs.s)**2 + (ey - obs.ey)**2) - (obs.radius))
-                cost += 10*(1/distance) #5) Obstacle Avoidance
+                cost += ds/((m+1)*distance) #5) Obstacle Avoidance
         
         return cost  
     
