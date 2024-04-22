@@ -75,29 +75,28 @@ It is particulary useful for a real-time control that adapts to \textbf{changes
 in the environment}.\\
 When dealing with nonlinear dynamics, a nonlinear MPC (or NMPC) can be used to
 capture more accurately the nonlinear behavior of a system. This entails a more
-robust manipulation of both nonlinearities and uncertainties in dynamics models
-and constraints. However, one of its highest problem is the computational power
-it can require, especially when dealing with highly nonlinear systems. This
-entails the need of a high-performance hardware to solve the optimization
-problem in an acceptable time, but sometimes this is not enough. Especially in a
-real environment, where the timeliness is fundamental to take a decision, fast
-computations are of utmost importance.\\
-The purpose of \cite{paper} is to develop a novel approach for a real-time NMPC
-for an autonomous vehicle, which was tested in a race environment, where the
-objective was to complete a lap in the minimum possible time, while also
-enhancing computational efficiency. The architecture is a cascaded model
-composed by a detailed model of the car for the near term, and a less complex
-model used for a long horizon planning. This concept will be addressed more in
-detail.\\
-In this report we tried to replicate the architecture of the paper, and we
-tested it in a simulation environment we created. Our purpose was to show the
-mean computation time for the cascaded model is lower than the mean computation
-time for a complete detailed model, achieving also better results.
+robust manipulation capability of both nonlinearities and uncertainties in the
+system. However, one of its major problems is the computational power it can
+require, especially when dealing with highly nonlinear systems. This entails the
+need of a high-performance hardware to solve the optimization problem in an
+acceptable time, but sometimes this is not enough. Especially in a real
+environment, where the timeliness is fundamental to take a decision,
+computational efficiency is of utmost importance.\\
+The purpose of \cite{paper} is to develop a novel, more computionally
+cost-effective approach for a real-time NMPC for an autonomous vehicle, which
+was tested in a race environment, where the objective was to complete a lap in
+the minimum possible time, considering the actual capabilities of the vehicle.
+The architecture consists in a so-called \textbf{cascaded model}, composed by a
+detailed model of the car for the near term, and a simpler model used for
+planning in the long term. This concept will be addressed more in detail.\\
+In this work we tried to replicate the architecture of the paper from scratch,
+testing the code in a very simple simulated race environment. Our purpose is to
+show that, as claimed by \cite{paper}, the average computation time for the
+cascaded model is lower, achieving also better results in terms of lap time.
 
 \subsection*{Report outline}
 
 \section*{Related Work}
-
 
 \section*{Methodology}
 
