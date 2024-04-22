@@ -1,4 +1,4 @@
-dt: 0.07 # sampling time
+dt: 0.05 # sampling time
 
 # car parameters mass, distance of CG from front (a) and rear (b) axis, height of CG, yaw moment of inertia
 car:
@@ -8,7 +8,7 @@ car:
   a: 1.5 # distance from front to CG [m]
   b: 1.5 # distance from rear to CG [m]
   h: 0.55 # CG height [m]
-  eps: 0.8 # tire model modification
+  eps: 0.85 # tire model modification
   Peng: 130000 #maximum engine power
   Xd: # drive force distribution
     f: 1

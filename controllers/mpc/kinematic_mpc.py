@@ -1,5 +1,5 @@
 from omegaconf import OmegaConf
-from models.kinematic_car import KinematicCar, KinematicInput
+from models.kinematic_car import KinematicCar, KinematicCarInput
 import casadi as ca
 import numpy as np
 from controllers.controller import Controller
@@ -44,6 +44,7 @@ class KinematicMPC(Controller):
         self.ds = self.opti.parameter(self.N) # ds trajectory var (just for loggin purposes)
         self.state_prediction = np.zeros((self.ns, self.N+1)); 
         self.action_prediction = np.ones((self.na, self.N)) + np.random.random((self.na, self.N))
+        self.state_prediction[self.car.state.index('v'),:] += 1
         self.curvature = self.opti.parameter(self.N) # curvature trajectory
     
     def _stage_constraints(self, n):
@@ -52,8 +53,6 @@ class KinematicMPC(Controller):
         a,w = self._unpack_action(action)
         state_constraints = self.config.state_constraints
         input_constraints = self.config.input_constraints
-        Peng = self.car.config.car.Peng
-        mu = self.car.config.env.mu
         
         # state limits
         self.opti.subject_to(v >= state_constraints.v_min)
@@ -87,7 +86,7 @@ class KinematicMPC(Controller):
         
         if n < self.N-1: #Force Input Continuity
             next_action = self.action[:,n+1]
-            cost += (cost_weights.a/ds) * (next_action[self.car.input.index('a')] - a)**2
+            cost += (cost_weights.a) * (next_action[self.car.input.index('a')] - a)**2
             
         if self.config.obstacles: #Obstacle avoidance
             for obs in self.car.track.obstacles:
@@ -102,8 +101,8 @@ class KinematicMPC(Controller):
         cost_weights = self.config.cost_weights
         final_state = self.state[:,-1]
         final_model = self.car
-        final_speed = final_state[final_model.state.index('Ux')]
-        cost += ca.if_else(final_speed >= state_constraints.max_speed,cost_weights.speed*(final_speed - state_constraints.max_speed)**2, 0) # excessive speed
+        final_speed = final_state[final_model.state.index('v')]
+        cost += ca.if_else(final_speed >= state_constraints.v_max,cost_weights.v*(final_speed - state_constraints.v_max)**2, 0) # excessive speed
         cost += cost_weights.time*(final_state[final_model.state.index('t'),-1]) # final cost (minimize time)
         cost += cost_weights.ey*final_state[final_model.state.index('ey'),-1]**2 # final cost (minimize terminal lateral error) hardcodato
         cost += cost_weights.epsi*final_state[final_model.state.index('epsi'),-1]**2 # final cost (minimize terminal course error) hardcodato
@@ -114,18 +113,17 @@ class KinematicMPC(Controller):
         self._init_horizon(state)
         sol = self.opti.solve()
         self._save_horizon(sol)
-        return KinematicInput(a=self.action_prediction[0][0], w=self.action_prediction[1][0]), sol
+        return KinematicCarInput(a=self.action_prediction[0][0], w=self.action_prediction[1][0]), sol
     
     def _init_horizon(self, state):
         # initial state
         state = state.values.squeeze()
         self.opti.set_value(self.state0, state)
-        
         # initializing state and action prediction
         self.opti.set_initial(self.action, self.action_prediction)
         self.opti.set_initial(self.state, self.state_prediction)
         #initializing s and k trajectory
-        ds_traj = np.full(self.N+1, self.config.mpc_dt) * self.state_prediction[self.car.state.index('v'),:]
+        ds_traj = np.full(self.N+1, self.config.mpc_dt) * self.state_prediction[self.car.state.index('v'),:] + 0.5
         self.opti.set_value(self.ds, ds_traj[:-1])
         ds_traj[0] = 0; s_traj = np.cumsum(ds_traj) + state[self.car.state.index('s')]; s_traj = s_traj[:-1]
         self.opti.set_value(self.curvature, self.car.track.k(s_traj))
@@ -135,9 +133,6 @@ class KinematicMPC(Controller):
         # saving for warmstart
         self.action_prediction = sol.value(self.action)
         self.state_prediction = sol.value(self.state)
-        if self.M > 0:
-            self.action_pm_prediction = sol.value(self.action_pm)
-            self.state_pm_prediction = sol.value(self.state_pm)
             
     def _unpack_state(self, state):
         v = state[self.car.state.index('v')]

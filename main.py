@@ -6,13 +6,11 @@ import controllers
 import models
 import environment as env
 from simulation.racing import RacingSimulation
-from utils.common_utils import load_config, ControlType, CarType, TrackType
+from utils.common_utils import load_config, CarType, TrackType
 from omegaconf import OmegaConf
-import casadi as ca
 
 # ======== Configuration =========================
-control_type = ControlType.CAS 
-car_type = CarType.DYN
+car_type = CarType.KIN
 track_name = TrackType.I.value
 
 # =========== Track Definition ====================
@@ -28,32 +26,46 @@ track = env.Track(
 )
 
 # ========= Model Definition =======================
-car_config = OmegaConf.create(load_config(f"config/models/dynamic_car.yaml"))
+if car_type == CarType.DYN:
+    car_config = OmegaConf.create(load_config(f"config/models/dynamic_car.yaml"))
+    car = models.DynamicCar(config=car_config, track=track)
+    car.state = models.DynamicCarState(Ux = 4, s = 1)
+    point_mass = models.DynamicPointMass(config=car_config, track=track)
+    point_mass.state = models.DynamicPointMassState()
+elif car_type == CarType.KIN:
+    car_config = OmegaConf.create(load_config(f"config/models/kinematic_car.yaml"))
+    car = models.KinematicCar(config=car_config, track=track)
+    car.state = models.KinematicCarState(v=1)
 OmegaConf.set_readonly(car_config, True)
 OmegaConf.set_struct(car_config, True)
-car = models.DynamicCar(config=car_config, track=track)
-car.state = models.DynamicCarState(Ux = 4, s = 1)
-point_mass = models.DynamicPointMass(config=car_config, track=track)
-point_mass.state = models.DynamicPointMassState()
+
 
 # ============ Controller Definition ================
-controller_config = OmegaConf.create(load_config(f"config/controllers/{track_name}/cascaded_{track_name}.yaml"))
+
+if car_type == CarType.KIN:
+    name = f"kinematic_{track_name}"
+    point_mass = None
+else:
+    name = f"cascaded_{track_name}"
+controller_config = OmegaConf.create(load_config(f"config/controllers/{track_name}/{name}.yaml"))
 OmegaConf.set_readonly(controller_config, True)
 OmegaConf.set_struct(controller_config, True)
-controller = controllers.CascadedMPC(car=car, point_mass=point_mass, config=controller_config)
-if controller.M > 0:
-    name = f"cascaded_{track_name}"
+
+if car_type == CarType.KIN:
+    controller = controllers.KinematicMPC(car=car, config=controller_config)
 else:
-    name = f"singletrack_{track_name}"
+    controller = controllers.CascadedMPC(car=car, point_mass=point_mass, config=controller_config)
+    if controller.M == 0:
+        name = f"singletrack_{track_name}"
 if controller.config.obstacles:
     name += "_obstacles"
-simulation = RacingSimulation(name,car,point_mass,controller)  
 
 # ============ Simulation ============================
+simulation = RacingSimulation(name,car,controller,point_mass)
 src_dir = os.path.dirname(os.path.abspath(__file__))
 logfile = f'simulation/logs/{simulation.name}.log'
 with open(logfile, "w") as f:
-    sys.stdout = f
+    # sys.stdout = f
     print(f"Car configuration: {car_config}")
     print(f"Controller configuration: {controller_config}")
     simulation.run(N = 500)
