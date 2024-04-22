@@ -35,7 +35,8 @@
 \begin{abstract}
     We propose the implementation and experimentation of a motion planning and
     control framework for autonomous vehicles based on nonlinear
-    model-predictive control.The work is mainly based on \cite{paper}. The code is available publicly at
+    model-predictive control.The work is mainly based on \cite{paper}. The code
+    is available publicly at
     \href{https://github.com/neverorfrog/vehicle-control}{this GitHub
     repository}. 
 \end{abstract}
@@ -45,10 +46,10 @@
 
 % Using the star (*) form of the sectioning command suppresses the numbering for
 % that particular section or subsection.
-Model predictive control (MPC for short) is a control technique which, in closed-loop,
-computes the control inputs by means of an optimization algorithm, which uses a
-\textbf{model} of the system and measurements to \textbf{predict} future states and act
-accordingly by choosing the "best" control action. 
+Model predictive control (MPC for short) is a control technique which, in
+closed-loop, computes the control inputs by means of an optimization algorithm,
+which uses a \textbf{model} of the system and measurements to \textbf{predict}
+future states and act accordingly by choosing the "best" control action. 
 
 \begin{equation}
 \begin{aligned}
@@ -94,25 +95,18 @@ testing the code in a very simple simulated race environment. Our purpose is to
 show that, as claimed by \cite{paper}, the average computation time for the
 cascaded model is lower, achieving also better results in terms of lap time.
 
-\subsection*{Report outline}
+% \subsection*{Report outline}
 
-\section*{Related Work}
+\section*{Related Works}
 
 \section*{Methodology}
 
-\begin{itemize}
-    \item Overview/Introduction
-    \begin{itemize}
-        \item Concept of MPC for vehicle control
-        \item Concept of serially cascaded models 
-    \end{itemize}
 
-    \item Paper
-    \begin{itemize}
-        \item Vehicle dynamic models
-        \item NLP
-    \end{itemize}    
-\end{itemize}
+
+\section*{Modelli dinamici single track e point mass}
+
+Anche non in dettaglio, ma va detto qualcosa sui modelli e sul concetto di
+modello spaziale vs modell temporale. 
 
 \section*{Serially cascaded models}
 While a single control loop system is a simple structure that consists in
@@ -156,29 +150,40 @@ in the linkage of the plant models, propagating correctly the final state of the
 model to the initial state of the second model, and mantaining consistency in constraints
 and cost functions across interconnected models.
 
+\section*{Struttura NLP con cost function e constraint}
 
-
+Spiegare un po', non in dettaglio, piú intuitivamente rispetto al paper magari
 
 \section*{Implementation}
 
+We used as main backbone casadi (\cite{casadi}), a software framework for automatic
+differentiation, nonlinear optimization and optimal control. It is implemented
+in c++ and has also a python interface. Casadi serves three main purposes:
 \begin{itemize}
-    \item Tools and libraries
-    \item Description of implementation process
-    \item Modifications or adaptations wrt the paper
+    \item Modeling
+    \item Simulation through numerical integration
+    \item Formulation and solving of optimization problems within MPC
 \end{itemize}
 
-\section*{Experimental Setup}
+\subsection*{Track}
+
+To carry out experiments, we modeled and implemented the model of a racing
+track. 
+
+\subsection*{Implementation process}
+
+\subsection*{Modifications or adaptations wrt the paper}
+
+
+\section*{Experiments}
+
 
 \begin{itemize}
-    \item Simulation setting (track etc.)
     \item Different configuration scenarios
+    \item Results
 \end{itemize}
 
-\section*{Results}
 
-\begin{itemize}
-    \item Guess what
-\end{itemize}
 
 \section*{Conclusion}
 
@@ -188,6 +193,6 @@ and cost functions across interconnected models.
 \end{itemize}
 
 
-\bibliographystyle{apalike}
+\bibliographystyle{unsrt}
 \bibliography{references}
 \end{document}
