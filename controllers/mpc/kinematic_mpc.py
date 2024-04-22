@@ -84,9 +84,9 @@ class KinematicMPC(Controller):
         
         cost += cost_weights.w*(w**2) # steer angle rate
         
-        # if n < self.N-1: #Force Input Continuity
-        #     next_action = self.action[:,n+1]
-        #     cost += (cost_weights.a) * (next_action[self.car.input.index('a')] - a)**2
+        if n < self.N-1: #Force Input Continuity
+            next_action = self.action[:,n+1]
+            cost += (cost_weights.a) * (next_action[self.car.input.index('a')] - a)**2
             
         if self.config.obstacles: #Obstacle avoidance
             for obs in self.car.track.obstacles:

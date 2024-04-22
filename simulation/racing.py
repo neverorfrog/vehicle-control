@@ -102,7 +102,7 @@ class RacingSimulation():
         
         # figure params
         grid = GridSpec(4, 2, width_ratios=[3, 1])
-        plt.subplots_adjust(left=0.05, bottom=0.05, right=0.95, top=0.9, hspace=0.3, wspace=0.1)
+        plt.subplots_adjust(left=0.05, bottom=0.05, right=0.95, top=0.85, hspace=0.3, wspace=0.1)
         ax_large = plt.subplot(grid[:, 0])
         ax_small1 = plt.subplot(grid[0, 1])
         ax_small2 = plt.subplot(grid[1, 1])
