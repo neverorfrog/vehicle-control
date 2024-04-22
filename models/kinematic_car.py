@@ -3,28 +3,33 @@ from models.racing_car import RacingCar
 from utils.fancy_vector import FancyVector
 import casadi as ca
 from casadi import sin,cos,tan
+from utils.integrators import EulerIntegrator
 
 class KinematicCar(RacingCar):        
     @classmethod
     def create_state(cls, *args, **kwargs):
-        return KinematicState(*args, **kwargs)
+        return KinematicCarState(*args, **kwargs)
     
     @classmethod
     def create_input(cls, *args, **kwargs):
-        return KinematicInput(*args, **kwargs)
+        return KinematicCarInput(*args, **kwargs)
+    
+    def print(self, state, input):
+        pass
         
     def _init_model(self):
         '''Differential equations describing the model'''
         
-        # Input variables
+        # =========== Input variables ===================================
         a,w = self.input.variables
 
-        # State and auxiliary variables
+        # =========== State and auxiliary variables ===================================
         v,delta,ey,epsi,_,_ = self.state.variables
         curvature = ca.SX.sym('curvature')
         ds = ca.SX.sym('ds')
+        dt = ca.SX.sym('dt')
         
-        # TEMPORAL ODE
+        # =========== Temporal ODE ===================================
         v_dot = a
         delta_dot = w
         s_dot = (v * cos(epsi)) / (1 - ey*curvature)
@@ -32,11 +37,10 @@ class KinematicCar(RacingCar):
         epsi_dot = v * (tan(delta)/self.length) - s_dot*curvature
         t_dot = 1
         state_dot = ca.vertcat(v_dot, delta_dot, ey_dot, epsi_dot, s_dot, t_dot)
-        t_ode = ca.Function('ode', [self.state.syms,self.input.syms,curvature], [state_dot])
-        t_integrator = self.integrate(self.state.syms,self.input.syms,curvature,t_ode,self.dt)
-        self._temporal_transition = ca.Function('transition', [self.state.syms,self.input.syms,curvature], [t_integrator])
+        time_integrator = EulerIntegrator(self.state.syms,self.input.syms,curvature,state_dot,dt)
+        self._temporal_transition = time_integrator.step
         
-        # SPATIAL ODE
+        # =========== Spatial ODE ===================================
         v_prime = ((1 - ey*curvature) / (v*cos(epsi))) * a #dv/dt * dt/ds = dv/ds
         delta_prime = ((1 - ey*curvature) / (v * cos(epsi))) * w #dw/dt * dt/ds = dw/ds
         ey_prime = (1 - ey*curvature) * tan(epsi)
@@ -44,9 +48,8 @@ class KinematicCar(RacingCar):
         s_prime = 1
         t_prime = (1 - ey*curvature) / (v*cos(epsi))
         state_prime = ca.vertcat(v_prime, delta_prime, ey_prime, epsi_prime, s_prime, t_prime)
-        s_ode = ca.Function('ode', [self.state.syms, self.input.syms, curvature], [state_prime])
-        s_integrator = self.integrate(self.state.syms,self.input.syms,curvature,s_ode,h=ds)
-        self._spatial_transition = ca.Function('transition', [self.state.syms,self.input.syms,curvature,ds], [s_integrator])
+        space_integrator = EulerIntegrator(self.state.syms,self.input.syms,curvature,state_prime,ds)
+        self._spatial_transition = space_integrator.step
         
     @property
     def transition(self):
@@ -56,10 +59,7 @@ class KinematicCar(RacingCar):
     def spatial_transition(self):
         return self._spatial_transition
     
-    def print(self, state, input):
-        pass
-    
-class KinematicInput(FancyVector):
+class KinematicCarInput(FancyVector):
     def __init__(self, a = 0.0, w = 0.0):
         """
         :param a: longitudinal acceleration | [m/s^2]
@@ -86,7 +86,7 @@ class KinematicInput(FancyVector):
         assert isinstance(value, float)
         self.values[1] = value
   
-class KinematicState(FancyVector):
+class KinematicCarState(FancyVector):
     def __init__(self, v = 0.0, delta = 0.0, ey = 0.0, epsi = 0.0, s = 0.0, t = 0.0):
         """
         :param v: velocity in global coordinate system | [m/s]
