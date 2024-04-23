@@ -2,14 +2,14 @@ dt: 0.05 # sampling time
 
 # car parameters mass, distance of CG from front (a) and rear (b) axis, height of CG, yaw moment of inertia
 car:
-  l: 3 # total length [m]
-  m: 1500 #mass [kg]
-  Izz: 3000 #inertia
-  a: 1.5 # distance from front to CG [m]
-  b: 1.5 # distance from rear to CG [m]
+  l: 2 # total length [m]
+  m: 1000 #mass [kg]
+  Izz: 1500 #inertia
+  a: 1 # distance from front to CG [m]
+  b: 1 # distance from rear to CG [m]
   h: 0.55 # CG height [m]
-  eps: 0.85 # tire model modification
-  Peng: 130000 #maximum engine power
+  eps: 0.8 # tire model modification
+  Peng: 150000 #maximum engine power
   Xd: # drive force distribution
     f: 1
     r: 0
@@ -17,8 +17,8 @@ car:
     f: 0.78
     r: 0.22
   C_alpha: # cornering stiffness
-    f: 80000
-    r: 130000
+    f: 70000
+    r: 100000
 
 # coefficients related to environment
 env:

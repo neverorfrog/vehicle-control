@@ -56,8 +56,8 @@ class CascadedMPC(Controller):
         self.state = self.opti.variable(self.ns, self.N+1) # state trajectory var
         self.action = self.opti.variable(self.na, self.N)  # control trajectory var
         self.ds = self.opti.parameter(self.N) # ds trajectory var (just for loggin purposes)
-        self.state_prediction = np.zeros((self.ns, self.N+1)); 
-        self.state_prediction[self.car.state.index('Ux'),:] += 4
+        self.state_prediction = np.ones((self.ns, self.N+1)); 
+        self.state_prediction[self.car.state.index('Ux'),:] += 3
         self.state_prediction[self.car.state.index('s'),:] += 1
         self.action_prediction = np.ones((self.na, self.N)) + np.random.random((self.na, self.N))
         self.curvature = self.opti.parameter(self.N) # curvature trajectory
