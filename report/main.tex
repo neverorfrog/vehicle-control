@@ -147,14 +147,37 @@ and cost functions across interconnected models.
 
 
 \section*{Single-track dynamic model}
-The car can be model as a single-track, where the two tires are merged together in just one.
+The car can be represented as a single-track, where the four tires are merged together in
+just one front and one rear wheel.
 For the intrinsic properties, the vehicle is assumed to have a mass $m$ and a yaw moment of
-inertia $I_{zz}$. The state of the model is composed by the longitudinal speed $U_x$, the 
-lateral speed $U_x$ and the yaw rate $r$ of the Center of Gravity, then by the curvilinear
-coordinate $s$, the lateral distance $e$ and the orientation of the chassis $\Delta \psi$
-with respect to che road descriptor path 
+inertia $I_{zz}$; the wheelbase has length $L$, divided in $a$ and $b$, where they are respectively
+the distances between the Center of Gravity and the front and rear axle; the CG is at distance 
+$h_{cg}$ from the ground; the front steer angle is $\delta$. \\
+The state of the model
+is composed by the longitudinal speed $U_x$, the lateral speed $U_y$ and the yaw rate $r$ of
+the CG, then by the curvilinear coordinate $s$, the lateral distance $e$ and the orientation 
+of the chassis $\Delta \psi$ with respect to the road descriptor path. The curvature of the path
+is called $\kappa$. \\
+\\
+The inputs of the system are the steering angle rate $\dot{\delta}$ and the total longitudinal 
+force $F_x$. This one can be divided in the longitudinal force applied on the axle of the front 
+tire $F_{x_f}$ and the longitudinal force applied on the axle of the rear tire $F_{x_r}$,
+according to a distribution function $\tilde{\chi}$:
 
-
+\begin{equation}
+    \tilde{\chi_f} = \frac{d_f - b_f}{2}\tanh(2(F_x+0.5))+\frac{d_f+b_f}{2}
+\end{equation}
+\begin{equation}
+    \tilde{\chi_r} = \frac{b_r-d_r}{2}\tanh(-2(F_x+0.5))+\frac{d_r+b_r}{2}
+\end{equation}
+where $d_f$ and $d_r$ represent the drive force distribution, and $b_f$ and $b_r$ represent the 
+brake force distribution. So the single components of the longitudinal force are:
+\begin{equation}
+    \tilde{F}_{x_f} = \tilde{\chi}_f(F_x) \cdot F_x
+\end{equation}
+\begin{equation}
+    \tilde{F}_{x_r} = \tilde{\chi}_r(F_x) \cdot F_x
+\end{equation}
 
 
 
