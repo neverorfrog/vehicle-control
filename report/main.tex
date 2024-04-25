@@ -103,11 +103,6 @@ cascaded model is lower, achieving also better results in terms of lap time.
 
 
 
-\section*{Modelli dinamici single track e point mass}
-
-Anche non in dettaglio, ma va detto qualcosa sui modelli e sul concetto di
-modello spaziale vs modell temporale. 
-
 \section*{Serially cascaded models}
 While a single control loop system is a simple structure that consists in
 just one primary loop that regulates directly the system, the cascade control
@@ -149,6 +144,28 @@ that are exchanged between the two models. A very important thing to pay attenti
 in the linkage of the plant models, propagating correctly the final state of the first
 model to the initial state of the second model, and mantaining consistency in constraints
 and cost functions across interconnected models.
+
+
+\section*{Single-track dynamic model}
+The car can be model as a single-track, where the two tires are merged together in just one.
+For the intrinsic properties, the vehicle is assumed to have a mass $m$ and a yaw moment of
+inertia $I_{zz}$. The state of the model is composed by the longitudinal speed $U_x$, the 
+lateral speed $U_x$ and the yaw rate $r$ of the Center of Gravity, then by the curvilinear
+coordinate $s$, the lateral distance $e$ and the orientation of the chassis $\Delta \psi$
+with respect to che road descriptor path 
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 \section*{Struttura NLP con cost function e constraint}
 
