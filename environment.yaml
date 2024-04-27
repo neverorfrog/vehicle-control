@@ -1,4 +1,4 @@
-name: mpc
+name: amr
 channels:
   - defaults
 dependencies:

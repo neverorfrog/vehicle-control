@@ -5,11 +5,28 @@ Cascaded MPC is an unofficial implementation of [[1]](#1).
 
 ## Install
 
-To execute the code you need to install the following packages
-- [miniconda](https://docs.anaconda.com/free/miniconda/index.html#quick-command-line-install)
-- [coinhsl](https://github.com/neverorfrog/vehicle-control/tree/main/thirdparty/coinhsl#thirdparty-hsl)
-- Create a conda environment with the required packages executing from the project root directory the command  
-```conda env create --name vehicle-control -f environment.yaml``` 
+### Coinhsl (taken from [ThirdParty-HSL](https://github.com/coin-or-tools/ThirdParty-HSL))
+Linear solvers that make code significantly faster
+1. Install dependencies  
+```sudo apt install gcc g++ gfortran liblapack-dev libmetis-dev pkg-config --install-recommends```
+2. Obtain a tarball with Coin-HSL source code from https://licences.stfc.ac.uk/product/coin-hsl
+3. Unzip the tarball `coinhsl-x.y.z.tar.gz` into `thirdparty/coinhsl` and rename the unzipped folder to `coinhsl`
+4. Run the following commands form inside `thirdparty/coinhsl` to install coinhsl libraries
+```
+./configure
+make -j12
+sudo make install
+```
+You should get a message like  
+_Libraries have been installed in:  
+   /usr/local/lib_
+
+
+### Conda Environment
+You can install the packages in environment.yaml one-by-one with pip, but I still suggest using virtual environments like conda or venv
+1. Install [miniconda](https://docs.anaconda.com/free/miniconda/index.html#quick-command-line-install)
+2. Create a conda environment with the required packages executing from the project root directory the command  
+```conda env create --name vehicle-control -f environment.yaml```
 
 ## Project Structure
 
