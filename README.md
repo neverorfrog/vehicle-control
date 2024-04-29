@@ -39,18 +39,26 @@ You can install the packages in environment.yaml one-by-one with pip, but I stil
 - simulation: Python modules defining the simulation cycle 
 - thirdparty: Third-party libraries (for now hsl libraries which deliver fast linear solvers for ipopt)
 
+## Concept
+
+The goal is to enhance racing performance by pushin the vehicle to its physical limits while achieving good computational performance. When using NMPC, computation times can become prohibitive with a longer planning horizon. The proposal of [[1]](#1) is to be able to plan far ahead in the future while keeping things sufficiently efficient. This entails also a better racing performance.
+
 ## Results
 
-### Cascaded MPC
-![alt](simulation/videos/cascaded_ippodromo.gif)
+### Cascaded (green) vs Singletrack (yellow)
+![alt](simulation/videos/race_ippodromo.gif)
 
-### Singletrack MPC
-![alt](simulation/videos/singletrack_ippodromo.gif)
+### Cascaded vs Singletrack with obstacles
+![alt](simulation/videos/race_obstacles_ippodromo.gif)
 
-### Cascaded MPC with obstacles
-![alt](simulation/videos/cascaded_ippodromo_obstacles.gif)
 
 ## References
 
 <a id="1">[1]</a> 
 [V. A. Laurense and J. C. Gerdes, "Long-Horizon Vehicle Motion Planning and Control Through Serially Cascaded Model Complexity," in IEEE Transactions on Control Systems Technology, vol. 30, no. 1, pp. 166-179, Jan. 2022](https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=9366415)
+
+## Possible expansions
+
+- Learning-based MPC
+- Observers for the state
+- More realistic track

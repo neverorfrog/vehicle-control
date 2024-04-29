@@ -51,6 +51,7 @@ logfile = f'simulation/logs/{sim_name}.log'
 with open(logfile, "w") as f:
     sys.stdout = f
     state_traj, action_traj, preds, elapsed = simulation.run(N=500)
+    simulation.save(state_traj, action_traj, preds, elapsed)
 animation = simulation.animate(state_traj, action_traj, preds, elapsed) 
 fig_manager: FigureManagerBase = plt.get_current_fig_manager()
 fig_manager.window.showMaximized()

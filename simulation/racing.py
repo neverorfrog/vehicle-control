@@ -20,7 +20,7 @@ class RacingSimulation():
     def run(self, N: int = None):
         # Logging containers
         state_traj = {name: [car.state] for name,car in zip(self.names,self.cars)} # state trajectory (logging)
-        action_traj = {name: [] for name in self.names} # input trajectory (logging)
+        action_traj = {name: [] for name in self.names} # action trajectory (logging)
         elapsed = {name: [] for name in self.names} # elapsed times
         preds = {name: [] for name in self.names} # state predictions for each horizon
         
@@ -65,15 +65,14 @@ class RacingSimulation():
                 print("------------------------------------------------------------------------------")
                 print(f"\n")
             n += 1
-        self.save(state_traj, action_traj, preds, elapsed)
         return state_traj, action_traj, preds, elapsed
       
-    def save(self, state_traj: list, input_traj: list, preds: list, elapsed: list):
+    def save(self, state_traj: list, action_traj: list, preds: list, elapsed: list):
         for name, controller in zip(self.names, self.controllers):
             path = f"simulation/data/{self.track.name}/{name}"
             os.makedirs(path, exist_ok=True)
             np.save(f"{path}/state_traj.npy", state_traj[name])
-            np.save(f"{path}/input_traj.npy", input_traj[name])
+            np.save(f"{path}/action_traj.npy", action_traj[name])
             np.save(f"{path}/preds.npy", preds[name])
             np.save(f"{path}/elapsed.npy", elapsed[name])  
             OmegaConf.save(config=controller.config, f=f"simulation/data/{self.track.name}/{name}/config.yaml")
@@ -81,21 +80,21 @@ class RacingSimulation():
     def load(self):
         pass  
     
-    def animate(self, state_traj: dict, input_traj: dict, preds: dict, elapsed: dict):
+    def animate(self, state_traj: dict, action_traj: dict, preds: dict, elapsed: dict):
         assert isinstance(state_traj,dict), "State trajectory has to be a dict"
-        assert isinstance(input_traj,dict), "Input trajectory has to be a dict"
+        assert isinstance(action_traj,dict), "Input trajectory has to be a dict"
         
         # simulation params
         ey_index = self.cars[0].state.index('ey')
         
-        error = []; v = []; s = []; delta = []; inputs = []; states = []; x_traj = []; y_traj = []
+        error = []; v = []; s = []; delta = []; actions = []; states = []; x_traj = []; y_traj = []
         for name,car in zip(self.names,self.cars):
             traj = np.array(state_traj[name])
             error.append(traj[:,ey_index]) # taking just ey
             v.append(traj[:,0]) # taking just velocity
             delta.append(traj[:,car.state.index('delta')])
             s.append(traj[:,car.state.index('s')]) # for ascissa in side plots
-            inputs.append(np.array(input_traj[name]))
+            actions.append(np.array(action_traj[name]))
             states.append(traj)
             x_traj.append([])
             y_traj.append([])
@@ -159,12 +158,12 @@ class RacingSimulation():
                 if preds is not None:
                     ax_large.plot(preds[self.names[j]][frame][:,0], preds[self.names[j]][frame][:,1],f'{colors[j]}o',alpha=0.5,linewidth=3)  
             
-                # Plot state and inputs
+                # Plot state and actions
                 ax_small1.plot(s[j][:frame],v[j][:frame], '-', alpha=0.7, label=self.names[j], color = colors[j]); ax_small1.legend()
                 ax_small2.plot(s[j][:frame],delta[j][:frame], '-', alpha=0.7, label=self.names[j], color = colors[j]); ax_small2.legend()
                 ax_small3.plot(s[j][:frame],error[j][:frame], '-', alpha=0.7, label=self.names[j], color = colors[j]); ax_small3.legend()
-                ax_small4.plot(s[j][:frame],inputs[j][:frame, 0], '-', alpha=0.7, label=self.names[j], color = colors[j]); ax_small4.legend()
+                ax_small4.plot(s[j][:frame],actions[j][:frame, 0], '-', alpha=0.7, label=self.names[j], color = colors[j]); ax_small4.legend()
             return ax_large, ax_small1, ax_small2, ax_small3, ax_small4
 
-        animation = FuncAnimation(fig=plt.gcf(), func=update, frames=len(input_traj[self.names[0]]), interval=1, repeat=False)
+        animation = FuncAnimation(fig=plt.gcf(), func=update, frames=len(action_traj[self.names[0]]), interval=1, repeat=False)
         return animation

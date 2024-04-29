@@ -135,7 +135,7 @@ class CascadedMPC(Controller):
         if self.config.obstacles: #Obstacle avoidance
             for obs in self.car.track.obstacles:
                 distance = ca.fabs(ca.sqrt((s - obs.s)**2 + (ey - obs.ey)**2) - (obs.radius))
-                cost += ds/((n+1)*distance)
+                cost += cost_weights.obstacles*ds/((n+1)*distance)
                 
         return cost
     
@@ -189,22 +189,21 @@ class CascadedMPC(Controller):
         if self.config.obstacles:
             for obs in self.car.track.obstacles:
                 distance = ca.fabs(ca.sqrt((s - obs.s)**2 + (ey - obs.ey)**2) - (obs.radius))
-                cost += ds/((m+1)*distance) #5) Obstacle Avoidance
+                cost += cost_weights.obstacles_pm*ds/((m+1)*distance) #5) Obstacle Avoidance
         
         return cost  
     
     def _switching_cost(self):
-        cost_weights = self.config.cost_weights
-        Ux_final,Uy_final,r_final,delta_final,s_final,ey_final,epsi_final,t_final = self._unpack_state(self.state[:self.ns,self.N-1]) #final state
-        Fx_final, w_final = self._unpack_action(self.action[:,self.N-1]) #final action
+        Ux_final,Uy_final,r_final,delta_final,_,_,_,_ = self._unpack_state(self.state[:self.ns,self.N-1]) #final state
+        Fx_final, _ = self._unpack_action(self.action[:,self.N-1]) #final action
         Fx_bar_initial, Fy_bar_initial = self._unpack_pm_action(self.action[:,self.N])
         Fy_f = self.car.Fy_f(Ux_final,Uy_final,r_final,delta_final,Fx_final)
         Fy_r = self.car.Fy_r(Ux_final,Uy_final,r_final,delta_final,Fx_final)
-        return (cost_weights.Fx/self.ds[self.N]) * (((Fx_bar_initial-Fx_final)**2) + (Fy_bar_initial-Fy_f-Fy_r)**2)
+        return 0.000000001 * (1/self.ds[self.N-1]) * (((Fx_bar_initial-Fx_final)**2) + (Fy_bar_initial-Fy_f-Fy_r)**2)
         
     
     def _switching_constraints(self):
-        Ux_final,Uy_final,r_final,delta_final,s_final,ey_final,epsi_final,t_final = self._unpack_state(self.state[:,self.N-1]) #final state
+        Ux_final,Uy_final,_,_,s_final,ey_final,epsi_final,t_final = self._unpack_state(self.state[:,self.N-1]) #final state
         state_pm_initial = self.state[:,self.N] # initial state of point mass
         self.opti.subject_to(state_pm_initial[self.point_mass.state.index('V')] == (Ux_final**2 + Uy_final**2)**0.5)
         self.opti.subject_to(state_pm_initial[self.point_mass.state.index('ey')] == ey_final)

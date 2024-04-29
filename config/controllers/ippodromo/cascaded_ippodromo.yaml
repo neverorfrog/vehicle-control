@@ -3,7 +3,7 @@ horizon: 20
 mpc_dt: 0.03
 horizon_pm: 30
 mpc_dt_pm: 0.09
-obstacles: True
+obstacles: False
 
 # weights for the cost function
 cost_weights:
@@ -19,8 +19,8 @@ cost_weights:
   boundary: 1
   slip : 1
   friction: 0.0000001
-  obstacles: 1
-  obstacles_pm: 5
+  obstacles: 1.2
+  obstacles_pm: 3
 
 # input constraints
 input_constraints:

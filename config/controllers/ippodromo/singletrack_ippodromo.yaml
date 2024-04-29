@@ -19,8 +19,8 @@ cost_weights:
   boundary: 1
   slip : 1
   friction: 0.0000001
-  obstacles: 1
-  obstacles_pm: 5
+  obstacles: 1.2
+  obstacles_pm: 3
 
 # input constraints
 input_constraints:
