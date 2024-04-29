@@ -159,7 +159,7 @@ $h_{cg}$ from the ground; the front steer angle is $\delta$. \\
 The state of the model
 is composed by the longitudinal speed $U_x$, the lateral speed $U_y$ and the yaw rate $r$ of
 the CG, then by the curvilinear coordinate $s$, the lateral distance $e$ and the orientation 
-of the chassis $\Delta \psi$ with respect to the road descriptor path. The curvature of the path
+of the chassis $\Delta \varPsi$ with respect to the road descriptor path. The curvature of the path
 is called $\kappa$. \\
 \\
 The inputs of the system are the steering angle rate $\dot{\delta}$ and the total longitudinal 
@@ -181,7 +181,7 @@ brake force distribution. So the single components of the longitudinal force are
 \begin{equation}
     \tilde{F}_{x_r} = \tilde{\chi}_r(F_x) \cdot F_x
 \end{equation}
-
+\\
 For the tire model, given the maximum instantaneous normal load of the tire $F_z$, the maximum possible
 lateral tire force that can be obtained applying the input force $\tilde{F}_x$ is:
 \begin{equation}
@@ -228,11 +228,43 @@ be expressed as:
 	\end{array}
     \right.
 \end{equation}
+\\
+Regarding the drag forces, these are included all in the same variable $F_d$:
+\begin{equation}
+    F_d = F_{rr}+C_DU_x^2-mg\sin(\theta)
+\end{equation}
+where $F_{rr}$ represents the rolling resistance, $C_D$ is the coefficient of aerodynamic
+drag. \\
+Instead, the lateral force $F_b$ applied on the CG models the effect of the road bank angle $\varphi$:
+\begin{equation}
+    F_b = -mg\cos(\theta)\sin(\varphi)
+\end{equation}
+\\
+\\
+All these informations are used to describe the motion of the single-track model:
+\begin{equation}
+    \dot{U}_x = \frac{F_{x_f}\cos(\delta)-F_{y_f}\sin(\delta)+F_{x_r}-F_d}{m}+rU_y
+\end{equation}
+\begin{equation}
+    \dot{U_y} = \frac{F_{y_f}\cos(\delta)+F_{x_f}\sin(\delta)+F_{y_r}+F_b}{m}-rU_x 
+\end{equation}
+\begin{equation}
+    \dot{r} = \frac{a(F_{y_f}\cos(\delta)+F_{x_f}\sin(\delta))-bF_{y_r}}{I_{zz}}
+\end{equation}
+\begin{equation}
+    \dot{s} = \frac{U_x\cos(\Delta \varPsi) -U_y\sin(\Delta \varPsi)}{1-\kappa e}
+\end{equation}
+\begin{equation}
+    \dot{e} = U_x\sin(\Delta \varPsi)+U_y \cos(\Delta \varPsi)
+\end{equation}
+\begin{equation}
+    \Delta \dot{\varPsi} = r-\kappa \dot{s}
+\end{equation}
+\section*{Point-Mass model}
 
 
 
-
-
+\newpage
 \section*{Struttura NLP con cost function e constraint}
 
 Spiegare un po', non in dettaglio, piú intuitivamente rispetto al paper magari
