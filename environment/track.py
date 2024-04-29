@@ -75,10 +75,11 @@ class Obstacle:
     
 
 class Track:
-    def __init__(self, corners, smoothing, resolution, width, obstacle_data):
+    def __init__(self, name, corners, smoothing, resolution, width, obstacle_data):
         """
         Track object containing a list of waypoints and a spline constructed
         """
+        self.name = name
         self.width = width
         self.resolution = resolution
         self.smoothing = smoothing

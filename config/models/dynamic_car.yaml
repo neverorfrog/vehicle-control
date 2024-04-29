@@ -17,7 +17,7 @@ car:
     f: 0.78
     r: 0.22
   C_alpha: # cornering stiffness
-    f: 230000
+    f: 180000
     r: 300000
 
 # coefficients related to environment
