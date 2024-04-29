@@ -181,7 +181,17 @@ brake force distribution. So the single components of the longitudinal force are
 \begin{equation}
     \tilde{F}_{x_r} = \tilde{\chi}_r(F_x) \cdot F_x
 \end{equation}
-\\
+
+This implementation might seem rather complex, compared to simply expressing the front and rear force distribution as
+\begin{equation}
+    \tilde{F}_{x_f} = \tilde{\chi}_f \cdot F_x
+\end{equation}
+\begin{equation}
+    \tilde{F}_{x_r} = \tilde{\chi}_r \cdot F_x
+\end{equation}
+
+where $\tilde{\chi}_f$ and $\tilde{\chi}_r$ are scalars that sum to 1, however, these equations will be used for numerical optimization, and should therefore be twice differentiable, and we therefore have to use the workaround equations presented above.
+
 For the tire model, given the maximum instantaneous normal load of the tire $F_z$, the maximum possible
 lateral tire force that can be obtained applying the input force $\tilde{F}_x$ is:
 \begin{equation}
@@ -189,7 +199,7 @@ lateral tire force that can be obtained applying the input force $\tilde{F}_x$ i
 \end{equation}
 where $\mu$ is the tire-road friction coefficient and the 99\%  of the longitudinal force is due to solve 
 some numerical issues in the optimization problem. \\
-The normal loads for the two tires are affected also by the slope $\theta$ of the road, in the following way:
+The normal loads for the two tires are affected also by the slope $\theta$ of the road, and by the banking $\phi$, in the following way:
 \begin{equation}
     F_{z_f} = \frac{b}{L}m(g\cdot \cos(\theta)\cos(\varphi)+A_{V^2}U_x^2)-\frac{h_{cg}}{L}F_x
 \end{equation}
@@ -261,6 +271,44 @@ All these informations are used to describe the motion of the single-track model
     \Delta \dot{\varPsi} = r-\kappa \dot{s}
 \end{equation}
 \section*{Point-Mass model}
+The Point-Mass model is a simpler version of the Single-Track model, where there is only a velocity state $V$, and three position states relative to the road descriptor path: the distance $s$ along it, the lateral distance $e$ from it, and finally the difference in orientation  $\phi$ between the velocity vector and the tangent to the road descriptor path.
+
+With the ... of substituting ${U}_x$ with $V$ we use the same equations introduced in the single-track model, in particular for the drag force ${F}_d$ we use equation \ref{}, for ${F}_b$ \ref{} and for the normal loads ${F}_{z_f}$, ${F}_{z_r}$ \ref{}. Following the basic intuition of having to simplify the model, the tire forces are not modeled.
+
+The inputs to this model are the longitudinal force ${F}_x$ and the lateral force ${F}_y$, finally we can define the following equations of motion:
+
+\begin{equation}
+    \dot{V} = \frac{F_{x}-F_{d}}{m}
+\end{equation}
+\begin{equation}
+    \dot{s} = \frac{V\cos(\phi)}{1-\kappa e}
+\end{equation}
+\begin{equation}
+    \dot{e} = V\sin(\phi)
+\end{equation}
+\begin{equation}
+    \dot{\phi} = \frac{{F}_y + {F}_b}{mV} - k\dot{s}
+\end{equation}
+
+Note that the yaw dynamics are omitted, and therefore this model cannot be used for yaw stabilization
+
+\subsection{Propagating the state from the single-track to the point-mass model}
+Here we define a mapping from the single-track to the point-mass states. We add a line on top of the point-mass states for clarity.
+
+\begin{equation}
+    \bar{V} = \sqrt{U_{x}^{2}-U_{y}^{2}}
+\end{equation}
+\begin{equation}
+    \bar{s} = s
+\end{equation}
+\begin{equation}
+    \bar{e} = e
+\end{equation}
+\begin{equation}
+    \bar{\phi} = arctan(\frac{{U}_y}{{U}_x}) + \Delta\psi
+\end{equation}
+
+
 
 
 
