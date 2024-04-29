@@ -3,7 +3,7 @@ from models.racing_car import RacingCar
 from utils.fancy_vector import FancyVector
 import casadi as ca
 from casadi import sin,cos,tan
-from utils.integrators import EulerIntegrator
+from utils.integrators import Euler
 
 class KinematicCar(RacingCar):        
     @classmethod
@@ -24,7 +24,7 @@ class KinematicCar(RacingCar):
         a,w = self.input.variables
 
         # =========== State and auxiliary variables ===================================
-        v,delta,ey,epsi,_,_ = self.state.variables
+        v,delta,s,ey,epsi,t = self.state.variables
         curvature = ca.SX.sym('curvature')
         ds = ca.SX.sym('ds')
         dt = ca.SX.sym('dt')
@@ -36,8 +36,8 @@ class KinematicCar(RacingCar):
         ey_dot = v * sin(epsi) 
         epsi_dot = v * (tan(delta)/self.length) - s_dot*curvature
         t_dot = 1
-        state_dot = ca.vertcat(v_dot, delta_dot, ey_dot, epsi_dot, s_dot, t_dot)
-        time_integrator = EulerIntegrator(self.state.syms,self.input.syms,curvature,state_dot,dt)
+        state_dot = ca.vertcat(v_dot, delta_dot, s_dot, ey_dot, epsi_dot, t_dot)
+        time_integrator = Euler(self.state.syms,self.input.syms,curvature,state_dot,dt)
         self._temporal_transition = time_integrator.step
         
         # =========== Spatial ODE ===================================
@@ -47,8 +47,8 @@ class KinematicCar(RacingCar):
         epsi_prime = (tan(delta) / self.length) * ((1 - ey*curvature)/cos(epsi)) - curvature
         s_prime = 1
         t_prime = (1 - ey*curvature) / (v*cos(epsi))
-        state_prime = ca.vertcat(v_prime, delta_prime, ey_prime, epsi_prime, s_prime, t_prime)
-        space_integrator = EulerIntegrator(self.state.syms,self.input.syms,curvature,state_prime,ds)
+        state_prime = ca.vertcat(v_prime, delta_prime, s_prime, ey_prime, epsi_prime, t_prime)
+        space_integrator = Euler(self.state.syms,self.input.syms,curvature,state_prime,ds)
         self._spatial_transition = space_integrator.step
         
     @property
@@ -87,7 +87,7 @@ class KinematicCarInput(FancyVector):
         self.values[1] = value
   
 class KinematicCarState(FancyVector):
-    def __init__(self, v = 0.0, delta = 0.0, ey = 0.0, epsi = 0.0, s = 0.0, t = 0.0):
+    def __init__(self, v = 0.0, delta = 0.0, s = 0.0, ey = 0.0, epsi = 0.0, t = 0.0):
         """
         :param v: velocity in global coordinate system | [m/s]
         :param delta: steering angle | [rad]
@@ -95,8 +95,8 @@ class KinematicCarState(FancyVector):
         :param epsi: yaw angle relative to path | [rad]
         :param s: curvilinear abscissa | [m]
         """
-        self._values = np.array([v,delta,ey,epsi,s,t])
-        self._keys = ['v','delta','ey','epsi','s','t']
+        self._values = np.array([v,delta,s,ey,epsi,t])
+        self._keys = ['v','delta','s','ey','epsi','t']
         self._syms = ca.vertcat(*[ca.SX.sym(self._keys[i]) for i in range(len(self._keys))])
         
     @property
@@ -106,19 +106,19 @@ class KinematicCarState(FancyVector):
     def delta(self): return self.values[1]
     
     @property
-    def ey(self): return self.values[2]
+    def s(self): return self.values[2]
+    
+    @property
+    def ey(self): return self.values[3]
     
     @ey.setter
-    def ey(self, value): self.values[2] = value
+    def ey(self, value): self.values[3] = value
     
     @property
-    def epsi(self): return self.values[3]
+    def epsi(self): return self.values[4]
     
     @epsi.setter
-    def epsi(self, value): self.values[3] = value  
-    
-    @property
-    def s(self): return self.values[4]
+    def epsi(self, value): self.values[4] = value  
     
     @property
     def t(self): return self.values[5]

@@ -11,11 +11,8 @@ class Controller(ABC):
         self.kd = kd
      
     @abstractmethod       
-    def command(self, robot: Robot, reference: Trajectory = None):
+    def command(self, *args, **kwargs):
         """Compute the control actions
-        Args:
-            robot: robot that encapsulates current state and last applied action
-            reference:  (optional) for feedback control
         Returns:
             (np.array): control actions
         """

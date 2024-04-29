@@ -37,6 +37,6 @@ state_constraints:
   ey_max: 4
 
 state_pm_constraints:
-  V_bar_min: 3
-  ey_bar_min: -4
-  ey_bar_max: 4
+  V_min: 3
+  ey_min: -4
+  ey_max: 4

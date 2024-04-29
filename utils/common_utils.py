@@ -2,19 +2,11 @@ from enum import Enum
 import numpy as np
 import yaml
 
-class CarType(Enum):
-    KIN = "kinematic_car"
-    DYN = "dynamic_car"
-    DPM = "dynamic_point_mass"
-    
 class TrackType(Enum):
+    E = "easy"
     I = "ippodromo"
-    M = "montecarlo"
+    B = "bean"
     G = "gokart"
-    
-class ControlType(Enum):
-    SIN = "single_track"
-    CAS = "cascaded"
 
 # Load configuration from a YAML file
 def load_config(file_path):

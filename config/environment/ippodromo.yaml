@@ -12,8 +12,10 @@ obstacle_data: # [s, ey, r]
   - [60, 2, 3]
   - [90,  3, 2]
   - [90, -3, 2]
-  - [190, 0, 2]
+  - [140, -2, 2]
+  - [170, 2, 2]
+  - [220, 0, 2]
 
 resolution: 0.1
-smoothing: 200
+smoothing: 300
 width: 9

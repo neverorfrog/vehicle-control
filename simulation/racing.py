@@ -1,180 +1,169 @@
+import os
 import time
-from matplotlib.backend_bases import FigureManagerBase
+from typing import List
+from omegaconf import OmegaConf
 from controllers.controller import Controller
 import numpy as np
+from environment.track import Track
 from models.racing_car import RacingCar
 from matplotlib.animation import FuncAnimation
 import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
-from itertools import count, cycle
-from utils.fancy_vector import FancyVector
 
 class RacingSimulation():   
-    def __init__(self, name: str, car: RacingCar, controller: Controller, point_mass: RacingCar = None):
-        self.name = name
-        self.car = car
-        self.controller = controller
-        self.point_mass = point_mass
+    def __init__(self, names: List[str], cars: List[RacingCar], controllers: List[Controller], track: Track):
+        self.names = names
+        self.cars = cars
+        self.controllers = controllers
+        self.track = track
         
-    def run(self, N: int = None, animate: bool = True):
+    def run(self, N: int = None):
         # Logging containers
-        state_traj = [self.car.state] # state trajectory (logging)
-        action_traj = [] # input trajectory (logging)
-        elapsed = [] # elapsed times
-        preds = [] # state predictions for each horizon
+        state_traj = {name: [car.state] for name,car in zip(self.names,self.cars)} # state trajectory (logging)
+        action_traj = {name: [] for name in self.names} # action trajectory (logging)
+        elapsed = {name: [] for name in self.names} # elapsed times
+        preds = {name: [] for name in self.names} # state predictions for each horizon
         
         # Initializing simulation
-        state: FancyVector = state_traj[0] 
-        counter = count(start=0)
+        n = 0
         steps = N if N is not None else np.inf
+        track_length = self.track.length
         
         # Starting Simulation
-        for n in cycle(counter):
-            if state.s > self.car.track.length-0.3 or n > steps: break
+        while(True):
+            if n > steps: break
+            for name,car,controller in zip(self.names,self.cars,self.controllers):
+                state = car.state
+                if state.s > track_length-1: n = steps + 1
+                # ----------- Computing control signal --------------------------
+                start = time.time()
+                try:
+                    action, sol = controller.command(state)
+                except Exception as e:
+                    print(e)
+                    n = steps + 1
+                    break
+                elapsed_time = time.time() - start
             
-            # ----------- Computing control signal ------
-            start = time.time()
-            state_prediction = None
-            try:
-                action, sol = self.controller.command(state)
-            except Exception as e:
-                print(e)
-                break
-            elapsed_time = time.time() - start
+                # ----------- Applying control signal and measuring state --------
+                state = car.drive(action)
             
-            # ----------- Applying control signal --------
-            state = self.car.drive(action)
-            state_prediction = self.controller.state_prediction
-            if self.point_mass is not None and self.controller.M > 0:
-                state_pm_prediction = self.controller.state_pm_prediction
-            
-            # ----------- Logging -------------------------
-            state_traj.append(state)
-            action_traj.append(action)
-            elapsed.append(elapsed_time)
-            try:
-                preds_car = [self.car.rel2glob(state_prediction[:,i]) for i in range(self.controller.N)]
-                if self.point_mass is not None and self.controller.M > 0:
-                    preds_pm = [self.point_mass.rel2glob(state_pm_prediction[:,i]) for i in range(self.controller.M)]
-                else:
-                    preds_pm = []
-                preds.append(np.array(preds_car + preds_pm).squeeze())
-            except:
-                preds = None
+                # ----------- Logging -------------------------
+                state_traj[name].append(state)
+                action_traj[name].append(action)
+                elapsed[name].append(elapsed_time)
+                preds[name].append(controller.get_state_prediction())
                 
-            # ------------- DEBUG PRINTS -----------------
-            print("------------------------------------------------------------------------------")
-            print(f"N: {n}")
-            print(f"Solver iterations: {sol.stats()["iter_count"]}")
-            print(f"STATE: {state}")
-            print(f"ACTION: {action}")
-            print(f"AVERAGE ELAPSED TIME: {np.mean(elapsed):.3f}")
-            print(f"MEDIAN ELAPSED TIME: {np.median(elapsed):.3f}")
-            self.car.print(state,action)
-            print("------------------------------------------------------------------------------")
-            print(f"\n")
-            
-        print("FINISHED")   
-        if animate:
-            self.animate(state_traj, action_traj, preds, elapsed) 
-        self.save(state_traj, action_traj, preds, elapsed)
+                # ------------- DEBUG PRINTS -----------------
+                print("------------------------------------------------------------------------------")
+                print(f"N: {n}")
+                print(f"Solver iterations: {sol.stats()["iter_count"]}")
+                print(f"STATE: {state}")
+                print(f"ACTION: {action}")
+                print(f"AVERAGE ELAPSED TIME: {np.mean(elapsed[name]):.3f}")
+                print(f"MEDIAN ELAPSED TIME: {np.median(elapsed[name]):.3f}")
+                print("------------------------------------------------------------------------------")
+                print(f"\n")
+            n += 1
+        return state_traj, action_traj, preds, elapsed
       
-    def save(self, state_traj: list, input_traj: list, preds: list, elapsed: list):
-        np.savez(f"simulation/data/{self.name}.npz", state_traj=state_traj, input_traj=input_traj, preds=preds, elapsed=elapsed)  
+    def save(self, state_traj: list, action_traj: list, preds: list, elapsed: list):
+        for name, controller in zip(self.names, self.controllers):
+            path = f"simulation/data/{self.track.name}/{name}"
+            os.makedirs(path, exist_ok=True)
+            np.save(f"{path}/state_traj.npy", state_traj[name])
+            np.save(f"{path}/action_traj.npy", action_traj[name])
+            np.save(f"{path}/preds.npy", preds[name])
+            np.save(f"{path}/elapsed.npy", elapsed[name])  
+            OmegaConf.save(config=controller.config, f=f"simulation/data/{self.track.name}/{name}/config.yaml")
     
     def load(self):
-        return np.load(f"simulation/data/{self.name}.npz")  
+        pass  
     
-    def animate(self, state_traj: list, input_traj: list, preds: list, elapsed: list):
-        assert isinstance(state_traj,list), "State trajectory has to be a list"
-        assert isinstance(input_traj,list), "Input trajectory has to be a list"
+    def animate(self, state_traj: dict, action_traj: dict, preds: dict, elapsed: dict):
+        assert isinstance(state_traj,dict), "State trajectory has to be a dict"
+        assert isinstance(action_traj,dict), "Input trajectory has to be a dict"
         
         # simulation params
-        N = len(input_traj)
-        ey_index = self.car.state.index('ey')
-        error = np.array(state_traj)[:,ey_index:ey_index+2] # taking just ey and epsi
-        v = np.array(state_traj)[:,0] # taking just velocity
-        delta = np.array(state_traj)[:,self.car.state.index('delta')]
-        s = np.array(state_traj)[:,self.car.state.index('s')] # for ascissa in side plots
-        input = np.array(input_traj)
-        x_traj = []
-        y_traj = []
+        ey_index = self.cars[0].state.index('ey')
         
+        error = []; v = []; s = []; delta = []; actions = []; states = []; x_traj = []; y_traj = []
+        for name,car in zip(self.names,self.cars):
+            traj = np.array(state_traj[name])
+            error.append(traj[:,ey_index]) # taking just ey
+            v.append(traj[:,0]) # taking just velocity
+            delta.append(traj[:,car.state.index('delta')])
+            s.append(traj[:,car.state.index('s')]) # for ascissa in side plots
+            actions.append(np.array(action_traj[name]))
+            states.append(traj)
+            x_traj.append([])
+            y_traj.append([])
+            
         # figure params
         grid = GridSpec(4, 2, width_ratios=[3, 1])
         plt.subplots_adjust(left=0.05, bottom=0.05, right=0.95, top=0.85, hspace=0.3, wspace=0.1)
         ax_large = plt.subplot(grid[:, 0])
-        ax_small1 = plt.subplot(grid[0, 1])
-        ax_small2 = plt.subplot(grid[1, 1])
-        ax_small3 = plt.subplot(grid[2, 1])
-        ax_small4 = plt.subplot(grid[3, 1])
-        state_max = max(v.min(), v.max(), key=abs) # for axis limits
-        error_max = max(error.min(), error.max(), key=abs) # for axis limits
-        input_max = max(input.min(), input.max(), key=abs) # for axis limits
-        input_labels = self.car.create_input().labels
-        error_labels = [r'$e_y$',r'$e_\psi$']
-        
-        # fig titles
+        ax_small1 = plt.subplot(grid[0, 1]); ax_small1.set_title(r'$v$', loc='right')
+        ax_small2 = plt.subplot(grid[1, 1]); ax_small2.set_title(r'$\delta$', loc='right')
+        ax_small3 = plt.subplot(grid[2, 1]); ax_small3.set_title("ey", loc='right')
+        ax_small4 = plt.subplot(grid[3, 1]); ax_small4.set_title("Fx", loc='right')
         lap_time = plt.gcf().text(0.4, 0.95, 'Laptime', fontsize=16, ha='center', va='center')
         elapsed_time = plt.gcf().text(0.4, 0.9, 'Average time', fontsize=16, ha='center', va='center')
         mean_speed = plt.gcf().text(0.4, 0.85, 'Mean speed', fontsize=16, ha='center', va='center')
         
-        def update(i):
-            state = state_traj[i]
-            
-            lap_time.set_text(f"Lap time: {state.t:.2f} s | Iteration n.{i}") 
-            
-            if np.mod(i,5) == 0 and i > 0:
-                elapsed_time.set_text(f"Average computation time: {np.mean(elapsed[:i])*1000:.2f} ms | Median computation time: {np.median(elapsed[:i])*1000:.2f} ms")
-                mean_speed.set_text(f"Mean speed: {np.mean(v):.2f} m/s")
-            
+        colors = ['g','y']
+        
+        def clear():
             ax_large.cla()
             ax_large.set_aspect('equal')
-            x,y = self.car.plot(ax_large, state)
-            x_traj.append(x)
-            y_traj.append(y)
-            ax_large.plot(x_traj[:i+1],y_traj[:i+1],'-',alpha=0.8,color="r",linewidth=3)
-            
-            # Plot track
-            if self.car.track is not None:
-                self.car.track.plot(ax_large)
-                if self.controller.config.obstacles:
-                    for obs in self.car.track.obstacles:
-                        obs.plot(ax_large)
-                
-            # Plot state predictions of MPC
-            if preds is not None and i <= N:
-                ax_large.plot(preds[i][:,0], preds[i][:,1],'go',alpha=0.5,linewidth=3)  
-            
             ax_small1.cla()
-            ax_small1.axis((s[0], s[-1], -state_max*1.1, state_max*1.1))
-            ax_small1.plot(s[:i],v[:i], '-', alpha=0.7,label='v',color='r')
-            ax_small1.legend()
-            
             ax_small2.cla()
-            ax_small2.axis((s[0], s[-1], -0.5, 0.5))
-            ax_small2.plot(s[:i],delta[:i], '-', alpha=0.7,label=r'$\delta$', color='c')
-            ax_small2.legend()
-                        
             ax_small3.cla()
-            ax_small3.axis((s[0], s[-1], -error_max*1.1, error_max*1.1))
-            ax_small3.plot(s[:i],error[:i, :], '-', alpha=0.7,label=error_labels)
-            ax_small3.legend()
-
             ax_small4.cla()
-            ax_small4.axis((s[0], s[-1], -input_max*1.1, input_max*1.1))
-            ax_small4.plot(s[:i],input[:i, 0], '-', alpha=0.7,label=input_labels[0], color='g')
-            ax_small4.legend()
+            ax_small1.axis((s[0][0], s[0][-1], 0, 20))
+            ax_small2.axis((s[0][0], s[0][-1], -0.5, 0.5))
+            ax_small3.axis((s[0][0], s[0][-1], -4, 4))
+            ax_small4.axis((s[0][0], s[0][-1], -7000, 7000))
+            return ax_large, ax_small1, ax_small2, ax_small3, ax_small4
+            
+            
+        def update(frame):
+            clear()
+            #Plot Track
+            self.track.plot(ax_large)
+            if self.controllers[0].config.obstacles:
+                for obs in self.track.obstacles:
+                    obs.plot(ax_large)
+            # Plot text
+            lap_time.set_text(f"Iteration n.{frame} | Laptime {state_traj[self.names[0]][frame][-1]:.2f} s")
+            if np.mod(frame,5) == 0 and frame > 0:
+                time = f"Median time"
+                speed = f"Mean Speed"
+                for j in range(len(self.names)):
+                    time += f" | {self.names[j]} = {np.median(elapsed[self.names[j]][:frame])*1000:.2f} ms"
+                    speed += f" | {self.names[j]} = {np.mean(v[j][:frame]):.2f} m/s"
+                    elapsed_time.set_text(time)
+                    mean_speed.set_text(speed)  
+                      
+            for j in range(len(self.names)):
+                state = state_traj[self.names[j]][frame]
+            
+                # Plot car
+                x,y = self.cars[j].plot(ax_large, state, colors[j])
+                x_traj[j].append(x)
+                y_traj[j].append(y)
+                ax_large.plot(x_traj[j][:frame],y_traj[j][:frame],'-',alpha=0.8,color=colors[j],linewidth=3)
+            
+                # Plot state predictions of MPC
+                if preds is not None:
+                    ax_large.plot(preds[self.names[j]][frame][:,0], preds[self.names[j]][frame][:,1],f'{colors[j]}o',alpha=0.5,linewidth=3)  
+            
+                # Plot state and actions
+                ax_small1.plot(s[j][:frame],v[j][:frame], '-', alpha=0.7, label=self.names[j], color = colors[j]); ax_small1.legend()
+                ax_small2.plot(s[j][:frame],delta[j][:frame], '-', alpha=0.7, label=self.names[j], color = colors[j]); ax_small2.legend()
+                ax_small3.plot(s[j][:frame],error[j][:frame], '-', alpha=0.7, label=self.names[j], color = colors[j]); ax_small3.legend()
+                ax_small4.plot(s[j][:frame],actions[j][:frame, 0], '-', alpha=0.7, label=self.names[j], color = colors[j]); ax_small4.legend()
+            return ax_large, ax_small1, ax_small2, ax_small3, ax_small4
 
-        animation = FuncAnimation(
-            fig=plt.gcf(), func=update, 
-            frames=N, interval=0, 
-            repeat=False, repeat_delay=5000
-        )
-        fig_manager: FigureManagerBase = plt.get_current_fig_manager()
-        fig_manager.window.showMaximized()
-        plt.show(block=True) 
-        plt.ioff() #interactive mode off
-        animation.save(f"simulation/videos/{self.name}.gif",writer='pillow',fps=20, dpi=200)
-        plt.ion() #interactive mode on
-        print("ANIMATION SAVED")
+        animation = FuncAnimation(fig=plt.gcf(), func=update, frames=len(action_traj[self.names[0]]), interval=1, repeat=False)
+        return animation

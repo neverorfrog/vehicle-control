@@ -1,23 +1,31 @@
 import sys
 import os
+from matplotlib import pyplot as plt
+from matplotlib.backend_bases import FigureManagerBase
 sys.path.append(".")
-
-import controllers
+os.environ["XDG_SESSION_TYPE"] = "xcb"
+import controllers as control
 import models
 import environment as env
+import utils.common_utils as utils
 from simulation.racing import RacingSimulation
-from utils.common_utils import load_config, CarType, TrackType
 from omegaconf import OmegaConf
 
 # ======== Configuration =========================
-car_type = CarType.KIN
-track_name = TrackType.I.value
+track_name = utils.TrackType.I.value
+names = []
+names.append("cascaded")
+names.append("singletrack")
+sim_name = f"race_{track_name}"
+# sim_name = f"cascaded_{track_name}"
+# sim_name = f"singletrack_{track_name}"
 
 # =========== Track Definition ====================
-track_config = OmegaConf.create(load_config(f"config/environment/{track_name}.yaml"))
+track_config = OmegaConf.create(utils.load_config(f"config/environment/{track_name}.yaml"))
 OmegaConf.set_readonly(track_config, True)
 OmegaConf.set_struct(track_config, True)
 track = env.Track(
+    name=track_name,
     corners=track_config.corners,
     smoothing=track_config.smoothing,
     resolution=track_config.resolution,
@@ -25,48 +33,27 @@ track = env.Track(
     obstacle_data=track_config.obstacle_data
 )
 
-# ========= Model Definition =======================
-if car_type == CarType.DYN:
-    car_config = OmegaConf.create(load_config(f"config/models/dynamic_car.yaml"))
-    car = models.DynamicCar(config=car_config, track=track)
-    car.state = models.DynamicCarState(Ux = 4, s = 1)
-    point_mass = models.DynamicPointMass(config=car_config, track=track)
-    point_mass.state = models.DynamicPointMassState()
-elif car_type == CarType.KIN:
-    car_config = OmegaConf.create(load_config(f"config/models/kinematic_car.yaml"))
-    car = models.KinematicCar(config=car_config, track=track)
-    car.state = models.KinematicCarState(v=1)
-OmegaConf.set_readonly(car_config, True)
-OmegaConf.set_struct(car_config, True)
-
+# ========= Models Definition =======================
+car_config = OmegaConf.create(utils.load_config(f"config/models/dynamic_car.yaml"))
+cars = [models.DynamicCar(config=car_config, track=track) for _ in names]
+for car in cars: car.state = models.DynamicCarState(Ux = 4, s = 1)
+point_mass = models.DynamicPointMass(config=car_config, track=track)
+point_mass.state = models.DynamicPointMassState()
 
 # ============ Controller Definition ================
-
-if car_type == CarType.KIN:
-    name = f"kinematic_{track_name}"
-    point_mass = None
-else:
-    name = f"cascaded_{track_name}"
-controller_config = OmegaConf.create(load_config(f"config/controllers/{track_name}/{name}.yaml"))
-OmegaConf.set_readonly(controller_config, True)
-OmegaConf.set_struct(controller_config, True)
-
-if car_type == CarType.KIN:
-    controller = controllers.KinematicMPC(car=car, config=controller_config)
-else:
-    controller = controllers.CascadedMPC(car=car, point_mass=point_mass, config=controller_config)
-    if controller.M == 0:
-        name = f"singletrack_{track_name}"
-if controller.config.obstacles:
-    name += "_obstacles"
+controller_configs = [OmegaConf.create(utils.load_config(f"config/controllers/{track_name}/{name}_{track_name}.yaml")) for name in names]
+controllers = [control.CascadedMPC(car=car, point_mass=point_mass, config=config) for config in controller_configs]
 
 # ============ Simulation ============================
-simulation = RacingSimulation(name,car,controller,point_mass)
+simulation = RacingSimulation(names,cars,controllers,track)
 src_dir = os.path.dirname(os.path.abspath(__file__))
-logfile = f'simulation/logs/{simulation.name}.log'
+logfile = f'simulation/logs/{sim_name}.log'
 with open(logfile, "w") as f:
-    # sys.stdout = f
-    print(f"Car configuration: {car_config}")
-    print(f"Controller configuration: {controller_config}")
-    simulation.run(N = 500)
-sys.stdout = sys.__stdout__
+    sys.stdout = f
+    state_traj, action_traj, preds, elapsed = simulation.run(N=500)
+    simulation.save(state_traj, action_traj, preds, elapsed)
+animation = simulation.animate(state_traj, action_traj, preds, elapsed) 
+fig_manager: FigureManagerBase = plt.get_current_fig_manager()
+fig_manager.window.showMaximized()
+plt.show(block=True)
+animation.save(f"simulation/videos/{sim_name}.gif",fps=20, dpi=200, writer='pillow')

@@ -1,0 +1,47 @@
+# prediction and control horizon
+horizon: 20
+mpc_dt: 0.03
+horizon_kc: 70
+mpc_dt_kc: 0.03
+obstacles: False
+
+# weights for the cost function
+cost_weights:
+  time: 1
+  speed: 0.2
+  ey: 0.4
+  epsi: 1
+  w:  0.0001
+  w_kc: 0.000001
+  Fx: 0.00001
+  Fy: 0.0001
+  a: 0.001
+  deviation_st: 0.001
+  deviation_kc: 0.0001
+  boundary: 1
+  slip : 100
+  friction: 0.0000001
+
+# input constraints
+input_constraints:
+  w_min: -0.4
+  w_max: 0.4
+  mu_lim: 0.95
+  a_min: -10
+  a_max: 10
+
+# state constraints
+state_constraints:
+  Ux_min: 3
+  max_speed: 20
+  delta_min: -0.4
+  delta_max: 0.4
+  ey_min: -4
+  ey_max: 4
+
+state_kc_constraints:
+  v_min: 0
+  ey_min: -3
+  ey_max: 3
+  delta_min: -0.4
+  delta_max: 0.4

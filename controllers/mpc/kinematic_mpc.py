@@ -49,7 +49,7 @@ class KinematicMPC(Controller):
     
     def _stage_constraints(self, n):
         state = self.state[:,n]; action = self.action[:,n]
-        v,delta,ey,epsi,s,t = self._unpack_state(state)
+        v,delta,s,ey,epsi,t = self._unpack_state(state)
         a,w = self._unpack_action(action)
         state_constraints = self.config.state_constraints
         input_constraints = self.config.input_constraints
@@ -66,7 +66,7 @@ class KinematicMPC(Controller):
         self.opti.subject_to(self.state[:,n+1] == self.car.spatial_transition(state,action,self.curvature[n],self.ds[n]))
         
     def _stage_cost(self, n):
-        v,delta,ey,epsi,s,t = self._unpack_state(self.state[:,n])
+        v,delta,s,ey,epsi,t = self._unpack_state(self.state[:,n])
         a,w = self._unpack_action(self.action[:,n])
         ds = self.ds[n]
         cost_weights = self.config.cost_weights
@@ -141,7 +141,7 @@ class KinematicMPC(Controller):
         epsi = state[self.car.state.index('epsi')]
         s = state[self.car.state.index('s')]
         t = state[self.car.state.index('t')]
-        return v,delta,ey,epsi,s,t
+        return v,delta,s,ey,epsi,t
     
     def _unpack_action(self, action):
         a = action[self.car.input.index('a')]
