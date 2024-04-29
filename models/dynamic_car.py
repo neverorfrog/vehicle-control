@@ -3,7 +3,7 @@ from models.racing_car import RacingCar
 from utils.fancy_vector import FancyVector
 from utils.common_utils import *
 from casadi import cos, sin, tan, atan, fabs, sign, tanh
-from utils.integrators import CVODESIntegrator, EulerIntegrator, RK4Integrator
+from utils.integrators import Euler, RK4, RK2
 
 class DynamicCar(RacingCar):
     
@@ -130,7 +130,7 @@ class DynamicCar(RacingCar):
         state_dot = ca.vertcat(Ux_dot, Uy_dot, r_dot, delta_dot, s_dot, ey_dot, epsi_dot, t_dot)
         self.Ux_dot = ca.Function("Ux_dot",[Fx,Ux,Uy,r,delta],[Ux_dot]).expand()
         self.Uy_dot = ca.Function("Uy_dot",[Fx,Ux,Uy,r,delta],[Uy_dot]).expand()
-        time_integrator = RK4Integrator(self.state.syms, self.input.syms, curvature, state_dot, dt)
+        time_integrator = RK4(self.state.syms, self.input.syms, curvature, state_dot, dt)
         self._temporal_transition = time_integrator.step
 
         # SPATIAL Transition (equations 41a to 41f)
@@ -143,7 +143,7 @@ class DynamicCar(RacingCar):
         epsi_prime = epsi_dot / s_dot
         t_prime = 1 / s_dot
         state_prime = ca.vertcat(Ux_prime, Uy_prime, r_prime, delta_prime, s_prime, ey_prime, epsi_prime, t_prime)
-        space_integrator = RK4Integrator(self.state.syms, self.input.syms, curvature, state_prime, ds)
+        space_integrator = RK4(self.state.syms, self.input.syms, curvature, state_prime, ds)
         self._spatial_transition = space_integrator.step
     
     @property

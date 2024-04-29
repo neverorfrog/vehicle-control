@@ -51,19 +51,15 @@ class RacingCar(Robot):
         #RK4
         state_dot_1 = ode(state, action, curvature)
         state_1 = state + (h/2)*state_dot_1
-        
         state_dot_2 = ode(state_1, action, curvature)
         state_2 = state + (h/2)*state_dot_2
-        
         state_dot_3 = ode(state_2, action, curvature)
         state_3 = state + h*state_dot_3
-        
         state_dot_4 = ode(state_3, action, curvature)
         state = state + (1/6) * (state_dot_1 + 2 * state_dot_2 + 2 * state_dot_3 + state_dot_4) * h
-        
         return state
     
-    def plot(self, axis: Axes, state: FancyVector):
+    def plot(self, axis: Axes, state: FancyVector, color = 'blue'):
         x,y,psi = self.rel2glob(state)
         delta = state.delta
         r = 1 # TODO hardcodato
@@ -72,8 +68,9 @@ class RacingCar(Robot):
         width = 2 # TODO hardcodato
         height = 2 # TODO hardcodato
         angle = wrap(psi-np.pi/2)
-        rectangle = plt.Rectangle((x-np.cos(angle)*width/2-np.cos(psi)*2*width/3, y-np.sin(angle)*height/2-np.sin(psi)*2*height/3),
-                                width,height,edgecolor='black',alpha=0.7, angle=np.rad2deg(angle), rotation_point='xy')
+        rectangle = plt.Rectangle(
+            xy=(x-np.cos(angle)*width/2-np.cos(psi)*2*width/3, y-np.sin(angle)*height/2-np.sin(psi)*2*height/3),
+            width=width,height=height,alpha=0.7,angle=np.rad2deg(angle),rotation_point='xy',color=color)
         axis.add_patch(rectangle)
         
         # Draw four wheels as rectangles

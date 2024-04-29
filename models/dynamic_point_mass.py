@@ -3,7 +3,7 @@ from models.racing_car import RacingCar
 from utils.fancy_vector import FancyVector
 from utils.common_utils import *
 from casadi import cos, tanh
-from utils.integrators import EulerIntegrator, RK4Integrator
+from utils.integrators import Euler
 
 class DynamicPointMass(RacingCar):
 
@@ -71,7 +71,7 @@ class DynamicPointMass(RacingCar):
         epsi_dot = (Fy + Fb)/(m*V) - curvature*s_dot
         t_dot = 1
         state_dot = ca.vertcat(V_dot,  s_dot, ey_dot, epsi_dot, t_dot)
-        time_integrator = EulerIntegrator(self.state.syms, self.input.syms, curvature, state_dot, dt)
+        time_integrator = Euler(self.state.syms, self.input.syms, curvature, state_dot, dt)
         self._temporal_transition = time_integrator.step
 
         # SPATIAL transition (equations 41a to 41f)
@@ -81,7 +81,7 @@ class DynamicPointMass(RacingCar):
         epsi_prime = epsi_dot / s_dot
         t_prime = t_dot / s_dot
         state_prime = ca.vertcat(V_prime, s_prime, ey_prime, epsi_prime, t_prime)
-        space_integrator = EulerIntegrator(self.state.syms, self.input.syms, curvature, state_prime, ds)
+        space_integrator = Euler(self.state.syms, self.input.syms, curvature, state_prime, ds)
         self._spatial_transition = space_integrator.step
 
     @property

@@ -3,7 +3,7 @@ from models.racing_car import RacingCar
 from utils.fancy_vector import FancyVector
 import casadi as ca
 from casadi import sin,cos,tan
-from utils.integrators import EulerIntegrator
+from utils.integrators import Euler
 
 class KinematicCar(RacingCar):        
     @classmethod
@@ -37,7 +37,7 @@ class KinematicCar(RacingCar):
         epsi_dot = v * (tan(delta)/self.length) - s_dot*curvature
         t_dot = 1
         state_dot = ca.vertcat(v_dot, delta_dot, s_dot, ey_dot, epsi_dot, t_dot)
-        time_integrator = EulerIntegrator(self.state.syms,self.input.syms,curvature,state_dot,dt)
+        time_integrator = Euler(self.state.syms,self.input.syms,curvature,state_dot,dt)
         self._temporal_transition = time_integrator.step
         
         # =========== Spatial ODE ===================================
@@ -48,7 +48,7 @@ class KinematicCar(RacingCar):
         s_prime = 1
         t_prime = (1 - ey*curvature) / (v*cos(epsi))
         state_prime = ca.vertcat(v_prime, delta_prime, s_prime, ey_prime, epsi_prime, t_prime)
-        space_integrator = EulerIntegrator(self.state.syms,self.input.syms,curvature,state_prime,ds)
+        space_integrator = Euler(self.state.syms,self.input.syms,curvature,state_prime,ds)
         self._spatial_transition = space_integrator.step
         
     @property
