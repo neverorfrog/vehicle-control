@@ -10,6 +10,8 @@
 \usepackage{amsmath}
 \usepackage{mathtools}
 \newcommand\tab[1][.3cm]{\hspace*{#1}}
+\newcommand\tabeq[1][.5cm]{\hspace*{#1}}
+
 % \usepackage{physics}
 % \usepackage{xcolor}
 % \usepackage{graphicx}
@@ -149,7 +151,7 @@ and cost functions across interconnected models.
 
 \section*{Single-track dynamic model}
 The car can be represented as a single-track, where the four tires are merged together in
-just one front and one rear wheel.
+just one front and one rear wheels.
 For the intrinsic properties, the vehicle is assumed to have a mass $m$ and a yaw moment of
 inertia $I_{zz}$; the wheelbase has length $L$, divided in $a$ and $b$, where they are respectively
 the distances between the Center of Gravity and the front and rear axle; the CG is at distance 
@@ -189,14 +191,14 @@ where $\mu$ is the tire-road friction coefficient and the 99\%  of the longitudi
 some numerical issues in the optimization problem. \\
 The normal loads for the two tires are affected also by the slope $\theta$ of the road, in the following way:
 \begin{equation}
-    F_{z_f} = \frac{b}{L}m(g\cdot cos(\theta)cos(\varphi)+A_{V^2}U_x^2)-\frac{h_{cg}}{L}F_x
+    F_{z_f} = \frac{b}{L}m(g\cdot \cos(\theta)\cos(\varphi)+A_{V^2}U_x^2)-\frac{h_{cg}}{L}F_x
 \end{equation}
 \begin{equation}
-    F_{z_r} = \frac{a}{L}m(g\cdot cos(\theta)cos(\varphi)+A_{V^2}U_x^2)+\frac{h_{cg}}{L}F_x
+    F_{z_r} = \frac{a}{L}m(g\cdot \cos(\theta)\cos(\varphi)+A_{V^2}U_x^2)+\frac{h_{cg}}{L}F_x
 \end{equation}
 where the effect of vertical curvature on speed are expressed through:
 \begin{equation}
-    A_{V^2} = -\frac{d \theta}{d s}cos(\varphi)-\kappa\cdot sin(\varphi)cos(\theta) 
+    A_{V^2} = -\frac{\partial \theta}{\partial s}\cos(\varphi)-\kappa\cdot \sin(\varphi)\cos(\theta) 
 \end{equation}
 The slip angles of the front ($\alpha_f$) and rear ($\alpha_r$) wheels are respectively given by:
 \begin{equation}
@@ -216,8 +218,13 @@ be expressed as:
     F_y = 
     \left\{
 	\begin{array}{ll}
-		-C_\alpha \tan(\alpha)+\frac{C_\alpha^2}{3\tilde{F}_y^{max}}|\tan(\alpha)|\tan(\alpha)-  \frac{C_\alpha^3}{27(\tilde{F}_{y}^{max})^2}\tan^3(\alpha) & \mbox{if } |\alpha| \leq \alpha^{mod} \\
-		-x & \mbox{if } x < 0
+		-C_\alpha \tan(\alpha)+&\\
+        \tabeq\frac{C_\alpha^2}{3\tilde{F}_y^{max}}|\tan(\alpha)|\tan(\alpha) - &\\
+        \tabeq\frac{C_\alpha^3}{27(\tilde{F}_{y}^{max})^2}\tan^3(\alpha) 
+        & \mbox{if } |\alpha| \leq \alpha^{mod} \\
+		-C_{\alpha}(1-2\zeta+\zeta^2)\tan(\alpha)-&\\
+        \tabeq \tilde{F}_y^{max}(3\zeta^2-2\zeta^3){sgn(\alpha)}
+        & \mbox{otherwise }
 	\end{array}
     \right.
 \end{equation}
