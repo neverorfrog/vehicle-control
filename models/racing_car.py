@@ -43,22 +43,6 @@ class RacingCar(Robot):
         epsi = state[self.state.index('epsi')]   
         return self.track.rel2glob(s, ey, epsi)
     
-    def integrate(self,state,action,curvature,ode,h):
-        '''
-        RK4 integrator
-        h: integration interval
-        '''
-        #RK4
-        state_dot_1 = ode(state, action, curvature)
-        state_1 = state + (h/2)*state_dot_1
-        state_dot_2 = ode(state_1, action, curvature)
-        state_2 = state + (h/2)*state_dot_2
-        state_dot_3 = ode(state_2, action, curvature)
-        state_3 = state + h*state_dot_3
-        state_dot_4 = ode(state_3, action, curvature)
-        state = state + (1/6) * (state_dot_1 + 2 * state_dot_2 + 2 * state_dot_3 + state_dot_4) * h
-        return state
-    
     def plot(self, axis: Axes, state: FancyVector, color = 'blue'):
         x,y,psi = self.rel2glob(state)
         delta = state.delta

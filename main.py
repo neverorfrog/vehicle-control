@@ -15,9 +15,9 @@ from omegaconf import OmegaConf
 track_name = utils.TrackType.I.value
 names = []
 names.append("cascaded")
-names.append("singletrack")
-sim_name = f"race_{track_name}"
-# sim_name = f"cascaded_{track_name}"
+# names.append("singletrack")
+# sim_name = f"race_{track_name}"
+sim_name = f"cascaded_{track_name}"
 # sim_name = f"singletrack_{track_name}"
 
 # =========== Track Definition ====================
@@ -34,22 +34,30 @@ track = env.Track(
 )
 
 # ========= Models Definition =======================
+#full fledged dynamic model
 car_config = OmegaConf.create(utils.load_config(f"config/models/dynamic_car.yaml"))
 cars = [models.DynamicCar(config=car_config, track=track) for _ in names]
 for car in cars: car.state = models.DynamicCarState(Ux = 4, s = 1)
+#point mass dynamic model
 point_mass = models.DynamicPointMass(config=car_config, track=track)
 point_mass.state = models.DynamicPointMassState()
+#kinematic bicycle model
+kincar_config = OmegaConf.create(utils.load_config(f"config/models/kinematic_car.yaml"))
+kincar = models.KinematicCar(config=car_config, track=track)
+kincar.state = models.KinematicCarState(v=0.1)
 
 # ============ Controller Definition ================
 controller_configs = [OmegaConf.create(utils.load_config(f"config/controllers/{track_name}/{name}_{track_name}.yaml")) for name in names]
 controllers = [control.CascadedMPC(car=car, point_mass=point_mass, config=config) for config in controller_configs]
+kincontroller_config = OmegaConf.create(utils.load_config(f"config/controllers/{track_name}/kinematic_{track_name}.yaml"))
+kincontroller = control.KinematicMPC(car=kincar, config=kincontroller_config)
 
 # ============ Simulation ============================
 simulation = RacingSimulation(names,cars,controllers,track)
 src_dir = os.path.dirname(os.path.abspath(__file__))
 logfile = f'simulation/logs/{sim_name}.log'
 with open(logfile, "w") as f:
-    sys.stdout = f
+    # sys.stdout = f
     state_traj, action_traj, preds, elapsed = simulation.run(N=500)
     simulation.save(state_traj, action_traj, preds, elapsed)
 animation = simulation.animate(state_traj, action_traj, preds, elapsed) 
