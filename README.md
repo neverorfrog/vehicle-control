@@ -51,6 +51,12 @@ The goal is to enhance racing performance by pushin the vehicle to its physical 
 ### Cascaded vs Singletrack with obstacles
 ![alt](simulation/videos/race_obstacles_ippodromo.gif)
 
+### Cascaded
+![alt](simulation/videos/cascaded_ippodromo.gif)
+
+### Singletrack
+![alt](simulation/videos/singletrack_ippodromo.gif)
+
 
 ## References
 
