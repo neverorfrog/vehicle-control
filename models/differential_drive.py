@@ -14,8 +14,8 @@ class DifferentialDrive(Robot):
         return DifferentialDriveState(*args, **kwargs)
     
     @classmethod
-    def create_input(cls, *args, **kwargs):
-        return DifferentialDriveInput(*args, **kwargs)
+    def create_action(cls, *args, **kwargs):
+        return DifferentialDriveAction(*args, **kwargs)
     
     def _init_model(self):
         
@@ -69,7 +69,7 @@ class DifferentialDrive(Robot):
         axis.add_patch(wheel_left)
     
 
-class DifferentialDriveInput(FancyVector):
+class DifferentialDriveAction(FancyVector):
     def __init__(self, v = 0.0, w = 0.0):
         """
         :param a: longitudinal acceleration | [m/s^2]

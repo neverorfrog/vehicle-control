@@ -1,4 +1,4 @@
-dt: 0.05 # sampling time
+dt: 0.08 # sampling time
 
 # car parameters mass, distance of CG from front (a) and rear (b) axis, height of CG, yaw moment of inertia
 car:

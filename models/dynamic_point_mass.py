@@ -12,8 +12,8 @@ class DynamicPointMass(RacingCar):
         return DynamicPointMassState(*args, **kwargs)
     
     @classmethod
-    def create_input(cls, *args, **kwargs):
-        return DynamicPointMassInput(*args, **kwargs)
+    def create_action(cls, *args, **kwargs):
+        return DynamicPointMassAction(*args, **kwargs)
     
     # TODO: if there is some value to print, do it here
     def print(self, state, input):
@@ -93,7 +93,7 @@ class DynamicPointMass(RacingCar):
         return self._spatial_transition
     
     
-class DynamicPointMassInput(FancyVector):
+class DynamicPointMassAction(FancyVector):
     def __init__(self, Fx = 0.0, Fy = 0.0):
         """
         :param Fx: longitudinal force | [m/s^2]

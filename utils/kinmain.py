@@ -27,10 +27,8 @@ track = env.Track(
 
 # ========= Model Definition =======================
 car_config = OmegaConf.create(load_config(f"config/models/kinematic_car.yaml"))
-OmegaConf.set_readonly(car_config, True)
-OmegaConf.set_struct(car_config, True)
 car = models.KinematicCar(config=car_config, track=track)
-car.state = models.KinematicCarState(v=1)
+car.state = models.KinematicCarState(v=0.1)
 
 # ============ Controller Definition ================
 controller_config = OmegaConf.create(load_config(f"config/controllers/{track_name}/kinematic_{track_name}.yaml"))
@@ -38,7 +36,7 @@ OmegaConf.set_readonly(controller_config, True)
 OmegaConf.set_struct(controller_config, True)
 controller = controllers.KinematicMPC(car=car, config=controller_config)
 name = f"kinematic_{track_name}"
-simulation = sim.RacingSimulation(name=name,car=car,controller=controller)  
+simulation = sim.RacingSimulation(name=name,car=car,controller=controller)
 
 # ============ Simulation ============================
 src_dir = os.path.dirname(os.path.abspath(__file__))

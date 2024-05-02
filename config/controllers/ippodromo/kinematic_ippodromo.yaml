@@ -16,15 +16,15 @@ cost_weights:
 
 # input constraints
 input_constraints:
-  a_min: 0
-  a_max: 10
+  a_min: -4
+  a_max: 4
   w_min: -0.5
   w_max: 0.5
 
 # state constraints
 state_constraints:
   v_min: 0
-  v_max: 40
+  v_max: 20
   delta_min: -0.3
   delta_max: 0.3
   ey_min: -3

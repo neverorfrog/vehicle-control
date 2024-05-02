@@ -1,5 +1,5 @@
 from omegaconf import OmegaConf
-from models.kinematic_car import KinematicCar, KinematicCarInput
+from models.kinematic_car import KinematicCar, KinematicCarAction
 import casadi as ca
 import numpy as np
 from controllers.controller import Controller
@@ -30,8 +30,19 @@ class KinematicMPC(Controller):
             
     def _init_opti(self):
         self.opti = ca.Opti('nlp')
-        ipopt_options = {'print_level': 1, 'linear_solver': 'ma27', 'hsllib': '/usr/local/lib/libcoinhsl.so', 'fixed_variable_treatment': 'relax_bounds'}
-        options = {'print_time': False, 'expand': True, 'ipopt': ipopt_options}
+        ipopt_options = {
+            'print_level': 2, 
+            'linear_solver': 'ma27', 
+            'hsllib': '/usr/local/lib/libcoinhsl.so',
+            # 'fixed_variable_treatment': 'relax_bounds',
+            'warm_start_init_point': 'yes',
+            'warm_start_bound_push': 1e-8,
+            'nlp_scaling_method': 'gradient-based',
+            'nlp_scaling_max_gradient': 100}
+        options = {
+            'print_time': False, 
+            'expand': True, 
+            'ipopt': ipopt_options}
         self.opti.solver("ipopt", options)
     
     def _init_variables(self):
@@ -44,7 +55,7 @@ class KinematicMPC(Controller):
         self.ds = self.opti.parameter(self.N) # ds trajectory var (just for loggin purposes)
         self.state_prediction = np.zeros((self.ns, self.N+1)); 
         self.action_prediction = np.ones((self.na, self.N)) + np.random.random((self.na, self.N))
-        self.state_prediction[self.car.state.index('v'),:] += 1
+        self.state_prediction[self.car.state.index('v'),:] += 0.1
         self.curvature = self.opti.parameter(self.N) # curvature trajectory
     
     def _stage_constraints(self, n):
@@ -84,7 +95,7 @@ class KinematicMPC(Controller):
         
         cost += cost_weights.w*(w**2) # steer angle rate
         
-        if n < self.N-1: #Force Input Continuity
+        if n < self.N-1: #Force Action Continuity
             next_action = self.action[:,n+1]
             cost += (cost_weights.a) * (next_action[self.car.input.index('a')] - a)**2
             
@@ -110,10 +121,15 @@ class KinematicMPC(Controller):
     
     
     def command(self, state):
+        print("KINEMATIC BABY")
         self._init_horizon(state)
         sol = self.opti.solve()
-        self._save_horizon(sol)
-        return KinematicCarInput(a=self.action_prediction[0][0], w=self.action_prediction[1][0]), sol
+        self.action_prediction = sol.value(self.action)
+        self.state_prediction = sol.value(self.state)
+        action = KinematicCarAction(a=self.action_prediction[0][0], w=self.action_prediction[1][0])
+        state = self.car.drive(action)
+        return action, state
+
     
     def _init_horizon(self, state):
         # initial state
@@ -129,10 +145,9 @@ class KinematicMPC(Controller):
         self.opti.set_value(self.curvature, self.car.track.k(s_traj))
 
             
-    def _save_horizon(self, sol):
-        # saving for warmstart
-        self.action_prediction = sol.value(self.action)
-        self.state_prediction = sol.value(self.state)
+    def get_state_prediction(self):
+        preds_car = [self.car.rel2glob(self.state_prediction[:,i]) for i in range(self.N)]
+        return np.array(preds_car).squeeze()
             
     def _unpack_state(self, state):
         v = state[self.car.state.index('v')]
