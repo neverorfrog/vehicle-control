@@ -1,18 +1,22 @@
+from typing import Tuple
 from omegaconf import OmegaConf
-from models.dynamic_car import DynamicCar, DynamicCarInput
+from controllers.mpc.kinematic_mpc import KinematicMPC
+from models.dynamic_car import DynamicCar, DynamicCarAction
 from models.dynamic_point_mass import DynamicPointMass
 import casadi as ca
 import numpy as np
 from casadi import cos, tan, fabs
 from controllers.controller import Controller
+from utils.fancy_vector import FancyVector
 np.random.seed(31)
 
 class CascadedMPC(Controller):
-    def __init__(self, car: DynamicCar, point_mass: DynamicPointMass, config: OmegaConf):
+    def __init__(self, car: DynamicCar, point_mass: DynamicPointMass, kin_controller: KinematicMPC, config: OmegaConf):
         """Optimizer Initialization"""
         self.config = config
         self.car = car
         self.point_mass = point_mass
+        self.kin_controller = kin_controller
         self._init_dims()
         self._init_opti()
         self._init_variables()
@@ -128,7 +132,7 @@ class CascadedMPC(Controller):
         cost += ca.if_else(fabs(tan(self.car.alpha_r(Ux,Uy,r,delta))) >= tan(self.car.alphamod_r(Fx)),  # slip angle rear
                     cost_weights.slip*(fabs(tan(self.car.alpha_r(Ux,Uy,r,delta))) - tan(self.car.alphamod_r(Fx)))**2, 0)
         
-        if n < self.N-1: #Force Input Continuity
+        if n < self.N-1: #Force Action Continuity
             next_action = self.action[:,n+1]
             cost += (cost_weights.Fx/ds) * (next_action[self.car.input.index('Fx')] - Fx)**2
             
@@ -230,12 +234,15 @@ class CascadedMPC(Controller):
         return cost
     
     
-    def command(self, state):
+    def command(self, state) -> Tuple[FancyVector, FancyVector]:
         self._init_horizon(state)
         sol = self.opti.solve()
         self.action_prediction = sol.value(self.action)
         self.state_prediction = sol.value(self.state)
-        return DynamicCarInput(Fx=self.action_prediction[0][0], w=self.action_prediction[1][0]), sol
+        action = DynamicCarAction(Fx=self.action_prediction[0][0], w=self.action_prediction[1][0])
+        state = self.car.drive(action)
+        return action, state
+
     
     def _init_horizon(self, state):
         #initial state

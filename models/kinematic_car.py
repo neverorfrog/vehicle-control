@@ -11,8 +11,8 @@ class KinematicCar(RacingCar):
         return KinematicCarState(*args, **kwargs)
     
     @classmethod
-    def create_input(cls, *args, **kwargs):
-        return KinematicCarInput(*args, **kwargs)
+    def create_action(cls, *args, **kwargs):
+        return KinematicCarAction(*args, **kwargs)
     
     def print(self, state, input):
         pass
@@ -20,7 +20,7 @@ class KinematicCar(RacingCar):
     def _init_model(self):
         '''Differential equations describing the model'''
         
-        # =========== Input variables ===================================
+        # =========== Action variables ===================================
         a,w = self.input.variables
 
         # =========== State and auxiliary variables ===================================
@@ -59,7 +59,7 @@ class KinematicCar(RacingCar):
     def spatial_transition(self):
         return self._spatial_transition
     
-class KinematicCarInput(FancyVector):
+class KinematicCarAction(FancyVector):
     def __init__(self, a = 0.0, w = 0.0):
         """
         :param a: longitudinal acceleration | [m/s^2]

@@ -57,7 +57,7 @@ class TrajectoryTrackingSimulation():
     
     def animate(self, state_traj: list, input_traj: list, ref_traj: list, error_traj: list, elapsed: list):
         assert isinstance(state_traj,list), "State trajectory has to be a list"
-        assert isinstance(input_traj,list), "Input trajectory has to be a list"
+        assert isinstance(input_traj,list), "Action trajectory has to be a list"
         
         # simulation params
         N = len(input_traj)

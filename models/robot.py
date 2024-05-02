@@ -12,7 +12,7 @@ class Robot(ABC):
         # Initialize state
         self.state: FancyVector = self.__class__.create_state()
         # Initialize input
-        self.input: FancyVector = self.__class__.create_input()
+        self.input: FancyVector = self.__class__.create_action()
         # Initialize ode 
         self._init_model()
     
@@ -35,7 +35,7 @@ class Robot(ABC):
     
     @classmethod
     @abstractmethod
-    def create_input(cls, *args, **kwargs) -> FancyVector:
+    def create_action(cls, *args, **kwargs) -> FancyVector:
         pass
     
     def integrate(self,state,action,ode,h):

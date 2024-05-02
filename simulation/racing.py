@@ -6,6 +6,7 @@ from controllers.controller import Controller
 import numpy as np
 from controllers.mpc.kinematic_mpc import KinematicMPC
 from environment.track import Track
+from models.dynamic_car import DynamicCarState
 from models.kinematic_car import KinematicCar
 from models.racing_car import RacingCar
 from matplotlib.animation import FuncAnimation
@@ -59,13 +60,20 @@ class RacingSimulation():
             for name,car,controller in zip(self.names,self.cars,self.controllers):
                 state = car.state
                 if state.s > track_length-1: n = steps + 1
+                kinematic = False
                 
                 # ----------- Applying control signal --------------------------
                 try:
+                    if controller.kin_controller.car.state[0] < 5: 
+                        controller = controller.kin_controller
+                        state = controller.car.state
+                        car.state = DynamicCarState(Ux = state[0], s = state[2])
+                        kinematic = True
                     start = time.time()
-                    action, sol = controller.command(state)
+                    action, state = controller.command(state)
+                    if kinematic:
+                        state = DynamicCarState(Ux = state[0], delta = state[1],s = state[2], t = state[-1])
                     elapsed_time = time.time() - start
-                    car.drive(action)
                 except Exception as e:
                     print(e)
                     n = steps + 1
@@ -79,8 +87,8 @@ class RacingSimulation():
                 
                 # ----------- Logging prints -------------------------------------
                 print("------------------------------------------------------------------------------")
+
                 print(f"N: {n}")
-                print(f"Solver iterations: {sol.stats()["iter_count"]}")
                 print(f"STATE: {state}")
                 print(f"ACTION: {action}")
                 print(f"AVERAGE ELAPSED TIME: {np.mean(elapsed[name]):.3f}")
@@ -92,7 +100,7 @@ class RacingSimulation():
       
     def save(self, state_traj: dict, action_traj: dict, preds: dict, elapsed: dict):
         assert isinstance(state_traj,dict), "State trajectory has to be a dict"
-        assert isinstance(action_traj,dict), "Input trajectory has to be a dict"
+        assert isinstance(action_traj,dict), "Action trajectory has to be a dict"
         for name, controller in zip(self.names, self.controllers):
             path = f"simulation/data/{self.track.name}/{name}"
             os.makedirs(path, exist_ok=True)
@@ -126,7 +134,7 @@ class RacingSimulation():
             The animation object
         """
         assert isinstance(state_traj,dict), "State trajectory has to be a dict"
-        assert isinstance(action_traj,dict), "Input trajectory has to be a dict"
+        assert isinstance(action_traj,dict), "Action trajectory has to be a dict"
         
         # simulation params
         ey_index = self.cars[0].state.index('ey')
@@ -147,15 +155,15 @@ class RacingSimulation():
         grid = GridSpec(4, 2, width_ratios=[3, 1])
         plt.subplots_adjust(left=0.05, bottom=0.05, right=0.95, top=0.85, hspace=0.3, wspace=0.1)
         ax_large = plt.subplot(grid[:, 0])
-        ax_small1 = plt.subplot(grid[0, 1]); ax_small1.set_title(r'$v$', loc='right')
-        ax_small2 = plt.subplot(grid[1, 1]); ax_small2.set_title(r'$\delta$', loc='right')
-        ax_small3 = plt.subplot(grid[2, 1]); ax_small3.set_title("ey", loc='right')
-        ax_small4 = plt.subplot(grid[3, 1]); ax_small4.set_title("Fx", loc='right')
+        ax_small1 = plt.subplot(grid[0, 1])
+        ax_small2 = plt.subplot(grid[1, 1]) 
+        ax_small3 = plt.subplot(grid[2, 1])
+        ax_small4 = plt.subplot(grid[3, 1]) 
         lap_time = plt.gcf().text(0.4, 0.95, 'Laptime', fontsize=16, ha='center', va='center')
         elapsed_time = plt.gcf().text(0.4, 0.9, 'Average time', fontsize=16, ha='center', va='center')
         mean_speed = plt.gcf().text(0.4, 0.85, 'Mean speed', fontsize=16, ha='center', va='center')
         
-        colors = ['g','y']
+        colors = ['g','y','r']
         
         def clear():
             ax_large.cla()
@@ -165,9 +173,13 @@ class RacingSimulation():
             ax_small3.cla()
             ax_small4.cla()
             ax_small1.axis((s[0][0], s[0][-1], 0, 20))
+            ax_small1.set_title(r'$v$', loc='center')
             ax_small2.axis((s[0][0], s[0][-1], -0.5, 0.5))
+            ax_small2.set_title(r'$\delta$', loc='center')
             ax_small3.axis((s[0][0], s[0][-1], -4, 4))
+            ax_small3.set_title(r'$e_y$', loc='center')
             ax_small4.axis((s[0][0], s[0][-1], -7000, 7000))
+            ax_small4.set_title(r'$F_x$', loc='center')
             return ax_large, ax_small1, ax_small2, ax_small3, ax_small4
             
             

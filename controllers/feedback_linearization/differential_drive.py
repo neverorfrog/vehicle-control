@@ -2,7 +2,7 @@ from environment.trajectory import Trajectory
 import numpy as np
 from controllers.controller import Controller
 from casadi import sin,cos
-from models.differential_drive import DifferentialDrive, DifferentialDriveInput
+from models.differential_drive import DifferentialDrive, DifferentialDriveAction
 import casadi as ca
 
 class FBL(Controller):
@@ -29,7 +29,7 @@ class FBL(Controller):
 
         action = np.matmul(inverse_decoupling_matrix,u_io)
     
-        return DifferentialDriveInput(action[0], action[1]), ref['p'], e_p 
+        return DifferentialDriveAction(action[0], action[1]), ref['p'], e_p 
 
 class DFBL(Controller):
     def __init__(self, kp: np.ndarray, kd: np.ndarray):
@@ -60,7 +60,7 @@ class DFBL(Controller):
         
         a_w = np.matmul(inverse_decoupling_matrix,u_io)
         v = self.v_transition(input.v, a_w[0]).full().squeeze()
-        return DifferentialDriveInput(v, a_w[1]), ref['p'], e_p 
+        return DifferentialDriveAction(v, a_w[1]), ref['p'], e_p 
     
     def integrate(self,v,a,h):
         '''

@@ -12,8 +12,8 @@ class DynamicCar(RacingCar):
         return DynamicCarState(*args, **kwargs)
     
     @classmethod
-    def create_input(cls, *args, **kwargs):
-        return DynamicCarInput(*args, **kwargs)
+    def create_action(cls, *args, **kwargs):
+        return DynamicCarAction(*args, **kwargs)
     
     def print(self, state, input):
         Ux, Uy, r, delta, s, ey, epsi, t = state
@@ -154,7 +154,7 @@ class DynamicCar(RacingCar):
     def spatial_transition(self):
         return self._spatial_transition
     
-class DynamicCarInput(FancyVector):
+class DynamicCarAction(FancyVector):
     def __init__(self, Fx = 0.0, w = 0.0):
         """
         :param Fx: longitudinal force | [N]

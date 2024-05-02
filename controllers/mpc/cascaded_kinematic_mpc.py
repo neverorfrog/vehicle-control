@@ -1,5 +1,5 @@
 from omegaconf import OmegaConf
-from models.dynamic_car import DynamicCar, DynamicCarInput
+from models.dynamic_car import DynamicCar, DynamicCarAction
 import casadi as ca
 import numpy as np
 from casadi import cos, tan, fabs
@@ -128,7 +128,7 @@ class CascadedKinematicMPC(Controller):
         cost += ca.if_else(fabs(tan(self.car.alpha_r(Ux,Uy,r,delta))) >= tan(self.car.alphamod_r(Fx)),  # slip angle rear
                     cost_weights.slip*(fabs(tan(self.car.alpha_r(Ux,Uy,r,delta))) - tan(self.car.alphamod_r(Fx)))**2, 0)
         
-        if n < self.N-1: #Force Input Continuity
+        if n < self.N-1: #Force Action Continuity
             next_action = self.action[:,n+1]
             cost += (cost_weights.Fx/ds) * (next_action[self.car.input.index('Fx')] - Fx)**2
             
@@ -236,7 +236,7 @@ class CascadedKinematicMPC(Controller):
         sol = self.opti.solve()
         self.action_prediction = sol.value(self.action)
         self.state_prediction = sol.value(self.state)
-        return DynamicCarInput(Fx=self.action_prediction[0][0], w=self.action_prediction[1][0]), sol
+        return DynamicCarAction(Fx=self.action_prediction[0][0], w=self.action_prediction[1][0]), sol
     
     def _init_horizon(self, state):
         #initial state

@@ -5,7 +5,7 @@ import numpy as np
 
 class FancyVector(ABC):
     """
-    Abstract Base Class for States and Inputs
+    Abstract Base Class for States and Actions
     In general it holds values and casadi variables (that's why it's fancy)
     """
     
