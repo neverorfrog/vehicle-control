@@ -30,8 +30,19 @@ class KinematicMPC(Controller):
             
     def _init_opti(self):
         self.opti = ca.Opti('nlp')
-        ipopt_options = {'print_level': 1, 'linear_solver': 'ma27', 'hsllib': '/usr/local/lib/libcoinhsl.so', 'fixed_variable_treatment': 'relax_bounds'}
-        options = {'print_time': False, 'expand': True, 'ipopt': ipopt_options}
+        ipopt_options = {
+            'print_level': 2, 
+            'linear_solver': 'ma27', 
+            'hsllib': '/usr/local/lib/libcoinhsl.so',
+            # 'fixed_variable_treatment': 'relax_bounds',
+            'warm_start_init_point': 'yes',
+            'warm_start_bound_push': 1e-8,
+            'nlp_scaling_method': 'gradient-based',
+            'nlp_scaling_max_gradient': 100}
+        options = {
+            'print_time': False, 
+            'expand': True, 
+            'ipopt': ipopt_options}
         self.opti.solver("ipopt", options)
     
     def _init_variables(self):
@@ -44,7 +55,7 @@ class KinematicMPC(Controller):
         self.ds = self.opti.parameter(self.N) # ds trajectory var (just for loggin purposes)
         self.state_prediction = np.zeros((self.ns, self.N+1)); 
         self.action_prediction = np.ones((self.na, self.N)) + np.random.random((self.na, self.N))
-        self.state_prediction[self.car.state.index('v'),:] += 1
+        self.state_prediction[self.car.state.index('v'),:] += 0.1
         self.curvature = self.opti.parameter(self.N) # curvature trajectory
     
     def _stage_constraints(self, n):
@@ -133,6 +144,10 @@ class KinematicMPC(Controller):
         # saving for warmstart
         self.action_prediction = sol.value(self.action)
         self.state_prediction = sol.value(self.state)
+        
+    def get_state_prediction(self):
+        preds_car = [self.car.rel2glob(self.state_prediction[:,i]) for i in range(self.N)]
+        return np.array(preds_car).squeeze()
             
     def _unpack_state(self, state):
         v = state[self.car.state.index('v')]

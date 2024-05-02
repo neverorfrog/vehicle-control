@@ -90,7 +90,9 @@ class RacingSimulation():
             n += 1
         return state_traj, action_traj, preds, elapsed
       
-    def save(self, state_traj: list, action_traj: list, preds: list, elapsed: list):
+    def save(self, state_traj: dict, action_traj: dict, preds: dict, elapsed: dict):
+        assert isinstance(state_traj,dict), "State trajectory has to be a dict"
+        assert isinstance(action_traj,dict), "Input trajectory has to be a dict"
         for name, controller in zip(self.names, self.controllers):
             path = f"simulation/data/{self.track.name}/{name}"
             os.makedirs(path, exist_ok=True)
