@@ -60,19 +60,11 @@ class RacingSimulation():
             for name,car,controller in zip(self.names,self.cars,self.controllers):
                 state = car.state
                 if state.s > track_length-1: n = steps + 1
-                kinematic = False
                 
                 # ----------- Applying control signal --------------------------
                 try:
-                    if controller.kin_controller.car.state[0] < 5: 
-                        controller = controller.kin_controller
-                        state = controller.car.state
-                        car.state = DynamicCarState(Ux = state[0], s = state[2])
-                        kinematic = True
                     start = time.time()
                     action, state = controller.command(state)
-                    if kinematic:
-                        state = DynamicCarState(Ux = state[0], delta = state[1],s = state[2], t = state[-1])
                     elapsed_time = time.time() - start
                 except Exception as e:
                     print(e)

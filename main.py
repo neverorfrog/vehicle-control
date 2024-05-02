@@ -10,16 +10,16 @@ import utils.common_utils as utils
 from simulation.racing import RacingSimulation
 from omegaconf import OmegaConf
 
-# ======== Configuration =========================
+# ======== Configuration ========================================================
 track_name = utils.TrackType.I.value
 names = []
 names.append("cascaded")
-# names.append("singletrack")
-# sim_name = f"race_{track_name}"
-sim_name = f"cascaded_{track_name}"
+names.append("singletrack")
+sim_name = f"race_{track_name}"
+# sim_name = f"cascaded_{track_name}"
 # sim_name = f"singletrack_{track_name}"
 
-# =========== Track Definition ====================
+# =========== Track Definition ===================================================
 track_config = OmegaConf.create(utils.load_config(f"config/environment/{track_name}.yaml"))
 OmegaConf.set_readonly(track_config, True)
 OmegaConf.set_struct(track_config, True)
@@ -32,12 +32,12 @@ track = env.Track(
     obstacle_data=track_config.obstacle_data
 )
 
-# ========= Models Definition ====================================================
+# ========= Models Definition ======================================================
 # cascaded models
 car_config = OmegaConf.create(utils.load_config(f"config/models/dynamic_car.yaml"))
 cars = [models.DynamicCar(config=car_config, track=track) for _ in names]
 point_masses = [models.DynamicPointMass(config=car_config, track=track) for _ in names]
-# for car in cars: car.state = models.DynamicCarState(Ux = 5, s = 1)
+for car in cars: car.state = models.DynamicCarState(Ux = 4, s = 1.5)
 
 #kinematic bicycle models
 kincar_config = OmegaConf.create(utils.load_config(f"config/models/kinematic_car.yaml"))
@@ -56,15 +56,15 @@ simulation = RacingSimulation(names,cars,controllers,track)
 src_dir = os.path.dirname(os.path.abspath(__file__))
 logfile = f'simulation/logs/{sim_name}.log'
 with open(logfile, "w") as f:
-    # sys.stdout = f
+    sys.stdout = f
     state_traj, action_traj, preds, elapsed = simulation.run(N=500)
 
-# ============ Animation ============================
+# ============ Show Animation ======================================================
 animation = simulation.animate(state_traj, action_traj, preds, elapsed) 
 fig_manager: FigureManagerBase = plt.get_current_fig_manager()
 fig_manager.window.showMaximized()
 plt.show(block=True)
 
-# =========== Save Data =============================
+# =========== Save Data and Animation ==============================================
 # simulation.save(state_traj, action_traj, preds, elapsed)
-# animation.save(f"simulation/videos/{sim_name}.gif",fps=20, dpi=200, writer='pillow')
+animation.save(f"simulation/videos/{sim_name}.gif",fps=13, dpi=200, writer='pillow')
