@@ -190,7 +190,8 @@ This implementation might seem rather complex, compared to simply expressing the
     \tilde{F}_{x_r} = \tilde{\chi}_r \cdot F_x
 \end{equation}
 
-where $\tilde{\chi}_f$ and $\tilde{\chi}_r$ are scalars that sum to 1, however, these equations will be used for numerical optimization, and should therefore be twice differentiable, and we therefore have to use the workaround equations presented above.
+where $\tilde{\chi}_f$ and $\tilde{\chi}_r$ are scalars that sum to 1, however, these equations will be used for numerical 
+optimization, and should therefore be twice differentiable, and we therefore have to use the workaround equations presented above.
 
 For the tire model, given the maximum instantaneous normal load of the tire $F_z$, the maximum possible
 lateral tire force that can be obtained applying the input force $\tilde{F}_x$ is:
@@ -201,9 +202,11 @@ where $\mu$ is the tire-road friction coefficient and the 99\%  of the longitudi
 some numerical issues in the optimization problem. \\
 The normal loads for the two tires are affected also by the slope $\theta$ of the road, and by the banking $\phi$, in the following way:
 \begin{equation}
+    \label{normalF}
     F_{z_f} = \frac{b}{L}m(g\cdot \cos(\theta)\cos(\varphi)+A_{V^2}U_x^2)-\frac{h_{cg}}{L}F_x
 \end{equation}
 \begin{equation}
+    \label{normalR}
     F_{z_r} = \frac{a}{L}m(g\cdot \cos(\theta)\cos(\varphi)+A_{V^2}U_x^2)+\frac{h_{cg}}{L}F_x
 \end{equation}
 where the effect of vertical curvature on speed are expressed through:
@@ -241,12 +244,14 @@ be expressed as:
 \\
 Regarding the drag forces, these are included all in the same variable $F_d$:
 \begin{equation}
+    \label{drag_force}
     F_d = F_{rr}+C_DU_x^2-mg\sin(\theta)
 \end{equation}
 where $F_{rr}$ represents the rolling resistance, $C_D$ is the coefficient of aerodynamic
 drag. \\
 Instead, the lateral force $F_b$ applied on the CG models the effect of the road bank angle $\varphi$:
 \begin{equation}
+    \label{lateral_force}
     F_b = -mg\cos(\theta)\sin(\varphi)
 \end{equation}
 \\
@@ -270,31 +275,50 @@ All these informations are used to describe the motion of the single-track model
 \begin{equation}
     \Delta \dot{\varPsi} = r-\kappa \dot{s}
 \end{equation}
+
+
+
+
 \section*{Point-Mass model}
-The Point-Mass model is a simpler version of the Single-Track model, where there is only a velocity state $V$, and three position states relative to the road descriptor path: the distance $s$ along it, the lateral distance $e$ from it, and finally the difference in orientation  $\phi$ between the velocity vector and the tangent to the road descriptor path.
+The Point-Mass model is a simpler version of the Single-Track model, where the car is approximated with a point object
+in the Center of Gravity of the vehicle. Being a one-dimensional object, the point has just one total horizontal velocity state $\bar{V}$, 
+and three position states relative to the road descriptor path: the distance $\bar{s}$ along it, the lateral distance $\bar{e}$ from it, and finally the
+difference in orientation $\bar{\phi}$ between the velocity vector and the tangent to the road descriptor path.
 
-With the ... of substituting ${U}_x$ with $V$ we use the same equations introduced in the single-track model, in particular for the drag force ${F}_d$ we use equation \ref{}, for ${F}_b$ \ref{} and for the normal loads ${F}_{z_f}$, ${F}_{z_r}$ \ref{}. Following the basic intuition of having to simplify the model, the tire forces are not modeled.
+Substituting ${U}_x$ with $\bar{V}$, we can use some of the equations introduced in the single-track model also for the point-mass model,
+in particular for the drag force ${F}_d$ (eq. \ref{drag_force}), for ${F}_b$ (eq. \ref{lateral_force}) and for the normal loads ${F}_{z_f}$ (eq. \ref{normalF}) and ${F}_{z_r}$ (eq. \ref{normalR}).
+Following the basic intuition of having to simplify the model, the tire forces are not modeled.
 
-The inputs to this model are the longitudinal force ${F}_x$ and the lateral force ${F}_y$, finally we can define the following equations of motion:
-
+The inputs to this model are the longitudinal force $\bar{F}_x$ and the lateral force $\bar{F}_y$, that are limited by friction limits
+according to the following rules:
 \begin{equation}
-    \dot{V} = \frac{F_{x}-F_{d}}{m}
+    \left(\frac{b}{L}\bar{F}_y\right)^2 + \left(\tilde{\chi_f}\bar{F}_x\right)^2 \leq \left(\mu_f F_{z_f}\right)^2
 \end{equation}
 \begin{equation}
-    \dot{s} = \frac{V\cos(\phi)}{1-\kappa e}
+    \left(\frac{a}{L}\bar{F}_y\right)^2 + \left(\tilde{\chi_r}\bar{F}_x\right)^2 \leq \left(\mu_r F_{z_r}\right)^2
+\end{equation}
+Thus the equations that describe the motion of the point-mass model are the following:
+
+\begin{equation}
+    \dot{\bar{V}} = \frac{\bar{F}_{x}-\bar{F}_{d}}{m}
 \end{equation}
 \begin{equation}
-    \dot{e} = V\sin(\phi)
+    \dot{\bar{s}} = \frac{\bar{V}\cos(\bar{\phi})}{1-\kappa \bar{e}}
 \end{equation}
 \begin{equation}
-    \dot{\phi} = \frac{{F}_y + {F}_b}{mV} - k\dot{s}
+    \dot{\bar{e}} = \bar{V}\sin(\bar{\phi})
+\end{equation}
+\begin{equation}
+    \dot{\bar{\phi}} = \frac{{\bar{F}}_y + {\bar{F}}_b}{m\bar{V}} - k\dot{\bar{s}}
 \end{equation}
 
 Note that the yaw dynamics are omitted, and therefore this model cannot be used for yaw stabilization
 
 \subsection{Propagating the state from the single-track to the point-mass model}
-Here we define a mapping from the single-track to the point-mass states. We add a line on top of the point-mass states for clarity.
-
+Here we define the mapping from the single-track to the point-mass states. 
+It is very important that this mapping is correct, to guarantee that the transition
+from one model to the other is compliant to the reality.\\
+The mapping is the following:
 \begin{equation}
     \bar{V} = \sqrt{U_{x}^{2}-U_{y}^{2}}
 \end{equation}
@@ -305,7 +329,7 @@ Here we define a mapping from the single-track to the point-mass states. We add 
     \bar{e} = e
 \end{equation}
 \begin{equation}
-    \bar{\phi} = arctan(\frac{{U}_y}{{U}_x}) + \Delta\psi
+    \bar{\phi} = arctan\left(\frac{{U}_y}{{U}_x}\right) + \Delta\psi
 \end{equation}
 
 
