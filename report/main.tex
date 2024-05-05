@@ -411,6 +411,18 @@ The mapping is the following:
 \end{equation}
 
 
+\subsection{Spatial dynamics}
+The discretization of the models can be done with respect to time or with respect to space, 
+according to own purposes. 
+Discretizing in time means to divide the time over the horizon in small well-defined time intervals $dt$, 
+and leaving the spatial curvilinear coordinate $s$ as an optimization variable in the NLP. This approach
+implies to know the temporal window for the horizon.\\ 
+Instead, discretizing in space means to establish the spatial discretization steps $ds$ that compose the
+total space travelled by the vehicle in the horizon window. In this way the time $t$ can be left as an 
+optimization variable.\\
+In our scenario, our objective is to minimize the lap time. So the discretization in space is more adapt,
+because it allows to minimize the employed time to cover the given space interval. Furthermore, this method
+does not allow to the car to stop, fact in which we are not interested in.
 
 \newpage
 \section{NLP Structure}
