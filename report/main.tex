@@ -427,8 +427,61 @@ does not allow to the car to stop, fact in which we are not interested in.
 \newpage
 \section{NLP Structure}
 
-Spiegare un po', non in dettaglio, piú intuitivamente rispetto al paper magari
-constraint e cost function
+The key element of the NLP is the cost function, for this work we formulate it to minimize time along the finite planning horizon, while also respecting the road boundaries and while keeping the car in a safe configuration. To achieve this, it is composed of the sum of the following seven terms:
+\begin{itemize}
+    \item Final time: the time at which the point-mass model reaches the last stage of the planning horizon
+    \item Terminal state: to make sure that the final stage is a safe one, we add this penalty based on the lateral position ${\bar{e}}_m$, the course error ${\bar{\phi}}_m$ and the excess speed ${\bar{V}}_{exc}$ of the final stage, with
+    \begin{equation}
+    {\bar{V}}_{exc} = 
+    \left\{
+	\begin{array}{ll}
+		{\bar{V}}_m - {{\bar{V}}_{safe}}
+        & \mbox{if } {\bar{V}}_m > {{\bar{V}}_{safe}} \\
+	0 & \mbox{otherwise }
+	\end{array}
+    \right.
+    \end{equation}
+
+    The terms introduced are finally combined in
+    
+    \begin{equation}{J}_{term} = {W_e}_{term}{\bar{e}}_m^2 + {W_{\phi}}_{term}{\bar{\phi}}_m^2 + {W_V}_{term}{\bar{V}}_{exc}^2
+    \end{equation}
+
+    \item Road Boundary Intrusion: we penalize any road excursion
+    \begin{equation}
+    J_{rb} = W_{rb}\sum_{k=1}^{N} \Delta s_k \begin{cases}
+    (e_k - {e_{\text{max}}}_k)^2, & \text{if } e_k \geq e_{\text{max}_k} \\
+    (e_k - e_{\text{min}_k})^2, & \text{if } e_k \leq e_{\text{min}_k} \\
+    0, & \text{otherwise}
+    \end{cases}
+    \end{equation}
+    \[  + W_{rb}\sum_{l=1}^{M} \Delta\overline{s}_l \begin{cases}
+    (\overline{e}_l - \overline{e}_{\text{max}_l})^2, & \text{if } \overline{e}_l \geq \overline{e}_{\text{max}_l} \\
+    (\overline{e}_l - \overline{e}_{\text{min}_l})^2, & \text{if } \overline{e}_l \leq \overline{e}_{\text{min}_l} \\
+    0, & \text{otherwise}
+    \end{cases}
+    \]
+
+    where, intuitively, ${e_{\text{max}}}_k$ can be chosen as the width of the road. !!!E' effettivamente cosi? Lo dico ad intuito!!!
+
+    \item Deviation from the Road Descriptor Path: 
+    \begin{equation}
+    J_{rd} = W_{rd}(\sum_{k=1}^{N} \Delta s_k e_k^2 + \sum_{l=1}^{M} \Delta\overline{s}_l \overline{e}_l^2)
+    \end{equation}
+    While this might look similar to the previous term, its objective is to increase robustness to any eventual mismatch between models !!!cazzo vordi!!!
+
+    \item Slew rate: in order to encourage smooth controls we penalize too big increases of the steering rate $\dot{\delta}$, variation of the total lateral force $\Delta F_y$ and the variation of the new commanded longitudinal force $F_x$ with respect to the previous commanded $F_x$.
+
+    These are all combined into:
+    
+    \begin{equation}
+        J_{\dot{u}} = J_{\dot{\delta}} + J_{\Delta F_y} + J_{\Delta F_x} + J_{\Delta F_u}
+    \end{equation}
+
+    !!!To be completed, vogliamo esprimere le varie J di questo ultimo step o diventa troppo listone di equazioni?!!!
+    
+    
+\end{itemize}
 
 \section{Implementation}
 
