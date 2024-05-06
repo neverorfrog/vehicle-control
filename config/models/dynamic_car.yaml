@@ -8,7 +8,7 @@ car:
   a: 1.1 # distance from front to CG [m]
   b: 1.4 # distance from rear to CG [m]
   h: 0.55 # CG height [m]
-  eps: 0.85 # tire model modification
+  eps: 0.9 # tire model modification
   Peng: 170000 #maximum engine power
   Xd: # drive force distribution
     f: 1

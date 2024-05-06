@@ -79,6 +79,10 @@ class CascadedMPC(Controller):
         # initial state
         self.state0 = self.opti.parameter(self.ns) if self.N > 0 else self.opti.parameter(self.ns_pm) 
         
+        # slack variables (for real world)
+        # self.Fe_f = self.opti.variable(self.N)
+        # self.Fe_r = self.opti.variable(self.N)
+        
     def _stage_constraints(self, n):
         state = self.state[:self.ns,n]; action = self.action[:,n]
         Ux,Uy,r,delta,s,ey,epsi,t = self._unpack_state(state)
@@ -105,7 +109,10 @@ class CascadedMPC(Controller):
         self.opti.subject_to(self.opti.bounded(-bound_f,self.car.Fx_f(Fx),bound_f))
         bound_r = mu.r*self.car.Fz_r(Ux,Fx)*cos(self.car.alpha_r(Ux,Uy,r,delta))
         self.opti.subject_to(self.opti.bounded(-bound_r,self.car.Fx_r(Fx),bound_r))
-        
+                
+        # friction Limits for real world experiments 
+        # self.opti.subject_to( self.car.Fy_f(Ux,Uy,r,delta,Fx)**2 <= (self.car.config.env.mu.f*self.car.Fz_f(Ux,Fx))**2 + self.Fe_f[n]**2 - 0.98*self.car.Fx_f(Fx)**2 )
+        # self.opti.subject_to( self.car.Fy_r(Ux,Uy,r,delta,Fx)**2 <= (self.car.config.env.mu.r*self.car.Fz_r(Ux,Fx))**2 + self.Fe_r[n]**2 - 0.98*self.car.Fx_r(Fx)**2 )
            
     def _stage_cost(self, n):
         Ux,Uy,r,delta,s,ey,epsi,t = self._unpack_state(self.state[:self.ns,n])
@@ -126,12 +133,16 @@ class CascadedMPC(Controller):
         
         cost += cost_weights.w*(w**2) # steer angle rate
         
-        cost += ca.if_else(fabs(tan(self.car.alpha_f(Ux,Uy,r,delta))) >= tan(self.car.alphamod_f(Fx)),  # slip angle front
-                        cost_weights.slip*(fabs(tan(self.car.alpha_f(Ux,Uy,r,delta))) - tan(self.car.alphamod_f(Fx)))**2, 0)
+        talpha_f = fabs(tan(self.car.alpha_f(Ux,Uy,r,delta)))
+        talphamod_f = tan(self.car.alphamod_f(Fx))
+        cost += ca.if_else(talpha_f >= talphamod_f, cost_weights.slip*(talpha_f - talphamod_f)**2, 0) #slip angle front
                         
-        cost += ca.if_else(fabs(tan(self.car.alpha_r(Ux,Uy,r,delta))) >= tan(self.car.alphamod_r(Fx)),  # slip angle rear
-                    cost_weights.slip*(fabs(tan(self.car.alpha_r(Ux,Uy,r,delta))) - tan(self.car.alphamod_r(Fx)))**2, 0)
+        talpha_r = fabs(tan(self.car.alpha_r(Ux,Uy,r,delta)))
+        talphamod_r = tan(self.car.alphamod_r(Fx))
+        cost += ca.if_else(talpha_r >= talphamod_r, cost_weights.slip*(talpha_r - talphamod_r)**2, 0) #slip angle rear
         
+        # cost += cost_weights.friction*(self.Fe_f[n]**2 + self.Fe_r[n]**2) # slack variables for real world
+
         if n < self.N-1: #Force Action Continuity
             next_action = self.action[:,n+1]
             cost += (cost_weights.Fx/ds) * (next_action[self.car.input.index('Fx')] - Fx)**2
@@ -149,7 +160,6 @@ class CascadedMPC(Controller):
         V,s,ey,epsi,t = self._unpack_pm_state(state)
         Fx, Fy = self._unpack_pm_action(action)
         state_pm_constraints = self.config.state_pm_constraints
-        input_constraints = self.config.input_constraints
         Peng = self.car.config.car.Peng
         
         # state limits
@@ -162,11 +172,9 @@ class CascadedMPC(Controller):
         if m < self.H-1:
             self.opti.subject_to(self.state[:self.ns_pm,m+1] == self.point_mass.spatial_transition(state,action,self.curvature[m],self.ds[m]))
         
-        # friction limits
-        Fx_f_bar = self.car.Fx_f(Fx)
-        Fx_r_bar = self.car.Fx_r(Fx)
-        self.opti.subject_to(Fx_f_bar**2 + (self.car.config.car.b/self.car.config.car.l*Fy)**2 <= (input_constraints.mu_lim*self.car.Fz_f(V,Fx))**2)
-        self.opti.subject_to(Fx_r_bar**2 + (self.car.config.car.a/self.car.config.car.l*Fy)**2 <= (input_constraints.mu_lim*self.car.Fz_r(V,Fx))**2)
+        # friction limits (for real world)
+        # self.opti.subject_to(self.car.Fx_f(Fx)**2 + ((self.car.config.car.b/self.car.config.car.l)*Fy)**2 <= (self.car.config.env.mu.f*self.car.Fz_f(V,Fx))**2)
+        # self.opti.subject_to(self.car.Fx_r(Fx)**2 + ((self.car.config.car.a/self.car.config.car.l)*Fy)**2 <= (self.car.config.env.mu.r*self.car.Fz_r(V,Fx))**2)
         
     
     def _pm_stage_cost(self, m):
@@ -198,12 +206,13 @@ class CascadedMPC(Controller):
         return cost  
     
     def _switching_cost(self):
+        cost_weights = self.config.cost_weights
         Ux_final,Uy_final,r_final,delta_final,_,_,_,_ = self._unpack_state(self.state[:self.ns,self.N-1]) #final state
         Fx_final, _ = self._unpack_action(self.action[:,self.N-1]) #final action
         Fx_bar_initial, Fy_bar_initial = self._unpack_pm_action(self.action[:,self.N])
         Fy_f = self.car.Fy_f(Ux_final,Uy_final,r_final,delta_final,Fx_final)
         Fy_r = self.car.Fy_r(Ux_final,Uy_final,r_final,delta_final,Fx_final)
-        return 0.000000001 * (1/self.ds[self.N-1]) * (((Fx_bar_initial-Fx_final)**2) + (Fy_bar_initial-Fy_f-Fy_r)**2)
+        return cost_weights.switch_F * (1/self.ds[self.N-1]) * (((Fx_bar_initial-Fx_final)**2) + (Fy_bar_initial-Fy_f-Fy_r)**2)
         
     
     def _switching_constraints(self):

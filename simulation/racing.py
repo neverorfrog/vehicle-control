@@ -79,12 +79,12 @@ class RacingSimulation():
                 
                 # ----------- Logging prints -------------------------------------
                 print("------------------------------------------------------------------------------")
-
                 print(f"N: {n}")
                 print(f"STATE: {state}")
                 print(f"ACTION: {action}")
                 print(f"AVERAGE ELAPSED TIME: {np.mean(elapsed[name]):.3f}")
                 print(f"MEDIAN ELAPSED TIME: {np.median(elapsed[name]):.3f}")
+                car.print(state,action)
                 print("------------------------------------------------------------------------------")
                 print(f"\n")
             n += 1

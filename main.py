@@ -14,9 +14,9 @@ from omegaconf import OmegaConf
 track_name = utils.TrackType.I.value
 names = []
 names.append("cascaded")
-names.append("singletrack")
-sim_name = f"race_{track_name}"
-# sim_name = f"cascaded_{track_name}"
+# names.append("singletrack")
+# sim_name = f"race_{track_name}"
+sim_name = f"cascaded_{track_name}"
 # sim_name = f"singletrack_{track_name}"
 
 # =========== Track Definition ===================================================
@@ -67,4 +67,4 @@ plt.show(block=True)
 
 # =========== Save Data and Animation ==============================================
 # simulation.save(state_traj, action_traj, preds, elapsed)
-animation.save(f"simulation/videos/{sim_name}.gif",fps=13, dpi=200, writer='pillow')
+# animation.save(f"simulation/videos/{sim_name}.gif",fps=13, dpi=200, writer='pillow')

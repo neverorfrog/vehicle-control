@@ -18,24 +18,19 @@ class DynamicCar(RacingCar):
     def print(self, state, input):
         Ux, Uy, r, delta, s, ey, epsi, t = state
         Fx, w = input
+        env = self.config.env
+        muf = env.mu.f; mur = env.mu.r
         print(f"Fx_f: {self.Fx_f(Fx)}")
         print(f"Fx_r: {self.Fx_r(Fx)}")
         Ux_dot = self.Ux_dot(Fx,Ux,Uy,r,delta).full().squeeze().item()
         Uy_dot = self.Uy_dot(Fx,Ux,Uy,r,delta).full().squeeze().item()
         print(f"UX ACCELERATION: {Ux_dot:.3f}, UY ACCELERATION: {Uy_dot:.3f}")
-        # print(f"Xf: {self.Xf(Fx)}")
-        # print(f"Xr: {self.Xr(Fx)}")
-        # env = self.config['env']
-        # print(f"Fymax_f: {(env['mu']['f']*self.Fz_f(Ux,Fx))**2 - ((0.98*self.Fx_f(Fx))**2)}")
-        # print(f"Fymax_r: {(env['mu']['r']*self.Fz_r(Ux,Fx))**2 - ((0.98*self.Fx_r(Fx))**2)}" )
-        # print(f"Fz_f: {self.Fz_f(Ux, Fx)}")
-        # print(f"Fz_r: {self.Fz_r(Ux,Fx)}")
-        # print(f"alpha_f: {self.alpha_f(Ux,Uy,r,delta)}")
-        # print(f"alpha_r: {self.alpha_r(Ux,Uy,r,delta)}")
-        # print(f"alpha_mod_f: {self.alphamod_f(Fx)}")
-        # print(f"alpha_mod_r: {self.alphamod_r(Fx)}")
-        print(f"Fy_f: {self.Fy_f(Ux,Uy,r,delta, Fx)}")
-        print(f"Fy_r: {self.Fy_r(Ux,Uy,r,delta, Fx)}")
+        Fymax_f = ((muf*self.Fz_f(Ux,Fx))**2 - ((0.98*self.Fx_f(Fx))**2))
+        Fymax_r = ((mur*self.Fz_r(Ux,Fx))**2 - ((0.98*self.Fx_r(Fx))**2))
+        print(f"Fy_f diff: {Fymax_f - self.Fy_f(Ux,Uy,r,delta, Fx)**2}")
+        print(f"Fy_r diff: {Fymax_r - self.Fy_r(Ux,Uy,r,delta, Fx)**2}")
+        print(f"slip_f diff: {ca.fabs(self.alphamod_f(Fx)) - ca.fabs(self.alpha_f(Ux,Uy,r,delta))}")
+        print(f"slip_r diff: {ca.fabs(self.alphamod_r(Fx)) - ca.fabs(self.alpha_r(Ux,Uy,r,delta))}")
     
     def _init_model(self):
         # =========== State and auxiliary variables ===================================
