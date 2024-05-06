@@ -15,7 +15,7 @@ track_name = utils.TrackType.I.value
 names = []
 names.append("cascaded")
 # names.append("singletrack")
-# sim_name = f"race_{track_name}"
+# sim_name = f"race_obstacles_{track_name}"
 sim_name = f"cascaded_{track_name}"
 # sim_name = f"singletrack_{track_name}"
 

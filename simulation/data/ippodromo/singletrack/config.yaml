@@ -8,14 +8,14 @@ cost_weights:
   speed: 0.2
   ey: 0.4
   epsi: 1
-  w: 0.001
+  w: 0.009
   Fx: 1.0e-06
   Fy: 1.0e-06
-  deviation_st: 0.001
-  deviation_pm: 0.001
+  deviation_st: 0.0001
+  deviation_pm: 0.0001
   boundary: 1
-  slip: 1
-  friction: 1.0e-07
+  slip: 5
+  friction: 1.0e-13
   obstacles: 1.2
   obstacles_pm: 3
 input_constraints:

@@ -11,16 +11,13 @@ cost_weights:
   speed: 0.2
   ey: 0.4
   epsi: 1
-  w:  0.001
+  w:  0.009
   Fx: 0.000001
   Fy: 0.000001
-  deviation_st: 0.001
-  deviation_pm: 0.001
+  deviation_st: 0.0001
   boundary: 1
-  slip : 1
-  friction: 0.0000001
-  obstacles: 1.2
-  obstacles_pm: 3
+  slip : 5
+  obstacles: 1.6
 
 # input constraints
 input_constraints:
@@ -34,10 +31,5 @@ state_constraints:
   max_speed: 20
   delta_min: -0.45
   delta_max: 0.45
-  ey_min: -3
-  ey_max: 3
-
-state_pm_constraints:
-  V_min: 3
   ey_min: -3
   ey_max: 3
