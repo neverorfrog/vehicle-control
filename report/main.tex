@@ -428,7 +428,7 @@ does not allow to the car to stop, fact in which we are not interested in.
 \section{NLP Structure}
 
 The key element of the NLP is the cost function, for this work we formulate it to minimize time along the finite planning horizon, while also respecting the road boundaries and while keeping the car in a safe configuration. To achieve this, it is composed of the sum of the following seven terms:
-\begin{itemize}
+\begin{enumerate}
     \item Final time: the time at which the point-mass model reaches the last stage of the planning horizon
     \item Terminal state: to make sure that the final stage is a safe one, we add this penalty based on the lateral position ${\bar{e}}_m$, the course error ${\bar{\phi}}_m$ and the excess speed ${\bar{V}}_{exc}$ of the final stage, with
     \begin{equation}
@@ -470,8 +470,8 @@ The key element of the NLP is the cost function, for this work we formulate it t
     \end{equation}
     While this might look similar to the previous term, its objective is to increase robustness to any eventual mismatch between models !!!cazzo vordi!!!
 
-    \item Slew rate: in order to encourage smooth controls we penalize too big increases of the steering rate $\dot{\delta}$, variation of the total lateral force $\Delta F_y$ and the variation of the new commanded longitudinal force $F_x$ with respect to the previous commanded $F_x$.
-
+    \item Slew rate: in order to encourage smooth controls we penalize too big increases of the steering rate $\dot{\delta}$, variation of the total lateral force $\Delta F_y$, variation of the new commanded longitudinal force ${F_x}_k$ with respect to the previous commanded ${F_x}_{k-1}$.
+    And finally, the variation in forces at the model transition, denoted as $\Delta F_u$.
     These are all combined into:
     
     \begin{equation}
@@ -480,8 +480,12 @@ The key element of the NLP is the cost function, for this work we formulate it t
 
     !!!To be completed, vogliamo esprimere le varie J di questo ultimo step o diventa troppo listone di equazioni?!!!
     
+    \item Excessive Slip Angle: in order to discourage the car to operate in the fully saturated region of the tires, we add a penalty on excessive slip angle. This helps in stabilizing the car.
+
+    \item Excessive Force Usage Beyond the Imposed Limit:
+    To help the optimization problem we introduce some slack variables on the force limits, we introduce this penalty to keep them as small as possible
     
-\end{itemize}
+\end{enumerate}
 
 \section{Implementation}
 
