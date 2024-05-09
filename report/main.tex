@@ -111,7 +111,7 @@ cascaded model is lower, achieving also better results in terms of lap time.
 
 In the next section we will talk about some related work. After that, we will
 address the modeling part of the algorithm, namely the modeling of the track and
-the car. Then, we will formalize the NLP structure and put everything togethere
+the car. Then, we will formalize the NLP structure and put everything together
 to define the complete MPC problem. In the end, we will discuss some experiments
 and the results.
 
@@ -456,7 +456,10 @@ According to this notation, we can define the spatial dynamics for the single-tr
 \newpage
 \section{NLP Structure}
 
-The key element of the NLP is the cost function, for this work we formulate it to minimize time along the finite planning horizon, while also respecting the road boundaries and while keeping the car in a safe configuration. To achieve this, it is composed of the sum of the following seven terms:
+The key element of the NLP is the cost function, which can be composed by many terms according to own puproses.
+Our objective is to minimize time along the finite planning horizon, while also respecting the road
+boundaries and while keeping the car in a safe configuration. 
+To achieve this, the following seven terms are summed together:
 \begin{enumerate}
     \item Final time: the time at which the point-mass model reaches the last stage of the planning horizon
     \item Terminal state: to make sure that the final stage is a safe one, we add this penalty based on the lateral position ${\bar{e}}_m$, the course error ${\bar{\phi}}_m$ and the excess speed ${\bar{V}}_{exc}$ of the final stage, with
