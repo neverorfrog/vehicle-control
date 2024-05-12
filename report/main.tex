@@ -459,10 +459,11 @@ According to this notation, we can define the spatial dynamics for the single-tr
 The key element of the NLP is the cost function, which can be composed by many terms according to own puproses.
 Our objective is to minimize time along the finite planning horizon, while also respecting the road
 boundaries and while keeping the car in a safe configuration. 
-To achieve this, the following seven terms are summed together:
+To achieve this, a series of seven terms regarding both single-track and point-mass models are summed together:
 \begin{enumerate}
-    \item Final time: the time at which the point-mass model reaches the last stage of the planning horizon
-    \item Terminal state: to make sure that the final stage is a safe one, we add this penalty based on the lateral position ${\bar{e}}_m$, the course error ${\bar{\phi}}_m$ and the excess speed ${\bar{V}}_{exc}$ of the final stage, with
+    \item \textbf{Final time}: the time at which the point-mass model reaches the last stage of the planning horizon
+    \item \textbf{Terminal state}: to make sure that the final stage is a safe one, we add this penalty based on the 
+    lateral position ${\bar{e}}_m$, the course error ${\bar{\phi}}_m$ and the excess speed ${\bar{V}}_{exc}$ of the final stage, with
     \begin{equation}
     {\bar{V}}_{exc} = 
     \left\{
@@ -476,10 +477,10 @@ To achieve this, the following seven terms are summed together:
 
     The terms introduced are finally combined in
     
-    \begin{equation}{J}_{term} = {W_e}_{term}{\bar{e}}_m^2 + {W_{\phi}}_{term}{\bar{\phi}}_m^2 + {W_V}_{term}{\bar{V}}_{exc}^2
+    \begin{equation}{J}_{term} = W_{e_{term}}{\bar{e}}_m^2 + {W_{\phi}}_{term}{\bar{\phi}}_m^2 + {W_V}_{term}{\bar{V}}_{exc}^2
     \end{equation}
 
-    \item Road Boundary Intrusion: we penalize any road excursion
+    \item \textbf{Road Boundary Intrusion}: it penalizes when the car crosses the track boundaries
     \begin{equation}
     J_{rb} = W_{rb}\sum_{k=1}^{N} \Delta s_k \begin{cases}
     (e_k - {e_{\text{max}}}_k)^2, & \text{if } e_k \geq e_{\text{max}_k} \\
@@ -494,15 +495,14 @@ To achieve this, the following seven terms are summed together:
     \end{cases}
     \]
 
-    where, intuitively, ${e_{\text{max}}}_k$ can be chosen as the width of the road. !!!E' effettivamente cosi? Lo dico ad intuito!!!
+    where, intuitively, ${e_{\text{max}}}_k$ can be chosen a little bit smaller than the width of the road.
 
-    \item Deviation from the Road Descriptor Path: 
+    \item \textbf{Deviation from the Road Descriptor Path}: it encourages the car to stay as near as possible to the road descriptor
     \begin{equation}
     J_{rd} = W_{rd}(\sum_{k=1}^{N} \Delta s_k e_k^2 + \sum_{l=1}^{M} \Delta\overline{s}_l \overline{e}_l^2)
     \end{equation}
-    While this might look similar to the previous term, its objective is to increase robustness to any eventual mismatch between models !!!cazzo vordi!!!
 
-    \item Slew rate: in order to encourage smooth controls we penalize too big increases of the steering rate $\dot{\delta}$, variation of the total lateral force $\Delta F_y$, variation of the new commanded longitudinal force ${F_x}_k$ with respect to the previous commanded ${F_x}_{k-1}$.
+    \item \textbf{Slew rate}: in order to encourage smooth controls we penalize too big increases of the steering rate $\dot{\delta}$, variation of the total lateral force $\Delta F_y$, variation of the new commanded longitudinal force ${F_x}_k$ with respect to the previous commanded ${F_x}_{k-1}$.
     And finally, the variation in forces at the model transition, denoted as $\Delta F_u$.
     These are all combined into:
     
@@ -512,11 +512,27 @@ To achieve this, the following seven terms are summed together:
 
     !!!To be completed, vogliamo esprimere le varie J di questo ultimo step o diventa troppo listone di equazioni?!!!
     
-    \item Excessive Slip Angle: in order to discourage the car to operate in the fully saturated region of the tires, we add a penalty on excessive slip angle. This helps in stabilizing the car.
-
-    \item Excessive Force Usage Beyond the Imposed Limit:
-    To help the optimization problem we introduce some slack variables on the force limits, we introduce this penalty to keep them as small as possible
+    \item \textbf{Excessive Slip Angle}: in order to discourage the car to operate in the fully saturated region of the tires, we add a penalty on excessive slip angle. This helps in stabilizing the car.
+    \begin{equation}
+        J_{a} = W_{a}\sum_{k=1}^{N}
+        \begin{cases}
+        \left(|\tan \alpha_{f_k}|-\tan \alpha_{f_k}^{\text{mod}}\right)^2, & \text{if } |\tan \alpha_{f_k}| \geq  \tan \alpha_{f_k}^{\text{mod}}\\
+        0, & \text{otherwise}
+        \end{cases}
+        \end{equation}
+        \[  + W_{a}\sum_{l=1}^{M} 
+        \begin{cases}
+        \left(|\tan \alpha_{r_k}|-\tan \alpha_{r_k}^{\text{mod}}\right)^2, & \text{if } |\tan \alpha_{r_k}| \geq  \tan \alpha_{r_k}^{\text{mod}}\\
+        0, & \text{otherwise}
+        \end{cases}
+        \]
     
+    \item \textbf{Excessive Force Usage Beyond the Imposed Limit}:
+    To help the optimization problem we introduce some slack variables on the force limits, we introduce this penalty to keep them as small as possible
+    \begin{equation}
+        J_F = W_F \sum_{k=0}^{N}\left(\left(F_{e_{f_k}}^2\right)^2 + \left(F_{e_{r_k}}^2\right)^2\right)
+    \end{equation}
+    !!! Forse si può togliere, dipende se è stata implementata!!!
 \end{enumerate}
 
 \section{Implementation}
