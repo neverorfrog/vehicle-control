@@ -535,6 +535,32 @@ To achieve this, a series of seven terms regarding both single-track and point-m
     !!! Forse si può togliere, dipende se è stata implementata!!!
 \end{enumerate}
 
+The constraints of the NLP regard some limitations on the states of the single-track and of the point-mass models, 
+on the input variables, on the tire model, and on the dynamics of the systems, including the transition between
+them. In detail:
+\begin{enumerate}
+    \item \textbf{State limits}: the velocities $U_x$ and $\bar{V}$ are maintained greater than a minimum value, such 
+    that they will never go to zero and the car will never stop. This is possible because we are in a race scenario.
+    In this way some problems with spatial discretization and singularities in the models are avoided.\\
+    Moreover, there are some mechanical limits on the steering angle $\delta$.
+    \begin{align}
+        U_{x_k} \geq U_x^{min} && \forall k=1,...,N\\
+        \bar{V_l} \geq \bar{V^{min}} && \forall l=1,...,M\\
+        \delta^{min} \leq \delta_k \leq \delta^{max} && \forall k=1,...,N
+    \end{align}
+
+    \item \textbf{Input limits}: the input longitudinal forces for both dynamic models have an upper bound, depending
+    on the maximum engine power $P_{eng}$ and the longitudinal velocity; furthermore there is a range of possible values
+    for the steering rate.
+    \begin{align}
+        F_{x_k} \leq \frac{P_{eng}}{U_{x_k}} && \forall k=0,...,N \\
+        \bar{F}_{x_k} \leq \frac{P_{eng}}{\bar{V}_{x_l}} && \forall l=0,...,M \\
+        \dot{\delta}^{min} \leq \dot{\delta}_{k} \leq \dot{\delta}^{max} && \forall k=0,...,N
+    \end{align}
+
+    \item \textbf{Tire model}: 
+\end{enumerate}
+
 \section{Implementation}
 
 We used as main backbone casadi (\cite{casadi}), a software framework for automatic
