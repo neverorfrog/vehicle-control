@@ -426,7 +426,7 @@ does not allow to the car to stop, but we are not interested in it.
 Thus, denoting as $p$ a state variable of any model, we define its derivative with respect to the curvilinear
 coordinate $s$ as:
 \begin{equation}
-    v' = \frac{d p}{d s} = \frac{dp}{dt} \frac{dt}{ds} = \dot{p} \frac{dt}{ds} = \dot{p} \frac{1}{\dot{s}}
+    p' = \frac{d p}{d s} = \frac{dp}{dt} \frac{dt}{ds} = \dot{p} \frac{dt}{ds} = \dot{p} \frac{1}{\dot{s}}
 \end{equation}  
 that we will compute through the chain rule.
 According to this notation, we can define the spatial dynamics for the single-track model:
@@ -451,6 +451,24 @@ According to this notation, we can define the spatial dynamics for the single-tr
 \begin{equation}
     t' = \frac{1}{\dot{s}}
 \end{equation}
+and for the point-mass model:
+\begin{equation}
+    {\bar{V}}' = \left(\frac{\bar{F}_{x}-\bar{F}_{d}}{m}\right) \frac{1}{\dot{\bar{s}}}
+\end{equation}
+\begin{equation}
+    {\bar{e}}' = \left(\bar{V}\sin(\bar{\phi})\right)\frac{1}{\dot{\bar{s}}}
+\end{equation}
+\begin{equation}
+    {\bar{\phi}}' = \left(\frac{{\bar{F}}_y + {\bar{F}}_b}{m\bar{V}} - k\dot{\bar{s}}\right)\frac{1}{\dot{\bar{s}}}
+\end{equation}
+\begin{equation}
+    \bar{t}' = \frac{1}{\dot{\bar{s}}}
+\end{equation}
+
+We will denote in a concise way the spatial transitions from a state to the next one as
+$spatialTransition_{st}(x_k, u_k)$ for the single-track, and $spatialTransition_{pm}(x_k, u_k)$ 
+for the point-mass model, where $x_k$ is the state at time step $k$ and $u_k$ is the control
+applied at time step $k$. 
 
 
 \newpage
@@ -558,7 +576,16 @@ them. In detail:
         \dot{\delta}^{min} \leq \dot{\delta}_{k} \leq \dot{\delta}^{max} && \forall k=0,...,N
     \end{align}
 
-    \item \textbf{Tire model}: 
+    \item \textbf{Tire model}: in the single-track model, the longitudinal tire forces are bounded by the friction forces 
+    modified by the slip angle $\alpha$
+    \begin{align}
+        -\mu_f F_{z_{f_k}} \cos(\alpha_{f_k}) \leq \tilde{F}_{x_{f_k}} \leq \mu_f F_{z_{f_k}} \cos(\alpha_{f_k}) && \forall k=0,...,N \\
+        -\mu_r F_{z_{r_k}} \cos(\alpha_{r_k}) \leq \tilde{F}_{x_{r_k}} \leq \mu_f F_{z_{r_k}} \cos(\alpha_{r_k}) && \forall k=0,...,N 
+    \end{align}
+
+    \item \textbf{Dynamics}: given a certain initial state for the single-track, the next states of this model must respect the
+    spatial dynamics of the system explained in \ref{}
+
 \end{enumerate}
 
 \section{Implementation}
