@@ -68,24 +68,29 @@ future states and act accordingly by choosing the "best" control action.
     \min_{u_0,...,u_{N-1}}{J(x,u)} \\
     \text{ subject to }
         \quad x_{k+1} = f(x_k,u_k) \\
-        \quad x_0 = x(t)
-        \quad 
+        \quad x_0 = x(t) \\
+        \quad u_{min} \leq u_k \leq u_{max}
 \end{aligned}
 \end{equation}
 
-We call $J(x)$ the \textbf{cost function} and $g(x)$ the \textbf{constraints}.
-In particular, the sequence of control actions is generated such that the cost
-function is minimized over the \textbf{prediction horizon} by solving a
-constrained optimization problem that depends on the evolution of the model over
-the horizon itself. Then, the controller applies just the first action: in this
-way the system has advanced one step, a new optimization problem with a new
-initial state is produced, and the process goes on. The advantages of MPC are
-many: it is a multivaribale controller, so it can control outputs by handling
-simultaneously all the interactions between system variables; it can handle
-constraints, so it allows to avoid possible undesired states; it predicts the
-future states, allowing to incorporate their information in the actual control.
-It is particulary useful for a real-time control that adapts to \textbf{changes
-in the environment}.\\
+We call $J(x)$ the \textbf{cost function} and $f(x,u)$ the \textbf{model}. The
+critical part of MPC lies in the two last rows. The second-last expresses the
+fact that, for every planning horizon, the current state is the initial state:
+this is a subtle but important difference with respect to, for example,
+trajectory optimization. The last row entails an equally important concept which
+pertains specifically MPC, namely constraints. In the end, the sequence of
+control actions is generated such that the cost function is minimized over the
+\textbf{prediction horizon} by solving a constrained optimization problem that
+depends on the evolution of the model over the horizon itself. Then, the
+controller applies just the first action: in this way the system has advanced
+one step, a new optimization problem with a new initial state is produced, and
+the process goes on. The advantages of MPC are many: it is a multivaribale
+controller, so it can control outputs by handling simultaneously all the
+interactions between system variables; as said, it can handle constraints, so it
+allows to avoid possible undesired states; it predicts the future states,
+allowing to incorporate their information in the actual control. It is
+particulary useful for a real-time control that adapts to \textbf{changes in the
+environment}.\\
 When dealing with nonlinear dynamics, a nonlinear MPC (or NMPC) can be used to
 capture more accurately the nonlinear behavior of a system. This entails a more
 robust manipulation capability of both nonlinearities and uncertainties in the
@@ -117,71 +122,29 @@ and the results.
 
 \section{Related Work}
 
+\begin{itemize}
+    \item Learning-based approach for vehicle control in \cite{rosolia}
+    \item Linearization approach in \cite{bemporad}
+\end{itemize}
+
 \newpage
 \section{Models}
 
-Models must be well-defined to be used in NMPC. In this section we describe
-them.
-
-\subsection{Track}
-\label{subsec:track}
-
-Since the algorithm is application-specific for the race environment, it is
-fundamental to model the racing track itself. We decided to model it as a
-sequence of \textbf{waypoints}, defining the track centerline, which are then
-connected through a \textbf{cubic spline}. The waypoints are constructed based
-on three parameters:
-\begin{itemize}
-    \item corner coordinates (in meters) defined by the user
-    \item resolution (meters between two waypoints)
-    \item smoothing (number of waypoints considered for smoothing)
-\end{itemize}
-This way, we can \textbf{uniquely identify a pose} in the track by the
-coordinates $\mathbf{s,e,\phi}$, namely the curvilinear abscissa, the position
-error and the orientation error. The describe respectively the displacement of
-the car along the track, the lateral error with respect to the centerline and
-the yaw error with respect to the track orientation. As we will see in the next
-section, the state of the car is expressed through these "relative" coordinates.
-More details about the track implementation are in appendix A. Moreover, obstacles are also
-modeled by their relative coordinates $s,e$ and the radius (in meters) $r$ (as a
-simplifying assumption, the obstacles are all circular).
-
-\begin{myverbatim}[title={Example of a track configuration file}]
-corners: #[x, y]
-    - [0, 0]
-    - [60, 0]
-    - [60, 60]
-    - [-60, 60]
-    - [-60, 0]
-    - [0, 0]
-resolution: 0.1 [m]
-smoothing: 300 
-width: 9 [m]
-obstacle_data: #[s, ey, r]
-    - [60, 2, 3]
-    - [90,  3, 2]
-    - [90, -3, 2]
-    - [140, -2, 2]
-    - [170, 2, 2]
-    - [220, 0, 2]
-\end{myverbatim}
-
-\newpage
-The result would then be the one shown in figure \ref*{ippodromo} below. 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=\textwidth]{assets/ippodromo_obstacles.png}
-    \caption{Example track}
-    \label{ippodromo}
-\end{figure}
+Models must be well-defined to be used in NMPC. It is important to note that, as
+said in \cite{paper}, the cascaded model together with the NLP formulation has
+the precise goal to solve the problem of pushing a car to its physical
+boundaries, like in race, while maintaining real-time performance. In this
+section we will describe the main concepts behind the modeling part of the NMPC
+algorithm. 
 
 \subsection{Serially cascaded dynamical model}
-While a single control loop system is a simple structure that consists in
-just one primary loop that regulates directly the system, the cascade control
-makes use of multiple control loops nested within each other. The requirements
-for an effective cascade control are that the inner loops variables must be 
-faster-responding than the outer ones, and the major disturbances enter in the 
-inner loops. Considering the simplest cascade control structure,\\
+Broadly speaking, while a single control loop system is a simple structure that
+consists in just one primary loop that regulates directly the system, the
+cascade control makes use of multiple control loops nested within each other.
+The requirements for an effective cascade control are that the inner loops
+variables must be faster-responding than the outer ones, and the major
+disturbances enter in the inner loops. Considering the simplest cascade control
+structure,\\
 ... (aggiungi schema/equazioni generiche del cascade semplice)
 
 According to the control objectives, a cascade control scheme can include also 
@@ -202,20 +165,22 @@ can face is in the interaction between the control loops, where the reference si
 generated by a control loop are not achievable by the others. This happens especially
 when we are dealing with models with different complexity levels.
 
-To deal with the disadvantages of the cascade control design, but leveraging on its 
-strengths, the idea of \cite{paper} in the scenario of an autonomous car is to build 
-a serial architecture which contains two dynamic models, belonging to the same single
-control loop and the same prediction horizon. The first one is a single-track vehicle
-model, which reflects comprehensively the complex dynamic of the car (we will see in the 
-next section the details) and provides all the tools to accurately treat the first
-prediction steps. The farthest window of the horizon is treated with a planar point-mass 
-model, useful for long-term trajectory planning with low computational resources.
-Thus the benefits of the cascade model for the trajectory task are preserved; moreover
-the existance of a single control loop ensure the feasibility of the reference targets
-that are exchanged between the two models. A very important thing to pay attention is 
-in the linkage of the plant models, propagating correctly the final state of the first
-model to the initial state of the second model, and mantaining consistency in constraints
-and cost functions across interconnected models.
+To deal with the disadvantages of the cascade control design, but leveraging on
+its strengths, the idea of \cite{paper} in the scenario of an autonomous car is
+to build a serial architecture which contains two dynamic models, belonging to
+the same single control loop and the same prediction horizon. The first one is a
+single-track vehicle model, which reflects comprehensively the complex dynamic
+of the car (we will see in the next section the details) and provides all the
+tools to accurately treat the first prediction steps. The farthest window of the
+horizon is treated with a planar point-mass model, useful for long-term
+trajectory planning with low computational resources. Thus the benefits of the
+cascade model for the trajectory task are preserved; moreover the existance of a
+single control loop ensure the feasibility of the reference targets that are
+exchanged between the two models. A very important aspect to pay attention to
+lies in the linkage of the plant models, namely propagating correctly the final
+state of the first model to the initial state of the second model, and
+mantaining consistency in constraints and cost functions across interconnected
+models. 
 
 
 \subsubsection{Single-track dynamic model}
@@ -412,18 +377,40 @@ The mapping is the following:
 
 
 \subsection{Spatial dynamics}
-The discretization of the models can be done with respect to time or with respect to space, 
-according to own purposes. 
-Discretizing in time means to divide the time over the horizon in small well-defined time intervals $dt$, 
-and leaving the spatial curvilinear coordinate $s$ as an optimization variable in the NLP. This approach
-implies to know the temporal window for the horizon.\\ 
-Instead, discretizing in space means to establish the spatial discretization steps $ds$ that compose the
-total space travelled by the vehicle in the horizon window. In this way the time $t$ can be left as an 
-optimization variable.\\
-In our scenario, our objective is to minimize the lap time. So the discretization in space is more adapt,
-because it allows to minimize the employed time to cover the given space interval. In contrast, this method
-does not allow to the car to stop, but we are not interested in it.
-Thus, denoting as $p$ a state variable of any model, we define its derivative with respect to the curvilinear
+Since the dynamical models need to be used in a digital fashion, it has to be
+discretized. The discretization of the models can be done with respect to time
+or with respect to space, according to own purposes, with the respective pros
+and cons. 
+\begin{itemize}
+    \item Discretizing in time consists in dividing the time over the horizon in
+    small well-defined time intervals $dt$, and leaving the spatial curvilinear
+    coordinate $s$ as an optimization variable in the NLP. This approach implies
+    that we know beforehand the temporal window for the horizon. Since this is
+    the most straightforward wa to discretize, it is also more intuitive.
+    Nevertheless, there are some problems attached to it, especially in a car
+    racing scenario. Since the curvilinear abscissa acts as a variable, it
+    cannot be keep fixed inside of a single time interval, which means that the
+    path geometry will be obtained by some interpolation function to be
+    evaluated during the planning horizon. This can cause some issues,
+    computation-wise.
+    \item Discretizing in space, instead, means to establish the spatial
+    discretization steps $ds$ that compose the total space travelled by the
+    vehicle in the horizon window. In this way the time $t$ can be left as an
+    optimization variable. In contrast, this method does not allow to the car to
+    stop, but this is not a problem for our purposes. Instead, a good advantage
+    of the spatial discretization is that during each \textbf{space interval},
+    the path geometry is known and constant, and thus can be computed apriori,
+    before even starting the planning horizon. Moreover, space discretization
+    allows to easily add elements to the track which are always know apriori,
+    like static obstacles, without creating too much trouble.
+\end{itemize}
+For the reasons stated above, since we are a racing scenario in which time
+minimization is of paramount importance, and the track geometry is known
+apriori, the spatial discretization methodo is the more adequate for the MPC
+planning horizon. This means that outside the horizon, the dynamical model will
+evolve as usual following a time-discretized differential equation, while inside
+the MPC, the evolution is space-disretized. Thus, denoting as $p$ a state
+variable of any model, we define its derivative with respect to the curvilinear
 coordinate $s$ as:
 \begin{equation}
     p' = \frac{d p}{d s} = \frac{dp}{dt} \frac{dt}{ds} = \dot{p} \frac{dt}{ds} = \dot{p} \frac{1}{\dot{s}}
@@ -588,25 +575,25 @@ them. In detail:
 
 \end{enumerate}
 
+\newpage
+
 \section{Implementation}
 
-We used as main backbone casadi (\cite{casadi}), a software framework for automatic
+We used as main backbone CasADI (\cite{casadi}), a software framework for automatic
 differentiation, nonlinear optimization and optimal control. It is implemented
-in c++ and has also a python interface. Casadi serves three main purposes:
+in C++ and has also a python interface. Casadi serves three main purposes:
 \begin{itemize}
     \item Modeling
     \item Simulation through numerical integration
     \item Formulation and solving of optimization problems within MPC
 \end{itemize}
-The modeling part was already addressed, while in this section we will focus
-more on the algorithmic perspective. Overall, the simulation loop can be
-summarized as follows.
+Overall, the simulation loop can be summarized in pseudocode as follows.
 
 \begin{algorithm}
     \caption{Simulation Loop}\label{sim}
     \begin{algorithmic}[1]
-        \State $dt \gets 0.08$ s \Comment{Time step}
-        \While{ True }
+        \State $dt \gets 0.06$ s \Comment{Time step}
+        \While{ one full turn not completed }
         \State measure car state $x$
         \State action $a \gets command(x)$ \Comment{From MPC}
         \State move forward for $dt$ under $a$ 
@@ -618,16 +605,71 @@ Line 3 takes the assumption that the state is fully known at each instant. We
 take this assumption for simplifying reasons. In a real setting the state would
 be measured with sensors and filtering algorithms.
 
+\subsection{Discretized models in CasADI}
+
+As already said, we used the spatial discretization method.
+explanation of the spatial discretization method
+expansion of "move forward" (integrators)
+
+
 \subsection{MPC Algorithm}
-As said, most of the computation happens in the instruction at line 4.
+Most of the computation happens in the instruction at line 4.
+expansion of command(x) as pseudocode
 
-TODO
+\newpage
+\subsection{Track}
+\label{subsec:track}
+
+Since the algorithm is application-specific for the race environment, it is
+fundamental to model the racing track itself. We decided to model it as a
+sequence of \textbf{waypoints}, defining the track centerline, which are then
+connected through a \textbf{cubic spline}. The waypoints are constructed based
+on three parameters:
 \begin{itemize}
-    \item expansion of command(x) as pseudocode
-    \item expansion of "move forward" (integrators)
+    \item corner coordinates (in meters) defined by the user
+    \item resolution (meters between two waypoints)
+    \item smoothing (number of waypoints considered for smoothing)
 \end{itemize}
+This way, we can \textbf{uniquely identify a pose} in the track by the
+coordinates $\mathbf{s,e,\phi}$, namely the curvilinear abscissa, the position
+error and the orientation error. The describe respectively the displacement of
+the car along the track, the lateral error with respect to the centerline and
+the yaw error with respect to the track orientation. As we will see in the next
+section, the state of the car is expressed through these "relative" coordinates.
+More details about the track implementation are in appendix A. Moreover, obstacles are also
+modeled by their relative coordinates $s,e$ and the radius (in meters) $r$ (as a
+simplifying assumption, the obstacles are all circular).
+
+\begin{myverbatim}[title={Example of a track configuration file}]
+corners: #[x, y]
+    - [0, 0]
+    - [60, 0]
+    - [60, 60]
+    - [-60, 60]
+    - [-60, 0]
+    - [0, 0]
+resolution: 0.1 [m]
+smoothing: 300 
+width: 9 [m]
+obstacle_data: #[s, ey, r]
+    - [60, 2, 3]
+    - [90,  3, 2]
+    - [90, -3, 2]
+    - [140, -2, 2]
+    - [170, 2, 2]
+    - [220, 0, 2]
+\end{myverbatim}
+
+The result would then be the one shown in figure \ref*{ippodromo} below. 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{assets/ippodromo_obstacles.png}
+    \caption{Example track with round obstacles}
+    \label{ippodromo}
+\end{figure}
 
 
+\newpage
 \section{Experiments}
 
 
