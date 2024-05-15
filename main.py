@@ -1,22 +1,20 @@
 import sys
 import os
-from matplotlib import pyplot as plt
-from matplotlib.backend_bases import FigureManagerBase
 sys.path.append(".")
 import controllers as control
 import models
 import environment as env
 import utils.common_utils as utils
-from simulation.racing import RacingSimulation
+from simulation import RacingSimulation
 from omegaconf import OmegaConf
 
 # ======== Configuration ========================================================
 track_name = utils.TrackType.I.value
 names = []
 names.append("cascaded")
-# names.append("singletrack")
-# sim_name = f"race_obstacles_{track_name}"
-sim_name = f"cascaded_{track_name}"
+names.append("singletrack")
+sim_name = f"race_obstacles_{track_name}"
+# sim_name = f"cascaded_{track_name}"
 # sim_name = f"singletrack_{track_name}"
 
 # =========== Track Definition ===================================================
@@ -55,16 +53,9 @@ controllers = [control.CascadedMPC(car=car, point_mass=point_mass, kin_controlle
 simulation = RacingSimulation(names,cars,controllers,track)
 src_dir = os.path.dirname(os.path.abspath(__file__))
 logfile = f'simulation/logs/{sim_name}.log'
-with open(logfile, "w") as f:
-    sys.stdout = f
-    state_traj, action_traj, preds, elapsed = simulation.run(N=500)
-
-# ============ Show Animation ======================================================
-animation = simulation.animate(state_traj, action_traj, preds, elapsed) 
-fig_manager: FigureManagerBase = plt.get_current_fig_manager()
-fig_manager.window.showMaximized()
-plt.show(block=True)
+# with open(logfile, "w") as f:
+    # sys.stdout = f
 
 # =========== Save Data and Animation ==============================================
-# simulation.save(state_traj, action_traj, preds, elapsed)
-# animation.save(f"simulation/videos/{sim_name}.gif",fps=13, dpi=200, writer='pillow')
+# simulation.save()
+# simulation.animation.save(f"simulation/videos/{sim_name}.gif",fps=13, dpi=200, writer='pillow')
