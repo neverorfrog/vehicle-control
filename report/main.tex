@@ -210,20 +210,16 @@ force applied on the axle of the front tire $F_{x_f}$ and the longitudinal force
 applied on the axle of the rear tire $F_{x_r}$, according to a distribution
 function $\tilde{\chi}$:
 
-\begin{equation}
-    \tilde{\chi_f} = \frac{d_f - b_f}{2}\tanh(2(F_x+0.5))+\frac{d_f+b_f}{2}
-\end{equation}
-\begin{equation}
-    \tilde{\chi_r} = \frac{b_r-d_r}{2}\tanh(-2(F_x+0.5))+\frac{d_r+b_r}{2}
-\end{equation}
+\begin{eqnarray}
+    \tilde{\chi_f} &=& \frac{d_f - b_f}{2}\tanh(2(F_x+0.5))+\frac{d_f+b_f}{2} \\
+    \tilde{\chi_r} &=& \frac{b_r-d_r}{2}\tanh(-2(F_x+0.5))+\frac{d_r+b_r}{2}
+\end{eqnarray}
 where $d_f$ and $d_r$ represent the drive force distribution, and $b_f$ and $b_r$ represent the 
 brake force distribution. So the single components of the longitudinal force are:
-\begin{equation}
-    \tilde{F}_{x_f} = \tilde{\chi}_f(F_x) \cdot F_x
-\end{equation}
-\begin{equation}
-    \tilde{F}_{x_r} = \tilde{\chi}_r(F_x) \cdot F_x
-\end{equation}
+\begin{eqnarray}
+    \tilde{F}_{x_f} &=& \tilde{\chi}_f(F_x) \cdot F_x \\
+    \tilde{F}_{x_r} &=& \tilde{\chi}_r(F_x) \cdot F_x
+\end{eqnarray}
 
 This implementation might seem rather complex, compared to simply expressing the front and rear force distribution as
 \begin{equation}
@@ -257,12 +253,10 @@ where the effect of vertical curvature on speed are expressed through:
     A_{V^2} = -\frac{\partial \theta}{\partial s}\cos(\varphi)-\kappa\cdot \sin(\varphi)\cos(\theta) 
 \end{equation}
 The slip angles of the front ($\alpha_f$) and rear ($\alpha_r$) wheels are respectively given by:
-\begin{equation}
-    \alpha_f = \arctan \left(\frac{U_y+ar}{U_x}\right)-\delta
-\end{equation}
-\begin{equation}
-    \alpha_r = \arctan \left(\frac{U_y-br}{U_x}\right)
-\end{equation}
+\begin{eqnarray}
+    \alpha_f &=& \arctan \left(\frac{U_y+ar}{U_x}\right)-\delta \\
+    \alpha_r &=& \arctan \left(\frac{U_y-br}{U_x}\right)
+\end{eqnarray}
 A full sliding occurs at an angle denoted as $\alpha^{\text{mod}}$, which is calculated as:
 \begin{equation}
     \alpha^{\text{mod}} = \arctan\left(\frac{3\cdot F_y^{\text{max}}\cdot\zeta}{C_{\alpha}}\right)
@@ -300,24 +294,14 @@ Instead, the lateral force $F_b$ applied on the CG models the effect of the road
 \\
 \\
 All these informations are used to describe the motion of the single-track model:
-\begin{equation}
-    \dot{U}_x = \frac{\tilde{F}_{x_f}\cos(\delta)-\tilde{F}_{y_f}\sin(\delta)+\tilde{F}_{x_r}-F_d}{m}+rU_y
-\end{equation}
-\begin{equation}
-    \dot{U_y} = \frac{\tilde{F}_{y_f}\cos(\delta)+\tilde{F}_{x_f}\sin(\delta)+\tilde{F}_{y_r}+F_b}{m}-rU_x 
-\end{equation}
-\begin{equation}
-    \dot{r} = \frac{a(\tilde{F}_{y_f}\cos(\delta)+\tilde{F}_{x_f}\sin(\delta))-b\tilde{F}_{y_r}}{I_{zz}}
-\end{equation}
-\begin{equation}
-    \dot{s} = \frac{U_x\cos(\Delta \varPsi) -U_y\sin(\Delta \varPsi)}{1-\kappa e}
-\end{equation}
-\begin{equation}
-    \dot{e} = U_x\sin(\Delta \varPsi)+U_y \cos(\Delta \varPsi)
-\end{equation}
-\begin{equation}
-    \Delta \dot{\varPsi} = r-\kappa \dot{s}
-\end{equation}
+\begin{eqnarray}
+    \dot{U}_x &=& \frac{\tilde{F}_{x_f}\cos(\delta)-\tilde{F}_{y_f}\sin(\delta)+\tilde{F}_{x_r}-F_d}{m}+rU_y\\
+    \dot{U_y} &=& \frac{\tilde{F}_{y_f}\cos(\delta)+\tilde{F}_{x_f}\sin(\delta)+\tilde{F}_{y_r}+F_b}{m}-rU_x\\ 
+    \dot{r} &=& \frac{a(\tilde{F}_{y_f}\cos(\delta)+\tilde{F}_{x_f}\sin(\delta))-b\tilde{F}_{y_r}}{I_{zz}}\\
+    \dot{s} &=& \frac{U_x\cos(\Delta \varPsi) -U_y\sin(\Delta \varPsi)}{1-\kappa e}\\
+    \dot{e} &=& U_x\sin(\Delta \varPsi)+U_y \cos(\Delta \varPsi)\\
+    \Delta \dot{\varPsi} &=& r-\kappa \dot{s}
+\end{eqnarray}
 
 
 
@@ -342,18 +326,12 @@ according to the following rules:
 \end{equation}
 Thus the equations that describe the motion of the point-mass model are the following:
 
-\begin{equation}
-    \dot{\bar{V}} = \frac{\bar{F}_{x}-\bar{F}_{d}}{m}
-\end{equation}
-\begin{equation}
-    \dot{\bar{s}} = \frac{\bar{V}\cos(\bar{\phi})}{1-\kappa \bar{e}}
-\end{equation}
-\begin{equation}
-    \dot{\bar{e}} = \bar{V}\sin(\bar{\phi})
-\end{equation}
-\begin{equation}
-    \dot{\bar{\phi}} = \frac{{\bar{F}}_y + {\bar{F}}_b}{m\bar{V}} - k\dot{\bar{s}}
-\end{equation}
+\begin{eqnarray}
+    \dot{\bar{V}} &=& \frac{\bar{F}_{x}-\bar{F}_{d}}{m}\\
+    \dot{\bar{s}} &=& \frac{\bar{V}\cos(\bar{\phi})}{1-\kappa \bar{e}}\\
+    \dot{\bar{e}} &=& \bar{V}\sin(\bar{\phi})\\
+    \dot{\bar{\phi}} &=& \frac{{\bar{F}}_y + {\bar{F}}_b}{m\bar{V}} - k\dot{\bar{s}}\\
+\end{eqnarray}
 
 Note that the yaw dynamics are omitted, and therefore this model cannot be used for yaw stabilization
 
@@ -361,22 +339,16 @@ Note that the yaw dynamics are omitted, and therefore this model cannot be used 
 Here we define the mapping from the single-track to the point-mass states. 
 It is very important that this mapping is correct, to guarantee that the transition
 from one model to the other is compliant to the reality.\\
-The mapping is the following:
-\begin{equation}
-    \bar{V} = \sqrt{U_{x}^{2}-U_{y}^{2}}
-\end{equation}
-\begin{equation}
-    \bar{s} = s
-\end{equation}
-\begin{equation}
-    \bar{e} = e
-\end{equation}
-\begin{equation}
-    \bar{\phi} = arctan\left(\frac{{U}_y}{{U}_x}\right) + \Delta\psi
-\end{equation}
+The mapping, called $spatialTransition_{trans}(x_k)$, is the following:
+\begin{eqnarray}
+    \bar{V} &=& \sqrt{U_{x}^{2}-U_{y}^{2}}\\
+    \bar{s} &=& s\\
+    \bar{e} &=& e\\
+    \bar{\phi} &=& arctan\left(\frac{{U}_y}{{U}_x}\right) + \Delta\psi\\
+\end{eqnarray}
 
 
-\subsection{Spatial dynamics}
+\subsection{Spatial dynamics} \label{spatial}
 Since the dynamical models need to be used in a digital fashion, it has to be
 discretized. The discretization of the models can be done with respect to time
 or with respect to space, according to own purposes, with the respective pros
@@ -417,40 +389,22 @@ coordinate $s$ as:
 \end{equation}  
 that we will compute through the chain rule.
 According to this notation, we can define the spatial dynamics for the single-track model:
-\begin{equation}
-    U'_x = \left(\frac{\tilde{F}_{x_f}\cos(\delta)-\tilde{F}_{y_f}\sin(\delta)+\tilde{F}_{x_r}-F_d}{m}+rU_y\right) \frac{1}{\dot{s}}
-\end{equation}
-\begin{equation}
-    U'_y = \left(\frac{\tilde{F}_{y_f}\cos(\delta)+\tilde{F}_{x_f}\sin(\delta)+\tilde{F}_{y_r}+F_b}{m}-rU_x\right) \frac{1}{\dot{s}}
-\end{equation}
-\begin{equation}
-    r' = \left(\frac{a(\tilde{F}_{y_f}\cos(\delta)+\tilde{F}_{x_f}\sin(\delta))-b\tilde{F}_{y_r}}{I_{zz}}\right) \frac{1}{\dot{s}}
-\end{equation}
-\begin{equation}
-    e' = \left(U_x\sin(\Delta \varPsi)+U_y \cos(\Delta \varPsi)\right) \frac{1}{\dot{s}}
-\end{equation}
-\begin{equation}
-    \Delta \varPsi' = \left(r-\kappa \dot{s}\right) \frac{1}{\dot{s}}
-\end{equation}
-\begin{equation}
-    \delta ' = \frac{\dot{\delta}}{\dot{s}}
-\end{equation}
-\begin{equation}
-    t' = \frac{1}{\dot{s}}
-\end{equation}
+\begin{eqnarray}
+    U'_x &=& \left(\frac{\tilde{F}_{x_f}\cos(\delta)-\tilde{F}_{y_f}\sin(\delta)+\tilde{F}_{x_r}-F_d}{m}+rU_y\right) \frac{1}{\dot{s}}\\
+    U'_y &=& \left(\frac{\tilde{F}_{y_f}\cos(\delta)+\tilde{F}_{x_f}\sin(\delta)+\tilde{F}_{y_r}+F_b}{m}-rU_x\right) \frac{1}{\dot{s}}\\
+    r' &=& \left(\frac{a(\tilde{F}_{y_f}\cos(\delta)+\tilde{F}_{x_f}\sin(\delta))-b\tilde{F}_{y_r}}{I_{zz}}\right) \frac{1}{\dot{s}}\\
+    e' &=& \left(U_x\sin(\Delta \varPsi)+U_y \cos(\Delta \varPsi)\right) \frac{1}{\dot{s}}\\
+    \Delta \varPsi' &=& \left(r-\kappa \dot{s}\right) \frac{1}{\dot{s}}\\
+    \delta ' &=& \frac{\dot{\delta}}{\dot{s}}\\
+    t' &=& \frac{1}{\dot{s}}
+\end{eqnarray}
 and for the point-mass model:
-\begin{equation}
-    {\bar{V}}' = \left(\frac{\bar{F}_{x}-\bar{F}_{d}}{m}\right) \frac{1}{\dot{\bar{s}}}
-\end{equation}
-\begin{equation}
-    {\bar{e}}' = \left(\bar{V}\sin(\bar{\phi})\right)\frac{1}{\dot{\bar{s}}}
-\end{equation}
-\begin{equation}
-    {\bar{\phi}}' = \left(\frac{{\bar{F}}_y + {\bar{F}}_b}{m\bar{V}} - k\dot{\bar{s}}\right)\frac{1}{\dot{\bar{s}}}
-\end{equation}
-\begin{equation}
-    \bar{t}' = \frac{1}{\dot{\bar{s}}}
-\end{equation}
+\begin{eqnarray}
+    {\bar{V}}' &=& \left(\frac{\bar{F}_{x}-\bar{F}_{d}}{m}\right) \frac{1}{\dot{\bar{s}}}\\
+    {\bar{e}}' &=& \left(\bar{V}\sin(\bar{\phi})\right)\frac{1}{\dot{\bar{s}}}\\
+    {\bar{\phi}}' &=& \left(\frac{{\bar{F}}_y + {\bar{F}}_b}{m\bar{V}} - k\dot{\bar{s}}\right)\frac{1}{\dot{\bar{s}}}\\
+    \bar{t}' &=& \frac{1}{\dot{\bar{s}}}
+\end{eqnarray}
 
 We will denote in a concise way the spatial transitions from a state to the next one as
 $spatialTransition_{st}(x_k, u_k)$ for the single-track, and $spatialTransition_{pm}(x_k, u_k)$ 
@@ -461,12 +415,12 @@ applied at time step $k$.
 \newpage
 \section{NLP Structure}
 
-The key element of the NLP is the cost function, which can be composed by many terms according to own puproses.
+The key element of the NLP is the cost function, which can be composed by many terms according to own purposes.
 Our objective is to minimize time along the finite planning horizon, while also respecting the road
 boundaries and while keeping the car in a safe configuration. 
 To achieve this, a series of seven terms regarding both single-track and point-mass models are summed together:
 \begin{enumerate}
-    \item \textbf{Final time}: the time at which the point-mass model reaches the last stage of the planning horizon
+    \item \textbf{Final time}: the time $\bar{\tau}_M$ at which the point-mass model reaches the last stage of the planning horizon
     \item \textbf{Terminal state}: to make sure that the final stage is a safe one, we add this penalty based on the 
     lateral position ${\bar{e}}_m$, the course error ${\bar{\phi}}_m$ and the excess speed ${\bar{V}}_{exc}$ of the final stage, with
     \begin{equation}
@@ -507,6 +461,11 @@ To achieve this, a series of seven terms regarding both single-track and point-m
     J_{rd} = W_{rd}(\sum_{k=1}^{N} \Delta s_k e_k^2 + \sum_{l=1}^{M} \Delta\overline{s}_l \overline{e}_l^2)
     \end{equation}
 
+    \item \textbf{Obstacles avoidance}: it penalizes the car to pass near the obstacles
+    \begin{equation}
+        J_{obs} = ...
+    \end{equation} 
+
     \item \textbf{Slew rate}: in order to encourage smooth controls we penalize too big increases of the steering rate $\dot{\delta}$, variation of the total lateral force $\Delta F_y$, variation of the new commanded longitudinal force ${F_x}_k$ with respect to the previous commanded ${F_x}_{k-1}$.
     And finally, the variation in forces at the model transition, denoted as $\Delta F_u$.
     These are all combined into:
@@ -540,7 +499,7 @@ To achieve this, a series of seven terms regarding both single-track and point-m
     !!! Forse si può togliere, dipende se è stata implementata!!!
 \end{enumerate}
 
-The constraints of the NLP regard some limitations on the states of the single-track and of the point-mass models, 
+The constraints of the NLP concern some limitations on the states of the single-track and of the point-mass models, 
 on the input variables, on the tire model, and on the dynamics of the systems, including the transition between
 them. In detail:
 \begin{enumerate}
@@ -571,9 +530,23 @@ them. In detail:
     \end{align}
 
     \item \textbf{Dynamics}: given a certain initial state for the single-track, the next states of this model must respect the
-    spatial dynamics of the system explained in \ref{}
-
+    spatial dynamics of the system explained in \ref{spatial}. Defined the vehicle state as $x$:
+    \begin{eqnarray}
+        x_0 &=& x_{\text{measured}} \\
+        x_{k+1} &=& \text{spatialTransition}_{st}(x_k, u_k) \\
+        \bar{x}_0 &=& \text{spatialTransition}_{trans}(x_N) \label{transition}\\
+        \bar{x}_{k+1} &=& \text{spatialTransition}_{pm}(\bar{x}_k, \bar{u}_k)
+    \end{eqnarray}
+    where $x_{\text{measured}}$ is the current measured state and it must be the initial state of the single-track model,
+    while the eq.\ref{transition} establishes that the initial state of the point-mass model comes from the propagation of 
+    the last state of the single-track.
 \end{enumerate}
+
+As we can notice, the restriction to stay inside the track boundaries is modeled not as a constraint, but like a cost term,
+that increases its value when the car is outside in relation with the distance to the nearest border, otherwise it is null.\\
+In the same way we decided to model also the obstacle avoidance, \dots.\\
+Giving both terms high weigths, we can be sure to obtain a good result without imposing them as hard constraints.
+This approach is prefered to the other one because it allows the NLP to be always numerically feasible.
 
 \newpage
 
