@@ -51,13 +51,13 @@ class CascadedMPC(Controller):
         self.opti = ca.Opti('nlp')
         ipopt_options = {
             'print_level': 2, 
-            'linear_solver': 'ma27', 
             'hsllib': '/usr/local/lib/libcoinhsl.so',
-            # 'fixed_variable_treatment': 'relax_bounds',
             'warm_start_init_point': 'yes',
-            'warm_start_bound_push': 1e-8,
-            'nlp_scaling_method': 'gradient-based',
-            'nlp_scaling_max_gradient': 100}
+            # 'fixed_variable_treatment': 'relax_bounds',
+            # 'warm_start_bound_push': 1e-8,
+            # 'nlp_scaling_method': 'gradient-based',
+            # 'nlp_scaling_max_gradient': 100,
+            'linear_solver': 'ma27'}
         options = {
             'print_time': False, 
             'expand': True, 
@@ -132,6 +132,7 @@ class CascadedMPC(Controller):
         talpha_r = fabs(tan(self.car.alpha_r(Ux,Uy,r,delta)))
         talphamod_r = tan(self.car.alphamod_r(Fx))
         cost += ca.if_else(talpha_r >= talphamod_r, cost_weights.slip*(talpha_r - talphamod_r)**2, 0) #slip angle rear
+        
         if n < self.N-1: #Force Action Continuity
             next_action = self.action[:,n+1]
             cost += (cost_weights.Fx/ds) * (next_action[self.car.input.index('Fx')] - Fx)**2
