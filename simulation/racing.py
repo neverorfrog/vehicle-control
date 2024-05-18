@@ -33,7 +33,7 @@ class RacingSimulation():
     def init_containers(self):
         # Logging containers
         self.state_traj = {name: [car.state] for name,car in zip(self.names,self.cars)} # state trajectory (logging)
-        self.action_traj = {name: [] for name in self.names} # action trajectory (logging)
+        self.action_traj = {name: [car.create_action()] for name,car in zip(self.names,self.cars)} # action trajectory (logging)
         self.elapsed = {name: [] for name in self.names} # elapsed times
         self.preds = {name: [] for name in self.names} # state predictions for each horizon
         self.x_traj = [[] for _ in self.names]
@@ -56,16 +56,16 @@ class RacingSimulation():
                 
         # Small axes initialization (for plots on s axis)
         self.ax_small1 = plt.subplot(grid[0, 1]); self.ax_small1.axis((0, self.track.length, 0, 22))
-        self.ax_small1.set_ylabel(r'$v$', fontsize=16, labelpad=20, rotation=360); self.ax_small1.yaxis.set_label_position('right')
+        self.ax_small1.set_ylabel(r'$v \rightarrow \frac{m}{s}$', fontsize=16, labelpad=25, rotation=360); self.ax_small1.yaxis.set_label_position('right')
         
-        self.ax_small2 = plt.subplot(grid[2, 1]); self.ax_small2.axis((0, self.track.length, -4, 4))
-        self.ax_small2.set_ylabel(r'$e_y$', fontsize=16, labelpad=20, rotation=360); self.ax_small2.yaxis.set_label_position('right')
+        self.ax_small2 = plt.subplot(grid[1, 1]); self.ax_small2.axis((0, self.track.length, -0.5, 0.5))
+        self.ax_small2.set_ylabel(r'$\delta \rightarrow rad$', fontsize=16, labelpad=30, rotation=360); self.ax_small2.yaxis.set_label_position('right')
         
-        self.ax_small3 = plt.subplot(grid[3, 1]); self.ax_small3.axis((0, self.track.length, -1, 1))
-        self.ax_small3.set_ylabel(r'$e_{\psi}$', fontsize=16, labelpad=20, rotation=360); self.ax_small3.yaxis.set_label_position('right')
+        self.ax_small3 = plt.subplot(grid[3, 1]); self.ax_small3.axis((0, self.track.length, -0.5, 0.5))
+        self.ax_small3.set_ylabel(r'$\omega \rightarrow \frac{rad}{s}$', fontsize=16, labelpad=30, rotation=360); self.ax_small3.yaxis.set_label_position('right')
         
-        self.ax_small4 = plt.subplot(grid[1, 1]); self.ax_small4.axis((0, self.track.length, -7000, 7000))
-        self.ax_small4.set_ylabel(r'$F_x$', fontsize=16, labelpad=20, rotation=360); self.ax_small4.yaxis.set_label_position('right')
+        self.ax_small4 = plt.subplot(grid[2, 1]); self.ax_small4.axis((0, self.track.length, -7000, 7000))
+        self.ax_small4.set_ylabel(r'$F_x \rightarrow N$', fontsize=16, labelpad=25, rotation=360); self.ax_small4.yaxis.set_label_position('right')
         
         
         # Text boxes
@@ -82,7 +82,7 @@ class RacingSimulation():
             
     def update(self, n):        
         for name,car,controller in zip(self.names,self.cars,self.controllers):
-            if car.state.s > self.track.length-1: 
+            if car.state.s > 2*self.track.length-0.1: 
                 return True
             
             start = time.time()
@@ -122,11 +122,12 @@ class RacingSimulation():
             car = self.cars[j]
             state = self.state_traj[name][n]
             state_traj = np.array(self.state_traj[name])
+            action_traj = np.array(self.action_traj[name])
             s = state_traj[:,car.state.index('s')]
-            ey = state_traj[:,car.state.index('ey')]
-            epsi = state_traj[:,car.state.index('epsi')]
+            delta = state_traj[:,car.state.index('delta')]
             v = state_traj[:,0]
-            Fx = self.action_traj[name][-1][0]
+            Fx = action_traj[:,0]
+            w = action_traj[:,1]
             
             # Plot car
             x,y = self.cars[j].plot(self.ax_car, state, self.colors[j])
@@ -138,10 +139,10 @@ class RacingSimulation():
             self.ax_car.plot(self.preds[name][n][:,0], self.preds[name][n][:,1],f'{self.colors[j]}o',alpha=0.5,linewidth=3) 
             
             # Plot state and actions
-            self.ax_small1.plot(s[-1],v[-1], 'o',markersize=2, alpha=0.7, label=self.names[j], color = self.colors[j])
-            self.ax_small2.plot(s[-1],ey[-1],'o',markersize=2, alpha=0.7, label=self.names[j], color = self.colors[j])
-            self.ax_small3.plot(s[-1],epsi[-1],'o',markersize=2, alpha=0.7, label=self.names[j], color = self.colors[j])
-            self.ax_small4.plot(s[-1],Fx,'o',markersize=2, alpha=0.7, label=self.names[j], color = self.colors[j])
+            self.ax_small1.plot(s[-2:],v[-2:], '-',markersize=2, alpha=0.7, label=self.names[j], color = self.colors[j])
+            self.ax_small2.plot(s[-2:],delta[-2:],'-',markersize=2, alpha=0.7, label=self.names[j], color = self.colors[j])
+            self.ax_small3.plot(s[-2:],w[-2:],'-',markersize=2, alpha=0.7, label=self.names[j], color = self.colors[j])
+            self.ax_small4.plot(s[-2:],Fx[-2:],'-',markersize=2, alpha=0.7, label=self.names[j], color = self.colors[j])
             
     
     def step(self, controller, car) -> Union[None, tuple]:
