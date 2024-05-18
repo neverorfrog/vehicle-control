@@ -47,7 +47,7 @@
     We propose the implementation and experimentation of a motion planning and
     control framework for autonomous vehicles based on nonlinear
     model-predictive control.The work is mainly based on \cite{paper}. The code
-    is available publicly at
+    is publicly available at
     \href{https://github.com/neverorfrog/vehicle-control}{this GitHub
     repository}. 
 \end{abstract}
@@ -115,10 +115,9 @@ cascaded model is lower, achieving also better results in terms of lap time.
 \subsection*{Outline}
 
 In the next section we will talk about some related work. After that, we will
-address the modeling part of the algorithm, namely the modeling of the track and
-the car. Then, we will formalize the NLP structure and put everything together
-to define the complete MPC problem. In the end, we will discuss some experiments
-and the results.
+address the modeling part of the algorithm in a rather formal way. Then, we will
+formalize the NLP structure and put everything together to define the complete
+MPC problem. Right after, we will discuss In the end, we will discuss some experiments and the results.
 
 \section{Related Work}
 
@@ -209,29 +208,29 @@ total longitudinal force $F_x$. This one can be divided in the longitudinal
 force applied on the axle of the front tire $F_{x_f}$ and the longitudinal force
 applied on the axle of the rear tire $F_{x_r}$, according to a distribution
 function $\tilde{\chi}$:
-
-\begin{eqnarray}
-    \tilde{\chi_f} &=& \frac{d_f - b_f}{2}\tanh(2(F_x+0.5))+\frac{d_f+b_f}{2} \\
-    \tilde{\chi_r} &=& \frac{b_r-d_r}{2}\tanh(-2(F_x+0.5))+\frac{d_r+b_r}{2}
-\end{eqnarray}
+\begin{subequations}
+    \begin{eqnarray}
+        \tilde{\chi_f} &=& \frac{d_f - b_f}{2}\tanh(2(F_x+0.5))+\frac{d_f+b_f}{2} \\
+        \tilde{\chi_r} &=& \frac{b_r-d_r}{2}\tanh(-2(F_x+0.5))+\frac{d_r+b_r}{2}
+    \end{eqnarray}
+\end{subequations}
 where $d_f$ and $d_r$ represent the drive force distribution, and $b_f$ and $b_r$ represent the 
 brake force distribution. So the single components of the longitudinal force are:
-\begin{eqnarray}
-    \tilde{F}_{x_f} &=& \tilde{\chi}_f(F_x) \cdot F_x \\
-    \tilde{F}_{x_r} &=& \tilde{\chi}_r(F_x) \cdot F_x
-\end{eqnarray}
-
+\begin{subequations}
+    \begin{eqnarray}
+        \tilde{F}_{x_f} &=& \tilde{\chi}_f(F_x) \cdot F_x \\
+        \tilde{F}_{x_r} &=& \tilde{\chi}_r(F_x) \cdot F_x
+    \end{eqnarray}
+\end{subequations}
 This implementation might seem rather complex, compared to simply expressing the front and rear force distribution as
-\begin{equation}
-    \tilde{F}_{x_f} = \tilde{\chi}_f \cdot F_x
-\end{equation}
-\begin{equation}
-    \tilde{F}_{x_r} = \tilde{\chi}_r \cdot F_x
-\end{equation}
-
+\begin{subequations}
+    \begin{eqnarray}
+        \tilde{F}_{x_f} = \tilde{\chi}_f \cdot F_x \\
+        \tilde{F}_{x_r} = \tilde{\chi}_r \cdot F_x
+    \end{eqnarray}
+\end{subequations}
 where $\tilde{\chi}_f$ and $\tilde{\chi}_r$ are scalars that sum to 1, however, these equations will be used for numerical 
-optimization, and should therefore be twice differentiable, and we therefore have to use the workaround equations presented above.
-
+optimization, and should therefore be twice differentiable, and we therefore have to use the workaround equations presented above. \\
 For the tire model, given the maximum instantaneous normal load of the tire $F_z$, the maximum possible
 lateral tire force that can be obtained applying the input force $\tilde{F}_x$ is:
 \begin{equation}
@@ -240,23 +239,24 @@ lateral tire force that can be obtained applying the input force $\tilde{F}_x$ i
 where $\mu$ is the tire-road friction coefficient and the 99\%  of the longitudinal force is due to solve 
 some numerical issues in the optimization problem. \\
 The normal loads for the two tires are affected also by the slope $\theta$ of the road, and by the banking $\phi$, in the following way:
-\begin{equation}
-    \label{normalF}
-    F_{z_f} = \frac{b}{L}m(g\cdot \cos(\theta)\cos(\varphi)+A_{V^2}U_x^2)-\frac{h_{cg}}{L}F_x
-\end{equation}
-\begin{equation}
-    \label{normalR}
-    F_{z_r} = \frac{a}{L}m(g\cdot \cos(\theta)\cos(\varphi)+A_{V^2}U_x^2)+\frac{h_{cg}}{L}F_x
-\end{equation}
+\begin{subequations}
+    \begin{eqnarray}
+        \label{normal}
+        F_{z_f} = \frac{b}{L}m(g\cdot \cos(\theta)\cos(\varphi)+A_{V^2}U_x^2)-\frac{h_{cg}}{L}F_x \\
+        F_{z_r} = \frac{a}{L}m(g\cdot \cos(\theta)\cos(\varphi)+A_{V^2}U_x^2)+\frac{h_{cg}}{L}F_x
+    \end{eqnarray}
+\end{subequations}
 where the effect of vertical curvature on speed are expressed through:
 \begin{equation}
     A_{V^2} = -\frac{\partial \theta}{\partial s}\cos(\varphi)-\kappa\cdot \sin(\varphi)\cos(\theta) 
 \end{equation}
 The slip angles of the front ($\alpha_f$) and rear ($\alpha_r$) wheels are respectively given by:
-\begin{eqnarray}
-    \alpha_f &=& \arctan \left(\frac{U_y+ar}{U_x}\right)-\delta \\
-    \alpha_r &=& \arctan \left(\frac{U_y-br}{U_x}\right)
-\end{eqnarray}
+\begin{subequations}
+    \begin{eqnarray}
+        \alpha_f &=& \arctan \left(\frac{U_y+ar}{U_x}\right)-\delta \\
+        \alpha_r &=& \arctan \left(\frac{U_y-br}{U_x}\right)
+    \end{eqnarray}
+\end{subequations}
 A full sliding occurs at an angle denoted as $\alpha^{\text{mod}}$, which is calculated as:
 \begin{equation}
     \alpha^{\text{mod}} = \arctan\left(\frac{3\cdot F_y^{\text{max}}\cdot\zeta}{C_{\alpha}}\right)
@@ -294,17 +294,16 @@ Instead, the lateral force $F_b$ applied on the CG models the effect of the road
 \\
 \\
 All these informations are used to describe the motion of the single-track model:
-\begin{eqnarray}
-    \dot{U}_x &=& \frac{\tilde{F}_{x_f}\cos(\delta)-\tilde{F}_{y_f}\sin(\delta)+\tilde{F}_{x_r}-F_d}{m}+rU_y\\
-    \dot{U_y} &=& \frac{\tilde{F}_{y_f}\cos(\delta)+\tilde{F}_{x_f}\sin(\delta)+\tilde{F}_{y_r}+F_b}{m}-rU_x\\ 
-    \dot{r} &=& \frac{a(\tilde{F}_{y_f}\cos(\delta)+\tilde{F}_{x_f}\sin(\delta))-b\tilde{F}_{y_r}}{I_{zz}}\\
-    \dot{s} &=& \frac{U_x\cos(\Delta \varPsi) -U_y\sin(\Delta \varPsi)}{1-\kappa e}\\
-    \dot{e} &=& U_x\sin(\Delta \varPsi)+U_y \cos(\Delta \varPsi)\\
-    \Delta \dot{\varPsi} &=& r-\kappa \dot{s}
-\end{eqnarray}
-
-
-
+\begin{subequations}
+    \begin{eqnarray} 
+        \dot{U}_x &=& \frac{\tilde{F}_{x_f}\cos(\delta)-\tilde{F}_{y_f}\sin(\delta)+\tilde{F}_{x_r}-F_d}{m}+rU_y\\
+        \dot{U_y} &=& \frac{\tilde{F}_{y_f}\cos(\delta)+\tilde{F}_{x_f}\sin(\delta)+\tilde{F}_{y_r}+F_b}{m}-rU_x\\ 
+        \dot{r} &=& \frac{a(\tilde{F}_{y_f}\cos(\delta)+\tilde{F}_{x_f}\sin(\delta))-b\tilde{F}_{y_r}}{I_{zz}}\\
+        \dot{s} &=& \frac{U_x\cos(\Delta \varPsi) -U_y\sin(\Delta \varPsi)}{1-\kappa e}\\
+        \dot{e} &=& U_x\sin(\Delta \varPsi)+U_y \cos(\Delta \varPsi)\\
+        \Delta \dot{\varPsi} &=& r-\kappa \dot{s}
+    \end{eqnarray}
+\end{subequations}
 
 \subsubsection{Point-Mass model}
 The Point-Mass model is a simpler version of the Single-Track model, where the car is approximated with a point object
@@ -313,25 +312,26 @@ and three position states relative to the road descriptor path: the distance $\b
 difference in orientation $\bar{\phi}$ between the velocity vector and the tangent to the road descriptor path.
 
 Substituting ${U}_x$ with $\bar{V}$, we can use some of the equations introduced in the single-track model also for the point-mass model,
-in particular for the drag force ${F}_d$ (eq. \ref{drag_force}), for ${F}_b$ (eq. \ref{lateral_force}) and for the normal loads ${F}_{z_f}$ (eq. \ref{normalF}) and ${F}_{z_r}$ (eq. \ref{normalR}).
+in particular for the drag force ${F}_d$ (eq. \ref{drag_force}), for ${F}_b$ (eq. \ref{lateral_force}) and for the normal loads ${F}_{z_f}$ and ${F}_{z_r}$ (eq. \ref{normal}).
 Following the basic intuition of having to simplify the model, the tire forces are not modeled.
 
 The inputs to this model are the longitudinal force $\bar{F}_x$ and the lateral force $\bar{F}_y$, that are limited by friction limits
 according to the following rules:
-\begin{equation}
-    \left(\frac{b}{L}\bar{F}_y\right)^2 + \left(\tilde{\chi_f}\bar{F}_x\right)^2 \leq \left(\mu_f F_{z_f}\right)^2
-\end{equation}
-\begin{equation}
-    \left(\frac{a}{L}\bar{F}_y\right)^2 + \left(\tilde{\chi_r}\bar{F}_x\right)^2 \leq \left(\mu_r F_{z_r}\right)^2
-\end{equation}
+\begin{subequations}
+    \begin{eqnarray} 
+        \left(\frac{b}{L}\bar{F}_y\right)^2 + \left(\tilde{\chi_f}\bar{F}_x\right)^2 \leq \left(\mu_f F_{z_f}\right)^2 \\
+        \left(\frac{a}{L}\bar{F}_y\right)^2 + \left(\tilde{\chi_r}\bar{F}_x\right)^2 \leq \left(\mu_r F_{z_r}\right)^2
+    \end{eqnarray}
+\end{subequations}
 Thus the equations that describe the motion of the point-mass model are the following:
-
-\begin{eqnarray}
-    \dot{\bar{V}} &=& \frac{\bar{F}_{x}-\bar{F}_{d}}{m}\\
-    \dot{\bar{s}} &=& \frac{\bar{V}\cos(\bar{\phi})}{1-\kappa \bar{e}}\\
-    \dot{\bar{e}} &=& \bar{V}\sin(\bar{\phi})\\
-    \dot{\bar{\phi}} &=& \frac{{\bar{F}}_y + {\bar{F}}_b}{m\bar{V}} - k\dot{\bar{s}}\\
-\end{eqnarray}
+\begin{subequations}
+    \begin{eqnarray}
+        \dot{\bar{V}} &=& \frac{\bar{F}_{x}-\bar{F}_{d}}{m}\\
+        \dot{\bar{s}} &=& \frac{\bar{V}\cos(\bar{\phi})}{1-\kappa \bar{e}}\\
+        \dot{\bar{e}} &=& \bar{V}\sin(\bar{\phi})\\
+        \dot{\bar{\phi}} &=& \frac{{\bar{F}}_y + {\bar{F}}_b}{m\bar{V}} - k\dot{\bar{s}}
+    \end{eqnarray}
+\end{subequations}
 
 Note that the yaw dynamics are omitted, and therefore this model cannot be used for yaw stabilization
 
@@ -340,21 +340,22 @@ Here we define the mapping from the single-track to the point-mass states.
 It is very important that this mapping is correct, to guarantee that the transition
 from one model to the other is compliant to the reality.\\
 The mapping, called $spatialTransition_{trans}(x_k)$, is the following:
-\begin{eqnarray}
-    \bar{V} &=& \sqrt{U_{x}^{2}-U_{y}^{2}}\\
-    \bar{s} &=& s\\
-    \bar{e} &=& e\\
-    \bar{\phi} &=& arctan\left(\frac{{U}_y}{{U}_x}\right) + \Delta\psi\\
-\end{eqnarray}
-
+\begin{subequations}
+    \begin{eqnarray}
+        \bar{V} &=& \sqrt{U_{x}^{2}-U_{y}^{2}}\\
+        \bar{s} &=& s\\
+        \bar{e} &=& e\\
+        \bar{\phi} &=& arctan\left(\frac{{U}_y}{{U}_x}\right) + \Delta\psi
+    \end{eqnarray}
+\end{subequations}
 
 \subsection{Spatial dynamics} \label{spatial}
 Since the dynamical models need to be used in a digital fashion, it has to be
 discretized. The discretization of the models can be done with respect to time
 or with respect to space, according to own purposes, with the respective pros
-and cons. 
-\begin{itemize}
-    \item Discretizing in time consists in dividing the time over the horizon in
+and cons.
+\begin{description}
+    \item[Discretizing in time] consists in dividing the time over the horizon in
     small well-defined time intervals $dt$, and leaving the spatial curvilinear
     coordinate $s$ as an optimization variable in the NLP. This approach implies
     that we know beforehand the temporal window for the horizon. Since this is
@@ -365,7 +366,7 @@ and cons.
     path geometry will be obtained by some interpolation function to be
     evaluated during the planning horizon. This can cause some issues,
     computation-wise.
-    \item Discretizing in space, instead, means to establish the spatial
+    \item[Discretizing in space] means to establish the spatial
     discretization steps $ds$ that compose the total space travelled by the
     vehicle in the horizon window. In this way the time $t$ can be left as an
     optimization variable. In contrast, this method does not allow to the car to
@@ -375,37 +376,40 @@ and cons.
     before even starting the planning horizon. Moreover, space discretization
     allows to easily add elements to the track which are always know apriori,
     like static obstacles, without creating too much trouble.
-\end{itemize}
+\end{description}
 For the reasons stated above, since we are a racing scenario in which time
 minimization is of paramount importance, and the track geometry is known
-apriori, the spatial discretization methodo is the more adequate for the MPC
+apriori, the spatial discretization method is the more adequate for the MPC
 planning horizon. This means that outside the horizon, the dynamical model will
-evolve as usual following a time-discretized differential equation, while inside
-the MPC, the evolution is space-disretized. Thus, denoting as $p$ a state
+evolve as usual, following a time-discretized differential equation, while
+inside the MPC the evolution is space-disretized. Thus, denoting as $p$ a state
 variable of any model, we define its derivative with respect to the curvilinear
-coordinate $s$ as:
+coordinate $s$ as
 \begin{equation}
     p' = \frac{d p}{d s} = \frac{dp}{dt} \frac{dt}{ds} = \dot{p} \frac{dt}{ds} = \dot{p} \frac{1}{\dot{s}}
 \end{equation}  
 that we will compute through the chain rule.
-According to this notation, we can define the spatial dynamics for the single-track model:
-\begin{eqnarray}
-    U'_x &=& \left(\frac{\tilde{F}_{x_f}\cos(\delta)-\tilde{F}_{y_f}\sin(\delta)+\tilde{F}_{x_r}-F_d}{m}+rU_y\right) \frac{1}{\dot{s}}\\
-    U'_y &=& \left(\frac{\tilde{F}_{y_f}\cos(\delta)+\tilde{F}_{x_f}\sin(\delta)+\tilde{F}_{y_r}+F_b}{m}-rU_x\right) \frac{1}{\dot{s}}\\
-    r' &=& \left(\frac{a(\tilde{F}_{y_f}\cos(\delta)+\tilde{F}_{x_f}\sin(\delta))-b\tilde{F}_{y_r}}{I_{zz}}\right) \frac{1}{\dot{s}}\\
-    e' &=& \left(U_x\sin(\Delta \varPsi)+U_y \cos(\Delta \varPsi)\right) \frac{1}{\dot{s}}\\
-    \Delta \varPsi' &=& \left(r-\kappa \dot{s}\right) \frac{1}{\dot{s}}\\
-    \delta ' &=& \frac{\dot{\delta}}{\dot{s}}\\
-    t' &=& \frac{1}{\dot{s}}
-\end{eqnarray}
+According to this notation, we can define the spatial dynamics for the single-track model as such:
+\begin{subequations}
+    \begin{eqnarray}
+        U'_x &=& \left(\frac{\tilde{F}_{x_f}\cos(\delta)-\tilde{F}_{y_f}\sin(\delta)+\tilde{F}_{x_r}-F_d}{m}+rU_y\right) \frac{1}{\dot{s}}\\
+        U'_y &=& \left(\frac{\tilde{F}_{y_f}\cos(\delta)+\tilde{F}_{x_f}\sin(\delta)+\tilde{F}_{y_r}+F_b}{m}-rU_x\right) \frac{1}{\dot{s}}\\
+        r' &=& \left(\frac{a(\tilde{F}_{y_f}\cos(\delta)+\tilde{F}_{x_f}\sin(\delta))-b\tilde{F}_{y_r}}{I_{zz}}\right) \frac{1}{\dot{s}}\\
+        e' &=& \left(U_x\sin(\Delta \varPsi)+U_y \cos(\Delta \varPsi)\right) \frac{1}{\dot{s}}\\
+        \Delta \varPsi' &=& \left(r-\kappa \dot{s}\right) \frac{1}{\dot{s}}\\
+        \delta ' &=& \frac{\dot{\delta}}{\dot{s}}\\
+        t' &=& \frac{1}{\dot{s}}
+    \end{eqnarray}
+\end{subequations}
 and for the point-mass model:
-\begin{eqnarray}
-    {\bar{V}}' &=& \left(\frac{\bar{F}_{x}-\bar{F}_{d}}{m}\right) \frac{1}{\dot{\bar{s}}}\\
-    {\bar{e}}' &=& \left(\bar{V}\sin(\bar{\phi})\right)\frac{1}{\dot{\bar{s}}}\\
-    {\bar{\phi}}' &=& \left(\frac{{\bar{F}}_y + {\bar{F}}_b}{m\bar{V}} - k\dot{\bar{s}}\right)\frac{1}{\dot{\bar{s}}}\\
-    \bar{t}' &=& \frac{1}{\dot{\bar{s}}}
-\end{eqnarray}
-
+\begin{subequations}
+    \begin{eqnarray}
+        {\bar{V}}' &=& \left(\frac{\bar{F}_{x}-\bar{F}_{d}}{m}\right) \frac{1}{\dot{\bar{s}}}\\
+        {\bar{e}}' &=& \left(\bar{V}\sin(\bar{\phi})\right)\frac{1}{\dot{\bar{s}}}\\
+        {\bar{\phi}}' &=& \left(\frac{{\bar{F}}_y + {\bar{F}}_b}{m\bar{V}} - k\dot{\bar{s}}\right)\frac{1}{\dot{\bar{s}}}\\
+        \bar{t}' &=& \frac{1}{\dot{\bar{s}}}
+    \end{eqnarray}
+\end{subequations}
 We will denote in a concise way the spatial transitions from a state to the next one as
 $spatialTransition_{st}(x_k, u_k)$ for the single-track, and $spatialTransition_{pm}(x_k, u_k)$ 
 for the point-mass model, where $x_k$ is the state at time step $k$ and $u_k$ is the control
@@ -418,7 +422,7 @@ applied at time step $k$.
 The key element of the NLP is the cost function, which can be composed by many terms according to own purposes.
 Our objective is to minimize time along the finite planning horizon, while also respecting the road
 boundaries and while keeping the car in a safe configuration. 
-To achieve this, a series of seven terms regarding both single-track and point-mass models are summed together:
+To achieve this, a series of terms regarding both single-track and point-mass models are summed together:
 \begin{enumerate}
     \item \textbf{Final time}: the time $\bar{\tau}_M$ at which the point-mass model reaches the last stage of the planning horizon
     \item \textbf{Terminal state}: to make sure that the final stage is a safe one, we add this penalty based on the 
@@ -458,13 +462,18 @@ To achieve this, a series of seven terms regarding both single-track and point-m
 
     \item \textbf{Deviation from the Road Descriptor Path}: it encourages the car to stay as near as possible to the road descriptor
     \begin{equation}
-    J_{rd} = W_{rd}(\sum_{k=1}^{N} \Delta s_k e_k^2 + \sum_{l=1}^{M} \Delta\overline{s}_l \overline{e}_l^2)
+    J_{rd} = W_{rd} \left( \sum_{k=1}^{N} \Delta s_k e_k^2 + \sum_{l=1}^{M} \Delta\overline{s}_l \overline{e}_l^2 \right)
     \end{equation}
 
-    \item \textbf{Obstacles avoidance}: it penalizes the car to pass near the obstacles
+    \item \textbf{Obstacles avoidance}: it discourages the car to go through the obstacles
     \begin{equation}
-        J_{obs} = ...
-    \end{equation} 
+        J_{obs} = W_{obs} \left( \sum_{k=1}^{N} \sum_{j=1}^{J} \frac{\Delta s_k}{d_{j,k} - r_j} \right)
+    \end{equation}
+    where $k$ is the usual index counting the steps of the prediction horizon
+    and $j$ is the index counting the obstacles on the track. Furthermore,
+    \[d_{j,k} = \sqrt{(s_k-s_j)^2 + (e_k-e_j)^2}\] is the distance between the
+    $k_{th}$ predicted car position and the $j_{th}$ obstacle, while $r_j$ is
+    the radius of the $j_{th}$ obstacle.
 
     \item \textbf{Slew rate}: in order to encourage smooth controls we penalize too big increases of the steering rate $\dot{\delta}$, variation of the total lateral force $\Delta F_y$, variation of the new commanded longitudinal force ${F_x}_k$ with respect to the previous commanded ${F_x}_{k-1}$.
     And finally, the variation in forces at the model transition, denoted as $\Delta F_u$.
@@ -490,13 +499,6 @@ To achieve this, a series of seven terms regarding both single-track and point-m
         0, & \text{otherwise}
         \end{cases}
         \]
-    
-    \item \textbf{Excessive Force Usage Beyond the Imposed Limit}:
-    To help the optimization problem we introduce some slack variables on the force limits, we introduce this penalty to keep them as small as possible
-    \begin{equation}
-        J_F = W_F \sum_{k=0}^{N}\left(\left(F_{e_{f_k}}^2\right)^2 + \left(F_{e_{r_k}}^2\right)^2\right)
-    \end{equation}
-    !!! Forse si può togliere, dipende se è stata implementata!!!
 \end{enumerate}
 
 The constraints of the NLP concern some limitations on the states of the single-track and of the point-mass models, 
@@ -541,12 +543,14 @@ them. In detail:
     while the eq.\ref{transition} establishes that the initial state of the point-mass model comes from the propagation of 
     the last state of the single-track.
 \end{enumerate}
-
-As we can notice, the restriction to stay inside the track boundaries is modeled not as a constraint, but like a cost term,
-that increases its value when the car is outside in relation with the distance to the nearest border, otherwise it is null.\\
-In the same way we decided to model also the obstacle avoidance, \dots.\\
-Giving both terms high weigths, we can be sure to obtain a good result without imposing them as hard constraints.
-This approach is prefered to the other one because it allows the NLP to be always numerically feasible.
+As we can notice, the restriction to stay inside the track boundaries is modeled
+not as a constraint, but like a cost term that increases when the car is outside
+the nearest border, otherwise it is null. Similary, the collision with obstacles
+is discouraged by minimizing the inverse of the distance to each obstacle, thus
+penalizing small distances. Giving both terms high weights, we can be sure to
+obtain a good result without imposing them as hard constraints. This approach is
+prefered to the other one because it allows the NLP to be always numerically
+feasible.
 
 \newpage
 
@@ -560,6 +564,28 @@ in C++ and has also a python interface. Casadi serves three main purposes:
     \item Simulation through numerical integration
     \item Formulation and solving of optimization problems within MPC
 \end{itemize}
+The "sofware framework" is based mainly on three components
+\begin{description}
+    \item[Controller] expressed as a CasADI nlp, namely a non-linear cost
+    function with non-linear constraints, that spits out a single control action
+    based on the current state and the predicted state for the next H steps (H
+    is the horizon length)
+    \item[Model] of the car, expressed as a casadi function that evolves the
+    state of the dynamical model with respect to the current state and action
+    \item[Simulator] to show everything graphically in real-time
+\end{description}
+
+\subsection{Simulator}
+
+To simulate a real racing track and a car interacting with it, we just used
+some simple plotting tools together with the modeling and numerical integration
+capabilities of CasADI. The main goals of the simulator are:
+\begin{itemize}
+    \item Visualize the track with the car correctly localized depending on its state
+    \item Simulate the car's movement
+\end{itemize}
+The complete implementation of the simulator can be found at
+\href{https://github.com/neverorfrog/vehicle-control/blob/main/simulation/racing.py}{racing.py}.
 Overall, the simulation loop can be summarized in pseudocode as follows.
 
 \begin{algorithm}
@@ -576,42 +602,31 @@ Overall, the simulation loop can be summarized in pseudocode as follows.
 
 Line 3 takes the assumption that the state is fully known at each instant. We
 take this assumption for simplifying reasons. In a real setting the state would
-be measured with sensors and filtering algorithms.
-
-\subsection{Discretized models in CasADI}
-
-As already said, we used the spatial discretization method.
-explanation of the spatial discretization method
-expansion of "move forward" (integrators)
-
-
-\subsection{MPC Algorithm}
-Most of the computation happens in the instruction at line 4.
-expansion of command(x) as pseudocode
+be measured with sensors and filtering algorithms. 
 
 \newpage
-\subsection{Track}
+\subsubsection*{Track}
 \label{subsec:track}
 
 Since the algorithm is application-specific for the race environment, it is
-fundamental to model the racing track itself. We decided to model it as a
-sequence of \textbf{waypoints}, defining the track centerline, which are then
-connected through a \textbf{cubic spline}. The waypoints are constructed based
-on three parameters:
+fundamental to model and represent the racing track itself. We decided to model
+it as a sequence of \textbf{waypoints}, defining the track centerline, which are
+then connected through a \textbf{cubic spline}. The waypoints are constructed
+based on three user-defined parameters:
 \begin{itemize}
-    \item corner coordinates (in meters) defined by the user
+    \item corner coordinates (in meters)
     \item resolution (meters between two waypoints)
     \item smoothing (number of waypoints considered for smoothing)
 \end{itemize}
-This way, we can \textbf{uniquely identify a pose} in the track by the
+This way, we can \textbf{uniquely identify a pose} in the track through the
 coordinates $\mathbf{s,e,\phi}$, namely the curvilinear abscissa, the position
-error and the orientation error. The describe respectively the displacement of
-the car along the track, the lateral error with respect to the centerline and
-the yaw error with respect to the track orientation. As we will see in the next
-section, the state of the car is expressed through these "relative" coordinates.
-More details about the track implementation are in appendix A. Moreover, obstacles are also
-modeled by their relative coordinates $s,e$ and the radius (in meters) $r$ (as a
-simplifying assumption, the obstacles are all circular).
+error and the orientation error. We recall that they describe respectively the
+displacement of the car along the track, the lateral error with respect to the
+centerline and the yaw error with respect to the track orientation. As already
+seen, the state of the car is expressed through these "relative" coordinates.
+Similarly, obstacles are modeled by their relative coordinates $s,e$ and the
+radius (in meters) $r$ (as a simplifying assumption, the obstacles are all
+circular).
 
 \begin{myverbatim}[title={Example of a track configuration file}]
 corners: #[x, y]
@@ -632,14 +647,131 @@ obstacle_data: #[s, ey, r]
     - [170, 2, 2]
     - [220, 0, 2]
 \end{myverbatim}
-
-The result would then be the one shown in figure \ref*{ippodromo} below. 
-\begin{figure}[H]
+\newpage 
+The result would then be the one shown in figure \ref{ippodromo} below. The
+track is pretty simple for testing purposes, but it is possible with much ease
+to create more complex tracks, thanks to the flexibility of the waypoint
+definition schema. \\
+The main features of interest of the track are the following:
+\begin{itemize}
+    \item centerline position
+    \item track curvature
+    \item track orientation
+\end{itemize}
+\begin{figure}[h]
     \centering
     \includegraphics[width=\textwidth]{assets/ippodromo_obstacles.png}
     \caption{Example track with round obstacles}
     \label{ippodromo}
-\end{figure}
+\end{figure} \vspace{0.5cm}
+As for the centerline, we simply evaluate the spline defined through the
+waypoints at the curvilinear abscissa $s$. We will define the two spline
+functions, one for $x$ and one for $y$ as $x_{spline}(s)$ and $y_{spline}(s)$.\\
+The curvature is defined as the inverse of the curvature radius and can be
+expressed as
+\begin{equation}
+    \kappa(s) = \frac{x' \cdot y'' - y' \cdot x''}{\sqrt{(x'^2 + y'^2)^3}}
+\end{equation}
+where $x'$ and $y'$ are the derivatives of the absolute coordinates with respect
+to the curvilinear abscissa $s$. We omitted the dependancy to $s$ in the
+righthand-side of the above equation just for notation. The curvature
+information is of utmost importance for the controller, since the evolution of
+the relative coordinates depends on it. \\
+Similarly, the orientation can be expressed as
+\begin{equation}
+    \phi(s) = \arctan\left(\frac{y'}{x'}\right)
+\end{equation}
+These two quantities are also needed to convert the relative coordinates to a
+global coordinate system. We can express this change of coordinates as such:
+\begin{equation}
+    \Bigg\{
+        \begin{array}{ll}
+            x(s,e) =  x_{spline}(s) - sin(\phi(s)) \cdot e\\
+            y(s,e) =  y_{spline}(s) + cos(\phi(s)) \cdot e\\
+            \varPsi(s,\varPsi) = \phi(s) + \Delta \varPsi
+        \end{array}
+\end{equation}
+This way, it is always possible to identify a pose in the track in global
+coordinates, in order to plot the car. More information about the implementation
+can be found in
+\href{https://github.com/neverorfrog/vehicle-control/blob/main/environment/track.py}{track.py}
+
+
+\subsection{Discretized model}
+
+An important aspect, which was not mentioned when we treated the models in a
+more formal way, is how the models are actually discretized. Conceptually, the
+model is still expressed as a symbolic function through CasADI, as if it were a
+continuous function, so nothing fancy about that. The discretization consists in
+adding to the symbolic function an integrator, which has the scope of letting
+the system transition from one state by applying a certain input, holding it for
+a certain amount of time and integrating the state rate of change, to finally
+end up into another state. In the pseudocode, it is line 5 we are talking about.
+Practically speaking, what happens is that we create a \textit{discrete ode} in
+form of a casadi function by executing the following steps:
+\begin{enumerate}
+    \item Define the righthand side of the continuous ode as a \textit{symbolic}
+    casadi function, namely \[f(state,action,\kappa)\] In our case, taking just
+    the singletrack model as an example, the state is the tuple
+    \([U_x,U_y,r,\delta,s,e,\Delta\varPsi,t]\) and the action \([F_x,\omega]\).
+    Instead, $\kappa$ indicates the curvature of the track. This function
+    returns the rate of change of the state. Note that there is the presence of
+    both $s$ and $t$, which actually makes no sense conceptually, but the reason
+    is that we use the same state for both the $temporalTransition$, depending
+    on $dt$ and the $spatialTransition$ depending on $ds$. Simply, in the first
+    one $\dot t=1$ and in the second one $s'=1$.
+    \item Define the symbolic expression of how the next state would be obtained
+    from the current one by applying the rate of change for an interval h. For a
+    simple Euler integrator, this would correspond to \[state_{n+1}=state_n+h*f(state_n,action_n,\kappa)\]
+    \item Embed the symbolic expression into a casadi function which defines the
+    discretized dynamics, and as such takes as input the actual state, action
+    and curvature tuple, returning the next state: \[state_{n+1}=F(state_n,action_n,\kappa)\]
+\end{enumerate}
+
+The implementation of the integrators can be found in
+\href{https://github.com/neverorfrog/vehicle-control/blob/main/utils/integrators.py}{integrators.py}
+and the dynamical model implementation in
+\href{https://github.com/neverorfrog/vehicle-control/blob/main/models/dynamic_car.py}{dynamiccar.py}
+
+
+
+
+\subsection{MPC Algorithm}
+Most of the concepts about MPC were already addressed in the previous sections;
+in this section we will deal with the implementation aspects. As said, most of
+the computation happens in the instruction at line 4 of the pseudocode
+\ref{sim}. The full implementation of the MPC algorithm can be found in
+\href{https://github.com/neverorfrog/vehicle-control/tree/main/controllers/mpc}{cascadedmpc.py}.
+We used as linear solver of the optimization problem the solver MA27, which
+proved itself faster than the standard solver shipped with CasADI. Regarding the
+MPC implementation itself, it can be done in a pretty straightforward way thanks
+to the high-level API Opti, which allow to express cost functions and
+constraints in a very similar way to the mathematical language.\\
+Implementation-wise, two relevant aspects are the following:
+\begin{description}
+    \item[Actual discretization of the NLP.] As said before, inside the
+    prediction horizon, the chosen discretization method is the one based on
+    spatial discretization. Specifically, the step must be chosen. For the
+    singletrack, we follow the same approach as in paper, namely we sample the
+    displacement of the car, considering its speed in real-time, every $30ms$.
+    This way, we account for big variations of speed during the entire lap. For
+    the pointmass, instead, we simply choose a static step-size of $3m$.
+    \item[Horizon initialization.] Before even starting to solve the
+    optimization problem, we have to properly initialize it. This is
+    particularly important for computational efficiency. Here, two things are done:
+    \begin{itemize}
+        \item We initialize the state and action decision variables as the
+        predictions from the previous horizon.
+        \item We precompute the trajectory of the spatial step sizes, the
+        curvilinear abscissae and the curvatures. For the pointmass, it is
+        pretty straightforward since the step sizes are predefined. For the
+        singletrack we actually used as realtime velocities to compute the
+        spatial step sizes the predictions of the last horizon. After that, we
+        compute the curvatures at the computed abscissae. This way, it is not
+        necessary to evaluate the curvature spline at every step of the
+        prediction horizon. In fact, this results in a much faster computation.
+    \end{itemize}
+\end{description} 
 
 
 \newpage
@@ -652,12 +784,12 @@ The result would then be the one shown in figure \ref*{ippodromo} below.
     \begin{itemize}
         \item Lap-time
         \item Compuational time
-        \item Slip angle excess
+        \item Slip angle excess (cascaded does not excess)
         \item Force usage (cascaded should be more economic in that sense)
+        \item Obstacles
     \end{itemize}
     \item Results
 \end{itemize}
-
 
 
 \section{Conclusion}
@@ -671,13 +803,5 @@ The result would then be the one shown in figure \ref*{ippodromo} below.
 \newpage
 \bibliographystyle{unsrt}
 \bibliography{references}
-
-\newpage
-\appendix
-
-\section{Details on the track}
-\label{app:track}
-TODO
-
 
 \end{document}
