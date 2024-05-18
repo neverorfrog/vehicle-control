@@ -135,7 +135,7 @@ class RacingSimulation():
             self.ax_car.plot(self.x_traj[j],self.y_traj[j],'-',alpha=0.8,color=self.colors[j],linewidth=2)
             
             # Plot state predictions of MPC
-            self.ax_car.plot(self.preds[name][n][:,0],self.preds[name][n][:,1],color=self.colors[j],marker='o',markerfacecolor=self.colors[j],markersize=4,alpha=0.3) 
+            self.ax_car.plot(self.preds[name][n][:,0],self.preds[name][n][:,1],linestyle='None',color=self.colors[j],marker='o',markerfacecolor=self.colors[j],markersize=4,alpha=0.3) 
             
             # Plot state and actions
             self.ax_small1.plot(s[-2:],v[-2:], '-', alpha=0.7, label=self.names[j], color = self.colors[j])
