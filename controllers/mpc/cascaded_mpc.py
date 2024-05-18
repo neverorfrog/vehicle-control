@@ -79,10 +79,6 @@ class CascadedMPC(Controller):
         # initial state
         self.state0 = self.opti.parameter(self.ns) if self.N > 0 else self.opti.parameter(self.ns_pm) 
         
-        # slack variables (for real world)
-        # self.Fe_f = self.opti.variable(self.N)
-        # self.Fe_r = self.opti.variable(self.N)
-        
     def _stage_constraints(self, n):
         state = self.state[:self.ns,n]; action = self.action[:,n]
         Ux,Uy,r,delta,s,ey,epsi,t = self._unpack_state(state)
@@ -109,10 +105,6 @@ class CascadedMPC(Controller):
         self.opti.subject_to(self.opti.bounded(-bound_f,self.car.Fx_f(Fx),bound_f))
         bound_r = mu.r*self.car.Fz_r(Ux,Fx)*cos(self.car.alpha_r(Ux,Uy,r,delta))
         self.opti.subject_to(self.opti.bounded(-bound_r,self.car.Fx_r(Fx),bound_r))
-                
-        # friction Limits for real world experiments 
-        # self.opti.subject_to( self.car.Fy_f(Ux,Uy,r,delta,Fx)**2 <= (self.car.config.env.mu.f*self.car.Fz_f(Ux,Fx))**2 + self.Fe_f[n]**2 - 0.98*self.car.Fx_f(Fx)**2 )
-        # self.opti.subject_to( self.car.Fy_r(Ux,Uy,r,delta,Fx)**2 <= (self.car.config.env.mu.r*self.car.Fz_r(Ux,Fx))**2 + self.Fe_r[n]**2 - 0.98*self.car.Fx_r(Fx)**2 )
            
     def _stage_cost(self, n):
         Ux,Uy,r,delta,s,ey,epsi,t = self._unpack_state(self.state[:self.ns,n])
@@ -140,17 +132,15 @@ class CascadedMPC(Controller):
         talpha_r = fabs(tan(self.car.alpha_r(Ux,Uy,r,delta)))
         talphamod_r = tan(self.car.alphamod_r(Fx))
         cost += ca.if_else(talpha_r >= talphamod_r, cost_weights.slip*(talpha_r - talphamod_r)**2, 0) #slip angle rear
-        
-        # cost += cost_weights.friction*(self.Fe_f[n]**2 + self.Fe_r[n]**2) # slack variables for real world
-
         if n < self.N-1: #Force Action Continuity
             next_action = self.action[:,n+1]
             cost += (cost_weights.Fx/ds) * (next_action[self.car.input.index('Fx')] - Fx)**2
             
         if self.config.obstacles: #Obstacle avoidance
             for obs in self.car.track.obstacles:
-                distance = ca.fabs(ca.sqrt((s - obs.s)**2 + (ey - obs.ey)**2) - (obs.radius))
-                cost += cost_weights.obstacles*ds/((n+1)*distance)
+                distance = ca.sqrt((s - obs.s)**2 + (ey - obs.ey)**2)
+                cost += cost_weights.obstacles*ds/(distance-(obs.radius+0.1))
+                # cost += ca.if_else(distance <= obs.radius + 0.1, cost_weights.obstacles*ds/(distance-obs.radius), 0) 
                 
         return cost
     
@@ -171,10 +161,6 @@ class CascadedMPC(Controller):
         # Model dynamics
         if m < self.H-1:
             self.opti.subject_to(self.state[:self.ns_pm,m+1] == self.point_mass.spatial_transition(state,action,self.curvature[m],self.ds[m]))
-        
-        # friction limits (for real world)
-        # self.opti.subject_to(self.car.Fx_f(Fx)**2 + ((self.car.config.car.b/self.car.config.car.l)*Fy)**2 <= (self.car.config.env.mu.f*self.car.Fz_f(V,Fx))**2)
-        # self.opti.subject_to(self.car.Fx_r(Fx)**2 + ((self.car.config.car.a/self.car.config.car.l)*Fy)**2 <= (self.car.config.env.mu.r*self.car.Fz_r(V,Fx))**2)
         
     
     def _pm_stage_cost(self, m):
@@ -200,8 +186,9 @@ class CascadedMPC(Controller):
         
         if self.config.obstacles:
             for obs in self.car.track.obstacles:
-                distance = ca.fabs(ca.sqrt((s - obs.s)**2 + (ey - obs.ey)**2) - (obs.radius))
-                cost += cost_weights.obstacles_pm*ds/((m+1)*distance) #5) Obstacle Avoidance
+                distance = ca.sqrt((s - obs.s)**2 + (ey - obs.ey)**2)
+                cost += cost_weights.obstacles*ds/(distance-(obs.radius+0.1))
+                # cost += ca.if_else(distance <= obs.radius + 0.1, cost_weights.obstacles_pm*ds/(distance-obs.radius), 0) #5) Obstacle Avoidance
         
         return cost  
     
@@ -237,9 +224,9 @@ class CascadedMPC(Controller):
             final_model = self.car
             final_speed = final_state[final_model.state.index('Ux')]
         cost += ca.if_else(final_speed >= state_constraints.max_speed,cost_weights.speed*(final_speed - state_constraints.max_speed)**2, 0) # excessive speed
-        cost += cost_weights.time*(final_state[final_model.state.index('t'),-1]) # final cost (minimize time)
-        cost += cost_weights.ey*final_state[final_model.state.index('ey'),-1]**2 # final cost (minimize terminal lateral error) hardcodato
-        cost += cost_weights.epsi*final_state[final_model.state.index('epsi'),-1]**2 # final cost (minimize terminal course error) hardcodato
+        cost += cost_weights.time*(final_state[final_model.state.index('t')]) # final cost (minimize time)
+        cost += cost_weights.ey*final_state[final_model.state.index('ey')]**2 # final cost (minimize terminal lateral error) hardcodato
+        cost += cost_weights.epsi*final_state[final_model.state.index('epsi')]**2 # final cost (minimize terminal course error) hardcodato
         return cost
     
     
@@ -249,8 +236,7 @@ class CascadedMPC(Controller):
         self.action_prediction = sol.value(self.action)
         self.state_prediction = sol.value(self.state)
         action = DynamicCarAction(Fx=self.action_prediction[0][0], w=self.action_prediction[1][0])
-        state = self.car.drive(action)
-        return action, state
+        return action
 
     
     def _init_horizon(self, state):
@@ -266,7 +252,7 @@ class CascadedMPC(Controller):
         s_traj = np.cumsum(ds_traj) - ds_traj[0] + state[self.car.state.index('s')]
         self.opti.set_value(self.curvature[:self.N], self.car.track.k(s_traj))
         #initializing pm s trajectory
-        ds_pm_traj = np.full(self.M, self.config.mpc_dt_pm) * self.state_prediction[self.point_mass.state.index('V'),self.N:self.H]
+        ds_pm_traj = np.full(self.M, self.config.ds_pm) #self.config.mpc_dt_pm) * self.state_prediction[self.point_mass.state.index('V'),self.N:self.H]
         self.opti.set_value(self.ds[self.N:self.H], ds_pm_traj)
         #initializing pm k trajectory
         s_pm_traj = np.cumsum(ds_pm_traj) - ds_traj[-1] + s_traj[-1]
