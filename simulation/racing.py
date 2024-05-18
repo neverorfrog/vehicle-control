@@ -25,7 +25,7 @@ class RacingSimulation():
         self.cars = cars
         self.controllers = controllers
         self.track = track
-        self.colors = ['g','y','r']
+        self.colors = ['#36AF29','#192E8E']
         self.init_containers()
         self.init_simulation()
     
@@ -70,8 +70,8 @@ class RacingSimulation():
         
         # Text boxes
         self.lap_time = plt.gcf().text(0.4, 0.95, 'Laptime', fontsize=16, ha='center', va='center')
-        self.elapsed_time = plt.gcf().text(0.4, 0.9, 'Average time', fontsize=16, ha='center', va='center')
-        self.mean_speed = plt.gcf().text(0.4, 0.85, 'Mean speed', fontsize=16, ha='center', va='center')
+        self.median_time = plt.gcf().text(0.4, 0.9, 'Median time', fontsize=16, ha='center', va='center')
+        self.average_time = plt.gcf().text(0.4, 0.85, 'Average time', fontsize=16, ha='center', va='center')
         
         # Figure initialization
         fig_manager: FigureManagerBase = plt.get_current_fig_manager()
@@ -101,14 +101,14 @@ class RacingSimulation():
         # Plot text
         self.lap_time.set_text(f"Iteration n.{n} | Laptime {self.state_traj[self.names[0]][n][-1]:.2f} s")
         if np.mod(n,5) == 0 and n > 0:
-            time = f"Median time"
-            speed = f"Mean Speed"
+            time1 = f"Median time | "
+            time2 = f"Average time | "
             for name in self.names:
                 v = np.array(self.state_traj[name])[:,0]
-                time += f" | {name} = {np.median(self.elapsed[name])*1000:.2f} ms"
-                speed += f" | {name} = {np.mean(v):.2f} m/s"
-            self.elapsed_time.set_text(time)
-            self.mean_speed.set_text(speed) 
+                time1 += f"{name} = {np.median(self.elapsed[name])*1000:.2f} ms | "
+                time2 += f"{name} = {np.mean(self.elapsed[name])*1000:.2f} ms | "
+            self.median_time.set_text(time1)
+            self.average_time.set_text(time2) 
         
         
         # Cycle cars     
@@ -132,16 +132,16 @@ class RacingSimulation():
             x,y = self.cars[j].plot(self.ax_car, state, self.colors[j])
             self.x_traj[j].append(x)
             self.y_traj[j].append(y)
-            self.ax_car.plot(self.x_traj[j],self.y_traj[j],'-',alpha=0.8,color=self.colors[j],linewidth=3)
+            self.ax_car.plot(self.x_traj[j],self.y_traj[j],'-',alpha=0.8,color=self.colors[j],linewidth=2)
             
             # Plot state predictions of MPC
-            self.ax_car.plot(self.preds[name][n][:,0], self.preds[name][n][:,1],f'{self.colors[j]}o',alpha=0.5,linewidth=3) 
+            self.ax_car.plot(self.preds[name][n][:,0],self.preds[name][n][:,1],color=self.colors[j],marker='o',markerfacecolor=self.colors[j],markersize=4,alpha=0.3) 
             
             # Plot state and actions
-            self.ax_small1.plot(s[-2:],v[-2:], '-',markersize=2, alpha=0.7, label=self.names[j], color = self.colors[j])
-            self.ax_small2.plot(s[-2:],delta[-2:],'-',markersize=2, alpha=0.7, label=self.names[j], color = self.colors[j])
-            self.ax_small3.plot(s[-2:],w[-2:],'-',markersize=2, alpha=0.7, label=self.names[j], color = self.colors[j])
-            self.ax_small4.plot(s[-2:],Fx[-2:],'-',markersize=2, alpha=0.7, label=self.names[j], color = self.colors[j])
+            self.ax_small1.plot(s[-2:],v[-2:], '-', alpha=0.7, label=self.names[j], color = self.colors[j])
+            self.ax_small2.plot(s[-2:],delta[-2:],'-', alpha=0.7, label=self.names[j], color = self.colors[j])
+            self.ax_small3.plot(s[-2:],w[-2:],'-', alpha=0.7, label=self.names[j], color = self.colors[j])
+            self.ax_small4.plot(s[-2:],Fx[-2:],'-', alpha=0.7, label=self.names[j], color = self.colors[j])
             
     
     def step(self, controller, car) -> Union[None, tuple]:
