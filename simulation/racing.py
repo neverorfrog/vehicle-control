@@ -82,8 +82,8 @@ class RacingSimulation():
             
     def update(self, n):        
         for name,car,controller in zip(self.names,self.cars,self.controllers):
-            if car.state.s > 2*self.track.length-0.1: 
-                return True
+            if car.state.s > self.track.length-0.1: 
+                return
             
             start = time.time()
             action, state = self.step(controller, car)
@@ -96,7 +96,6 @@ class RacingSimulation():
             self.preds[name].append(controller.get_state_prediction()) # each state prediction is an array of shape [horizon,3]
             
         self.plot(n)
-        return False
     
     def plot(self,n):
         # Plot text
