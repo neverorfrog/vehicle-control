@@ -3,7 +3,7 @@ import numpy as np
 import yaml
 
 class TrackType(Enum):
-    E = "easy"
+    S = "standard"
     I = "ippodromo"
     B = "bean"
     G = "gokart"
