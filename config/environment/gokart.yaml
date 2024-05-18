@@ -19,7 +19,7 @@ corners:
 
   # almost a curve
   - [-60, 35]
-  - [-50, 30]
+  - [-45, 30]
   
   # last curve
   - [-50, 0]
