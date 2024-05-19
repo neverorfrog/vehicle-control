@@ -42,7 +42,11 @@ _Libraries have been installed in:
 
 ## Concept
 
-The goal is to enhance racing performance by pushin the vehicle to its physical limits while achieving good computational performance. When using NMPC, computation times can become prohibitive with a longer planning horizon. The proposal of [[1]](#1) is to be able to plan far ahead in the future while keeping things sufficiently efficient. This entails also a better racing performance.
+The goal is to enhance racing performance by pushin the vehicle to its physical limits while achieving good computational performance. When using NMPC, computation times can become prohibitive with a longer planning horizon. The proposal of [[1]](#1) is to be able to plan far ahead in the future while keeping things sufficiently efficient. This entails also a better racing performance. The idea boils down to using two different models:
+- Singletrack for short-term planning, responsible for safety and stability
+- Pointmass for long-term planning, since it is a low accuracy model
+
+These two models are serially chained inside a single planning and control loop, resulting in a NMPC problem formulation.
 
 ## Results
 
