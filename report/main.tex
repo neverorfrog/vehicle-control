@@ -701,7 +701,7 @@ can be found in
 
 An important aspect, which was not mentioned when we treated the models in a
 more formal way, is how the models are actually discretized. Conceptually, the
-model is still expressed as a symbolic function through CasADI, as if it were a
+model is still expressed as a symbolic function through CasADI, as if it was a
 continuous function, so nothing fancy about that. The discretization consists in
 adding to the symbolic function an integrator, which has the scope of letting
 the system transition from one state by applying a certain input, holding it for
@@ -721,8 +721,8 @@ form of a casadi function by executing the following steps:
     on $dt$ and the $spatialTransition$ depending on $ds$. Simply, in the first
     one $\dot t=1$ and in the second one $s'=1$.
     \item Define the symbolic expression of how the next state would be obtained
-    from the current one by applying the rate of change for an interval h. For a
-    simple Euler integrator, this would correspond to \[state_{n+1}=state_n+h*f(state_n,action_n,\kappa)\]
+    from the current one by applying the rate of change for an interval $h$. For a
+    simple Euler integrator, this would correspond to \[state_{n+1}=state_n+h \cdot f(state_n,action_n,\kappa)\]
     \item Embed the symbolic expression into a casadi function which defines the
     discretized dynamics, and as such takes as input the actual state, action
     and curvature tuple, returning the next state: \[state_{n+1}=F(state_n,action_n,\kappa)\]
@@ -731,7 +731,9 @@ form of a casadi function by executing the following steps:
 The implementation of the integrators can be found in
 \href{https://github.com/neverorfrog/vehicle-control/blob/main/utils/integrators.py}{integrators.py}
 and the dynamical model implementation in
-\href{https://github.com/neverorfrog/vehicle-control/blob/main/models/dynamic_car.py}{dynamiccar.py}
+\href{https://github.com/neverorfrog/vehicle-control/blob/main/models/dynamic_car.py}{dynamiccar.py}.
+In particular, we decided to use RK4 numerical integrator for the single-track model because of its accuracy,
+and the easier Euler method for the pointmass. 
 
 
 
