@@ -23,7 +23,6 @@ _Libraries have been installed in:
 
 
 ### Conda Environment
-You can install the packages in environment.yaml one-by-one with pip, but I still suggest using virtual environments like conda or venv
 1. Install [miniconda](https://docs.anaconda.com/free/miniconda/index.html#quick-command-line-install)
 2. Create a conda environment  
 ```conda env create -yn --name vehicle-control python=3.12.0```
