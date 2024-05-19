@@ -6,12 +6,12 @@ from simulation import RacingSimulation
 from omegaconf import OmegaConf
 
 # ======== Configuration ========================================================
-track_name = utils.TrackType.I.value
+track_name = utils.TrackType.S.value
 names = []
-names.append("singletrack")
+# names.append("singletrack")
 names.append("cascaded")
-sim_name = f"race4_{track_name}"
-# sim_name = f"cascaded_obstacles2_{track_name}"
+# sim_name = f"race_obstacles_{track_name}"
+sim_name = f"cascaded_obstacles_{track_name}"
 # sim_name = f"singletrack_{track_name}"
 
 # =========== Track Definition ===================================================

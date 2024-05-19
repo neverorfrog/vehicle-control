@@ -58,19 +58,25 @@ In the gifs below we show some results on a test track. The plots on the right i
 - Commanded steering velocity $\omega$
 
 ### Cascaded (blue) with 20+15 steps vs Singletrack (orange) with 50 steps
-![alt](simulation/videos/ippodromo/race1.gif)
+![alt](simulation/videos/ippodromo/race1_ippodromo.gif)
 
 ### Cascaded (blue) with 20+35 steps vs Singletrack (orange) with 50 steps
-![alt](simulation/videos/ippodromo/race3.gif)
+![alt](simulation/videos/ippodromo/race3_ippodromo.gif)
 
 ### Cascaded is able to sustain higher maximal speeds
-![alt](simulation/videos/ippodromo/race4.gif)
+![alt](simulation/videos/ippodromo/race4_ippodromo.gif)
 
 ### Cascaded with obstacles (higher weight on obstacles)
-![alt](simulation/videos/cascaded_obstacles1_ippodromo.gif)
+![alt](simulation/videos/ippodromo/cascaded_obstacles1_ippodromo.gif)
 
 ### Cascaded with obstacles (lower weight on obstacles)
-![alt](simulation/videos/cascaded_obstacles2_ippodromo.gif)
+![alt](simulation/videos/ippodromo/cascaded_obstacles2_ippodromo.gif)
+
+## Longer track with steeper curves
+![alt](simulation/videos/shoe/race2_shoe.gif)
+
+## Longer track with steeper curves and obstacles
+![alt](simulation/videos/shoe/cascaded_obstacles_shoe.gif)
 
 
 ## References

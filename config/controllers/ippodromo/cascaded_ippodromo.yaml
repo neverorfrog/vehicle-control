@@ -1,7 +1,7 @@
 # prediction and control horizon
 horizon: 20
 mpc_dt: 0.03
-horizon_pm: 35
+horizon_pm: 25
 ds_pm: 3
 obstacles: False
 color: '#007CFF'
