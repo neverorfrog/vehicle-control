@@ -1,6 +1,3 @@
-import sys
-import os
-sys.path.append(".")
 import controllers as control
 import models
 import environment as env
@@ -11,9 +8,9 @@ from omegaconf import OmegaConf
 # ======== Configuration ========================================================
 track_name = utils.TrackType.I.value
 names = []
-names.append("cascaded")
 names.append("singletrack")
-sim_name = f"race_obstacles_{track_name}"
+names.append("cascaded")
+sim_name = f"race_{track_name}"
 # sim_name = f"cascaded_{track_name}"
 # sim_name = f"singletrack_{track_name}"
 
@@ -31,31 +28,16 @@ track = env.Track(
 )
 
 # ========= Models Definition ======================================================
-# cascaded models
 car_config = OmegaConf.create(utils.load_config(f"config/models/dynamic_car.yaml"))
 cars = [models.DynamicCar(config=car_config, track=track) for _ in names]
 point_masses = [models.DynamicPointMass(config=car_config, track=track) for _ in names]
-for car in cars: car.state = models.DynamicCarState(Ux = 4, s = 1.5)
-
-#kinematic bicycle models
-kincar_config = OmegaConf.create(utils.load_config(f"config/models/kinematic_car.yaml"))
-kin_cars = [models.KinematicCar(config=kincar_config, track=track) for _ in names]
-for kincar in kin_cars: kincar.state = models.KinematicCarState(v=0.1)
+for car in cars: car.state = models.DynamicCarState(Ux = 4, s = 1)
 
 # ============ Controller Definition ================================================
 controller_configs = [OmegaConf.create(utils.load_config(f"config/controllers/{track_name}/{name}_{track_name}.yaml")) for name in names]
-kincontroller_config = OmegaConf.create(utils.load_config(f"config/controllers/{track_name}/kinematic_{track_name}.yaml"))
-kin_controllers = [control.KinematicMPC(car=car, config=kincontroller_config) for car in kin_cars]
-combriccola = zip(cars, point_masses, kin_controllers, controller_configs)
-controllers = [control.CascadedMPC(car=car, point_mass=point_mass, kin_controller=kin_controller, config=config) for car,point_mass,kin_controller,config in combriccola]
+combriccola = zip(cars, point_masses, controller_configs)
+controllers = [control.CascadedMPC(car=car, point_mass=point_mass, config=config) for car,point_mass,config in combriccola]
 
 # ============ Run Simulation ======================================================
-simulation = RacingSimulation(names,cars,controllers,track)
-src_dir = os.path.dirname(os.path.abspath(__file__))
-logfile = f'simulation/logs/{sim_name}.log'
-# with open(logfile, "w") as f:
-    # sys.stdout = f
-
-# =========== Save Data and Animation ==============================================
-# simulation.save()
-# simulation.animation.save(f"simulation/videos/{sim_name}.gif",fps=13, dpi=200, writer='pillow')
+colors = [controller.config.color for controller in controllers]
+simulation = RacingSimulation(sim_name,names,cars,controllers,colors,track,load=False)

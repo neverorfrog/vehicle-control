@@ -45,7 +45,7 @@ class RacingCar(Robot):
     
     def plot(self, axis: Axes, state: FancyVector, color = 'blue'):
         x,y,psi = self.rel2glob(state)
-        delta = state.delta
+        delta = state[self.state.index('delta')]
         r = 1 # TODO hardcodato
         
         # Draw the bicycle as a rectangle

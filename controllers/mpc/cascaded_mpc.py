@@ -11,12 +11,11 @@ from utils.fancy_vector import FancyVector
 np.random.seed(31)
 
 class CascadedMPC(Controller):
-    def __init__(self, car: DynamicCar, point_mass: DynamicPointMass, kin_controller: KinematicMPC, config: OmegaConf):
+    def __init__(self, car: DynamicCar, point_mass: DynamicPointMass, config: OmegaConf):
         """Optimizer Initialization"""
         self.config = config
         self.car = car
         self.point_mass = point_mass
-        self.kin_controller = kin_controller
         self._init_dims()
         self._init_opti()
         self._init_variables()
