@@ -41,7 +41,6 @@ class CascadedMPC(Controller):
         self.na = len(self.car.input) # number of action variables
         # point-mass
         self.M = self.config.horizon_pm
-        self.dt_pm = self.config.mpc_dt_pm
         self.ns_pm = len(self.point_mass.state) # number of state variables
         self.na_pm = len(self.point_mass.input) # number of action variables
         self.H = self.N + self.M

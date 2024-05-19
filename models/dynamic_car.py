@@ -22,15 +22,26 @@ class DynamicCar(RacingCar):
         muf = env.mu.f; mur = env.mu.r
         print(f"Fx_f: {self.Fx_f(Fx)}")
         print(f"Fx_r: {self.Fx_r(Fx)}")
+        print(f"Fy_f: {self.Fy_f(Ux,Uy,r,delta,Fx)}")
+        print(f"Fy_r: {self.Fy_r(Ux,Uy,r,delta,Fx)}")
         Ux_dot = self.Ux_dot(Fx,Ux,Uy,r,delta).full().squeeze().item()
         Uy_dot = self.Uy_dot(Fx,Ux,Uy,r,delta).full().squeeze().item()
         print(f"UX ACCELERATION: {Ux_dot:.3f}, UY ACCELERATION: {Uy_dot:.3f}")
         Fymax_f = ((muf*self.Fz_f(Ux,Fx))**2 - ((0.98*self.Fx_f(Fx))**2))
         Fymax_r = ((mur*self.Fz_r(Ux,Fx))**2 - ((0.98*self.Fx_r(Fx))**2))
-        print(f"Fy_f diff: {Fymax_f - self.Fy_f(Ux,Uy,r,delta, Fx)**2}")
-        print(f"Fy_r diff: {Fymax_r - self.Fy_r(Ux,Uy,r,delta, Fx)**2}")
-        print(f"slip_f diff: {ca.fabs(self.alphamod_f(Fx)) - ca.fabs(self.alpha_f(Ux,Uy,r,delta))}")
-        print(f"slip_r diff: {ca.fabs(self.alphamod_r(Fx)) - ca.fabs(self.alpha_r(Ux,Uy,r,delta))}")
+        alpha_f = np.rad2deg(self.alpha_f(Ux,Uy,r,delta).full().squeeze().item())
+        alpha_r = np.rad2deg(self.alpha_r(Ux,Uy,r,delta).full().squeeze().item())
+        alphamod_f = np.rad2deg(self.alphamod_f(Fx).full().squeeze().item())
+        alphamod_r = np.rad2deg(self.alphamod_r(Fx).full().squeeze().item())
+        slipping_f = ca.fabs(alpha_f) - ca.fabs(alphamod_f)
+        slipping_r = ca.fabs(alpha_r) - ca.fabs(alphamod_r)
+        if slipping_f > 0 or slipping_r > 0:
+            print(f"alpha_f: {alpha_f:.2f}")
+            print(f"alpha_r: {alpha_r:.2f}")
+            print(f"slipping_f: {slipping_f:.2f}")
+            print(f"slipping_r: {slipping_r:.2f}")
+            print(f"Fy_f diff: {self.Fy_f(Ux,Uy,r,delta, Fx)**2 - Fymax_f}")
+            print(f"Fy_r diff: {self.Fy_r(Ux,Uy,r,delta, Fx)**2 - Fymax_r}")
     
     def _init_model(self):
         # =========== State and auxiliary variables ===================================

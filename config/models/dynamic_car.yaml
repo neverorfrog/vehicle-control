@@ -1,4 +1,4 @@
-dt: 0.08 # sampling time
+dt: 0.05 # sampling time
 
 # car parameters mass, distance of CG from front (a) and rear (b) axis, height of CG, yaw moment of inertia
 car:
@@ -17,8 +17,8 @@ car:
     f: 0.78
     r: 0.22
   C_alpha: # cornering stiffness
-    f: 180000
-    r: 300000
+    f: 234000
+    r: 390000
 
 # coefficients related to environment
 env:
