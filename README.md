@@ -50,6 +50,13 @@ These two models are serially chained inside a single planning and control loop,
 
 ## Results
 
+In the gifs below we show some results on a test track. The plots on the right indicate respetively:
+- Average computation time per prediction horizon
+- Absolute speed
+- Steering angle $\delta$
+- Commanded force $F_x$
+- Commanded steering velocity $\omega$
+
 ### Cascaded (blue) with 20+15 steps vs Singletrack (orange) with 50 steps
 ![alt](simulation/videos/ippodromo/race1.gif)
 
