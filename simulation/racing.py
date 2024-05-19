@@ -1,20 +1,21 @@
 import sys
 import os
-src_dir = os.path.dirname(os.path.abspath(__file__))
 import time
 from typing import List, Union
-from matplotlib.animation import FuncAnimation
-from matplotlib.backend_bases import FigureManagerBase
-from matplotlib.figure import Figure
 from omegaconf import OmegaConf
-from controllers.controller import Controller
 import numpy as np
-from environment.track import Track
-from models.racing_car import RacingCar
 import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
+from matplotlib.animation import FuncAnimation
+from matplotlib.figure import Figure
 
-class RacingSimulation():
+from controllers.controller import Controller
+from environment.track import Track
+from models import DynamicCar
+from models.racing_car import RacingCar
+from simulation.simulation import Simulation
+
+class RacingSimulation(Simulation):
     """
     Class for running a simulation of racing cars
 
@@ -24,31 +25,16 @@ class RacingSimulation():
     using matplotlib.
     """
     def __init__(self, name: str, names: List[str], cars: List[RacingCar], controllers: List[Controller], colors: List[str], track: Track, load = False):
-        self.name = name
         self.names = names
         self.cars = cars
         self.controllers = controllers
         self.colors = colors
         self.track = track
+        super().__init__(name,load)
         
-        # Init containers
-        self.init_containers()
-        
-        # Init logfile
-        logfile_path = f'{src_dir}/logs/{self.name}.log'
-        self.logfile = open(logfile_path, "w") 
-        sys.stdout = self.logfile
-        
-        # Init simulation
-        if load:
-            self.load()
-            self.animation = self.init_animation(func=self.plot,frames=len(self.state_traj[self.names[0]])-1)
-        else:
-            self.animation = self.init_animation(func=self.update)
-        fig_manager: FigureManagerBase = plt.get_current_fig_manager()
-        fig_manager.window.showMaximized()
-        plt.show()
-    
+    @property
+    def state_len(self):
+        return len(self.state_traj[self.names[0]])
         
     def init_containers(self):
         # Logging containers
@@ -61,8 +47,6 @@ class RacingSimulation():
         
             
     def init_animation(self, func: object, fig: Figure = plt.gcf(), frames: int = None):
-        self.finished = False
-        # self.n = -1
         # Grid for subplots
         grid = GridSpec(5, 2, width_ratios=[3, 1])
         plt.subplots_adjust(left=0.05, bottom=0.05, right=0.95, top=0.95, hspace=0.3, wspace=0.1)
@@ -159,7 +143,7 @@ class RacingSimulation():
             self.ax_small4.plot(s[n-2:n],Fx[n-2:n],'-', alpha=0.7,linewidth=1,label=self.names[j], color = self.colors[j])
             
     
-    def step(self, controller, car) -> Union[None, tuple]:
+    def step(self, controller: Controller, car: DynamicCar) -> Union[None, tuple]:
         try:
             action = controller.command(car.state)
             state = car.drive(action)
@@ -180,11 +164,10 @@ class RacingSimulation():
         car.print(state,action)
         print("-----------------------------------------------------------------------------------")
         print(f"\n")
-        
-            
+             
     def save(self):
         for name, controller in zip(self.names, self.controllers):
-            path = f"{src_dir}/data/{self.name}/{name}"
+            path = f"{self.src_dir}/data/{self.name}/{name}"
             os.makedirs(path, exist_ok=True)
             np.save(f"{path}/state_traj.npy", self.state_traj[name])
             np.save(f"{path}/action_traj.npy", self.action_traj[name])
@@ -194,15 +177,9 @@ class RacingSimulation():
     
     def load(self):
         for name, controller in zip(self.names, self.controllers):
-            path = f"{src_dir}/data/{self.name}/{name}"
+            path = f"{self.src_dir}/data/{self.name}/{name}"
             self.state_traj[name] = np.load(f"{path}/state_traj.npy")
             self.action_traj[name] = np.load(f"{path}/action_traj.npy")
             self.preds[name] = np.load(f"{path}/preds.npy")
             self.elapsed[name] = np.load(f"{path}/elapsed.npy")
             controller.config = OmegaConf.load(f"{path}/config.yaml")
-    
-    def save_animation(self):
-        plt.gcf().clear()
-        animation: FuncAnimation = self.init_animation(func=self.plot,frames=len(self.state_traj[self.names[0]])-1)
-        animation.save(f"{src_dir}/videos/{self.name}.gif",fps=20, dpi=100, bitrate=1800, writer='pillow')
-        print("Animation saved!")
