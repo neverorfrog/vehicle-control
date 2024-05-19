@@ -45,17 +45,20 @@ The goal is to enhance racing performance by pushin the vehicle to its physical 
 
 ## Results
 
-### Cascaded (green) vs Singletrack (yellow)
-![alt](simulation/videos/race_ippodromo.gif)
+### Cascaded (blue) with 20+15 steps vs Singletrack (orange) with 50 steps
+![alt](simulation/videos/ippodromo/race1.gif)
 
-### Cascaded vs Singletrack with obstacles
-![alt](simulation/videos/race_obstacles_ippodromo.gif)
+### Cascaded (blue) with 20+35 steps vs Singletrack (orange) with 50 steps
+![alt](simulation/videos/ippodromo/race3.gif)
 
-### Cascaded
-![alt](simulation/videos/cascaded_ippodromo.gif)
+### Cascaded is able to sustain higher maximal speeds
+![alt](simulation/videos/ippodromo/race4.gif)
 
-### Singletrack
-![alt](simulation/videos/singletrack_ippodromo.gif)
+### Cascaded with obstacles (higher weight on obstacles)
+![alt](simulation/videos/cascaded_obstacles1_ippodromo.gif)
+
+### Cascaded with obstacles (lower weight on obstacles)
+![alt](simulation/videos/cascaded_obstacles2_ippodromo.gif)
 
 
 ## References

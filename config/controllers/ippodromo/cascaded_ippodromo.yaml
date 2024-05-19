@@ -1,9 +1,9 @@
 # prediction and control horizon
 horizon: 20
 mpc_dt: 0.03
-horizon_pm: 15
+horizon_pm: 35
 ds_pm: 3
-obstacles: True
+obstacles: False
 color: '#007CFF'
 
 # weights for the cost function
@@ -32,7 +32,7 @@ input_constraints:
 # state constraints
 state_constraints:
   Ux_min: 3
-  max_speed: 18
+  max_speed: 20
   delta_min: -0.45
   delta_max: 0.45
   ey_min: -3

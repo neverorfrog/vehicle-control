@@ -1,9 +1,9 @@
 # prediction and control horizon
-horizon: 60
+horizon: 50
 mpc_dt: 0.03
 horizon_pm: 0
 ds_pm: 0
-obstacles: True
+obstacles: False
 color: '#E16917'
 
 # weights for the cost function
@@ -15,7 +15,7 @@ cost_weights:
   w:  4
   Fx: 0.000001
   Fy: 0.000001
-  deviation_st: 0.0001
+  deviation_st: 0.001
   boundary: 10
   slip : 1500
   obstacles: 1
@@ -29,7 +29,7 @@ input_constraints:
 # state constraints
 state_constraints:
   Ux_min: 3
-  max_speed: 18
+  max_speed: 20
   delta_min: -0.45
   delta_max: 0.45
   ey_min: -3
