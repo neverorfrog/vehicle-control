@@ -2,31 +2,14 @@
 
 \usepackage{amsfonts,amsmath,oldgerm}
 \usepackage{mathtools}
-\usepackage{algpseudocode}
-\usepackage{tikz}
-\newcommand\norm[1]{\lVert#1\rVert}
-\usetikzlibrary{shapes,arrows, positioning, calc}  
-\usepackage{xcolor}
-\usepackage{tcolorbox}
-\usepackage{tabularx}
-\usepackage{array}
-\usepackage{colortbl}
-\usepackage{adjustbox}
+\usepackage{amssymb}
 \usepackage{animate}
-\tcbuselibrary{skins}
 
 \usepackage[T1]{fontenc}
+\usefonttheme[onlymath]{serif}
 \usepackage[default]{gillius}
-
-\newcolumntype{Y}{>{\raggedleft\arraybackslash}X}
-
-\tcbset{tab2/.style={enhanced,fonttitle=\bfseries,fontupper=\small\sffamily,
-colback=yellow!10!white,colframe=red!50!black,colbacktitle=Salmon!40!white,
-coltitle=black,center title}}
-
 \usetheme{sintef}
 
-\newcommand{\testcolor}[1]{\colorbox{#1}{\textcolor{#1}{test}}~\texttt{#1}}
 \newcommand{\greenplus}[0]{\begin{tikzpicture}
     \draw[green, line width=5pt] (-0.01,0) -- (0.01,0);
     \draw[green, line width=5pt] (0,-0.01) -- (0,0.01);
@@ -36,23 +19,29 @@ coltitle=black,center title}}
     \draw[red, line width=5pt] (0,-0.01) -- (0,0.01);
     \node[minimum width=0.2cm] at (current bounding box.east) {};
 \end{tikzpicture}}
-
-\usefonttheme[onlymath]{serif}
-
-\titlebackground*{assets/background}
-
 \newcommand{\hrefcol}[2]{\textcolor{cyan}{\href{#1}{#2}}}
 
+
+\titlebackground*{assets/background}
 \title{Cascaded}
 \subtitle{Final Project}
 \course{Autonomous and Mobile Robotics}
-\author{\href{mailto:maiorana.2051396@studenti.uniroma1.it}{Flavio Maiorana} and }
-\date{Academic Year 2022/2023}
+\author{}
+\date{\today}
+
 
 \begin{document}
 \maketitle
 
 \section{Introduction}
+
+\begin{frame}[fragile]{Boh}
+    \begin{figure}
+        \centering
+        \animategraphics[autoplay,width=0.8\textwidth]{20}{assets/videos/race4_ippodromo/frame}{0}{416}
+    \end{figure}
+\end{frame}
+
 
 \backmatter
 \end{document}
