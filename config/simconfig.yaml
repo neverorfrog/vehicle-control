@@ -1,0 +1,13 @@
+track_name: 'ippodromo'
+
+controller_names:
+  - 'singletrack'
+  - 'cascaded'
+
+name: 'test'
+
+save_gif: False
+save_images: False
+save_data: False
+load: False
+logging: False

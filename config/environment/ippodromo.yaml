@@ -1,4 +1,5 @@
 # track data
+name: 'ippodromo'
 
 corners: # [x, y]
   - [0, 0]

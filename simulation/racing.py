@@ -13,10 +13,12 @@ from matplotlib.figure import Figure
 from controllers.controller import Controller
 from environment.track import Track
 from models import DynamicCar
-from models.racing_car import RacingCar
-from simulation.simulation import Simulation
+from simulation.simulator import Simulator
+import models
+import utils.common_utils as utils
+import controllers as control
 
-class RacingSimulation(Simulation):
+class RacingSimulator(Simulator):
     """
     Class for running a simulation of racing cars
 
@@ -25,13 +27,32 @@ class RacingSimulation(Simulation):
     simulation. It also generates animations of the simulation
     using matplotlib.
     """
-    def __init__(self, name: str, names: List[str], cars: List[RacingCar], controllers: List[Controller], colors: List[str], track: Track, load = False):
-        self.names = names
-        self.cars = cars
-        self.controllers = controllers
-        self.colors = colors
+    def __init__(self, simconfig: OmegaConf, carconfig: OmegaConf, trackconfig: OmegaConf):
+        self.names = simconfig.controller_names
+        
+        #track
+        track = Track(trackconfig)
         self.track = track
-        super().__init__(name,load)
+        
+        #cars
+        cars = [models.DynamicCar(config=carconfig, track=self.track) for _ in self.names]
+        point_masses = [models.DynamicPointMass(config=carconfig, track=self.track) for _ in self.names]
+        for car in cars: car.state = models.DynamicCarState(Ux = 4, s = 1)
+        self.cars = cars
+        
+        #controllers
+        controllerconfigs = [OmegaConf.create(utils.load_config(f"config/controllers/{name}.yaml")) for name in self.names]
+        combriccola = zip(cars, point_masses, controllerconfigs)
+        controllers = [control.CascadedMPC(car=car, point_mass=point_mass, config=config) for car,point_mass,config in combriccola]
+        self.controllers = controllers
+        self.colors = [controller.config.color for controller in controllers]
+        
+        super().__init__(simconfig)
+        
+     
+    @property
+    def name(self):
+        return f'{self.config.name}_{self.config.track_name}'
         
     @property
     def state_len(self):
@@ -97,10 +118,13 @@ class RacingSimulation(Simulation):
     def update(self, n):  
         for car in self.cars:
             if car.state.s > self.track.length-0.1:
-                self.logfile.close()
-                sys.stdout = sys.__stdout__
-                self.save()
-                self.save_animation()
+                if self.config.logging:
+                    self.logfile.close()
+                    sys.stdout = sys.__stdout__
+                if self.config.save_data:
+                    self.save()
+                if self.config.save_gif:
+                    self.save_animation()
                 self.animation.event_source.stop()
                 return
 
@@ -148,12 +172,15 @@ class RacingSimulation(Simulation):
             self.ax_car.plot(self.preds[name][n][:,0],self.preds[name][n][:,1],linestyle='None',color=self.colors[j],marker='o',markerfacecolor=self.colors[j],markersize=4,alpha=0.3) 
             
             # Plot state and actions
-            self.ax_small0.plot(s[n],np.mean(self.elapsed[name][:n])*1000, 'o', markersize=0.7,alpha=0.7,linewidth=1,label=self.names[j], color = self.colors[j])
-            self.ax_small1.plot(s[n-2:n],v[n-2:n], '-', alpha=0.7,linewidth=1,label=self.names[j], color = self.colors[j])
-            self.ax_small2.plot(s[n-2:n],delta[n-2:n],'-', alpha=0.7,linewidth=1,label=self.names[j], color = self.colors[j])
-            self.ax_small3.plot(s[n-2:n],w[n-2:n],'-', alpha=0.7,linewidth=1,label=self.names[j], color = self.colors[j])
-            self.ax_small4.plot(s[n-2:n],Fx[n-2:n],'-', alpha=0.7,linewidth=1,label=self.names[j], color = self.colors[j])
-            
+            self.ax_small0.plot(s[n],np.mean(self.elapsed[name][:n])*1000, 'o', markersize=0.7,alpha=0.7,linewidth=1,color = self.colors[j])
+            self.ax_small1.plot(s[n-2:n],v[n-2:n], '-', alpha=0.7,linewidth=1,color = self.colors[j])
+            self.ax_small2.plot(s[n-2:n],delta[n-2:n],'-', alpha=0.7,linewidth=1,color = self.colors[j])
+            self.ax_small3.plot(s[n-2:n],w[n-2:n],'-', alpha=0.7,linewidth=1,color = self.colors[j])
+            self.ax_small4.plot(s[n-2:n],Fx[n-2:n],'-', alpha=0.7,linewidth=1,color = self.colors[j])
+        
+        if self.config.save_images:
+            plt.gcf().savefig(f"{self.images_path}/frame{n}.png", dpi=50)
+    
     
     def step(self, controller: Controller, car: DynamicCar) -> Union[None, tuple]:
         try:
@@ -178,20 +205,18 @@ class RacingSimulation(Simulation):
         print(f"\n")
              
     def save(self):
+        os.makedirs(self.data_path, exist_ok=True)
         for name, controller in zip(self.names, self.controllers):
-            path = f"{self.src_dir}/data/{self.name}/{name}"
-            os.makedirs(path, exist_ok=True)
-            np.save(f"{path}/state_traj.npy", self.state_traj[name])
-            np.save(f"{path}/action_traj.npy", self.action_traj[name])
-            np.save(f"{path}/preds.npy", self.preds[name])
-            np.save(f"{path}/elapsed.npy", self.elapsed[name])  
-            OmegaConf.save(config=controller.config, f=f"{path}/config.yaml")
+            np.save(f"{self.data_path}/{name}_state_traj.npy", self.state_traj[name])
+            np.save(f"{self.data_path}/{name}_action_traj.npy", self.action_traj[name])
+            np.save(f"{self.data_path}/{name}_preds.npy", self.preds[name])
+            np.save(f"{self.data_path}/{name}_elapsed.npy", self.elapsed[name])  
+            OmegaConf.save(config=controller.config, f=f"{self.data_path}/{name}_config.yaml")
     
     def load(self):
         for name, controller in zip(self.names, self.controllers):
-            path = f"{self.src_dir}/data/{self.name}/{name}"
-            self.state_traj[name] = np.load(f"{path}/state_traj.npy")
-            self.action_traj[name] = np.load(f"{path}/action_traj.npy")
-            self.preds[name] = np.load(f"{path}/preds.npy")
-            self.elapsed[name] = np.load(f"{path}/elapsed.npy")
-            controller.config = OmegaConf.load(f"{path}/config.yaml")
+            self.state_traj[name] = np.load(f"{self.data_path}/{name}_state_traj.npy")
+            self.action_traj[name] = np.load(f"{self.data_path}/{name}_action_traj.npy")
+            self.preds[name] = np.load(f"{self.data_path}/{name}_preds.npy")
+            self.elapsed[name] = np.load(f"{self.data_path}/{name}_elapsed.npy")
+            controller.config = OmegaConf.load(f"{self.data_path}/{name}_config.yaml")

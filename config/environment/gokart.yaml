@@ -1,4 +1,6 @@
 # track data
+name: 'gokart'
+
 corners:
   - [0, 0]
 

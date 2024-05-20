@@ -1,6 +1,7 @@
 from matplotlib import pyplot as plt
 from matplotlib.axes import Axes
 import numpy as np
+from omegaconf import OmegaConf
 import scipy
 from scipy.integrate import trapezoid
 import scipy.interpolate
@@ -75,20 +76,21 @@ class Obstacle:
     
 
 class Track:
-    def __init__(self, name, corners, smoothing, resolution, width, obstacle_data):
+    def __init__(self, config: OmegaConf):
         """
         Track object containing a list of waypoints and a spline constructed
         """
-        self.name = name
-        self.width = width
-        self.resolution = resolution
-        self.smoothing = smoothing
-        self.waypoints: List[Waypoint] = self._construct_path(corners)
+        
+        self.name = config.name
+        self.width = config.width
+        self.resolution = config.resolution
+        self.smoothing = config.smoothing
+        self.waypoints: List[Waypoint] = self._construct_path(config.corners)
         self.n_waypoints = len(self.waypoints)
         self.x, self.y, self.dx_ds, self.dy_ds, self.ddx_ds, self.ddy_ds = self._construct_spline()
         self.curvatures = self._precompute_curvatures()
         self._divide_track()
-        self.obstacles: List[Obstacle] = self._construct_obstacles(obstacle_data)
+        self.obstacles: List[Obstacle] = self._construct_obstacles(config.obstacle_data)
         
     def rel2glob(self, s, ey, epsi):
         orientation = self.get_orientation(s)

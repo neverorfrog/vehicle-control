@@ -1,4 +1,5 @@
 # track data
+name: 'bean'
 
 corners: # [x, y]
   - [0, 0]

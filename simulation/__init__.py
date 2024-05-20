@@ -1,2 +1,2 @@
-from .racing import RacingSimulation
-from .simulation import Simulation
+from .racing import RacingSimulator
+from .simulator import Simulator
