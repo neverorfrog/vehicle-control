@@ -829,8 +829,31 @@ been claimed by \cite{paper}.
         \textbf{Parameter} & \textbf{Symbol} & \textbf{Value} & \textbf{Unit} \\ [0.5ex] 
         \hline
         \hline 
-        Vehicle mass & $m$ & 1.700 & $kg$\\ 
+        Vehicle mass & $m$ & 1700 & $kg$\\ 
         \hline
+        Inertia & $I_{zz}$ & 3000 & $kg \cdot m^2$\\
+        \hline
+        Total length & $l$ & 3 & $m$\\
+        \hline
+        Distance from front axle to CG & $a$ & 1.1 & $m$\\
+        \hline
+        Distance from rear axle to CG & $b$ & 1.4 & $m$\\
+        \hline
+        Height of CG & $h_{cg}$ & 0.55 & $m$\\
+        \hline
+        Modification of tire model & $eps$ & 0.9 & -\\
+        \hline
+        Maximum engine power & $P_{eng}$ & 170000 & W \\
+        \hline
+        Drive force distribution & $\chi_{f_d} / \chi_{r_d}$ & 1/0 & -\\
+        \hline
+        Brake force distribution & $\chi_{f_b} / \chi_{r_b}$ & 0.78 / 0.22 & -\\
+        \hline
+        Cornering stiffness & $C_{\alpha_f} / C_{\alpha_r}$ & 234000 / 390000 & $N/rad$\\
+        \hline
+        Steering angle limits & $\delta_{min,max}$ & $\pm$ 0.45 & $rad$ \\
+        \hline
+
     \end{tabular}
 \end{table}
 We used almost the same data to define the car's model as in \cite{paper}. We
