@@ -1,5 +1,7 @@
 \documentclass[a4paper, onecolumn, 12pt]{article}
-\usepackage[left=30mm,right=30mm,top=35mm,columnsep=15pt]{geometry} 
+\usepackage[left=32mm,right=32mm,top=35mm,columnsep=15pt]{geometry} 
+
+% basic packages
 \usepackage[english]{babel} %language
 \usepackage[utf8]{inputenc} %input encoding
 \usepackage{float} %position of floating objects
@@ -7,13 +9,24 @@
 \usepackage{subcaption}
 \usepackage[T1]{fontenc}
 \usepackage{lipsum} %placeholder text
+
+% math packages
 \usepackage{amsthm} %theorems
 \usepackage{amsmath} %math
 \usepackage{mathtools} %still math
+
+% code packages
 \usepackage{listings} %code
 \usepackage{xcolor} %syntax highlighting
 \usepackage{algorithm}
 \usepackage{algpseudocode}
+
+% todonotes package
+\usepackage{xkeyval}
+\usepackage{tikz}
+\usepackage{calc}
+\setlength {\marginparwidth }{2cm}
+\usepackage{todonotes} % Load the todonotes package
 
 % custom commands
 \newcommand\tab[1][.3cm]{\hspace*{#1}}
@@ -27,12 +40,9 @@
 }{}
 
 % \usepackage{physics}
-% \usepackage{graphicx}
 % \usepackage{adjustbox}
 % \usepackage{placeins}
 % \usepackage{csquotes}
-% \usepackage{graphicx}
-% \usepackage{tikz}
 % \usepackage[normalem]{ulem}
 % \useunder{\uline}{\ul}{}
 
@@ -41,6 +51,8 @@
 \date{\today}
 
 \begin{document}
+
+\listoftodos
 
 \maketitle
 \begin{abstract}
@@ -483,8 +495,6 @@ To achieve this, a series of terms regarding both single-track and point-mass mo
         J_{\dot{u}} = J_{\dot{\delta}} + J_{\Delta F_y} + J_{\Delta F_x} + J_{\Delta F_u}
     \end{equation}
 
-    !!!To be completed, vogliamo esprimere le varie J di questo ultimo step o diventa troppo listone di equazioni?!!!
-    
     \item \textbf{Excessive Slip Angle}: in order to discourage the car to operate in the fully saturated region of the tires, we add a penalty on excessive slip angle. This helps in stabilizing the car.
     \begin{equation}
         J_{a} = W_{a}\sum_{k=1}^{N}
@@ -500,7 +510,6 @@ To achieve this, a series of terms regarding both single-track and point-mass mo
         \end{cases}
         \]
 \end{enumerate}
-
 The constraints of the NLP concern some limitations on the states of the single-track and of the point-mass models, 
 on the input variables, on the tire model, and on the dynamics of the systems, including the transition between
 them. In detail:
@@ -701,7 +710,7 @@ can be found in
 
 An important aspect, which was not mentioned when we treated the models in a
 more formal way, is how the models are actually discretized. Conceptually, the
-model is still expressed as a symbolic function through CasADI, as if it was a
+model is still expressed as a symbolic function through CasADI, as if it were a
 continuous function, so nothing fancy about that. The discretization consists in
 adding to the symbolic function an integrator, which has the scope of letting
 the system transition from one state by applying a certain input, holding it for
@@ -774,12 +783,30 @@ Implementation-wise, two relevant aspects are the following:
         prediction horizon. In fact, this results in a much faster computation.
     \end{itemize}
 \end{description} 
+Another thing to mention about the MPC implementation is that we neglected the
+terms about the user-defined friction limits depending on road conditions, since
+we can't test on a real road. 
 
 
 \newpage
 \section{Experiments}
 
 
+\todo[inline]{Posiziona sta tabella (in realtá diventerá piú di una)}
+\begin{table}[H] 
+    \centering
+    \caption{MPC weights} \label{weights}
+    \begin{tabular}{ |c|c|c|c| }
+        \hline
+        \textbf{Weight} & \textbf{Symbol} & \textbf{Value} & \textbf{Unit} \\ [0.5ex] 
+        \hline
+        \hline 
+        Terminal lateral error & $todo$ & todo & $todo$\\ 
+        \hline
+    \end{tabular}
+\end{table}
+
+\todo[inline]{Lista di commenti da fare in results}
 \begin{itemize}
     \item Different configuration scenarios
     \item Tests (comparisons between cascaded and singletrack)
@@ -792,8 +819,35 @@ Implementation-wise, two relevant aspects are the following:
     \end{itemize}
     \item Results
 \end{itemize}
+We report in this section some experiments that actually corroborate what has
+been claimed by \cite{paper}. 
+\begin{table}[H]
+    \centering
+    \caption{Parameters of the dynamic model of the car} \label{params}
+    \begin{tabular}{ |c|c|c|c| }
+        \hline
+        \textbf{Parameter} & \textbf{Symbol} & \textbf{Value} & \textbf{Unit} \\ [0.5ex] 
+        \hline
+        \hline 
+        Vehicle mass & $m$ & 1.700 & $kg$\\ 
+        \hline
+    \end{tabular}
+\end{table}
+We used almost the same data to define the car's model as in \cite{paper}. We
+decided to simulate the car as if it were on dry asphalt. Thus, we just changed
+the parameters related to the cornering stiffness. Since the authors did the
+tests on wet asphalt, and the cornering stiffness is usually higher for dry
+asphalts \cite{stiffness}, we decided to raise the cornering stiffness
+accordingly. Similarly, the friction values have to take into account that the
+asphalt is dry. This is done for obvious reasons: letting the car drive on wet
+asphalt would necessitate extra parameter tuning and would give additional
+difficulties that are out of the scope of this work. \\
+We decided to test mainly on two tracks.
 
 
+
+
+\newpage
 \section{Conclusion}
 
 \begin{itemize}
@@ -802,7 +856,6 @@ Implementation-wise, two relevant aspects are the following:
 \end{itemize}
 
 
-\newpage
 \bibliographystyle{unsrt}
 \bibliography{references}
 
