@@ -479,7 +479,7 @@ To achieve this, a series of terms regarding both single-track and point-mass mo
 
     \item \textbf{Obstacles avoidance}: it discourages the car to go through the obstacles
     \begin{equation}
-        J_{obs} = W_{obs} \left( \sum_{k=1}^{N} \sum_{j=1}^{J} \frac{\Delta s_k}{d_{j,k} - r_j} \right)
+        J_{obs} = W_{obs} \left( \sum_{k=1}^{N} \sum_{j=1}^{J} \frac{\Delta s_k}{d_{j,k} - r_j} + \sum_{k=1}^{M} \sum_{j=1}^{J} \frac{\Delta \bar{s}_k}{d_{j,k} - r_j} \right)
     \end{equation}
     where $k$ is the usual index counting the steps of the prediction horizon
     and $j$ is the index counting the obstacles on the track. Furthermore,
@@ -791,21 +791,6 @@ we can't test on a real road.
 \newpage
 \section{Experiments}
 
-
-\todo[inline]{Posiziona sta tabella (in realtá diventerá piú di una)}
-\begin{table}[H] 
-    \centering
-    \caption{MPC weights} \label{weights}
-    \begin{tabular}{ |c|c|c|c| }
-        \hline
-        \textbf{Weight} & \textbf{Symbol} & \textbf{Value} & \textbf{Unit} \\ [0.5ex] 
-        \hline
-        \hline 
-        Terminal lateral error & $todo$ & todo & $todo$\\ 
-        \hline
-    \end{tabular}
-\end{table}
-
 \todo[inline]{Lista di commenti da fare in results}
 \begin{itemize}
     \item Different configuration scenarios
@@ -819,8 +804,9 @@ we can't test on a real road.
     \end{itemize}
     \item Results
 \end{itemize}
-We report in this section some experiments that actually corroborate what has
-been claimed by \cite{paper}. 
+
+
+
 \begin{table}[H]
     \centering
     \caption{Parameters of the dynamic model of the car} \label{params}
@@ -866,6 +852,42 @@ asphalt is dry. This is done for obvious reasons: letting the car drive on wet
 asphalt would necessitate extra parameter tuning and would give additional
 difficulties that are out of the scope of this work. \\
 We decided to test mainly on two tracks.
+
+\todo[inline]{Posiziona sta tabella (in realtá diventerá piú di una)}
+\begin{table}[H] 
+    \centering
+    \caption{MPC weights} \label{weights}
+    \begin{tabular}{ |c|c|c|c| }
+        \hline
+        \textbf{Weight} & \textbf{Symbol} & \textbf{Value} & \textbf{Unit} \\ [0.5ex] 
+        \hline
+        \hline
+        Final time & $W_{time}$ & 5 & -\\ 
+        \hline
+        Terminal speed & $W_{v}$ & 1 & $s/(m/s^2)$\\
+        \hline
+        Terminal lateral cost & $W_{e_{term}}$ & 1 & $s/m^2$ \\
+        \hline
+        Terminal course error & $W_{\phi_{term}}$ & 2 & $s/rad^2$ \\
+        \hline
+        Steering angle & $W_{\dot{delta}}$ & 4 & $s/(deg/s)^2$ \\
+        \hline 
+        Input forces ($F_x$, $F_y$) & $W_{F}$ & 0.000001 & $s \cdot m / N^2$ \\
+        \hline
+        Deviation from road descriptor & $W_{rd}$ & 0.001 & $s/m/m^2$ \\
+        \hline
+        Road Boundary intrusion & $W_{rb}$ & 10 & $s/m/m^2$ \\
+        \hline
+        Excessive slip angle & $W_\alpha$ & 1500 & s \\
+        \hline
+        Obstacle avoidance & $W_{obs}$ & 10 & ??? \\
+        \hline
+        Transition changes & $W_{tr}$ & 0.00001 & $s \cdot m / N^2$ \\
+        \hline
+
+
+    \end{tabular}
+\end{table}
 
 
 \newpage
