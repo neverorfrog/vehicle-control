@@ -4,10 +4,10 @@ controller_names:
   - 'singletrack'
   - 'cascaded'
 
-name: 'test'
+name: 'race1'
 
 save_gif: False
-save_images: False
+save_images: True
 save_data: False
-load: False
+load: True
 logging: False
