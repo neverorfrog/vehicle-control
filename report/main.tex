@@ -20,6 +20,7 @@
 \usepackage{xcolor} %syntax highlighting
 \usepackage{algorithm}
 \usepackage{algpseudocode}
+\usepackage{fancyvrb}
 
 % todonotes package
 \usepackage{xkeyval}
@@ -31,13 +32,6 @@
 % custom commands
 \newcommand\tab[1][.3cm]{\hspace*{#1}}
 \newcommand\tabeq[1][.5cm]{\hspace*{#1}}
-\lstnewenvironment{myverbatim}[1][]{
-  \lstset{
-    basicstyle=\ttfamily,
-    frame=tb,
-    #1
-  }
-}{}
 
 % \usepackage{physics}
 % \usepackage{adjustbox}
@@ -46,7 +40,7 @@
 % \usepackage[normalem]{ulem}
 % \useunder{\uline}{\ul}{}
 
-\title{Long-Horizon Vehicle Motion Planning and Control Through Serially Cascaded Model Complexity}
+\title{Long-Horizon Vehicle Motion Planning and Control Through Serially Cascaded Model Complexity: Implementation and Experimentation}
 \author{Flavio Maiorana \and Flavio Volpi \and Andrea Ferrari}
 \date{\today}
 
@@ -56,12 +50,18 @@
 
 \maketitle
 \begin{abstract}
-    We propose the implementation and experimentation of a motion planning and
-    control framework for autonomous vehicles based on nonlinear
-    model-predictive control.The work is mainly based on \cite{paper}. The code
-    is publicly available at
+    Dynamical models can be too computationally expensive for real-time
+    purposes, especially when they have to be accurate. The proposal of
+    \cite{paper} is to devise an MPC algorithm where the horizon is split in two
+    parts, with the first driven by an accurate model and the second by a
+    simpler one. We propose the implementation and experimentation of a motion
+    planning and control framework for autonomous vehicles based on nonlinear
+    model-predictive control, inspired by \cite{paper}. Our main contribution is
+    the development of the algorithm and a graphical simulator to test it. We've
+    also added some additional benchmarks that involve the presence of obstacles
+    on the track. The code is publicly available at
     \href{https://github.com/neverorfrog/vehicle-control}{this GitHub
-    repository}. 
+    repository}.
 \end{abstract}
 
 \newpage
@@ -124,19 +124,23 @@ testing the code in a very simple simulated race environment. Our purpose is to
 show that, as claimed by \cite{paper}, the average computation time for the
 cascaded model is lower, achieving also better results in terms of lap time.
 
-\subsection*{Outline}
+\subsection*{Related Work}
 
-In the next section we will talk about some related work. After that, we will
-address the modeling part of the algorithm in a rather formal way. Then, we will
-formalize the NLP structure and put everything together to define the complete
-MPC problem. Right after, we will discuss In the end, we will discuss some experiments and the results.
-
-\section{Related Work}
+\todo[inline]{Fare related work}
 
 \begin{itemize}
     \item Learning-based approach for vehicle control in \cite{rosolia}
     \item Linearization approach in \cite{bemporad}
 \end{itemize}
+
+\subsection*{Outline}
+
+In the next section we will address the modeling part of the algorithm in a
+rather formal way. Then, we will formalize the NLP structure and put everything
+together to define the complete MPC problem. Right after, we will discuss about
+the actual implementation. In the end, we will discuss some experiments and the
+results.
+
 
 \newpage
 \section{Models}
@@ -430,11 +434,22 @@ applied at time step $k$.
 
 \newpage
 \section{NLP Structure}
+The NLP (non-linear program) has three main components:
+\begin{itemize}
+    \item Decision variables (state and action)
+    \item Cost function
+    \item Constraints
+\end{itemize}
 
-The key element of the NLP is the cost function, which can be composed by many terms according to own purposes.
-Our objective is to minimize time along the finite planning horizon, while also respecting the road
-boundaries and while keeping the car in a safe configuration. 
-To achieve this, a series of terms regarding both single-track and point-mass models are summed together:
+\subsection{Cost function}
+
+Our objective is to minimize time (which, we remind, has to be integrated in the
+spatial step and thus is not know before starting the prediction horizon) at
+each "space instant" along the finite planning horizon, while also respecting
+the road boundaries and while keeping the car in a safe configuration. To
+achieve this, a series of terms regarding both single-track and point-mass
+models are summed together in the cost function. In general, we will have $N$
+steps for the singletrack model and $M$ steps for the pointmass model.
 \begin{enumerate}
     \item \textbf{Final time}: the time $\bar{\tau}_M$ at which the point-mass model reaches the last stage of the planning horizon
     \item \textbf{Terminal state}: to make sure that the final stage is a safe one, we add this penalty based on the 
@@ -455,7 +470,7 @@ To achieve this, a series of terms regarding both single-track and point-mass mo
     \begin{equation}{J}_{term} = W_{e_{term}}{\bar{e}}_m^2 + {W_{\phi}}_{term}{\bar{\phi}}_m^2 + {W_V}_{term}{\bar{V}}_{exc}^2
     \end{equation}
 
-    \item \textbf{Road Boundary Intrusion}: it penalizes when the car crosses the track boundaries
+    \item \textbf{Road Boundary Intrusion}: it penalizes states in which the car crosses the track boundaries
     \begin{equation}
     J_{rb} = W_{rb}\sum_{k=1}^{N} \Delta s_k \begin{cases}
     (e_k - {e_{\text{max}}}_k)^2, & \text{if } e_k \geq e_{\text{max}_k} \\
@@ -470,7 +485,19 @@ To achieve this, a series of terms regarding both single-track and point-mass mo
     \end{cases}
     \]
 
-    where, intuitively, ${e_{\text{max}}}_k$ can be chosen a little bit smaller than the width of the road.
+    where, intuitively, ${e_{\text{max}}}_k$ can be chosen a little bit smaller
+    than the width of the road, to be more conservative. This cost term could
+    appear somehow counterintuitive, since we are applying a penalty on a
+    situation that should never happen, whatsoever, and thus is more suited to
+    be modeled as a constraint. Actually, as the authors claim and as we also
+    verified by the experiments, modeling the boundary through a constraint
+    makes the nlp very easily infeasible, even if the car is still inside the
+    track but near the boundaries. Always trying to stay on the centerline is
+    not a good strategy to minimize time, thus the car is allowed to find
+    solutions for which it goes near the boundary, but this cost term will have
+    a high weight with respect to the other, to enforce this virtual constraint
+    and discourage the nlp to find solutions for which the boundaries are
+    crossed.
 
     \item \textbf{Deviation from the Road Descriptor Path}: it encourages the car to stay as near as possible to the road descriptor
     \begin{equation}
@@ -485,7 +512,10 @@ To achieve this, a series of terms regarding both single-track and point-mass mo
     and $j$ is the index counting the obstacles on the track. Furthermore,
     \[d_{j,k} = \sqrt{(s_k-s_j)^2 + (e_k-e_j)^2}\] is the distance between the
     $k_{th}$ predicted car position and the $j_{th}$ obstacle, while $r_j$ is
-    the radius of the $j_{th}$ obstacle.
+    the radius of the $j_{th}$ obstacle. For the same reason as for the road
+    boundaries, the collision with obstacles is discouraged by minimizing the
+    inverse of the distance to each obstacle, thus penalizing small distances,
+    instead of imposing a hard constraint.
 
     \item \textbf{Slew rate}: in order to encourage smooth controls we penalize too big increases of the steering rate $\dot{\delta}$, variation of the total lateral force $\Delta F_y$, variation of the new commanded longitudinal force ${F_x}_k$ with respect to the previous commanded ${F_x}_{k-1}$.
     And finally, the variation in forces at the model transition, denoted as $\Delta F_u$.
@@ -510,6 +540,9 @@ To achieve this, a series of terms regarding both single-track and point-mass mo
         \end{cases}
         \]
 \end{enumerate}
+
+\subsection{Constraints}
+
 The constraints of the NLP concern some limitations on the states of the single-track and of the point-mass models, 
 on the input variables, on the tire model, and on the dynamics of the systems, including the transition between
 them. In detail:
@@ -552,16 +585,7 @@ them. In detail:
     while the eq.\ref{transition} establishes that the initial state of the point-mass model comes from the propagation of 
     the last state of the single-track.
 \end{enumerate}
-As we can notice, the restriction to stay inside the track boundaries is modeled
-not as a constraint, but like a cost term that increases when the car is outside
-the nearest border, otherwise it is null. Similary, the collision with obstacles
-is discouraged by minimizing the inverse of the distance to each obstacle, thus
-penalizing small distances. Giving both terms high weights, we can be sure to
-obtain a good result without imposing them as hard constraints. This approach is
-prefered to the other one because it allows the NLP to be always numerically
-feasible.
 
-\newpage
 
 \section{Implementation}
 
@@ -575,13 +599,12 @@ in C++ and has also a python interface. Casadi serves three main purposes:
 \end{itemize}
 The "sofware framework" is based mainly on three components
 \begin{description}
-    \item[Controller] expressed as a CasADI nlp, namely a non-linear cost
-    function with non-linear constraints, that spits out a single control action
-    based on the current state and the predicted state for the next H steps (H
-    is the horizon length)
-    \item[Model] of the car, expressed as a casadi function that evolves the
+    \item[Controller] Expressed as a CasADI nlp, namely a non-linear cost
+    function with non-linear constraints, that returns a single control action
+    based on the current state and the predicted state for the whole horizon
+    \item[Model] Expressed as a casadi function that evolves the
     state of the dynamical model with respect to the current state and action
-    \item[Simulator] to show everything graphically in real-time
+    \item[Simulator] Matplotlib plot to shhow everything graphically in real-time
 \end{description}
 
 \subsection{Simulator}
@@ -590,28 +613,33 @@ To simulate a real racing track and a car interacting with it, we just used
 some simple plotting tools together with the modeling and numerical integration
 capabilities of CasADI. The main goals of the simulator are:
 \begin{itemize}
-    \item Visualize the track with the car correctly localized depending on its state
-    \item Simulate the car's movement
+    \item Visualize the track and the car, using a proper change from local to global coordinates
+    \item Simulate the car's movement through the control inputs and integration ot the model
 \end{itemize}
 The complete implementation of the simulator can be found at
 \href{https://github.com/neverorfrog/vehicle-control/blob/main/simulation/racing.py}{racing.py}.
-Overall, the simulation loop can be summarized in pseudocode as follows.
+Overall, the simulation loop is summarized in pseudocode \ref{sim}. The lines
+inside the while cycle all are inside the function 
+\begin{verbatim}
+    update(self,n) 
+\end{verbatim}
+which takes the $n_{th}$ simulation step and updates the state of the car by
+also plotting the result. Line 3 takes the assumption that the state is fully
+known at each instant. We take this assumption for simplifying reasons. In a
+real setting the state would be measured with sensors and filtering algorithms. 
 
-\begin{algorithm}
+\begin{algorithm}[h]
     \caption{Simulation Loop}\label{sim}
     \begin{algorithmic}[1]
-        \State $dt \gets 0.06$ s \Comment{Time step}
+        \State $dt \gets 0.05$ s \Comment{Time step}
         \While{ one full turn not completed }
         \State measure car state $x$
         \State action $a \gets command(x)$ \Comment{From MPC}
-        \State move forward for $dt$ under $a$ 
+        \State move forward for $dt$ under action $a$, updating state $x$
+        \State update plot and save state and action
         \EndWhile
     \end{algorithmic}
 \end{algorithm}
-
-Line 3 takes the assumption that the state is fully known at each instant. We
-take this assumption for simplifying reasons. In a real setting the state would
-be measured with sensors and filtering algorithms. 
 
 \newpage
 \subsubsection*{Track}
@@ -627,17 +655,8 @@ based on three user-defined parameters:
     \item resolution (meters between two waypoints)
     \item smoothing (number of waypoints considered for smoothing)
 \end{itemize}
-This way, we can \textbf{uniquely identify a pose} in the track through the
-coordinates $\mathbf{s,e,\phi}$, namely the curvilinear abscissa, the position
-error and the orientation error. We recall that they describe respectively the
-displacement of the car along the track, the lateral error with respect to the
-centerline and the yaw error with respect to the track orientation. As already
-seen, the state of the car is expressed through these "relative" coordinates.
-Similarly, obstacles are modeled by their relative coordinates $s,e$ and the
-radius (in meters) $r$ (as a simplifying assumption, the obstacles are all
-circular).
 
-\begin{myverbatim}[title={Example of a track configuration file}]
+\begin{Verbatim}[frame=single,label=Example of a track configuration file,labelposition=topline,framesep=10pt]
 corners: #[x, y]
     - [0, 0]
     - [60, 0]
@@ -655,24 +674,32 @@ obstacle_data: #[s, ey, r]
     - [140, -2, 2]
     - [170, 2, 2]
     - [220, 0, 2]
-\end{myverbatim}
-\newpage 
+\end{Verbatim}
+This way, we can \textbf{uniquely identify a pose} in the track through the
+coordinates $\mathbf{s,e,\phi}$, namely the curvilinear abscissa, the position
+error and the orientation error. We recall that they describe respectively the
+displacement of the car along the track, the lateral error with respect to the
+centerline and the yaw error with respect to the track orientation. As already
+seen, the state of the car is expressed through these "relative" coordinates.
+Similarly, obstacles are modeled by their relative coordinates $s,e$ and the
+radius (in meters) $r$ (as a simplifying assumption, the obstacles are all
+circular). \\
 The result would then be the one shown in figure \ref{ippodromo} below. The
 track is pretty simple for testing purposes, but it is possible with much ease
 to create more complex tracks, thanks to the flexibility of the waypoint
-definition schema. \\
+definition schema. 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{assets/ippodromo_obstacles.png}
+    \caption{Example track with round obstacles}
+    \label{ippodromo}
+\end{figure} \vspace{0.5cm}
 The main features of interest of the track are the following:
 \begin{itemize}
     \item centerline position
     \item track curvature
     \item track orientation
 \end{itemize}
-\begin{figure}[h]
-    \centering
-    \includegraphics[width=\textwidth]{assets/ippodromo_obstacles.png}
-    \caption{Example track with round obstacles}
-    \label{ippodromo}
-\end{figure} \vspace{0.5cm}
 As for the centerline, we simply evaluate the spline defined through the
 waypoints at the curvilinear abscissa $s$. We will define the two spline
 functions, one for $x$ and one for $y$ as $x_{spline}(s)$ and $y_{spline}(s)$.\\
@@ -709,15 +736,15 @@ can be found in
 \subsection{Discretized model}
 
 An important aspect, which was not mentioned when we treated the models in a
-more formal way, is how the models are actually discretized. Conceptually, the
-model is still expressed as a symbolic function through CasADI, as if it were a
-continuous function, so nothing fancy about that. The discretization consists in
-adding to the symbolic function an integrator, which has the scope of letting
-the system transition from one state by applying a certain input, holding it for
-a certain amount of time and integrating the state rate of change, to finally
-end up into another state. In the pseudocode, it is line 5 we are talking about.
-Practically speaking, what happens is that we create a \textit{discrete ode} in
-form of a casadi function by executing the following steps:
+more formal way, is how the models are actually discretized.  What happens is
+that, conceptually, the model is still expressed as a symbolic function through
+CasADI, as if it were a continuous function. The discretization consists in
+adding to the symbolic function an integrator that lets the system transition
+from one state by applying a certain input, holding it for a certain amount of
+time and integrating the state rate of change, to finally end up into another
+state. In the pseudocode, it is line 5 we are talking about. Practically
+speaking, what happens is that we create a \textit{discrete ode} in form of a
+casadi function by executing the following steps:
 \begin{enumerate}
     \item Define the righthand side of the continuous ode as a \textit{symbolic}
     casadi function, namely \[f(state,action,\kappa)\] In our case, taking just
@@ -741,72 +768,102 @@ The implementation of the integrators can be found in
 \href{https://github.com/neverorfrog/vehicle-control/blob/main/utils/integrators.py}{integrators.py}
 and the dynamical model implementation in
 \href{https://github.com/neverorfrog/vehicle-control/blob/main/models/dynamic_car.py}{dynamiccar.py}.
-In particular, we decided to use RK4 numerical integrator for the single-track model because of its accuracy,
-and the easier Euler method for the pointmass. 
+In particular, we decided to use RK4 numerical integrator for the single-track
+model because of its accuracy, and the easier Euler method for the pointmass.
+For what concerns the discretization of inputs, they are treated in a ZOH
+modality, while the path geometry, as said, is discretized through a cubic
+spline that can be evaluated through the curvilinear abscissa.
 
 
 
 
 \subsection{MPC Algorithm}
-Most of the concepts about MPC were already addressed in the previous sections;
-in this section we will deal with the implementation aspects. As said, most of
-the computation happens in the instruction at line 4 of the pseudocode
-\ref{sim}. The full implementation of the MPC algorithm can be found in
+The concepts behind MPC were already addressed in the previous sections; in this
+section we will deal with the implementation aspects. As said, most of the
+computation happens in the instruction at line 4 of the pseudocode \ref{sim}.
+The full implementation of the MPC algorithm can be found in
 \href{https://github.com/neverorfrog/vehicle-control/tree/main/controllers/mpc}{cascadedmpc.py}.
 We used as linear solver of the optimization problem the solver MA27, which
 proved itself faster than the standard solver shipped with CasADI. Regarding the
 MPC implementation itself, it can be done in a pretty straightforward way thanks
 to the high-level API Opti, which allow to express cost functions and
 constraints in a very similar way to the mathematical language.\\
-Implementation-wise, two relevant aspects are the following:
-\begin{description}
-    \item[Actual discretization of the NLP.] As said before, inside the
-    prediction horizon, the chosen discretization method is the one based on
-    spatial discretization. Specifically, the step must be chosen. For the
-    singletrack, we follow the same approach as in paper, namely we sample the
-    displacement of the car, considering its speed in real-time, every $30ms$.
-    This way, we account for big variations of speed during the entire lap. For
-    the pointmass, instead, we simply choose a static step-size of $3m$.
-    \item[Horizon initialization.] Before even starting to solve the
-    optimization problem, we have to properly initialize it. This is
-    particularly important for computational efficiency. Here, two things are done:
-    \begin{itemize}
-        \item We initialize the state and action decision variables as the
-        predictions from the previous horizon.
-        \item We precompute the trajectory of the spatial step sizes, the
-        curvilinear abscissae and the curvatures. For the pointmass, it is
-        pretty straightforward since the step sizes are predefined. For the
-        singletrack we actually used as realtime velocities to compute the
-        spatial step sizes the predictions of the last horizon. After that, we
-        compute the curvatures at the computed abscissae. This way, it is not
-        necessary to evaluate the curvature spline at every step of the
-        prediction horizon. In fact, this results in a much faster computation.
-    \end{itemize}
-\end{description} 
+\subsubsection*{Structure of one MPC iteration}
+\begin{itemize}
+    \item Prepare optimization variables at iteration $n$
+    \begin{subequations}
+        \begin{eqnarray}
+            X_N = [U_{x,k}, U_{y,k}, r_k, \delta_k, s_k, e_k, \Delta \varPsi_k, t_k]_{k=n}^{n+N} \\
+            X_M = [V_k, e_k, \Delta \varPsi_k, t_k]_{k=n+N}^{n+N+M} \\
+            U_N = [F_{x,k}, \omega_k]_{k=n}^{n+N} \\
+            U_M = [F_{x,k}, F_{y,k}]_{k=n+N}^{n+N+M}
+        \end{eqnarray}
+    \end{subequations}
+    \item Initialize parameters $s_0$, $\kappa$, $s$, $ds$ at iteration $n$.
+    $s_0$ indicates the current state of the car and it will be the first row of
+    the state prediction variables. So we are actually precomputing the
+    trajectory of curvilinear abscissae and the spatial step sizes, and also the
+    curvatures.
+    \item Solve the optimization problem based on the cost function under the
+    constraints we talked about before.
+    \item Apply the first of the predicted actions, evolve the state of the car and repeat.
+
+\end{itemize}
+\subsubsection*{Actual discretization of the NLP}
+As said before, inside the prediction horizon, the chosen discretization method
+is the one based on spatial discretization. Specifically, the step must be
+chosen. For the singletrack, we follow the same approach as in paper, namely
+we sample the displacement of the car, considering its speed in real-time,
+every $30ms$. This way, we account for big variations of speed during the
+entire lap. For the pointmass, instead, we simply choose a static step-size
+of $3m$.
+\subsubsection*{Horizon Initialization}
+Before even starting to solve the optimization problem, we have to properly
+initialize it. This is particularly important for computational efficiency.
+Here, two things are done:
+\begin{itemize}
+    \item We initialize the state and action decision variables as the
+    predictions from the previous horizon.
+    \item We precompute the trajectory of the spatial step sizes, the
+    curvilinear abscissae and the curvatures. For the pointmass, it is
+    pretty straightforward since the step sizes are predefined. For the
+    singletrack, we've used as realtime velocities the predictions of the
+    last horizon. After that, we compute the curvatures at the computed
+    abscissae. This way, it is not necessary to evaluate the curvature
+    spline at every step of the prediction horizon. Indeed, this results in
+    a much faster computation.
+\end{itemize}
 Another thing to mention about the MPC implementation is that we neglected the
 terms about the user-defined friction limits depending on road conditions, since
 we can't test on a real road. 
 
 
-\newpage
 \section{Experiments}
 
 \todo[inline]{Lista di commenti da fare in results}
-\begin{itemize}
-    \item Different configuration scenarios
-    \item Tests (comparisons between cascaded and singletrack)
-    \begin{itemize}
-        \item Lap-time
-        \item Compuational time
-        \item Slip angle excess (cascaded does not excess)
-        \item Force usage (cascaded should be more economic in that sense)
-        \item Obstacles
-    \end{itemize}
-    \item Results
-\end{itemize}
+% \begin{itemize}
+%       \item Obstacles
+%       \item Giocare su alcuni parametri
+%           \begin{itemize}
+%               \item Cambio da singletrack a pointmass
+%               \item Pesi sugli ostacoli
+%               \item Peso sul tempo
+%               \item Slip angle
+%           \end{itemize}
+%       \item Results
+% \end{itemize}
 
+\subsection{Parameter configuration}
 
-
+We've used almost the same data to define the car's model as in \cite{paper}. We
+decided to simulate the car as if it were on dry asphalt. Thus, we just changed
+the parameters related to the cornering stiffness. Since the authors did the
+tests on wet asphalt, and the cornering stiffness is usually higher for dry
+asphalts \cite{stiffness}, we decided to raise the cornering stiffness
+accordingly. Similarly, the friction values have to take into account that the
+asphalt is dry. Letting the car drive on wet asphalt would necessitate extra
+parameter tuning and would give additional difficulties that are out of the
+scope of this work.
 \begin{table}[H]
     \centering
     \caption{Parameters of the dynamic model of the car} \label{params}
@@ -842,18 +899,8 @@ we can't test on a real road.
 
     \end{tabular}
 \end{table}
-We used almost the same data to define the car's model as in \cite{paper}. We
-decided to simulate the car as if it were on dry asphalt. Thus, we just changed
-the parameters related to the cornering stiffness. Since the authors did the
-tests on wet asphalt, and the cornering stiffness is usually higher for dry
-asphalts \cite{stiffness}, we decided to raise the cornering stiffness
-accordingly. Similarly, the friction values have to take into account that the
-asphalt is dry. This is done for obvious reasons: letting the car drive on wet
-asphalt would necessitate extra parameter tuning and would give additional
-difficulties that are out of the scope of this work. \\
-We decided to test mainly on two tracks.
 
-\todo[inline]{Posiziona sta tabella (in realtá diventerá piú di una)}
+
 \begin{table}[H] 
     \centering
     \caption{MPC weights} \label{weights}
@@ -872,7 +919,7 @@ We decided to test mainly on two tracks.
         \hline
         Steering angle & $W_{\dot{delta}}$ & 4 & $s/(deg/s)^2$ \\
         \hline 
-        Input forces ($F_x$, $F_y$) & $W_{F}$ & 0.000001 & $s \cdot m / N^2$ \\
+        Input force continuity ($F_x$, $F_y$) & $W_{F}$ & 0.000001 & $s \cdot m / N^2$ \\
         \hline
         Deviation from road descriptor & $W_{rd}$ & 0.001 & $s/m/m^2$ \\
         \hline
@@ -884,20 +931,217 @@ We decided to test mainly on two tracks.
         \hline
         Transition changes & $W_{tr}$ & 0.00001 & $s \cdot m / N^2$ \\
         \hline
-
-
     \end{tabular}
 \end{table}
+Table \ref{weights} shows some typical values of the weights used in the
+optimization. These values were chosen through considerations about the model
+and also trial-and-error tests. Note that the highest weights are the slip
+angle, road boundary and obstacle avoidance. The slip angle is particularly high
+because we actually noted that lower values still resulted in the nlp trying to
+perform steeper curves, and thus generating high slip angles that would lead to
+infeasible lateral forces. 
+
+\subsection{Problem size}
+First and foremost, we could compare the dimension of the nlp in terms of
+constraints and decision variables. CasADI comes in handy for this task.
+Naturally, we expect that the nlp for the cascaded controller is smaller. We
+test two configurations: one in singletrack mode with 60 steps, and the other in
+cascaded mode with 20 singletrack steps and 35 pointmass steps. \\
+\begin{Verbatim}[frame=single,label=Singletrack with 60 steps,labelposition=topline,framesep=10pt]
+Number of nonzeros in equality constraint Jacobian...:     3902
+Number of nonzeros in inequality constraint Jacobian.:     1380
+Number of nonzeros in Lagrangian Hessian.............:     2201
+
+Total number of variables............................:      600
+Total number of equality constraints.................:      480
+Total number of inequality constraints...............:      480
+
+Number of objective function evaluations             = 18
+Total seconds in IPOPT                               = 0.114 ms
+\end{Verbatim} 
+\vspace{1mm}
+\begin{Verbatim}[frame=single,label=Cascaded with 20+35 steps,labelposition=topline,framesep=10pt]
+Number of nonzeros in equality constraint Jacobian...:     1989
+Number of nonzeros in inequality constraint Jacobian.:      565
+Number of nonzeros in Lagrangian Hessian.............:     1275
+
+Total number of variables............................:      550
+Total number of equality constraints.................:      335
+Total number of inequality constraints...............:      230
+
+Number of objective function evaluations             = 22
+Total seconds in IPOPT                               = 0.050 ms
+\end{Verbatim}
+Even though the number of total steps is almost the same, the singletrack
+configuration has clearly more variables and constraints. Moreover, we should
+consider that inside the MPC all the variables are inside a single CasADI matrix
+(whose size if fixed apriori) and that the pointmass has less state variables
+than the singletrack model. Hence, the number of "active variables" is even less
+than the number shown above. In fact, a better indicator is the number of
+constraints, especially the inequalities, and the jacobian and hessian
+dimension. The latter is almost halved for the cascaded configuration. This is
+due to the fact that the pointmass model neglects the terms concerning steering,
+namely the minimization of steering velocities and slip angle cost term. The
+neglected constraints are the ones concerning the tire model and, again, the
+steering inputs. For what concerns the effective duration of the MPC iteration,
+the cascaded controller takes signifantly less time, despite needing more
+evaluations. Also, despite the number of steps being almost the same, fewer
+pointmass steps are necessary, because the spatial step size can be chosoen
+bigger thatn with the singletrack. That caused by the fact that the pointmass is
+non subject to the delicate yaw dynamics. Anyway, just to visualize, two horizon
+lengths are shown in figure \ref{horizon_shorter}.
+
+
+\subsection{Simple track}
+
+The first test was carried out on a pretty simple track, as the one in Figure
+\ref{ippodromo} but without obstacles for now. We compare three different
+configurations of the cascaded controller. We report the results below. The
+first column indicates the number of iterations per lap and the second the lap
+time. The third column indicates the average time per iteration of the MPC,
+while the fourth and fifth column indicate the average speed and the average
+force input. As a note, the maximum speed in the test reported in this table is
+$18 m/s$ for all controllers.
+\begin{table}[H] 
+    \centering
+    \caption{Performance of various controller configurations} \label{boh}
+    \begin{tabular}{|c||c|c|c|c|c|}
+        \hline
+        \textbf{Controller} & \textbf{Iter.} & \textbf{Lap} & \textbf{Time} & \textbf{Av.Speed} & \textbf{Av.$F_x$} \\ [0.5ex] 
+        \hline
+        \hline
+        Singletrack $N=60$ & 432 & $21.60 s$ & $84 ms$ & $14.44 m/s$ & $2375.58 N$\\
+        \hline
+        Cascaded $N=20, M=15$ & 430 & $21.50 s$ & $42 ms$ & $14.41 m/s$ & $2083.23 N$\\
+        \hline
+        Cascaded $N=20, M=25$ & 424 & $21.15 s$ & $47 ms$ & $14.64 m/s$ & $2337.54 N$\\
+        \hline
+        Cascaded $N=20, M=35$ & 417 & $20.85 s$ & $47 ms$ & $14.75 m/s$ & $2588.47 N$\\
+        \hline
+    \end{tabular}
+\end{table}
+As expected, the cascaded controller performs better than the singletrack in
+many ways.
+
+\paragraph{Time Comparison}
+The cascaded controller halves the average computation time with respect to the
+singletrack. That alone demonstrates the effectiveness of using such a
+controller as opposed to using the singletrack model for the whole prediction
+horizon. Considering that the sample time is $50ms$ in our experiments, the
+computation time of the singletrack controller exceeds by fare realtime
+requirements. Moreover, in the first iterations, the singletrack reaches $130ms$
+per iterations, which is absolutely prohibitive. Of course, when adding more
+pointmass steps, the time per iteration increases, but not significantly. In
+fact, when passing from $M=25$ to $M=35$, the increase in computation time is
+negligible.
+
+\paragraph{Laptime comparison}
+Considering just the first two rows, the laptime is almost the same, but there's
+a big caveat to that. The singletrack controller actually exceeds the slip angle
+limits at the third curve by $0.16 deg$, generating infeasible lateral forces.
+This is not surprising, since the segment before is straight and long enough to
+reach a relatively high speed, while the prediction horizon is not far-sighted
+enough to see how much curvature the track has. Thus, it tries to recover the
+track path by braking and steering as much as it can. Moreover, if we increase
+the maximum speed of the controllers to $20 m/s$, the singletrack actually goes
+outside as in figure \ref{singletrack_outside}, while the cascaded' performance
+is enhanced. We also tried increasing the maximum speed even more, with the
+singletrack going completely out of the track and the cascaded always performing
+well. That is simply thanks to the long enough horizon.
+
+\begin{figure}[H] 
+    \centering
+        \begin{subfigure}{\textwidth} \label{horizon_shorter}
+        \centering
+        \includegraphics[width=\textwidth]{assets/horizon_shorter.png}
+        \subcaption{Cascaded with $N=20, M=15$}
+    \end{subfigure}
+    \begin{subfigure}{\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{assets/horizon_longer.png}
+        \subcaption{Cascaded with $N=20, M=35$}
+    \end{subfigure}
+    \caption[short]{Comparison of two horizon lengths against the singletrack}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}{\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{assets/race1_ippodromo.png}
+        \subcaption{Maximum speed of $18 m/s$}
+    \end{subfigure}
+    \begin{subfigure}{\textwidth} \label{singletrack_outside}
+        \centering
+        \includegraphics[width=\textwidth]{assets/race3_ippodromo.png}
+        \subcaption{Maximum speed of $20 m/s$}
+    \end{subfigure}
+    \caption[short]{Comparison of two cascaded controllers}
+\end{figure}
+
+\paragraph{$F_x$ usage comparison}
+\todo[inline]{fx usage}
+
+\paragraph{Slip angle comparison}
+\todo[inline]{slip angle}
+
+\paragraph*{Obstacles}
+We also experimented adding obstacles to the track and comparing the performance
+depending on the weight in the cost function. The controller parameters are the
+same, just with the added cost weight. Incidentally, the singletrack controller
+was not even able to finish the track without going into a numerical
+infeasibility situation. 
+\begin{table}[H] 
+    \centering
+    \caption{Performance depending on obstacles weight with $N=20$, $M=15$} \label{obstacles_ippodromo}
+    \begin{tabular}{|c||c|c|c|c|c|}
+        \hline
+        \textbf{Controller} & \textbf{Iter.} & \textbf{Lap} & \textbf{Time} & \textbf{Av.Speed} & \textbf{Av.$F_x$} \\ [0.5ex] 
+        \hline
+        \hline
+        $W_{obs}$ = 10 & 518 & $25.85 s$ & $44 ms$ & $12.43 m/s$ & $2473.79 N$\\
+        \hline
+        $W_{obs}$ = 1 & 465 & $23.20 s$ & $44 ms$ & $13.64 m/s$ & $1903.64 N$\\
+        \hline
+    \end{tabular}
+\end{table}
+As pretty much expected, the controller with a lower weight on obstacle
+avoidance is more aggressive, going very near the obstacles. This results in a
+higher average speed, thus a lower laptime. It also results in a lower average
+force usage, due to the reduced braking. 
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}{\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{assets/obstacles1_ippodromo.png}
+        \subcaption{$W_{obs}$ = 10}
+    \end{subfigure}
+    \begin{subfigure}{\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{assets/obstacle2_ippodromo.png}
+        \subcaption{$W_{obs}$ = 1}
+    \end{subfigure}
+    \caption[short]{Comparison of two cascaded controllers with obstacles}
+\end{figure}
+
+
+
+
+\subsection{Longer track}
+
 
 
 \newpage
 \section{Conclusion}
 
-\begin{itemize}
-    \item Take-away message
-    \item Pitfalls and future work
-\end{itemize}
-
+In this work we proposed the implementation and experimentation of the cascaded
+MPC algorithm. We showed through the experiments that the algorithm effectively
+works and the premises are right. Of course, there are still some limitations to
+this approach. One could be that the manual tuning of the MPC weights is not
+easy. It requires domain expertise about the dynamical model and the task at
+hand. Thus, a possible extension to this work could be to use a learning
+approach that lifts the programmer from hardcoding the model and the weights.
+This could be done maybe with an iterative learning approach and where both
+models, the singletrack and the pointmass can be predicted by two neural networks.
 
 \bibliographystyle{unsrt}
 \bibliography{references}
