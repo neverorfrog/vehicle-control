@@ -840,20 +840,6 @@ we can't test on a real road.
 
 \section{Experiments}
 
-\todo[inline]{Lista di commenti da fare in results}
-% \begin{itemize}
-%       \item Obstacles
-%       \item Giocare su alcuni parametri
-%           \begin{itemize}
-%               \item Cambio da singletrack a pointmass
-%               \item Pesi sugli ostacoli
-%               \item Peso sul tempo
-%               \item Slip angle
-%           \end{itemize}
-%       \item Results
-% \end{itemize}
-
-\subsection{Parameter configuration}
 
 We've used almost the same data to define the car's model as in \cite{paper}. We
 decided to simulate the car as if it were on dry asphalt. Thus, we just changed
@@ -1023,7 +1009,7 @@ $18 m/s$ for all controllers.
 As expected, the cascaded controller performs better than the singletrack in
 many ways.
 
-\paragraph{Time Comparison}
+\paragraph{Comptational efficiency}
 The cascaded controller halves the average computation time with respect to the
 singletrack. That alone demonstrates the effectiveness of using such a
 controller as opposed to using the singletrack model for the whole prediction
@@ -1035,7 +1021,7 @@ pointmass steps, the time per iteration increases, but not significantly. In
 fact, when passing from $M=25$ to $M=35$, the increase in computation time is
 negligible.
 
-\paragraph{Laptime comparison}
+\paragraph{Laptime}
 Considering just the first two rows, the laptime is almost the same, but there's
 a big caveat to that. The singletrack controller actually exceeds the slip angle
 limits at the third curve by $0.16 deg$, generating infeasible lateral forces.
@@ -1051,10 +1037,11 @@ well. That is simply thanks to the long enough horizon.
 
 \begin{figure}[H] 
     \centering
-        \begin{subfigure}{\textwidth} \label{horizon_shorter}
+        \begin{subfigure}{\textwidth} 
         \centering
         \includegraphics[width=\textwidth]{assets/horizon_shorter.png}
         \subcaption{Cascaded with $N=20, M=15$}
+        \label{horizon_shorter}
     \end{subfigure}
     \begin{subfigure}{\textwidth}
         \centering
@@ -1070,21 +1057,62 @@ well. That is simply thanks to the long enough horizon.
         \includegraphics[width=\textwidth]{assets/race1_ippodromo.png}
         \subcaption{Maximum speed of $18 m/s$}
     \end{subfigure}
-    \begin{subfigure}{\textwidth} \label{singletrack_outside}
+    \begin{subfigure}{\textwidth}
         \centering
         \includegraphics[width=\textwidth]{assets/race3_ippodromo.png}
         \subcaption{Maximum speed of $20 m/s$}
+        \label{singletrack_outside}
     \end{subfigure}
     \caption[short]{Comparison of two cascaded controllers}
+    \label{race_ippodromo}
 \end{figure}
 
-\paragraph{$F_x$ usage comparison}
+\paragraph{Driving profile}
+It is interesting to notice that with a longer prediction horizon, the driving
+profile changes and assumes a more aggressive behavior. Specifically, before the
+first curve, which is to the left, there is an inflection to the right. This is
+typical of racing cars: the goal is to break anticipately and take the curve
+from a more external point, in order to hit the so-called "flex", namely the
+nearest point to the internal border of the curve, at the highest possible
+speed. Another consequence, as we can observe from figure \ref{race_ippodromo},
+is that the flex is hit slightly later with the longer horizon. Before the third
+curve the behavior is similar: the car keeps going on the external side of the
+track for a longer time, in order to take the turn with higher speed.
+\begin{table}[H]
+    \centering
+    \caption{Analysis of mean squared error and laptime}
+    \begin{tabular}{|c||c|c|c|}
+        \hline
+        \textbf{Controller} & \textbf{Iter.} & \textbf{Lap} & \textbf{MSE} \\ [0.5ex] 
+        \hline
+        \hline
+        Singletrack $N=60$ & 432 & $21.60 s$ & $1.55 m$ \\
+        \hline
+        Cascaded $N=20, M=15$ & 430 & $21.50 s$ & $3.37 m$ \\
+        \hline
+        Cascaded $N=20, M=35$ & 417 & $20.85 s$ & $3.20 m$ \\
+        \hline
+    \end{tabular}
+\end{table}
+An indicator of this more aggressive driving behavior is the mean squared
+(lateral) error. As expected, the singletrack controller is more conservative in
+that sense; it tries to stay as much as possible at the center of the track.
+Meanwhile, the cascaded controller roams the track while also allowing itself to
+drive near the border in order to reduce laptime.
+
+\paragraph{$F_x$ usage}
 \todo[inline]{fx usage}
 
-\paragraph{Slip angle comparison}
+\paragraph{Slip angle excess}
 \todo[inline]{slip angle}
 
-\paragraph*{Obstacles}
+\paragraph{Laptime weight vs boundary weight}
+\todo[inline]{laptime weight vs boundary weight}
+
+\paragraph{Weight on switch from singletrak to pointmass}
+\todo[inline]{switch from singletrak to pointmass}
+
+\paragraph{Obstacles}
 We also experimented adding obstacles to the track and comparing the performance
 depending on the weight in the cost function. The controller parameters are the
 same, just with the added cost weight. Incidentally, the singletrack controller
