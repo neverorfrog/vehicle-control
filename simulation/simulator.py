@@ -12,19 +12,21 @@ class Simulator(ABC):
     def __init__(self, config: OmegaConf):
         self.init_containers()
         self.config = config
-        
-        # Creation of directories for saving data
         self.src_dir = os.path.dirname(os.path.abspath(__file__))
         self.data_path = f"{self.src_dir}/data/{self.name}"
-        self.images_path = f"{self.src_dir}/images/{self.name}"
-        if self.config.save_images:
-            os.makedirs(self.images_path, exist_ok=True)
         
-        # Init simulation
+        # Loading simulation data if needed
         if self.config.load:
             self.load()
             print("LOADED SUCCESSFULLY!")
             print(f"State trajectory length: {self.state_len}")
+            
+    def run(self):
+        self.images_path = f"{self.src_dir}/images/{self.name}"
+        if self.config.save_images:
+            os.makedirs(self.images_path, exist_ok=True)
+            
+        if self.config.load:
             self.animation = self.init_animation(func=self.plot,frames=self.state_len-1)
         else:
             if self.config.logging:
