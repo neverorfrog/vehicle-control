@@ -5,4 +5,7 @@ from omegaconf import OmegaConf
 simconfig = OmegaConf.create(utils.load_config(f"config/simconfig.yaml"))
 trackconfig = OmegaConf.create(utils.load_config(f"config/environment/{simconfig.track_name}.yaml"))
 carconfig = OmegaConf.create(utils.load_config(f"config/models/dynamic_car.yaml"))
-RacingSimulator(simconfig, carconfig, trackconfig)
+simulator = RacingSimulator(simconfig, carconfig, trackconfig)
+if simconfig.load:
+    simulator.summarize()
+simulator.run()

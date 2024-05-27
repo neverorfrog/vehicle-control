@@ -67,6 +67,17 @@ class RacingSimulator(Simulator):
         self.x_traj = [[] for _ in self.names]
         self.y_traj = [[] for _ in self.names]
         
+    def summarize(self):
+        for name in self.names:
+            print("-------------------------")
+            print(name)
+            print(f"Laptime: {self.state_traj[name][-1,-1]}")
+            print(f"Average time:{np.mean(self.elapsed[name])}")
+            print(f"Average speed: {np.mean(self.state_traj[name][:,0])}")
+            print(f"Average Fx: {np.mean(np.abs(self.action_traj[name][:,0]))}")
+            print(f"Mean squared error: {np.mean(np.square(self.state_traj[name][:,5]))}")
+            print("-------------------------")
+        
             
     def init_animation(self, func: object, fig: Figure = plt.gcf(), frames: int = None):
         # Grid for subplots
