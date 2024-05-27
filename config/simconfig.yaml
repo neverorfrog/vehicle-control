@@ -1,13 +1,13 @@
 track_name: 'ippodromo'
 
 controller_names:
-  - 'singletrack'
+  # - 'singletrack'
   - 'cascaded'
 
-name: 'race1'
+name: 'cascaded_giantObstacle1'
 
 save_gif: False
-save_images: True
+save_images: False
 save_data: False
 load: True
-logging: False
+logging: True
