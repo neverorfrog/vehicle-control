@@ -1008,7 +1008,7 @@ force input. As a note, the maximum speed in the test reported in this table is
 $18 m/s$ for all controllers.
 \begin{table}[H] 
     \centering
-    \caption{Performance of various controller configurations} \label{boh}
+    \caption{Performance of various controller configurations} \label{simulations}
     \begin{tabular}{|c||c|c|c|c|c|}
         \hline
         \textbf{Controller} & \textbf{Iter.} & \textbf{Lap} & \textbf{Time} & \textbf{Av.Speed} & \textbf{Av.$F_x$} \\ [0.5ex] 
@@ -1027,7 +1027,7 @@ $18 m/s$ for all controllers.
 As expected, the cascaded controller performs better than the singletrack in
 many ways.
 
-\paragraph{Comptational efficiency}
+\paragraph{Computational efficiency}
 The cascaded controller halves the average computation time with respect to the
 singletrack. That alone demonstrates the effectiveness of using such a
 controller as opposed to using the singletrack model for the whole prediction
@@ -1119,7 +1119,20 @@ Meanwhile, the cascaded controller roams the track while also allowing itself to
 drive near the border in order to reduce laptime.
 
 \paragraph{$F_x$ usage}
-\todo[inline]{fx usage}
+The average $F_x$ cannot be analysed separately from the other parameters of the 
+table \ref{simulations}. So, let's take firstly in consideration just the first 
+two simulations, and then we will extend the considerations to the other two. 
+The single-track model is the one that takes the longest time to finish the circuit,
+even if it has both higher average speed and higher average force than the other model.
+This means that the cascaded model can optimize in a better way its velocity and the 
+distribution of the force along the track, due to its long horizon planning capacity.\\
+Consider now the third simulation data. It descreases the lap time with respect to
+the first two, having also an higher speed. The applied force is a little bit lower than
+the one applied on the single-track. This overview suggests how this cascaded model is the
+best one between the three considered, because it can balance the usage of the force in 
+order to reach better performances.\\
+The same argument can be applied to the last cascaded model, which has the longest horizon
+window.
 
 \paragraph{Slip angle excess}
 \todo[inline]{slip angle}
