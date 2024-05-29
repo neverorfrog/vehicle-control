@@ -46,8 +46,8 @@
 % No navigation symbols
 \setbeamertemplate{navigation symbols}{}
 
-\newcommand{\@footlineauthor}{\insertauthor \enspace$\vert$\enspace}
-\newcommand{\@footlinepayoff}{\@footlineauthor\inserttitle}
+\newcommand{\@footlinesection}{\insertsection}
+\newcommand{\@footlinepayoff}{\@footlinesection}
 \newcommand{\footlinepayoff}[1]{\renewcommand{\@footlinepayoff}{#1}}
 % Define footline content
 \setbeamertemplate{footline}{%
@@ -67,12 +67,12 @@
     \footlinepayoff{}
     \setbeamercolor{footline}{fg=darkgray, bg=}
     \setbeamercolor{block title}{fg=white,bg=maincolor}
-    \setbeamercolor{block body}{fg=white,bg=maincolor}
+    % \setbeamercolor{block body}{fg=white,bg=maincolor}
   }{
-    \footlinepayoff{\@footlineauthor\inserttitle}
+    \footlinepayoff{\@footlinesection}
     \setbeamercolor{footline}{fg=white,bg=#1}
     \setbeamercolor{block title}{fg=white,bg=#1}
-    \setbeamercolor{block body}{fg=white,bg=#1}
+    % \setbeamercolor{block body}{fg=white,bg=#1}
   }%
 }
 \footlinecolor{} % Default: no footline
@@ -136,16 +136,24 @@
 	\endgroup
 }
 
-% Put the logo in each slide's top left area
-\setbeamertemplate{headline}{\hspace{0.06\textwidth}\pgfuseimage{\@logo}}
-
-% Define frame title and subtitle layout
+% Define frame title and subtitle layout (with logo)
 \setbeamertemplate{frametitle}{%
-  \vspace*{-3.5ex}
-  \begin{beamercolorbox}[leftskip=2cm]{frametitle}%
-    \usebeamerfont{frametitle}\insertframetitle\\
-    \usebeamerfont{framesubtitle}\insertframesubtitle
-  \end{beamercolorbox}
+  \leavevmode
+  \vbox{
+    \begin{beamercolorbox}[wd=.7\paperwidth,ht=5ex,dp=2ex,left]{frametitle}%
+      % \hspace*{-0.48cm}
+      % \usebeamerfont{subtitle} \insertsubsectionhead \\
+      \hspace*{-0.5cm}
+      \usebeamerfont{frametitle} \insertframetitle
+    \end{beamercolorbox}
+    \vskip-40pt
+    \hbox{
+      \hskip250pt
+      \begin{beamercolorbox}[wd=.25\paperwidth,ht=5ex,dp=1ex,right]{frametitle}%
+        \pgfuseimage{\@logo}
+      \end{beamercolorbox}%
+    }
+  } 
 }
 
 \def\@courseLabel{}

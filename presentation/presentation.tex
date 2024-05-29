@@ -1,15 +1,40 @@
 \documentclass{beamer}
 
-\usepackage{amsfonts,amsmath,oldgerm}
-\usepackage{mathtools}
-\usepackage{amssymb}
-\usepackage{animate}
-
+% Theme
 \usepackage[T1]{fontenc}
-\usefonttheme[onlymath]{serif}
 \usepackage[default]{gillius}
 \usetheme{sintef}
 
+% Math
+\usepackage{amsfonts,amsmath,oldgerm}
+\usepackage{mathtools}
+\usefonttheme[onlymath]{serif}
+
+% Code
+\usepackage{algpseudocode}
+
+% Figures
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption}
+
+% Tables
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{colortbl}
+
+% Boxes
+\usepackage{xcolor}
+\usepackage{tcolorbox}
+\usepackage{adjustbox}
+\tcbuselibrary{skins}
+\tcbset{tab2/.style={enhanced,fonttitle=\bfseries,fontupper=\small\sffamily,
+colback=yellow!10!white,colframe=red!50!black,colbacktitle=Salmon!40!white,
+coltitle=black,center title}}
+
+% Shapes
+\usepackage{tikz}
+\usetikzlibrary{shapes,arrows, positioning, calc}  
 \newcommand{\greenplus}[0]{\begin{tikzpicture}
     \draw[green, line width=5pt] (-0.01,0) -- (0.01,0);
     \draw[green, line width=5pt] (0,-0.01) -- (0,0.01);
@@ -19,7 +44,9 @@
     \draw[red, line width=5pt] (0,-0.01) -- (0,0.01);
     \node[minimum width=0.2cm] at (current bounding box.east) {};
 \end{tikzpicture}}
-\newcommand{\hrefcol}[2]{\textcolor{cyan}{\href{#1}{#2}}}
+
+% Animations
+\usepackage{animate}
 
 
 \titlebackground*{assets/background}
@@ -33,13 +60,65 @@
 \begin{document}
 \maketitle
 
-\section{Introduction}
+\begin{frame}{Problem Statement}
 
-\begin{frame}[fragile]{Boh}
+\end{frame}
+
+\section{Model}
+
+\begin{frame}{Singletrack}
+\end{frame}
+
+\begin{frame}{Pointmass}
+\end{frame}
+
+\begin{frame}{Discretization}
+\end{frame}
+
+\section{NLP Structure}
+
+\begin{frame}{Overview}
+\end{frame}
+
+\begin{frame}{Cost Function}
+\end{frame}
+
+\begin{frame}{Constraints}
+\end{frame}
+
+\section{Implementation}
+
+\begin{frame}{Overview}
+\end{frame}
+
+\begin{frame}{Simulator}
+\end{frame}
+
+\begin{frame}{Track}
+\end{frame}
+
+\begin{frame}{MPC}
+\end{frame}
+
+\section{Experiments}
+
+\begin{frame}{Configuration}
+\end{frame}
+
+\begin{frame}{Configuration}
+\end{frame}
+
+\begin{frame}[fragile]{Test 1}
     \begin{figure}
         \centering
-        \animategraphics[autoplay,width=0.8\textwidth]{20}{assets/videos/race4_ippodromo/frame}{0}{416}
+        \animategraphics[autoplay,width=0.8\textwidth]{20}{assets/videos/race4_ippodromo/frame}{0}{200}
     \end{figure}
+\end{frame}
+
+\begin{frame}{Test 2}
+\end{frame}
+
+\begin{frame}{Test 3}
 \end{frame}
 
 
