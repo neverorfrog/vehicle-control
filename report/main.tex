@@ -445,7 +445,7 @@ The NLP (non-linear program) has three main components:
     \item Constraints
 \end{itemize}
 
-\subsection{Cost function}
+\subsection{Cost function}\label{cost_section}
 
 Our objective is to minimize time (which, we remind, has to be integrated in the
 spatial step and thus is not know before starting the prediction horizon) at
@@ -1173,6 +1173,7 @@ infeasibility situation.
         \centering
         \includegraphics[width=\textwidth]{assets/obstacles1_ippodromo.png}
         \subcaption{$W_{obs}$ = 10}
+        \label{obs1}
     \end{subfigure}
     \begin{subfigure}{\textwidth}
         \centering
@@ -1198,8 +1199,38 @@ infeasibility situation.
 As pretty much expected, the controller with a lower weight on obstacle
 avoidance is more aggressive, going very near the obstacles. This results in a
 higher average speed, thus a lower laptime. It also results in a lower average
-force usage, due to the reduced braking. 
-
+force usage, due to the reduced braking. \\
+We tried also another experiment, where one obstacle covers the entire width of the 
+track. This is an important test that allows to verify if the model is quite robust,
+because of how we modeled the optimization problem. How explained in \ref{cost_section},
+both terms about the road boundary intrusion and obstacle avoidance are modeled
+as terms in the cost function instead of as constraints. This choice allows to make the
+problem feasible also in cases like this. As shown in the figures \ref{giant1} and 
+\ref{giant2}, the car assumes exactly the behavior we would like it to have, that is, 
+it goes slightly outside the track to avoid the obstacle, and then it comes back into 
+the boundaries. 
+The difference between these two examples is in the values of the weights 
+about the obstacle avoidance. In particular, in the former we considered a weight $W_{obs}=10$ 
+(the same situation shown in the example \ref{obs1}), while in the latter the weight is
+$W_{obs}=50$. We can notice like the first one is almost an impossible case in the reality,
+due to the high proximity of the car to the surface of the object. On the opposite, the
+second configuration handles these type of situations better.
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}{\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{assets/giant2.png}
+        \subcaption{$W_{obs}$ = 10}
+        \label{giant2}
+    \end{subfigure}
+    \begin{subfigure}{\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{assets/giant1.png}
+        \subcaption{$W_{obs}$ = 50}
+        \label{giant1}
+    \end{subfigure}
+    \caption[short]{Comparison of two cascaded controllers with giant obstacle}
+\end{figure}
 
 \subsection{Longer track}
 
