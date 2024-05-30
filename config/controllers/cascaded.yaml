@@ -3,7 +3,7 @@ horizon: 20
 mpc_dt: 0.03
 horizon_pm: 35
 ds_pm: 3
-obstacles: False
+obstacles: True
 color: '#007CFF'
 
 # weights for the cost function
