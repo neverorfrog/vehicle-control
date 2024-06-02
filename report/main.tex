@@ -926,7 +926,7 @@ scope of this work.
         \hline
         Terminal course error & $W_{\phi_{term}}$ & 2 & $s/rad^2$ \\
         \hline
-        Steering angle & $W_{\dot{delta}}$ & 4 & $s/(deg/s)^2$ \\
+        Steering angle & $W_{\dot{\delta}}$ & 4 & $s/(deg/s)^2$ \\
         \hline 
         Input force continuity ($F_x$, $F_y$) & $W_{F}$ & 0.000001 & $s \cdot m / N^2$ \\
         \hline
@@ -983,7 +983,7 @@ Total seconds in IPOPT                               = 0.050 ms
 \end{Verbatim}
 Even though the number of total steps is almost the same, the singletrack
 configuration has clearly more variables and constraints. Moreover, we should
-consider that inside the MPC all the variables are inside a single CasADI matrix
+consider that in the MPC all the variables are inside a single CasADI matrix
 (whose size if fixed apriori) and that the pointmass has less state variables
 than the singletrack model. Hence, the number of "active variables" is even less
 than the number shown above. In fact, a better indicator is the number of
@@ -1001,10 +1001,10 @@ non subject to the delicate yaw dynamics. Anyway, just to visualize and be aware
 of how much the pointmass model impacts the horizon, the two horizon lengths are
 shown in figure \ref{horizons}.
 
-\subsection{Comparison on a simple track}
+\subsection{Cascaded vs Singletrack on a simple track}
 
 The first set of tests was carried out on a pretty simple track, as the one in Figure
-\ref{ippodromo} but without obstacles for now. We compare three different
+\ref{ippodromo}, without obstacles for now. We compare three different
 configurations of the cascaded controller. We report the results below. The
 first column indicates the number of iterations per lap and the second the lap
 time. The third column indicates the average time per iteration of the MPC,
@@ -1013,12 +1013,12 @@ force input. As a note, the maximum speed in the test reported in this table is
 $18 m/s$ for all controllers.
 \begin{figure}[H] 
     \centering
-        \begin{subfigure}{\textwidth} 
+        \begin{subfigure}{0.9\textwidth} 
         \centering
         \includegraphics[width=\textwidth]{assets/horizon_shorter.png}
         \subcaption{Cascaded with $N=20, M=15$}
     \end{subfigure}
-    \begin{subfigure}{\textwidth}
+    \begin{subfigure}{0.9\textwidth}
         \centering
         \includegraphics[width=\textwidth]{assets/horizon_longer.png}
         \subcaption{Cascaded with $N=20, M=35$}
@@ -1068,11 +1068,14 @@ This is not surprising, since the segment before is straight and long enough to
 reach a relatively high speed, while the prediction horizon is not far-sighted
 enough to see how much curvature the track has. Thus, it tries to recover the
 track path by braking and steering as much as it can. Moreover, if we increase
-the maximum speed of the controllers to $20 m/s$, the singletrack actually goes
-outside as in figure \ref{singletrack_outside}, while the cascaded' performance
-is enhanced. We also tried increasing the maximum speed even more, with the
-singletrack going completely out of the track and the cascaded always performing
-well. That is simply thanks to the long enough horizon.
+the maximum speed of the controllers to $20 m/s$ and keep every other weight
+exactly the same as before, the singletrack actually goes outside as in figure
+\ref{singletrack_outside}, while the cascaded' performance is enhanced. We also
+tried increasing the maximum speed even more, with the singletrack going
+completely out of the track and the cascaded always performing well. That is
+simply thanks to the longer horizon. Of course, one could argue that the weight
+on the laptime should be decreased in order regain a safer driving profile. On
+the other hand, this would probably result in a 
 
 \paragraph{Driving profile}
 It is interesting to notice that with a longer prediction horizon, the driving
@@ -1106,6 +1109,22 @@ drive near the border in order to reduce laptime.
         \hline
     \end{tabular}
 \end{table}
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}{0.9\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{assets/race1_ippodromo.png}
+        \subcaption{Maximum speed of $18 m/s$}
+    \end{subfigure}
+    \begin{subfigure}{0.9\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{assets/race3_ippodromo.png}
+        \subcaption{Maximum speed of $20 m/s$}
+        \label{singletrack_outside}
+    \end{subfigure}
+    \caption[short]{Comparison of two cascaded controllers}
+    \label{race_ippodromo}
+\end{figure}
 \paragraph{$F_x$ usage}
 The average force usage cannot be analysed separately from the other parameters
 of table \ref{simulations}. So, let's start with the first two rows of the
@@ -1113,11 +1132,11 @@ table, and then we will extend the considerations to the other ones. The
 single-track model is the one that takes the longest time to finish the circuit,
 even if it has a (slightly) higher average speed (but almost the same) and
 higher average force. That may seem counterintuitive, since with higher force,
-there should be higher speed. Actyally, the cascaded model can optimize in
-a better way its velocity and the distribution of the force along the track, due
+there should be higher speed. Actyally, the cascaded model can optimize in a
+better way its velocity and the distribution of the force along the track, due
 to its long horizon planning capacity. More intuitively, the braking happens in
 anticipation, rather than after noticing the curve is too steep. Hence, the
-average speed is almost the same, although the force usage is higher. \\
+average speed is almost the same, although the force usage is higher.
 Considering now the third and fourth row of the table, we notice that the
 increase in force usage and average speed are proportional to each other,
 resulting in the last cascaded model having a considerably higher average speed
@@ -1130,37 +1149,30 @@ controller with 60 steps and a higher maximal allowed speed. The simulation of
 this controller is shown in figure \ref{singletrack_outside}. As already pointed
 out, previously, the car goes outside the track at a certain point. Indeed, the
 average speed decreases while the force usage increases by far, due to the
-excessive braking in order to recover the track path.
+excessive braking to recover the track path.
 
-\paragraph{Slip angle excess}
-\todo[inline]{slip angle}
-
+\paragraph{Pushing the car to its physical boundaries}
+An important idea, for which this work shall serve as proof-of-concept, is to
+test how the car handles being pushed to its physical boundaries. Such
+considerations can be made by exploiting "almost infeasible" situations in the
+optimization. In particular, we can consider how sensitive the MPC control
+algorithm can be, depending on its weights.  
 \begin{figure}[H]
     \centering
-    \begin{subfigure}{\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{assets/race1_ippodromo.png}
-        \subcaption{Maximum speed of $18 m/s$}
-    \end{subfigure}
-    \begin{subfigure}{\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{assets/race3_ippodromo.png}
-        \subcaption{Maximum speed of $20 m/s$}
-        \label{singletrack_outside}
-    \end{subfigure}
-    \caption[short]{Comparison of two cascaded controllers}
-    \label{race_ippodromo}
+    \includegraphics[width=0.8\textwidth]{assets/cascaded_high_laptime_weight.png}
+    \caption{$W_{t}$ = 50}
+    \label{hightime}
 \end{figure}
+We have already seen that the singletrack controller is keen on exceeding the
+slip angle limits, due to having a shorter horizon. This condition can also
+happen if, for example, we increase the weight on the laptime. Intuitively, the
+higher the laptime weight, the more the car will try to reduce the laptime. Just
+as an illustrative example, if we increase the laptime weight (with respect to
+\ref{weights}) to $50$, the result is the one in figure \ref{hightime}, that is,
+the car goes outside the track. That is just to say, that handling a dynamic
+model at its physical limits can be difficult in terms of tuning MPC weights.
 
-\subsection{Playing with some parameters}
-
-\paragraph{Laptime weight vs boundary weight}
-\todo[inline]{laptime weight vs boundary weight}
-
-\paragraph{Weight on switch from singletrak to pointmass}
-\todo[inline]{switch from singletrak to pointmass}
-
-\subsection{Adding obstacles}
+\subsection{Adding obstacles to the track}
 
 We also experimented adding obstacles to the track and comparing the performance
 depending on the weight in the cost function. The controller parameters are the
@@ -1169,13 +1181,13 @@ was not even able to finish the track without going into a numerical
 infeasibility situation. 
 \begin{figure}[H]
     \centering
-    \begin{subfigure}{\textwidth}
+    \begin{subfigure}{0.9\textwidth}
         \centering
         \includegraphics[width=\textwidth]{assets/obstacles1_ippodromo.png}
         \subcaption{$W_{obs}$ = 10}
         \label{obs1}
     \end{subfigure}
-    \begin{subfigure}{\textwidth}
+    \begin{subfigure}{0.9\textwidth}
         \centering
         \includegraphics[width=\textwidth]{assets/obstacle2_ippodromo.png}
         \subcaption{$W_{obs}$ = 1}
@@ -1184,7 +1196,7 @@ infeasibility situation.
 \end{figure}
 \begin{table}[H] 
     \centering
-    \caption{Performance depending on obstacles weight with $N=20$, $M=15$} \label{obstacles_ippodromo}
+    \caption{Different cascaded controllers ($N=20$, $M=15$) depending on $W_{obs}$} \label{obstacles_ippodromo}
     \begin{tabular}{|c||c|c|c|c|c|}
         \hline
         \textbf{Controller} & \textbf{Iter.} & \textbf{Lap} & \textbf{Time} & \textbf{Av.Speed} & \textbf{Av.$F_x$} \\ [0.5ex] 
@@ -1199,7 +1211,23 @@ infeasibility situation.
 As pretty much expected, the controller with a lower weight on obstacle
 avoidance is more aggressive, going very near the obstacles. This results in a
 higher average speed, thus a lower laptime. It also results in a lower average
-force usage, due to the reduced braking. \\
+force usage, due to the reduced braking.
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}{0.9\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{assets/giant2.png}
+        \subcaption{$W_{obs}$ = 10}
+        \label{giant2}
+    \end{subfigure}
+    \begin{subfigure}{0.9\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{assets/giant1.png}
+        \subcaption{$W_{obs}$ = 50}
+        \label{giant1}
+    \end{subfigure}
+    \caption[short]{Comparison of two cascaded controllers with giant obstacle}
+\end{figure}
 We tried also another experiment, where one obstacle covers the entire width of the 
 track. This is an important test that allows to verify if the model is quite robust,
 because of how we modeled the optimization problem. How explained in \ref{cost_section},
@@ -1215,26 +1243,50 @@ about the obstacle avoidance. In particular, in the former we considered a weigh
 $W_{obs}=50$. We can notice like the first one is almost an impossible case in the reality,
 due to the high proximity of the car to the surface of the object. On the opposite, the
 second configuration handles these type of situations better.
+
+\subsection{Longer track with steeper curves}
+
+We experimented also on a different and longer (more realistically) track that
+has also steeper curves.
+
 \begin{figure}[H]
     \centering
-    \begin{subfigure}{\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{assets/giant2.png}
-        \subcaption{$W_{obs}$ = 10}
-        \label{giant2}
-    \end{subfigure}
-    \begin{subfigure}{\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{assets/giant1.png}
-        \subcaption{$W_{obs}$ = 50}
-        \label{giant1}
-    \end{subfigure}
-    \caption[short]{Comparison of two cascaded controllers with giant obstacle}
+    \includegraphics[width=0.95\textwidth]{assets/obstacles_shoe.png}
+    \label{shoe}
+    \caption{Cascaded controller on longer track with obstacles}
+\end{figure}
+The laptime difference is even more exaggerated, more than 1 second. Also, it is
+interesting to notice that the computational efficiency is pretty much the same
+for the cascaded controller (under 50 ms), while for the singletrack it is even
+worse than before. In particular, in figure \ref{singletrack_shoe}, we can
+observe a spike in the computational time, corresponding to the first (the
+steepest one) curve. Since the car has to recover the track without crossing the
+boundaries, the optimizer takes much more to find a solution. Moreover, again,
+the generated forces by the singletrack are infeasible in practice, since it
+tries to brake too much while steering, impressing too much lateral force. These
+issues don't presente themselves in the cascaded controller. 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{assets/singletrack_obstacles_shoe.png}
+    \label{singletrack_shoe}
+    \caption{Singletrack controller on longer track with obstacles}
 \end{figure}
 
-\subsection{Longer track}
 
 \subsection{Kinematic Model}
+
+The singularity limitation of the dynamic model can be addressed by using a
+kinematic model instead. The structure of the NLP is pretty much the same. Of
+course, the computation times are much reduced, namely from $50ms$ to $20ms$.
+Ideally, the kinematic model should be used at low speeds. After reaching a
+sufficient speed, we could switch to the dynamic model.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{assets/kinematic_ippodromo.png}
+    \label{kin}
+    \caption{Kinematic controller}
+\end{figure}
+
 
 
 
