@@ -17,6 +17,7 @@ from simulation.simulator import Simulator
 import models
 import utils.common_utils as utils
 import controllers as control
+import casadi as ca
 
 class RacingSimulator(Simulator):
     """
@@ -29,7 +30,7 @@ class RacingSimulator(Simulator):
     """
     def __init__(self, simconfig: OmegaConf, carconfig: OmegaConf, trackconfig: OmegaConf):
         self.names = simconfig.controller_names
-        
+        self.slip_angle_plot = simconfig.slip_angle_plot
         #track
         track = Track(trackconfig)
         self.track = track
@@ -85,47 +86,81 @@ class RacingSimulator(Simulator):
             
     def init_animation(self, func: object, fig: Figure = plt.gcf(), frames: int = None):
         # Grid for subplots
-        grid = GridSpec(5, 2, width_ratios=[3, 1])
-        plt.subplots_adjust(left=0.05, bottom=0.05, right=0.95, top=0.95, hspace=0.3, wspace=0.1)
+
+        # If slip_angle_plot activated in simconfig.yaml, we plot
+        # the dynamic of the front and rear slip angles
+        if self.slip_angle_plot == True and len(self.names)==1:
+            grid = GridSpec(2, 2, width_ratios=[3, 1])
+            plt.subplots_adjust(left=0.05, bottom=0.05, right=0.95, top=0.95, hspace=0.3, wspace=0.1)
+            # Big axis initialization (one for the track and one for the car)
+            self.ax_track = plt.subplot(grid[:, 0])
+            self.ax_track.set_aspect('equal')
+            self.ax_car: Axes = self.ax_track.twinx()
+            self.track.plot(self.ax_track)
+            if self.controllers[0].config.obstacles:
+                for obs in self.track.obstacles:
+                    obs.plot(self.ax_track)
+
+            # Small axes initialization (for plots on s axis)
+            self.ax_small0 = plt.subplot(grid[0, 1])
+            self.ax_small0.axis((0, self.track.length, -10, 20))
+            self.ax_small0.set_ylabel(r'$\alpha_f$', fontsize=16, labelpad=25, rotation=360, color='blue')
+            self.ax_small0.yaxis.set_label_position('right')
+            
+            self.ax_small1 = plt.subplot(grid[1, 1])
+            self.ax_small1.axis((0, self.track.length, -10, 20))
+            self.ax_small1.set_ylabel(r'$\alpha_r$', fontsize=16, labelpad=25, rotation=360, color='blue')
+            self.ax_small1.yaxis.set_label_position('right')
+
+            # Text boxe
+            self.lap_time = fig.text(0.5, 0.97, 'Laptime', fontsize=16, ha='center', va='center')
+                  
         
-        # Big axis initialization (one for the track and one for the car)
-        self.ax_track = plt.subplot(grid[:, 0])
-        self.ax_track.set_aspect('equal')
-        self.ax_car: Axes = self.ax_track.twinx()
-        self.track.plot(self.ax_track)
-        if self.controllers[0].config.obstacles:
-            for obs in self.track.obstacles:
-                obs.plot(self.ax_track)
-                
-        # Small axes initialization (for plots on s axis)
-        self.ax_small0 = plt.subplot(grid[0, 1])
-        self.ax_small0.axis((0, self.track.length, 20, 150))
-        self.ax_small0.set_ylabel(r'$ms$', fontsize=16, labelpad=25, rotation=360)
-        self.ax_small0.yaxis.set_label_position('right')
-        
-        self.ax_small1 = plt.subplot(grid[1, 1])
-        self.ax_small1.axis((0, self.track.length, 0, 22))
-        self.ax_small1.set_ylabel(r'$v \rightarrow \frac{m}{s}$', fontsize=16, labelpad=25, rotation=360)
-        self.ax_small1.yaxis.set_label_position('right')
-        
-        self.ax_small2 = plt.subplot(grid[2, 1])
-        self.ax_small2.axis((0, self.track.length, -0.5, 0.5))
-        self.ax_small2.set_ylabel(r'$\delta \rightarrow rad$', fontsize=16, labelpad=30, rotation=360)
-        self.ax_small2.yaxis.set_label_position('right')
-        
-        self.ax_small3 = plt.subplot(grid[4, 1])
-        self.ax_small3.axis((0, self.track.length, -0.5, 0.5))
-        self.ax_small3.set_ylabel(r'$\omega \rightarrow \frac{rad}{s}$', fontsize=16, labelpad=30, rotation=360)
-        self.ax_small3.yaxis.set_label_position('right')
-        
-        self.ax_small4 = plt.subplot(grid[3, 1])
-        self.ax_small4.axis((0, self.track.length, -7000, 7000))
-        self.ax_small4.set_ylabel(r'$F_x \rightarrow N$', fontsize=16, labelpad=25, rotation=360)
-        self.ax_small4.yaxis.set_label_position('right')
-        
-        # Text boxe
-        self.lap_time = fig.text(0.5, 0.97, 'Laptime', fontsize=16, ha='center', va='center')
-        
+        # if slip_angle_plot is deactivated, we plot 
+        # the dynamics of the state
+
+        else:
+            grid = GridSpec(5, 2, width_ratios=[3, 1])
+            plt.subplots_adjust(left=0.05, bottom=0.05, right=0.95, top=0.95, hspace=0.3, wspace=0.1)
+            
+            # Big axis initialization (one for the track and one for the car)
+            self.ax_track = plt.subplot(grid[:, 0])
+            self.ax_track.set_aspect('equal')
+            self.ax_car: Axes = self.ax_track.twinx()
+            self.track.plot(self.ax_track)
+            if self.controllers[0].config.obstacles:
+                for obs in self.track.obstacles:
+                    obs.plot(self.ax_track)
+                    
+            # Small axes initialization (for plots on s axis)
+            self.ax_small0 = plt.subplot(grid[0, 1])
+            self.ax_small0.axis((0, self.track.length, 20, 150))
+            self.ax_small0.set_ylabel(r'$ms$', fontsize=16, labelpad=25, rotation=360)
+            self.ax_small0.yaxis.set_label_position('right')
+            
+            self.ax_small1 = plt.subplot(grid[1, 1])
+            self.ax_small1.axis((0, self.track.length, 0, 22))
+            self.ax_small1.set_ylabel(r'$v \rightarrow \frac{m}{s}$', fontsize=16, labelpad=25, rotation=360)
+            self.ax_small1.yaxis.set_label_position('right')
+            
+            self.ax_small2 = plt.subplot(grid[2, 1])
+            self.ax_small2.axis((0, self.track.length, -0.5, 0.5))
+            self.ax_small2.set_ylabel(r'$\delta \rightarrow rad$', fontsize=16, labelpad=30, rotation=360)
+            self.ax_small2.yaxis.set_label_position('right')
+            
+            self.ax_small3 = plt.subplot(grid[4, 1])
+            self.ax_small3.axis((0, self.track.length, -0.5, 0.5))
+            self.ax_small3.set_ylabel(r'$\omega \rightarrow \frac{rad}{s}$', fontsize=16, labelpad=30, rotation=360)
+            self.ax_small3.yaxis.set_label_position('right')
+            
+            self.ax_small4 = plt.subplot(grid[3, 1])
+            self.ax_small4.axis((0, self.track.length, -7000, 7000))
+            self.ax_small4.set_ylabel(r'$F_x \rightarrow N$', fontsize=16, labelpad=25, rotation=360)
+            self.ax_small4.yaxis.set_label_position('right')
+            
+            # Text boxe
+            self.lap_time = fig.text(0.5, 0.97, 'Laptime', fontsize=16, ha='center', va='center')
+            
         # Animation initialization
         return FuncAnimation(fig, func, frames, interval=0, cache_frame_data=False, repeat_delay=0)
     
@@ -186,12 +221,29 @@ class RacingSimulator(Simulator):
             # Plot state predictions of MPC
             self.ax_car.plot(self.preds[name][n][:,0],self.preds[name][n][:,1],linestyle='None',color=self.colors[j],marker='o',markerfacecolor=self.colors[j],markersize=4,alpha=0.3) 
             
-            # Plot state and actions
-            self.ax_small0.plot(s[n],np.mean(self.elapsed[name][:n])*1000, 'o', markersize=0.7,alpha=0.7,linewidth=1,color = self.colors[j])
-            self.ax_small1.plot(s[n-2:n],v[n-2:n], '-', alpha=0.7,linewidth=1,color = self.colors[j])
-            self.ax_small2.plot(s[n-2:n],delta[n-2:n],'-', alpha=0.7,linewidth=1,color = self.colors[j])
-            self.ax_small3.plot(s[n-2:n],w[n-2:n],'-', alpha=0.7,linewidth=1,color = self.colors[j])
-            self.ax_small4.plot(s[n-2:n],Fx[n-2:n],'-', alpha=0.7,linewidth=1,color = self.colors[j])
+            if self.slip_angle_plot == True and len(self.names)==1:
+                alpha_f = ca.fabs(np.rad2deg(car.alpha_f(state[car.state.index('Ux')],state[car.state.index('Uy')],state[car.state.index('r')],state[car.state.index('delta')]).full().squeeze().item()))
+                alphamod_f = ca.fabs(np.rad2deg(car.alphamod_f(Fx[n]).full().squeeze().item()))
+
+                alpha_r = ca.fabs(np.rad2deg(car.alpha_r(state[car.state.index('Ux')],state[car.state.index('Uy')],state[car.state.index('r')],state[car.state.index('delta')]).full().squeeze().item()))
+                alphamod_r = ca.fabs(np.rad2deg(car.alphamod_r(Fx[n]).full().squeeze().item()))
+
+                # Fymax_r = ((mur*self.Fz_r(Ux,Fx))**2 - ((0.99*self.Fx_r(Fx))**2))
+                # alphamod_f = atan((3*Fymax_f*eps)/Calpha_f)
+                self.ax_small0.plot(s[n],alpha_f, 'o', markersize=0.7,alpha=0.7,linewidth=1,color = 'blue')
+                self.ax_small0.plot(s[n],alphamod_f, 'o', markersize=0.7,alpha=0.7,linewidth=1,color = 'red')
+
+                self.ax_small1.plot(s[n],alpha_r, 'o', markersize=0.7,alpha=0.7,linewidth=1,color = 'blue')
+                self.ax_small1.plot(s[n],alphamod_r, 'o', markersize=0.7,alpha=0.7,linewidth=1,color = 'red')
+
+
+            else:
+                # Plot state and actions
+                self.ax_small0.plot(s[n],np.mean(self.elapsed[name][:n])*1000, 'o', markersize=0.7,alpha=0.7,linewidth=1,color = self.colors[j])
+                self.ax_small1.plot(s[n-2:n],v[n-2:n], '-', alpha=0.7,linewidth=1,color = self.colors[j])
+                self.ax_small2.plot(s[n-2:n],delta[n-2:n],'-', alpha=0.7,linewidth=1,color = self.colors[j])
+                self.ax_small3.plot(s[n-2:n],w[n-2:n],'-', alpha=0.7,linewidth=1,color = self.colors[j])
+                self.ax_small4.plot(s[n-2:n],Fx[n-2:n],'-', alpha=0.7,linewidth=1,color = self.colors[j])
         
         if self.config.save_images:
             plt.gcf().savefig(f"{self.images_path}/frame{n}.png", dpi=50)
