@@ -101,8 +101,8 @@ class KinematicMPC(Controller):
             
         if self.config.obstacles: #Obstacle avoidance
             for obs in self.car.track.obstacles:
-                distance = ca.fabs(ca.sqrt((s - obs.s)**2 + (ey - obs.ey)**2) - (obs.radius))
-                cost += 10*(1/distance)
+                distance = ca.sqrt((s - obs.s)**2 + (ey - obs.ey)**2)
+                cost += cost_weights.obstacles*ds/(distance-(obs.radius+0.1))
                 
         return cost
     
@@ -121,14 +121,12 @@ class KinematicMPC(Controller):
     
     
     def command(self, state):
-        print("KINEMATIC BABY")
         self._init_horizon(state)
         sol = self.opti.solve()
         self.action_prediction = sol.value(self.action)
         self.state_prediction = sol.value(self.state)
         action = KinematicCarAction(a=self.action_prediction[0][0], w=self.action_prediction[1][0])
-        state = self.car.drive(action)
-        return action, state
+        return action
 
     
     def _init_horizon(self, state):

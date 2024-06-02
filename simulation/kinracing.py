@@ -18,9 +18,9 @@ import models
 import utils.common_utils as utils
 import controllers as control
 
-class RacingSimulator(Simulator):
+class KinematicRacingSimulator(Simulator):
     """
-    Class for running a simulation of racing cars
+    Class for running a simulation of kinematic racing cars
 
     This class runs a simulation of racing cars on a track. It uses
     a list of models, controllers, and a track to generate the
@@ -35,19 +35,19 @@ class RacingSimulator(Simulator):
         self.track = track
         
         #cars
-        cars = [models.DynamicCar(config=carconfig, track=self.track) for _ in self.names]
-        point_masses = [models.DynamicPointMass(config=carconfig, track=self.track) for _ in self.names]
-        for car in cars: car.state = models.DynamicCarState(Ux = 4, s = 1)
+        cars = [models.KinematicCar(config=carconfig, track=self.track) for _ in self.names]
+        for car in cars: car.state = models.KinematicCarState(v = 0.1, s = 1)
         self.cars = cars
         
         #controllers
-        controllerconfigs = [OmegaConf.create(utils.load_config(f"config/controllers/{name}.yaml")) for name in self.names]
-        combriccola = zip(cars, point_masses, controllerconfigs)
-        controllers = [control.CascadedMPC(car=car, point_mass=point_mass, config=config) for car,point_mass,config in combriccola]
+        controllerconfigs = [OmegaConf.create(utils.load_config(f"config/controllers/kinematic.yaml")) for _ in self.names]
+        combriccola = zip(cars, controllerconfigs)
+        controllers = [control.KinematicMPC(car=car, config=config) for car,config in combriccola]
         self.controllers = controllers
         self.colors = [controller.config.color for controller in controllers]
         
         super().__init__(simconfig)
+        
         
      
     @property
@@ -77,8 +77,6 @@ class RacingSimulator(Simulator):
             print(f"Laptime: {self.state_traj[name][-1,-1]}")
             print(f"Average time:{np.mean(self.elapsed[name])}")
             print(f"Average speed: {np.mean(self.state_traj[name][:,0])}")
-            print(f"Mean Fx: {np.mean(np.abs(self.action_traj[name][:,0]))}")
-            print(f"Std Fx: {np.std(self.action_traj[name][:,0])}")
             print(f"Mean squared error: {np.mean(np.square(self.state_traj[name][:,5]))}")
             print("-------------------------")
         
@@ -99,12 +97,12 @@ class RacingSimulator(Simulator):
                 
         # Small axes initialization (for plots on s axis)
         self.ax_small0 = plt.subplot(grid[0, 1])
-        self.ax_small0.axis((0, self.track.length, 20, 150))
+        self.ax_small0.axis((0, self.track.length, 0, 30))
         self.ax_small0.set_ylabel(r'$ms$', fontsize=16, labelpad=25, rotation=360)
         self.ax_small0.yaxis.set_label_position('right')
         
         self.ax_small1 = plt.subplot(grid[1, 1])
-        self.ax_small1.axis((0, self.track.length, 0, 22))
+        self.ax_small1.axis((0, self.track.length, 0, 50))
         self.ax_small1.set_ylabel(r'$v \rightarrow \frac{m}{s}$', fontsize=16, labelpad=25, rotation=360)
         self.ax_small1.yaxis.set_label_position('right')
         
@@ -119,8 +117,8 @@ class RacingSimulator(Simulator):
         self.ax_small3.yaxis.set_label_position('right')
         
         self.ax_small4 = plt.subplot(grid[3, 1])
-        self.ax_small4.axis((0, self.track.length, -7000, 7000))
-        self.ax_small4.set_ylabel(r'$F_x \rightarrow N$', fontsize=16, labelpad=25, rotation=360)
+        self.ax_small4.axis((0, self.track.length, -20, 20))
+        self.ax_small4.set_ylabel(r'$a_x \rightarrow N$', fontsize=16, labelpad=25, rotation=360)
         self.ax_small4.yaxis.set_label_position('right')
         
         # Text boxe
@@ -128,7 +126,6 @@ class RacingSimulator(Simulator):
         
         # Animation initialization
         return FuncAnimation(fig, func, frames, interval=0, cache_frame_data=False, repeat_delay=0)
-    
     
     def update(self, n):  
         for car in self.cars:

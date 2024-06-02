@@ -14,6 +14,7 @@ class Simulator(ABC):
         self.config = config
         self.src_dir = os.path.dirname(os.path.abspath(__file__))
         self.data_path = f"{self.src_dir}/data/{self.name}"
+        self.loaded = False
         
         # Loading simulation data if needed
         if self.config.load:
@@ -52,6 +53,10 @@ class Simulator(ABC):
     @property
     @abstractmethod
     def state_len(self):
+        pass
+    
+    @abstractmethod
+    def summarize(self):
         pass
     
     @abstractmethod
