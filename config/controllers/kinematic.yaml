@@ -1,31 +1,32 @@
 # prediction horizon
-horizon: 80
+horizon: 50
 mpc_dt: 0.03
-obstacles: False
+obstacles: True
 color: 'red'
 
 # weights for the cost function
 cost_weights:
   time: 1
-  ey: 0.2
-  epsi: 0.1
-  v: 0.1
-  w: 0.001 
+  ey: 0.5
+  epsi: 0.5
+  v: 100
+  w: 0.01
   a: 0.0001
   deviation: 0.0001
+  obstacles: 5
   boundary: 5
 
 # input constraints
 input_constraints:
-  a_min: 0
-  a_max: 10
-  w_min: -0.5
-  w_max: 0.5
+  a_min: -3
+  a_max: 3
+  w_min: -0.4
+  w_max: 0.4
 
 # state constraints
 state_constraints:
-  v_min: 0
-  v_max: 100
+  v_min: -10
+  v_max: 10
   delta_min: -0.3
   delta_max: 0.3
   ey_min: -3
