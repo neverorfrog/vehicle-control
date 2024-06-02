@@ -1,13 +1,17 @@
 track_name: 'ippodromo'
 
 controller_names:
-  # - 'singletrack'
-  - 'cascaded'
+  - 'singletrack'
+  # - 'cascaded'
 
-name: 'cascaded_giantObstacle3'
+# It can be activated just if 
+# there is one controller
+slip_angle_plot: True
+
+name: 'prova_slip_angle'
 
 save_gif: False
 save_images: False
 save_data: False
-load: True
+load: False
 logging: False
