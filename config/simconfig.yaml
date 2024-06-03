@@ -6,9 +6,9 @@ controller_names:
 
 # It can be activated just if 
 # there is one controller
-slip_angle_plot: True
+slip_angle_plot: False
 
-name: 'cascaded_slip_angle'
+name: 'cascaded6'
 
 save_gif: False
 save_images: False
