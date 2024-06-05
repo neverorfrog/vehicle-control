@@ -1004,13 +1004,42 @@ shown in figure \ref{horizons}.
 \subsection{Cascaded vs Singletrack on a simple track}
 
 The first set of tests was carried out on a pretty simple track, as the one in Figure
-\ref{ippodromo}, without obstacles for now. We compare three different
-configurations of the cascaded controller. We report the results below. The
+\ref{ippodromo}, without obstacles for the moment. We compare different configurations
+for both singletrack and cascaded models, changing the length of the horizon and the 
+maximum speed velocity. We report the results below. We tried also other configurations,
+but the ones reported here are the most interesting ones. The
 first column indicates the number of iterations per lap and the second the lap
 time. The third column indicates the average time per iteration of the MPC,
-while the fourth and fifth column indicate the average speed and the average
-force input. As a note, the maximum speed in the test reported in this table is
-$18 m/s$ for all controllers.
+while the fourth and fifth column represent the average speed and the average
+force input.
+
+\begin{table}[h] 
+    \centering
+    \caption{Performance of various controller configurations} \label{simulations}
+    \begin{tabular}{|c||c|c|c|c|c|}
+        \hline
+        \textbf{Controller} & \textbf{Iter.} & \textbf{Lap} & \textbf{Time} & \textbf{Av.$U_x$} & \textbf{Av.|$F_x$|} \\ [0.5ex] 
+        \hline
+        \hline
+        Singletrack $N=50$, $V_{max}=18m/s$ & 442 & $22.05 s$ & $93 ms$ & $14.26 m/s$ & $2661.67 N$\\
+        \hline
+        Singletrack $N=50$, $V_{max}=20m/s$ & 448 & $22.35 s$ & $105 ms$ & $14.07 m/s$ & $3273.58 N$\\
+        \hline
+        Singletrack $N=60$, $V_{max}=18m/s$ & 433 & $21.60 s$ & $81 ms$ & $14.44 m/s$ & $2375.56 N$\\
+        \hline
+        Singletrack $N=60$, $V_{max}=20m/s$ & 428 & $21.35 s$ & $127 ms$ & $14.58 m/s$ & $2543.66 N$\\
+        \hline
+        Cascaded $N=20, M=15, V_{max}=18m/s$ & 432 & $21.55 s$ & $42 ms$ & $14.41 m/s$ & $2083.51 N$\\
+        \hline
+        Cascaded $N=20, M=25, V_{max}=18m/s$ & 424 & $21.15 s$ & $47 ms$ & $14.64 m/s$ & $2337.79 N$\\
+        \hline
+        Cascaded $N=20, M=35, V_{max}=18m/s$ & 418 & $20.85 s$ & $47 ms$ & $14.75 m/s$ & $2588.77 N$\\
+        \hline
+        Cascaded $N=20, M=35, V_{max}=20m/s$ & 418 & $20.85 s$ & $63 ms$ & $14.77 m/s$ & $2591.64 N$\\
+        \hline
+    \end{tabular}
+\end{table}
+
 \begin{figure}[H] 
     \centering
         \begin{subfigure}{0.9\textwidth} 
@@ -1026,27 +1055,6 @@ $18 m/s$ for all controllers.
     \caption[short]{Comparison of two horizon lengths against the singletrack}
     \label{horizons}
 \end{figure}
-
-\begin{table}[h] 
-    \centering
-    \caption{Performance of various controller configurations} \label{simulations}
-    \begin{tabular}{|c||c|c|c|c|c|}
-        \hline
-        \textbf{Controller} & \textbf{Iter.} & \textbf{Lap} & \textbf{Time} & \textbf{Av.$U_x$} & \textbf{Av.|$F_x$|} \\ [0.5ex] 
-        \hline
-        \hline
-        Singletrack $N=60$ & 432 & $21.60 s$ & $84 ms$ & $14.44 m/s$ & $2375.58 N$\\
-        \hline
-        Cascaded $N=20, M=15$ & 430 & $21.50 s$ & $42 ms$ & $14.41 m/s$ & $2083.23 N$\\
-        \hline
-        Cascaded $N=20, M=25$ & 424 & $21.15 s$ & $47 ms$ & $14.64 m/s$ & $2337.54 N$\\
-        \hline
-        Cascaded $N=20, M=35$ & 417 & $20.85 s$ & $47 ms$ & $14.75 m/s$ & $2588.47 N$\\
-        \hline
-        Singletrack $V_{max}=20m/s$ & $-$ & $-$ & $82 ms$ & $13.83 m/s$ & $3232.29 N$\\
-        \hline
-    \end{tabular}
-\end{table}
 
 \paragraph{Computational efficiency}
 The cascaded controller halves the average computation time with respect to the
