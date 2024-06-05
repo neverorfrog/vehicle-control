@@ -1022,11 +1022,11 @@ The first set of tests was carried out on a pretty simple track, as the one in F
 \ref{ippodromo}, without obstacles for the moment. We compare different configurations
 for both singletrack and cascaded models, changing the length of the horizon and the 
 maximum speed velocity. We report the results below. We tried also other configurations,
-but the ones reported here are the most interesting ones. The
-first column indicates the number of iterations per lap and the second the lap
+but the ones reported here are the most interesting ones. 
+The first column indicates the number of iterations per lap and the second the lap
 time. The third column indicates the average time per iteration of the MPC,
 while the fourth and fifth column represent the average speed and the average
-force input.
+force input. In the next paragraphes we are going to analyze these results. 
 
 \begin{table}[h] 
     \centering
@@ -1053,66 +1053,84 @@ force input.
         Cascaded $N=20, M=35, V_{max}=20m/s$ & 418 & $20.85 s$ & $63 ms$ & $14.77 m/s$ & $2591.64 N$\\
         \hline
     \end{tabular}
+    \label{experiments}
 \end{table}
-
 \begin{figure}[H] 
     \centering
         \begin{subfigure}{0.9\textwidth} 
         \centering
-        \includegraphics[width=\textwidth]{assets/horizon_shorter.png}
-        \subcaption{Cascaded with $N=20, M=15$}
+        \includegraphics[width=\textwidth]{assets/im/fig2_50.png}
+        \subcaption{Singletrack with $N=50$, Cascaded with $N=20, M=15$}
     \end{subfigure}
     \begin{subfigure}{0.9\textwidth}
         \centering
-        \includegraphics[width=\textwidth]{assets/horizon_longer.png}
-        \subcaption{Cascaded with $N=20, M=35$}
+        \includegraphics[width=\textwidth]{assets/im/fig2_60.png}
+        \subcaption{Singletrack with $N=60$, Cascaded with $N=20, M=35$}
     \end{subfigure}
-    \caption[short]{Comparison of two horizon lengths against the singletrack}
+    \caption[short]{Comparison of cascaded horizons and singletrack horizons}
     \label{horizons}
 \end{figure}
 
+
+
+
 \paragraph{Computational efficiency}
 The cascaded controller halves the average computation time with respect to the
-singletrack. That alone demonstrates the effectiveness of using such a
+singletrack. This is already a very important result, which demonstrates the 
+effectiveness of using such a
 controller as opposed to using the singletrack model for the whole prediction
-horizon. Considering that the sample time is $50ms$ in our experiments, the
-computation time of the singletrack controller exceeds by fare realtime
-requirements. Moreover, in the first iterations, the singletrack reaches $130ms$
-per iterations, which is absolutely prohibitive. Of course, when adding more
-pointmass steps, the time per iteration increases, but not significantly. In
-fact, when passing from $M=25$ to $M=35$, the increase in computation time is
-negligible.
+horizon. Moreover, considering that the sample time is $50ms$ in our experiments, the
+computation time of the singletrack controller exceeds by far realtime
+requirements. In particular in the first iterations, the singletrack reaches $130ms$
+per iterations, which is absolutely prohibitive. \\
+On the other hand, when adding more pointmass steps to the cascaded controller, the 
+time per iteration increases, but not significantly. 
+For example, considering the ones with a maximum velocity of 18m/s, passing from 
+$M=15$ to $M=35$ just takes a computation time of 5ms, while passing from $M=15$ to $M=35$
+is practically negligible. Instead, we have a different situation for the last controller, 
+where the little change on the maximum velocity makes a consistent increment of the 
+computational time. This conseguence implies also an impossibility of usage in a realtime 
+scenario, due to the exceeding of the sample time.
 
-\paragraph{Laptime}
-Considering just the first two rows, the laptime is almost the same, but there's
-a big caveat to that. The singletrack controller actually exceeds the slip angle
-limits at the third curve by $0.16 deg$, generating infeasible lateral forces.
-This is not surprising, since the segment before is straight and long enough to
+\paragraph{Laptime} \label{laptime}
+Here we will not take in consideration factors different from the laptime.
+Let's first analyze the performances of different configurations of the same 
+controller, and then compare the two types between them. \\
+Looking at the results of the singletrack controllers, we can notice how a longer
+horizon is beneficial to reduce the racing time, even having a lower maximum
+velocity limit. Another important thing to be noticed is that the controller
+with $N=60$ and an higher maximum velocity acts better than the one with lower
+maximum velocity; instead, the controllers with $N=50$ do not follow this behavior,
+thus the one with lower velocity runs faster than the other one. The reason behind 
+this scenario can be understood by observing the trajectory of the second controller,
+in figure \ref{race7}. The segment before the third curve is straight and long enough to
 reach a relatively high speed, while the prediction horizon is not far-sighted
-enough to see how much curvature the track has. Thus, it tries to recover the
-track path by braking and steering as much as it can. Moreover, if we increase
-the maximum speed of the controllers to $20 m/s$ and keep every other weight
-exactly the same as before, the singletrack actually goes outside as in figure
-\ref{singletrack_outside}, while the cascaded' performance is enhanced. We also
-tried increasing the maximum speed even more, with the singletrack going
-completely out of the track and the cascaded always performing well. That is
-simply thanks to the longer horizon. Of course, one could argue that the weight
-on the laptime should be decreased in order regain a safer driving profile. On
-the other hand, this would probably result in a 
+enough to see how much curvature the track has. This results in the car that goes
+outside the boundaries, and takes more time to recover. \\
+Switching to the cascaded controllers, it is easy to see how increasing the number
+of steps for the pointmass horizon the laptime consequently reduces. Equally, it is
+easy to notice that making the maximum feasible velocity higher, it does not result
+in better performances, as shown by the last two controllers of table \ref{simulations}. \\
+Comparing the two types of controller between them, the results show how the best
+singletrack controller behaves better than just the worst cascaded controller. 
+
+
 
 \paragraph{Driving profile}
-It is interesting to notice that with a longer prediction horizon, the driving
+In figure \ref{race_ippodromo}, we show some driving profiles using different
+controllers. Focusing on the cascaded controllers (blue trajectories),
+it is interesting to notice that with a longer prediction horizon, the driving
 profile changes and assumes a more aggressive behavior. Specifically, before the
 first curve, which is to the left, there is an inflection to the right. This is
 typical of racing cars: the goal is to break anticipately and take the curve
 from a more external point, in order to hit the so-called "apex", namely the
 nearest point to the internal border of the curve, at the highest possible
-speed. Another consequence, as we can observe from figure \ref{race_ippodromo},
-is that the flex is hit slightly later with the longer horizon. Before the third
-curve the behavior is similar: the car keeps going on the external side of the
-track for a longer time, in order to take the turn with higher speed. An
-indicator of this more aggressive driving behavior is the mean squared (lateral)
-error. As expected, the singletrack controller is more conservative in that
+speed. 
+Another consequence is that the flex is hit slightly later with the longer horizon. 
+Before the third curve the behavior is similar: the car keeps going on the external 
+side of the track for a longer time, in order to take the turn with higher speed. 
+An indicator of this more aggressive driving behavior is the mean squared (lateral)
+error. As expected, the singletrack controller (red trajectories) is more conservative in that
 sense; it tries to stay as much as possible at the center of the track.
 Meanwhile, the cascaded controller roams the track while also allowing itself to
 drive near the border in order to reduce laptime.
@@ -1132,47 +1150,98 @@ drive near the border in order to reduce laptime.
         \hline
     \end{tabular}
 \end{table}
+
 \begin{figure}[H]
     \centering
     \begin{subfigure}{0.9\textwidth}
         \centering
-        \includegraphics[width=\textwidth]{assets/race1_ippodromo.png}
-        \subcaption{Maximum speed of $18 m/s$}
+        \includegraphics[width=\textwidth]{assets/im/race1.png}
+        \subcaption{Cascaded with $N=20, M=15, V_{max}=18$,\\ Singletrack with $N=50, V_{max}=18$}
+        \label{race1}
     \end{subfigure}
     \begin{subfigure}{0.9\textwidth}
         \centering
-        \includegraphics[width=\textwidth]{assets/race3_ippodromo.png}
-        \subcaption{Maximum speed of $20 m/s$}
-        \label{singletrack_outside}
+        \includegraphics[width=\textwidth]{assets/im/race7.png}
+        \subcaption{Cascaded with $N=20, M=35, V_{max}=18$, \\ Singletrack with $N=50, V_{max}=20$}
+        \label{race7}
     \end{subfigure}
-    \caption[short]{Comparison of two cascaded controllers}
+    \begin{subfigure}{0.9\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{assets/im/race5.png}
+        \subcaption{Cascaded with $N=20, M=35, V_{max}=18$, \\ Singletrack with $N=50, V_{max}=20$}
+        \label{race5}
+    \end{subfigure}
+    \caption[short]{Comparisons in race}
     \label{race_ippodromo}
 \end{figure}
-\paragraph{$F_x$ usage}
+
+\paragraph{$F_x$ usage } \label{force_usage}
 The average force usage cannot be analysed separately from the other parameters
-of table \ref{simulations}. So, let's start with the first two rows of the
-table, and then we will extend the considerations to the other ones. The
-single-track model is the one that takes the longest time to finish the circuit,
-even if it has a (slightly) higher average speed (but almost the same) and
-higher average force. That may seem counterintuitive, since with higher force,
-there should be higher speed. Actyally, the cascaded model can optimize in a
-better way its velocity and the distribution of the force along the track, due
-to its long horizon planning capacity. More intuitively, the braking happens in
-anticipation, rather than after noticing the curve is too steep. Hence, the
-average speed is almost the same, although the force usage is higher.
-Considering now the third and fourth row of the table, we notice that the
-increase in force usage and average speed are proportional to each other,
-resulting in the last cascaded model having a considerably higher average speed
-(considering how short the track is) than the singletrack. This overview
-suggests how this cascaded model is the best one between the three considered,
-because it can balance the usage of the force in order to reach better
-performances.\\
-As an extreme case, the last row of table \ref{simulations} shows a singletrack
-controller with 60 steps and a higher maximal allowed speed. The simulation of
-this controller is shown in figure \ref{singletrack_outside}. As already pointed
-out, previously, the car goes outside the track at a certain point. Indeed, the
-average speed decreases while the force usage increases by far, due to the
-excessive braking to recover the track path.
+of table \ref{simulations}. So, let's start with some considerations on the singletrack. \\
+The configuration which has the highest average force is the second one, which is 
+also the slowest one. This is due probably to the fact it goes out of the boundaries.
+Comparing the first and the third singletrack configurations, we can see how an higher
+force usage does not imply a faster laptime and an higher average velocity. This means
+that the third controller optimizes in a better way the usage of force along the circuit.
+The fourth controller is the one that guarantees the best performances, but it still uses
+less average force with respect to the second configuration. \\
+On the opposite, the cascaded controllers have a nicer situation, because the usage of 
+force is proportional to the performance the controller can guarantee and to the length
+of the horizon. \\
+One more thing must be noticed: only the third singletrack controller has a lower force usage
+than the best performing cascaded controller (the third one in table \ref{simulations}).
+This is another aspect where we can appreciate this type of architecture.
+
+\paragraph{Slip angle}
+The trend of the slip angles is useful to understand which simulated configurations can be
+proposed also in a real environment and which not, because of the infeasible lateral forces
+they can generate. In figure \ref{slip_angles}, we showed the dynamics of the slip angles of 
+the front and rear wheels in some configurations. The red line represents the limits at
+each instant, while the blue line represents the actual value of the slip angles. 
+We can notice how the casaded controller pushes the slip angles to their limits
+without surpass them, so it means the generated lateral forces are still feasible.
+Instead, considering the singletrack configurations, we can see how the one in Figure
+\ref{single_slip_50_20} and \ref{single_slip_60_20} plently overcome the limits of slip angles.
+While for the first one is an intuitive result, because of its driving profile that goes outside
+the track (as we said in \ref{laptime}), for the second one is more surpising. It means the 
+controller tries to push the car to its limits, but in doing this the tires generate infeasible
+lateral forces. The only singletrack controller which respects the slip angle limits is the
+one observed in Figure \ref{single_slip_60_18}, and this result agrees also with what we said 
+in section \ref{force_usage} on the usage of force.
+
+
+
+\begin{figure}
+    \centering
+    \begin{subfigure}{0.65\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{assets/im/cascaded_slip_35_18.png}
+        \subcaption{Cascaded with $N=20, M=35, V_{max}=18$}
+        \label{cascaded_slip}
+    \end{subfigure}
+    \begin{subfigure}{0.65\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{assets/im/singletrack_slip_50_20.png}
+        \subcaption{Singletrack with $N=50, V_{max}=20$}
+        \label{single_slip_50_20}
+    \end{subfigure}
+    \begin{subfigure}{0.65\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{assets/im/singletrack_slip_60_18.png}
+        \subcaption{Singletrack with $N=60, V_{max}=18$}
+        \label{single_slip_60_18}
+    \end{subfigure}
+    \begin{subfigure}{0.65\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{assets/im/singletrack_slip_60_20.png}
+        \subcaption{Singletrack with $N=60, V_{max}=20$}
+        \label{single_slip_60_20}
+    \end{subfigure}
+    \caption[short]{Comparisons of slip angles}
+    \label{slip_angles}
+\end{figure}
+
+
 
 \paragraph{Pushing the car to its physical boundaries}
 An important idea, for which this work shall serve as proof-of-concept, is to
