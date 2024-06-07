@@ -544,6 +544,15 @@ steps for the singletrack model and $M$ steps for the pointmass model.
         J_{\dot{u}} = J_{\dot{\delta}} + J_{\Delta F_y} + J_{\Delta F_x} + J_{\Delta F_u}
     \end{equation}
 
+    where:
+    \begin{eqnarray}
+        J_{\dot{\delta}} &=& W_{\dot{\delta}}\sum_{k=0}^{N} \dot{\delta_k}^2 \\
+        J_{\Delta F_y} &=& W_{\Delta F_y} \sum_{l=1}^{M-1} \frac{\left(\bar{F}_{y_{l+1}}-\bar{F}_{y_{l}}\right)}{\Delta \bar{s}_l}^2 \\
+        J_{\Delta F_x} &=& W_{\Delta F_x} \left(\sum_{k=0}^{N-1} \frac{\left({F}_{x_{k+1}}-{F}_{x_{k}}\right)}{\Delta {s}_k}^2  + 
+                                                \sum_{l=1}^{M-1} \frac{\left(\bar{F}_{x_{l+1}}-\bar{F}_{x_{l}}\right)}{\Delta \bar{s}_l}^2  \right) \\
+        J_{\Delta F_u} &=& \frac{W_{\Delta F}}{\Delta \bar{s}_0}\left( \left(\bar{F}_{x_1}-F_{x_N}\right)^2 + \left(\bar{F}_{y_1}-\tilde{F}_{y_{f_N}}-\tilde{F}_{y_{r_N}}\right)^2 \right) 
+    \end{eqnarray}
+
     \item \textbf{Excessive Slip Angle}: in order to discourage the car to operate in the fully saturated region of the tires, we add a penalty on excessive slip angle. This helps in stabilizing the car.
     \begin{equation}
         J_{a} = W_{a}\sum_{k=1}^{N}
@@ -812,10 +821,10 @@ constraints in a very similar way to the mathematical language.\\
     \item Prepare optimization variables at iteration $n$
     \begin{subequations}
         \begin{eqnarray}
-            X_N = [U_{x,k}, U_{y,k}, r_k, \delta_k, s_k, e_k, \Delta \varPsi_k, t_k]_{k=n}^{n+N} \\
-            X_M = [V_k, e_k, \Delta \varPsi_k, t_k]_{k=n+N}^{n+N+M} \\
-            U_N = [F_{x,k}, \omega_k]_{k=n}^{n+N} \\
-            U_M = [F_{x,k}, F_{y,k}]_{k=n+N}^{n+N+M}
+            X_N &=& [U_{x,k}, U_{y,k}, r_k, \delta_k, s_k, e_k, \Delta \varPsi_k, t_k]_{k=n}^{n+N} \\
+            X_M &=& [V_k, e_k, \Delta \varPsi_k, t_k]_{k=n+N}^{n+N+M} \\
+            U_N &=& [F_{x,k}, \omega_k]_{k=n}^{n+N} \\
+            U_M &=& [F_{x,k}, F_{y,k}]_{k=n+N}^{n+N+M}
         \end{eqnarray}
     \end{subequations}
     \item Initialize parameters $s_0$, $\kappa$, $s$, $ds$ at iteration $n$.
@@ -1142,33 +1151,38 @@ drive near the border in order to reduce laptime.
         \textbf{Controller} & \textbf{Iter.} & \textbf{Lap} & \textbf{MSE} \\ [0.5ex] 
         \hline
         \hline
-        Singletrack $N=60$ & 432 & $21.60 s$ & $1.55 m$ \\
+        Singletrack $N=50, V_{max}=18$ & 442 & $22.05 s$ & $1.29 m$ \\
         \hline
-        Cascaded $N=20, M=15$ & 430 & $21.50 s$ & $3.37 m$ \\
+        Singletrack $N=50, V_{max}=20$ & 448 & $22.35 s$ & $2.79 m$ \\
         \hline
-        Cascaded $N=20, M=35$ & 417 & $20.85 s$ & $3.20 m$ \\
+        Singletrack $N=60, V_{max}=20$ & 428 & $21.35 s$ & $2.29 m$ \\
+        \hline
+        Cascaded $N=20, M=15. V_{max}=18$ & 432 & $21.55 s$ & $3.37 m$ \\
+        \hline
+        Cascaded $N=20, M=35, V_{max}=18$ & 418 & $20.85 s$ & $3.20 m$ \\
         \hline
     \end{tabular}
 \end{table}
 
 \begin{figure}[H]
+    \captionsetup[subfigure]{justification=centering}
     \centering
-    \begin{subfigure}{0.9\textwidth}
+    \begin{subfigure}{0.8\textwidth}
         \centering
         \includegraphics[width=\textwidth]{assets/im/race1.png}
         \subcaption{Cascaded with $N=20, M=15, V_{max}=18$,\\ Singletrack with $N=50, V_{max}=18$}
         \label{race1}
     \end{subfigure}
-    \begin{subfigure}{0.9\textwidth}
+    \begin{subfigure}{0.8\textwidth}
         \centering
         \includegraphics[width=\textwidth]{assets/im/race7.png}
         \subcaption{Cascaded with $N=20, M=35, V_{max}=18$, \\ Singletrack with $N=50, V_{max}=20$}
         \label{race7}
     \end{subfigure}
-    \begin{subfigure}{0.9\textwidth}
+    \begin{subfigure}{0.8\textwidth}
         \centering
         \includegraphics[width=\textwidth]{assets/im/race5.png}
-        \subcaption{Cascaded with $N=20, M=35, V_{max}=18$, \\ Singletrack with $N=50, V_{max}=20$}
+        \subcaption{Cascaded with $N=20, M=35, V_{max}=18$, \\ Singletrack with $N=60, V_{max}=20$}
         \label{race5}
     \end{subfigure}
     \caption[short]{Comparisons in race}
