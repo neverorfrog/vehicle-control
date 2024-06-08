@@ -1,17 +1,19 @@
 track_name: 'ippodromo'
 
 controller_names:
-  # - 'singletrack'
-  - 'cascaded'
+  - 'singletrack'
+  # - 'cascaded'
+
+obstacles: False
 
 # It can be activated just if 
 # there is one controller
 slip_angle_plot: False
 
-name: 'cascaded6'
+name: 'singletrack4'
 
 save_gif: False
 save_images: False
 save_data: False
-load: False
+load: True
 logging: False

@@ -43,6 +43,8 @@ class RacingSimulator(Simulator):
         
         #controllers
         controllerconfigs = [OmegaConf.create(utils.load_config(f"config/controllers/{name}.yaml")) for name in self.names]
+        for controllerconfig in controllerconfigs:
+            controllerconfig.obstacles = simconfig.obstacles
         combriccola = zip(cars, point_masses, controllerconfigs)
         controllers = [control.CascadedMPC(car=car, point_mass=point_mass, config=config) for car,point_mass,config in combriccola]
         self.controllers = controllers
@@ -77,6 +79,7 @@ class RacingSimulator(Simulator):
             print(name)
             print(f"Laptime: {self.state_traj[name][-1,-1]}")
             print(f"Average time:{np.mean(self.elapsed[name])}")
+            print(f"Median time:{np.median(self.elapsed[name])}")
             print(f"Average speed: {np.mean(self.state_traj[name][:,0])}")
             print(f"Mean Fx: {np.mean(np.abs(self.action_traj[name][:,0]))}")
             print(f"Std Fx: {np.std(self.action_traj[name][:,0])}")
@@ -162,7 +165,10 @@ class RacingSimulator(Simulator):
             self.lap_time = fig.text(0.5, 0.97, 'Laptime', fontsize=16, ha='center', va='center')
             
         # Animation initialization
-        return FuncAnimation(fig, func, frames, interval=0, cache_frame_data=False, repeat_delay=0)
+        if self.loaded:
+            return FuncAnimation(fig, func, frames, interval=0, cache_frame_data=False, repeat=False)
+        else:
+            return FuncAnimation(fig, func, frames, interval=0, cache_frame_data=False, repeat_delay=0)
     
     
     def update(self, n):  

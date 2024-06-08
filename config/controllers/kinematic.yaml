@@ -1,7 +1,7 @@
 # prediction horizon
 horizon: 50
 mpc_dt: 0.03
-obstacles: True
+obstacles: True #overridden by simconfig
 color: 'red'
 
 # weights for the cost function
