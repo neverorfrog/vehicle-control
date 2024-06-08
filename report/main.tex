@@ -46,8 +46,6 @@
 
 \begin{document}
 
-\listoftodos
-
 \maketitle
 \begin{abstract}
     Dynamical models can be too computationally expensive for real-time
@@ -68,15 +66,26 @@
 \tableofcontents
 
 \newpage
-\section{Introduction and related works}
+\section{Introduction}
 
-In recent years autonomous driving has emerged as one of the most prominent topics in the robotics and artificial intelligence research fields, while also gathering a lot of attention from the general public. It has the potential to reshape the way we move around a city completely, and can lead to a significant reduction of deaths related to road accidents.
+In recent years autonomous driving has emerged as one of the most prominent
+topics in the robotics and artificial intelligence research fields, while also
+gathering a lot of attention from the general public. It has the potential to
+reshape the way we move around a city completely, and can lead to a significant
+reduction of deaths related to road accidents.
 
-The main challenges of autonomous driving are ensuring the ability to accurately perceive the environment surrounding the vehicle, and then solve complex decision-making problems based on the received data. Nevertheless,  at the heart of autonomous driving lies the challenge of motion planning, which is the process of determining the optimal path and speed, while respecting various constraints, such as safety, speed and many others.
+The main challenges of autonomous driving are ensuring the ability to accurately
+perceive the environment surrounding the vehicle, and then solve complex
+decision-making problems based on the received data. Nevertheless,  at the heart
+of autonomous driving lies the challenge of motion planning, which is the
+process of determining the optimal path and speed, while respecting various
+constraints, such as safety, speed and many others.
 
-To approach this challenge, one popular approach is to employ Model Predictive Control (MPC), which is a control technique that, in closed-loop, computes the control inputs by means of an optimization algorithm,
-which uses a \textbf{model} of the system and measurements to \textbf{predict}
-future states and act accordingly by choosing the "best" control action. 
+To approach this challenge, one popular approach is to employ Model Predictive
+Control (MPC), which is a control technique that, in closed-loop, computes the
+control inputs by means of an optimization algorithm, which uses a
+\textbf{model} of the system and measurements to \textbf{predict} future states
+and act accordingly by choosing the "best" control action. 
 
 \begin{equation}
 \begin{aligned}
@@ -89,67 +98,67 @@ future states and act accordingly by choosing the "best" control action.
 \end{equation}
 
 We call $J(x)$ the \textbf{cost function} and $f(x,u)$ the \textbf{model}. The
-critical part of MPC lies in the two last rows. The second-last expresses the
-fact that, for every planning horizon, the current state is the initial state:
-this is a subtle but important difference with respect to, for example,
-trajectory optimization. The last row entails an equally important concept which
-pertains specifically MPC, namely constraints. In the end, the sequence of
-control actions is generated such that the cost function is minimized over the
-\textbf{prediction horizon} by solving a constrained optimization problem that
-depends on the evolution of the model over the horizon itself. Then, the
-controller applies just the first action: in this way the system has advanced
-one step, a new optimization problem with a new initial state is produced, and
-the process goes on. The advantages of MPC are many: it is a multivaribale
-controller, so it can control outputs by handling simultaneously all the
-interactions between system variables; as said, it can handle constraints, so it
-allows to avoid possible undesired states; it predicts the future states,
-allowing to incorporate their information in the actual control. It is
-particulary useful for a real-time control that adapts to \textbf{changes in the
-environment}.\\
+second-last row expresses the fact that, for every planning horizon, the current
+state is the initial state: this is a subtle but important difference with
+respect to, for example, trajectory optimization. The last row entails an
+equally important concept which pertains specifically MPC, namely constraints.
+In the end, the sequence of control actions is generated such that the cost
+function is minimized over the \textbf{prediction horizon} by solving a
+constrained optimization problem that depends on the evolution of the model over
+the horizon itself. Then, the controller applies just the first action: in this
+way the system has advanced one step, a new optimization problem with a new
+initial state is produced, and the process goes on. The advantages of MPC are
+many: it is a multivaribale controller, so it can control outputs by handling
+simultaneously all the interactions between system variables; as said, it can
+handle constraints, so it allows to avoid possible undesired states; it predicts
+the future states, allowing to incorporate their information in the actual
+control. It is particulary useful for a real-time control that adapts to
+\textbf{changes in the environment}.\\
 When dealing with nonlinear dynamics, a nonlinear MPC (or NMPC) can be used to
 capture more accurately the nonlinear behavior of a system. This entails a more
 robust manipulation capability of both nonlinearities and uncertainties in the
 system. However, one of its major problems is the computational power it can
-require, especially when dealing with highly nonlinear systems. This entails the
-need of a high-performance hardware to solve the optimization problem in an
+require, especially when dealing with highly nonlinear systems. This may require
+a need of a high-performance hardware to solve the optimization problem in an
 acceptable time, but sometimes this is not enough. Especially in a real
 environment, where the timeliness is fundamental to take a decision,
-computational efficiency is of utmost importance.
+computational efficiency is of utmost importance. An example of such a task is
+autonomous driving, where there is the need for a long planning horizon, due to
+the high speeds reached by the vehicle, which require it to start braking well
+in advance for upcoming turns in the road, and the need for a fast control loop
+in order to stabilize the vehicle and avoid any unexpected obstacle.
 
-This is especially true for the task of autonomous driving, where there is the need for a long planning horizon, due to the high speeds reached by the vehicle, which require it to start braking well in advance for upcoming turns in the road, and the need for a fast control loop in order to stabilize the vehicle and avoid any unexpected obstacle.
-
-Due to the duality of the requirements, a popular approach has been to use different control loops to address different tasks. In \cite{Gros2007} for example, to control a quadcopter with similar requirements to our case, two loops with different time scales were used: a slow trajectory generation loop and a faster loop for controlling said quadcopter through linear feedback. 
-
-Another approach has been to use two models of different complexity, to deal with different tasks. In \cite{Gao2010} a point-mass model is used for high-level path planning, while a more complex four-wheel model is used for low-level path following.
-
-The main limitation of this approach is that the trajectory generated by the high-level path planner might be feasible for the simple point-mass model but impossible to track by the low-level controller, that has to control a more complex model, with more constraints and limitations.\\
-
-\cite{paper} follows the intuition of using models of different complexity, and improves on it by employing a so-called \textbf{cascaded model}, composed by a
+\subsection*{Related Work}
+\paragraph*{} Due to the duality of the requirements, a popular approach has been
+to use different control loops to address different tasks. In \cite{Gros2007}
+for example, to control a quadcopter with similar requirements to our case, two
+loops with different time scales were used: a slow trajectory generation loop
+and a faster loop for controlling said quadcopter through linear feedback.
+\paragraph*{} An orthogonal approach, adopted in \cite{rosolia}, is to use a
+linearized model that learns iteratively from a precomputed time-optimal
+trajectory.
+\paragraph*{} Another approach has been to use two models of different 
+complexity, to deal with different tasks. In \cite{Gao2010} a point-mass model
+is used for high-level path planning, intrinsically more far-sighted, while a
+more complex four-wheel model is used for low-level path following.The main
+limitation of this approach is that the trajectory generated by the high-level
+path planner might be feasible for the simple point-mass model but impossible to
+track by the low-level controller, that has to control a more complex model,
+with more constraints and limitations.
+\paragraph*{}\cite{paper} follows the intuition of using models of different complexity, and
+improves on it by employing a so-called \textbf{cascaded model}, composed by a
 detailed model of the car for the near term, and a simpler model used for
-planning in the long term. 
-This leads to the developement a novel, more computationally
-cost-effective approach for a real-time NMPC for a autonomous driving, which
-was tested in a race environment, where the objective was to complete a lap in
-the minimum possible time, considering the actual capabilities of the vehicle. 
+planning in the long term. This leads to the developement a novel, more
+computationally cost-effective approach for a real-time NMPC for a autonomous
+driving, which was tested in a race environment, where the objective was to
+complete a lap in the minimum possible time, considering the actual capabilities
+of the vehicle. 
 
-In this work we tried to replicate the architecture of the paper from scratch,
+\subsection*{Outline}
+In this work we tried to replicate the architecture of \cite{paper} from scratch,
 testing the code in a very simple simulated race environment. Our purpose is to
 show that, as claimed by \cite{paper}, the average computation time for the
 cascaded model is lower, achieving also better results in terms of lap time.
-
-
-\subsection*{Related Work}
-
-\todo[inline]{Fare related work}
-
-\begin{itemize}
-    \item Learning-based approach for vehicle control in \cite{rosolia}
-    \item Linearization approach in \cite{bemporad}
-\end{itemize}
-
-
-\subsection*{Outline}
-
 In the next section we will address the modeling part of the algorithm in a
 rather formal way. Then, we will formalize the NLP structure and put everything
 together to define the complete MPC problem. Right after, we will discuss about
@@ -157,9 +166,7 @@ the actual implementation. In the end, we will discuss some experiments and the
 results.
 
 
-\newpage
 \section{Models}
-
 Models must be well-defined to be used in NMPC. It is important to note that, as
 said in \cite{paper}, the cascaded model together with the NLP formulation has
 the precise goal to solve the problem of pushing a car to its physical
@@ -448,7 +455,6 @@ can be addressed by using a kinematic model at low speeds. We will address this
 point in the experiments section. 
 
 
-\newpage
 \section{NLP Structure}
 The NLP (non-linear program) has three main components:
 \begin{itemize}
@@ -567,7 +573,6 @@ steps for the singletrack model and $M$ steps for the pointmass model.
 \end{enumerate}
 
 \subsection{Constraints}
-
 The constraints of the NLP concern some limitations on the states of the single-track and of the point-mass models, 
 on the input variables, on the tire model, and on the dynamics of the systems, including the transition between
 them. In detail:
@@ -613,7 +618,6 @@ them. In detail:
 
 
 \section{Implementation}
-
 We used as main backbone CasADI (\cite{casadi}), a software framework for automatic
 differentiation, nonlinear optimization and optimal control. It is implemented
 in C++ and has also a python interface. Casadi serves three main purposes:
@@ -760,8 +764,7 @@ can be found in
 
 \subsection{Discretized model}
 
-An important aspect, which was not mentioned when we treated the models in a
-more formal way, is how the models are actually discretized.  What happens is
+An important aspect is how the models are actually discretized.  What happens is
 that, conceptually, the model is still expressed as a symbolic function through
 CasADI, as if it were a continuous function. The discretization consists in
 adding to the symbolic function an integrator that lets the system transition
@@ -789,9 +792,9 @@ casadi function by executing the following steps:
     and curvature tuple, returning the next state: \[state_{n+1}=F(state_n,action_n,\kappa)\]
 \end{enumerate}
 
-The implementation of the integrators can be found in
+The implementation of the integrators is in
 \href{https://github.com/neverorfrog/vehicle-control/blob/main/utils/integrators.py}{integrators.py}
-and the dynamical model implementation in
+and the models in
 \href{https://github.com/neverorfrog/vehicle-control/blob/main/models/dynamic_car.py}{dynamiccar.py}.
 In particular, we decided to use RK4 numerical integrator for the single-track
 model because of its accuracy, and the easier Euler method for the pointmass.
@@ -863,19 +866,23 @@ terms about the user-defined friction limits depending on road conditions, since
 we can't test on a real road. 
 
 
-\newpage
 \section{Experiments}
-
-
-We've used almost the same data to define the car's model as in \cite{paper}. We
-decided to simulate the car as if it were on dry asphalt. Thus, we just changed
-the parameters related to the cornering stiffness. Since the authors did the
-tests on wet asphalt, and the cornering stiffness is usually higher for dry
-asphalts \cite{stiffness}, we decided to raise the cornering stiffness
-accordingly. Similarly, the friction values have to take into account that the
-asphalt is dry. Letting the car drive on wet asphalt would necessitate extra
-parameter tuning and would give additional difficulties that are out of the
-scope of this work.
+The tested tracks are 9 meters wide and with a friction value similar to that of
+dry asphalt. The sample time is 50ms in all experiments. For the car parameters,
+we've used almost the same data as in \cite{paper}. Since we simulate on dry
+asphalt, we just changed the parameters related to the cornering stiffness.
+Since the authors did the tests on wet asphalt, and the cornering stiffness is
+usually higher for dry asphalts \cite{stiffness}, we decided to raise the
+cornering stiffness accordingly. Similarly, the friction values have to take
+into account that the asphalt is dry. Letting the car drive on wet asphalt would
+necessitate extra parameter tuning and would give additional difficulties that
+are out of the scope of this work. Table \ref{weights} shows some typical values
+of the weights used in the optimization. These values were chosen through
+considerations about the model and also trial-and-error tests. Note that the
+highest weights are the slip angle, road boundary and obstacle avoidance. The
+slip angle is particularly high because we actually noted that lower values
+still resulted in the nlp trying to perform steeper curves, and thus generating
+high slip angles that would lead to infeasible lateral forces. 
 \begin{table}[H]
     \centering
     \caption{Parameters of the dynamic model of the car} \label{params}
@@ -963,23 +970,15 @@ scope of this work.
         \hline
     \end{tabular}
 \end{table}
-Table \ref{weights} shows some typical values of the weights used in the
-optimization. These values were chosen through considerations about the model
-and also trial-and-error tests. Note that the highest weights are the slip
-angle, road boundary and obstacle avoidance. The slip angle is particularly high
-because we actually noted that lower values still resulted in the nlp trying to
-perform steeper curves, and thus generating high slip angles that would lead to
-infeasible lateral forces. 
 
 \subsection{Problem size}
-First and foremost, we could compare the dimension of the nlp in terms of
-constraints and decision variables. CasADI comes in handy for this task.
-Naturally, we expect that the nlp for the cascaded controller is smaller. We
-test two configurations: one in singletrack mode with 60 steps, and the other in
-cascaded mode with 20 singletrack steps and 35 pointmass steps. \\
+An important consideration is to compare the dimensions of the nlp in terms of
+constraints and decision variables. We expect the nlp of the cascaded
+controller to be smaller. We test two configurations: one with 60 singletrack
+steps, and the other in cascaded mode with 20 singletrack steps and 35 pointmass
+steps. \\
 \begin{Verbatim}[frame=single,label=Singletrack with 60 steps,labelposition=topline,framesep=10pt]
 Number of nonzeros in equality constraint Jacobian...:     3902
-Number of nonzeros in inequality constraint Jacobian.:     1380
 Number of nonzeros in Lagrangian Hessian.............:     2201
 
 Total number of variables............................:      600
@@ -992,7 +991,6 @@ Total seconds in IPOPT                               = 0.114 ms
 \vspace{1mm}
 \begin{Verbatim}[frame=single,label=Cascaded with 20+35 steps,labelposition=topline,framesep=10pt]
 Number of nonzeros in equality constraint Jacobian...:     1989
-Number of nonzeros in inequality constraint Jacobian.:      565
 Number of nonzeros in Lagrangian Hessian.............:     1275
 
 Total number of variables............................:      550
@@ -1002,73 +1000,33 @@ Total number of inequality constraints...............:      230
 Number of objective function evaluations             = 22
 Total seconds in IPOPT                               = 0.050 ms
 \end{Verbatim}
-Even though the number of total steps is almost the same, the singletrack
-configuration has clearly more variables and constraints. Moreover, we should
-consider that in the MPC all the variables are inside a single CasADI matrix
-(whose size if fixed apriori) and that the pointmass has less state variables
-than the singletrack model. Hence, the number of "active variables" is even less
-than the number shown above. In fact, a better indicator is the number of
-constraints, especially the inequalities, and the jacobian and hessian
-dimension. The latter is almost halved for the cascaded configuration. This is
-due to the fact that the pointmass model neglects the terms concerning steering,
-namely the minimization of steering velocities and slip angle cost term. The
-neglected constraints are the ones concerning the tire model and, again, the
-steering inputs. For what concerns the effective duration of the MPC iteration,
-the cascaded controller takes signifantly less time, despite needing more
-evaluations. Also, despite the number of steps being almost the same, fewer
-pointmass steps are necessary, because the spatial step size can be chosoen
-bigger thatn with the singletrack. That caused by the fact that the pointmass is
-non subject to the delicate yaw dynamics. Anyway, just to visualize and be aware
-of how much the pointmass model impacts the horizon, the two horizon lengths are
-shown in figure \ref{horizons}.
-
-\subsection{Cascaded vs Singletrack on a simple track}
-
-The first set of tests was carried out on a pretty simple track, as the one in Figure
-\ref{ippodromo}, without obstacles for the moment. We compare different configurations
-for both singletrack and cascaded models, changing the length of the horizon and the 
-maximum speed velocity. We report the results below. We tried also other configurations,
-but the ones reported here are the most interesting ones. 
-The first column indicates the number of iterations per lap and the second the lap
-time. The third column indicates the average time per iteration of the MPC,
-while the fourth and fifth column represent the average speed and the average
-force input. In the next paragraphes we are going to analyze these results. 
-
-\begin{table}[h] 
-    \centering
-    \caption{Performance of various controller configurations} \label{simulations}
-    \begin{tabular}{|c||c|c|c|c|c|}
-        \hline
-        \textbf{Controller} & \textbf{Iter.} & \textbf{Lap} & \textbf{Time} & \textbf{Av.$U_x$} & \textbf{Av.|$F_x$|} \\ [0.5ex] 
-        \hline
-        \hline
-        Singletrack $N=50$, $V_{max}=18m/s$ & 442 & $22.05 s$ & $93 ms$ & $14.26 m/s$ & $2661.67 N$\\
-        \hline
-        Singletrack $N=50$, $V_{max}=20m/s$ & 448 & $22.35 s$ & $105 ms$ & $14.07 m/s$ & $3273.58 N$\\
-        \hline
-        Singletrack $N=60$, $V_{max}=18m/s$ & 433 & $21.60 s$ & $81 ms$ & $14.44 m/s$ & $2375.56 N$\\
-        \hline
-        Singletrack $N=60$, $V_{max}=20m/s$ & 428 & $21.35 s$ & $127 ms$ & $14.58 m/s$ & $2543.66 N$\\
-        \hline
-        Cascaded $N=20, M=15, V_{max}=18m/s$ & 432 & $21.55 s$ & $42 ms$ & $14.41 m/s$ & $2083.51 N$\\
-        \hline
-        Cascaded $N=20, M=25, V_{max}=18m/s$ & 424 & $21.15 s$ & $47 ms$ & $14.64 m/s$ & $2337.79 N$\\
-        \hline
-        Cascaded $N=20, M=35, V_{max}=18m/s$ & 418 & $20.85 s$ & $47 ms$ & $14.75 m/s$ & $2588.77 N$\\
-        \hline
-        Cascaded $N=20, M=35, V_{max}=20m/s$ & 418 & $20.85 s$ & $63 ms$ & $14.77 m/s$ & $2591.64 N$\\
-        \hline
-    \end{tabular}
-    \label{experiments}
-\end{table}
+The singletrack configuration has clearly more variables and constraints.
+Moreover, we should consider that in the MPC all the variables are inside a
+single CasADI matrix (whose size if fixed apriori) and that the pointmass has
+less state variables than the singletrack model. Hence, the number of "active
+variables" is even less than the number shown above. In fact, instead of the
+number of total steps, a better indicator is the number of constraints,
+especially the inequalities, and the jacobian and hessian dimension. The latter
+is almost halved for the cascaded configuration. This is due to the fact that
+the pointmass model neglects the terms concerning steering, namely the
+minimization of steering velocities and slip angle cost term. The neglected
+constraints are the ones concerning the tire model and, again, the steering
+inputs. For what concerns the effective duration of the MPC iteration, the
+cascaded controller takes signifantly less time, despite needing more
+evaluations. Also, even if the number of total steps is almost the same,
+fewer pointmass steps are necessary, because the spatial step size can be
+chosoen bigger than with the singletrack. That's because the pointmass is not
+subject to the delicate yaw dynamics. Just to visualize and be aware of how much
+the pointmass model impacts the horizon, the two horizon lengths are shown in
+figure \ref{horizons}.
 \begin{figure}[H] 
     \centering
-        \begin{subfigure}{0.9\textwidth} 
+        \begin{subfigure}{0.85\textwidth} 
         \centering
         \includegraphics[width=\textwidth]{assets/im/fig2_50.png}
         \subcaption{Singletrack with $N=50$, Cascaded with $N=20, M=15$}
     \end{subfigure}
-    \begin{subfigure}{0.9\textwidth}
+    \begin{subfigure}{0.85\textwidth}
         \centering
         \includegraphics[width=\textwidth]{assets/im/fig2_60.png}
         \subcaption{Singletrack with $N=60$, Cascaded with $N=20, M=35$}
@@ -1077,69 +1035,94 @@ force input. In the next paragraphes we are going to analyze these results.
     \label{horizons}
 \end{figure}
 
-
-
+\subsection{Cascaded vs Singletrack on a simple track}
+The first set of tests was carried out on a pretty simple track, as the one in
+Figure \ref{ippodromo}, without obstacles for the moment. We compare different
+configurations for both singletrack and cascaded models, changing the length of
+the horizon and the maximum speed velocity. We report the results below. We
+tried also other configurations, but the ones reported here are the most
+interesting ones. The first column indicates the number of iterations per lap
+and the second the lap time. The third and fourth column indicate the average
+and median time per iteration of the MPC, while the fifth and sixth column
+represent the average speed and the average force input. In the next paragraphes
+we are going to analyze these results. 
+\begin{table}[h] 
+    \centering
+    \caption{Performance of various controller configurations} \label{simulations}
+    \hspace*{-2.66cm}
+    \begin{tabular}{|c||c|c|c|c|c|c|}
+        \hline
+        \textbf{Controller} & \textbf{Iter.} & \textbf{Lap} & \textbf{Av.Time} & \textbf{Med.Time} & \textbf{Av.$U_x$} & \textbf{Av.|$F_x$|} \\ [0.5ex] 
+        \hline
+        \hline
+        Singletrack $N=50$, $V_{max}=18m/s$ & 442 & $22.05 s$ & $93 ms$ & $75 ms$ & $14.26 m/s$ & $2661.67 N$\\
+        \hline
+        Singletrack $N=50$, $V_{max}=20m/s$ & 448 & $22.35 s$ & $105 ms$ & $83 ms$ & $14.07 m/s$ & $3273.58 N$\\
+        \hline
+        Singletrack $N=60$, $V_{max}=18m/s$ & 433 & $21.60 s$ & $81 ms$ & $76 ms$ & $14.44 m/s$ & $2375.56 N$\\
+        \hline
+        Singletrack $N=60$, $V_{max}=20m/s$ & 428 & $21.35 s$ & $127 ms$ & $105 ms$ & $14.58 m/s$ & $2543.66 N$\\
+        \hline
+        Cascaded $N=20, M=15, V_{max}=18m/s$ & 432 & $21.55 s$ & $42 ms$ & $36 ms$ & $14.41 m/s$ & $2083.51 N$\\
+        \hline
+        Cascaded $N=20, M=25, V_{max}=18m/s$ & 424 & $21.15 s$ & $47 ms$ & $37 ms$ & $14.64 m/s$ & $2337.79 N$\\
+        \hline
+        Cascaded $N=20, M=35, V_{max}=18m/s$ & 418 & $20.85 s$ & $47 ms$ & $41 ms$ & $14.75 m/s$ & $2588.77 N$\\
+        \hline
+        Cascaded $N=20, M=35, V_{max}=20m/s$ & 418 & $20.85 s$ & $52 ms$ & $43 ms$ & $14.78 m/s$ & $2591.64 N$\\
+        \hline
+        Cascaded $N=20, M=40, V_{max}=20m/s$ & 418 & $20.85 s$ & $49 ms$ & $42 ms$ & $14.78 m/s$ & $2615.64 N$\\
+        \hline
+    \end{tabular}
+    \label{experiments}
+\end{table}
 
 \paragraph{Computational efficiency}
-The cascaded controller halves the average computation time with respect to the
-singletrack. This is already a very important result, which demonstrates the 
-effectiveness of using such a
-controller as opposed to using the singletrack model for the whole prediction
-horizon. Moreover, considering that the sample time is $50ms$ in our experiments, the
-computation time of the singletrack controller exceeds by far realtime
-requirements. In particular in the first iterations, the singletrack reaches $130ms$
-per iterations, which is absolutely prohibitive. \\
-On the other hand, when adding more pointmass steps to the cascaded controller, the 
-time per iteration increases, but not significantly. 
-For example, considering the ones with a maximum velocity of 18m/s, passing from 
-$M=15$ to $M=35$ just takes a computation time of 5ms, while passing from $M=15$ to $M=35$
-is practically negligible. Instead, we have a different situation for the last controller, 
-where the little change on the maximum velocity makes a consistent increment of the 
-computational time. This conseguence implies also an impossibility of usage in a realtime 
-scenario, due to the exceeding of the sample time.
+The cascaded controller \textbf{halves the average and median computation time}
+with respect to the singletrack. This on its own is already a very important
+result that demonstrates the effectiveness of using both models as opposed to
+just the singletrack model for the whole prediction horizon. In fact,
+considering that the sample time is $50ms$ in our experiments, the computation
+time of the \textbf{singletrack controller exceeds by far realtime
+requirements}. In particular in the first iterations, the singletrack reaches
+$130ms$ per iterations, which is absolutely prohibitive. On the other hand, as
+expected, when adding more pointmass steps to the cascaded controller, the time
+per iteration increases, but not significantly. For example, considering the
+ones with a maximum velocity of 18m/s, passing from $M=15$ to $M=35$ cause an
+increase of 5ms, while passing from $M=25$ to $M=35$ is practically negligible.
+Instead, we have a different situation for the last controller, where the little
+change on the maximum velocity causes an increment in the computation time. This
+may happen for the same reasons as for the singletrack, namely the horizon is
+too short to predict the curvature anticipately enough. In fact - and this may
+actually seem somehow counterintuitive - if we prolong the pointmass horizon by 5
+steps, as in the last row of the table, the computation time is slightly
+reduced, both average and median. Another aspect worth mentioning is that there
+is more excursion between average and median time for the singletrack
+controller. This is a symptom of particular points in the track where it takes
+the optimizer more time to find a solution. This generally does not happen with
+the cascaded controller.
 
 \paragraph{Laptime} \label{laptime}
-Here we will not take in consideration factors different from the laptime.
 Let's first analyze the performances of different configurations of the same 
 controller, and then compare the two types between them. \\
-Looking at the results of the singletrack controllers, we can notice how a longer
-horizon is beneficial to reduce the racing time, even having a lower maximum
-velocity limit. Another important thing to be noticed is that the controller
-with $N=60$ and an higher maximum velocity acts better than the one with lower
-maximum velocity; instead, the controllers with $N=50$ do not follow this behavior,
-thus the one with lower velocity runs faster than the other one. The reason behind 
-this scenario can be understood by observing the trajectory of the second controller,
-in figure \ref{race7}. The segment before the third curve is straight and long enough to
-reach a relatively high speed, while the prediction horizon is not far-sighted
-enough to see how much curvature the track has. This results in the car that goes
-outside the boundaries, and takes more time to recover. \\
-Switching to the cascaded controllers, it is easy to see how increasing the number
-of steps for the pointmass horizon the laptime consequently reduces. Equally, it is
-easy to notice that making the maximum feasible velocity higher, it does not result
-in better performances, as shown by the last two controllers of table \ref{simulations}. \\
-Comparing the two types of controller between them, the results show how the best
-singletrack controller behaves better than just the worst cascaded controller. 
-
-
-
-\paragraph{Driving profile}
-In figure \ref{race_ippodromo}, we show some driving profiles using different
-controllers. Focusing on the cascaded controllers (blue trajectories),
-it is interesting to notice that with a longer prediction horizon, the driving
-profile changes and assumes a more aggressive behavior. Specifically, before the
-first curve, which is to the left, there is an inflection to the right. This is
-typical of racing cars: the goal is to break anticipately and take the curve
-from a more external point, in order to hit the so-called "apex", namely the
-nearest point to the internal border of the curve, at the highest possible
-speed. 
-Another consequence is that the flex is hit slightly later with the longer horizon. 
-Before the third curve the behavior is similar: the car keeps going on the external 
-side of the track for a longer time, in order to take the turn with higher speed. 
-An indicator of this more aggressive driving behavior is the mean squared (lateral)
-error. As expected, the singletrack controller (red trajectories) is more conservative in that
-sense; it tries to stay as much as possible at the center of the track.
-Meanwhile, the cascaded controller roams the track while also allowing itself to
-drive near the border in order to reduce laptime.
+Looking at the results of the singletrack controllers, we can notice how a
+longer horizon is beneficial to reduce the racing time, even having a lower
+maximum velocity limit. Another important thing to be noticed is that the
+controller with $N=60$ and an higher maximum velocity acts better than the one
+with lower maximum velocity; instead, the controllers with $N=50$ do not follow
+this behavior, thus the one with lower velocity runs faster than the other one.
+The reason behind this scenario can be understood by observing the trajectory of
+the second controller, in figure \ref{race7}. The segment before the third curve
+is straight and long enough to reach a relatively high speed, while the
+prediction horizon is not far-sighted enough to see how much curvature the track
+has. Thus, it tries to recover the track path by braking and steering as much as
+it can, ending up going outside the boundaries anyway, increasing lap time. \\
+Switching to the cascaded controllers, it is easy to see how, increasing the number
+of steps for the pointmass horizon, the laptime consequently decreases. Similarly, 
+making the maximum feasible velocity higher, it does not result in better performances, 
+as shown by the last two controllers of table \ref{simulations}. \\
+Summarizing, just considering laptime, the results show how the best singletrack
+controller is worse than all but the worst cascaded controllers.
 \begin{table}[H]
     \centering
     \caption{Analysis of mean squared error and laptime}
@@ -1160,7 +1143,24 @@ drive near the border in order to reduce laptime.
         \hline
     \end{tabular}
 \end{table}
-
+\paragraph{Driving profile}
+In figure \ref{race_ippodromo}, we show some driving profiles using different
+controllers. Focusing on the cascaded controllers (blue trajectories), it is
+interesting to notice that with a longer prediction horizon, the driving profile
+changes and assumes a more aggressive behavior. Specifically, before the first
+curve, which is to the left, there is an inflection to the right. This is
+typical of racing cars: the goal is to brake anticipately and take the curve
+from a more external point, in order to hit the so-called "apex", namely the
+nearest point to the internal border of the curve, at the highest possible
+speed. Another consequence is that the flex is hit slightly later with the
+longer horizon. Before the third curve the behavior is similar: the car keeps
+going on the external side of the track for a longer time, in order to take the
+turn with higher speed. An indicator of this more aggressive driving behavior is
+the mean squared (lateral) error. As expected, the singletrack controller (red
+trajectories) is more conservative in that sense; it tries to stay as much as
+possible at the center of the track. Meanwhile, the cascaded controller roams
+the track while also allowing itself to drive near the border in order to reduce
+laptime.
 \begin{figure}[H]
     \captionsetup[subfigure]{justification=centering}
     \centering
@@ -1186,19 +1186,22 @@ drive near the border in order to reduce laptime.
     \label{race_ippodromo}
 \end{figure}
 
-\paragraph{$F_x$ usage } \label{force_usage}
-The average force usage cannot be analysed separately from the other parameters
-of table \ref{simulations}. So, let's start with some considerations on the singletrack. \\
-The configuration which has the highest average force is the second one, which is 
-also the slowest one. This is due probably to the fact it goes out of the boundaries.
-Comparing the first and the third singletrack configurations, we can see how an higher
-force usage does not imply a faster laptime and an higher average velocity. This means
-that the third controller optimizes in a better way the usage of force along the circuit.
-The fourth controller is the one that guarantees the best performances, but it still uses
-less average force with respect to the second configuration. \\
-On the opposite, the cascaded controllers have a nicer situation, because the usage of 
-force is proportional to the performance the controller can guarantee and to the length
-of the horizon. \\
+\paragraph{$F_x$ usage } \label{force_usage} The average force usage cannot be
+analysed separately from the other parameters of table \ref{simulations}. So,
+let's start with some considerations on the singletrack. The configuration which
+has the highest average force is the second one, which is also the slowest one.
+This is due probably to the fact it goes out of the boundaries. Comparing the
+first and the third singletrack configurations, we can see how an higher force
+usage does not imply a faster laptime and an higher average velocity. This means
+that the third controller optimizes in a better way the usage of force along the
+circuit. The fourth controller is the one that guarantees the best performances,
+but it still uses less average force with respect to the second configuration.
+Intuitively, the longer the horizon, the sooner the car brakes, rather than
+after noticing the curve is too steep. Hence, although the average force usage
+is slightly lower, the average speed is higher, resulting in a reduce lap
+time.\\
+In the cascaded controllers the force usage is proportional to the average speed
+the controller can guarantee and to the length of the horizon. \\
 One more thing must be noticed: only the third singletrack controller has a lower force usage
 than the best performing cascaded controller (the third one in table \ref{simulations}).
 This is another aspect where we can appreciate this type of architecture.
@@ -1219,30 +1222,28 @@ controller tries to push the car to its limits, but in doing this the tires gene
 lateral forces. The only singletrack controller which respects the slip angle limits is the
 one observed in Figure \ref{single_slip_60_18}, and this result agrees also with what we said 
 in section \ref{force_usage} on the usage of force.
-
-
-
 \begin{figure}
     \centering
-    \begin{subfigure}{0.65\textwidth}
+    \vspace*{-3cm}
+    \begin{subfigure}{0.76\textwidth}
         \centering
         \includegraphics[width=\textwidth]{assets/im/cascaded_slip_35_18.png}
         \subcaption{Cascaded with $N=20, M=35, V_{max}=18$}
         \label{cascaded_slip}
     \end{subfigure}
-    \begin{subfigure}{0.65\textwidth}
+    \begin{subfigure}{0.76\textwidth}
         \centering
         \includegraphics[width=\textwidth]{assets/im/singletrack_slip_50_20.png}
         \subcaption{Singletrack with $N=50, V_{max}=20$}
         \label{single_slip_50_20}
     \end{subfigure}
-    \begin{subfigure}{0.65\textwidth}
+    \begin{subfigure}{0.76\textwidth}
         \centering
         \includegraphics[width=\textwidth]{assets/im/singletrack_slip_60_18.png}
         \subcaption{Singletrack with $N=60, V_{max}=18$}
         \label{single_slip_60_18}
     \end{subfigure}
-    \begin{subfigure}{0.65\textwidth}
+    \begin{subfigure}{0.76\textwidth}
         \centering
         \includegraphics[width=\textwidth]{assets/im/singletrack_slip_60_20.png}
         \subcaption{Singletrack with $N=60, V_{max}=20$}
@@ -1281,7 +1282,24 @@ We also experimented adding obstacles to the track and comparing the performance
 depending on the weight in the cost function. The controller parameters are the
 same, just with the added cost weight. Incidentally, the singletrack controller
 was not even able to finish the track without going into a numerical
-infeasibility situation. 
+infeasibility situation. As pretty much expected, the controller with a lower weight on obstacle
+avoidance is more aggressive, going very near the obstacles. This results in a
+higher average speed, thus a lower laptime. It also results in a lower average
+force usage, due to the reduced braking.
+\begin{table}[H] 
+    \centering
+    \caption{Different cascaded controllers ($N=20$, $M=15$) depending on $W_{obs}$} \label{obstacles_ippodromo}
+    \begin{tabular}{|c||c|c|c|c|c|c|}
+        \hline
+        \textbf{Controller} & \textbf{Iter.} & \textbf{Lap} & \textbf{Av.Time} & \textbf{Med.Time} & \textbf{Av.Speed} & \textbf{Av.$F_x$} \\ [0.5ex] 
+        \hline
+        \hline
+        $W_{obs}$ = 10 & 518 & $25.85 s$ & $44 ms$ & $40 ms$ & $12.43 m/s$ & $2473.79 N$\\
+        \hline
+        $W_{obs}$ = 1 & 465 & $23.20 s$ & $44 ms$ & $38 ms$ & $13.64 m/s$ & $1903.64 N$\\
+        \hline
+    \end{tabular}
+\end{table}
 \begin{figure}[H]
     \centering
     \begin{subfigure}{0.9\textwidth}
@@ -1297,24 +1315,15 @@ infeasibility situation.
     \end{subfigure}
     \caption[short]{Comparison of two cascaded controllers with obstacles}
 \end{figure}
-\begin{table}[H] 
-    \centering
-    \caption{Different cascaded controllers ($N=20$, $M=15$) depending on $W_{obs}$} \label{obstacles_ippodromo}
-    \begin{tabular}{|c||c|c|c|c|c|}
-        \hline
-        \textbf{Controller} & \textbf{Iter.} & \textbf{Lap} & \textbf{Time} & \textbf{Av.Speed} & \textbf{Av.$F_x$} \\ [0.5ex] 
-        \hline
-        \hline
-        $W_{obs}$ = 10 & 518 & $25.85 s$ & $44 ms$ & $12.43 m/s$ & $2473.79 N$\\
-        \hline
-        $W_{obs}$ = 1 & 465 & $23.20 s$ & $44 ms$ & $13.64 m/s$ & $1903.64 N$\\
-        \hline
-    \end{tabular}
-\end{table}
-As pretty much expected, the controller with a lower weight on obstacle
-avoidance is more aggressive, going very near the obstacles. This results in a
-higher average speed, thus a lower laptime. It also results in a lower average
-force usage, due to the reduced braking.
+We tried also another experiment, where one obstacle covers the entire width of the 
+track. This is an important test that allows to verify if the model is quite robust,
+because of how we modeled the optimization problem. How explained in \ref{cost_section},
+both terms about the road boundary intrusion and obstacle avoidance are modeled
+as terms in the cost function instead of as constraints. This choice allows to make the
+problem feasible also in cases like this. As shown in the figures \ref{giant1} and 
+\ref{giant2}, the car assumes exactly the behavior we would like it to have, that is, 
+it goes slightly outside the track to avoid the obstacle, and then it comes back into 
+the boundaries. 
 \begin{figure}[H]
     \centering
     \begin{subfigure}{0.9\textwidth}
@@ -1331,15 +1340,6 @@ force usage, due to the reduced braking.
     \end{subfigure}
     \caption[short]{Comparison of two cascaded controllers with giant obstacle}
 \end{figure}
-We tried also another experiment, where one obstacle covers the entire width of the 
-track. This is an important test that allows to verify if the model is quite robust,
-because of how we modeled the optimization problem. How explained in \ref{cost_section},
-both terms about the road boundary intrusion and obstacle avoidance are modeled
-as terms in the cost function instead of as constraints. This choice allows to make the
-problem feasible also in cases like this. As shown in the figures \ref{giant1} and 
-\ref{giant2}, the car assumes exactly the behavior we would like it to have, that is, 
-it goes slightly outside the track to avoid the obstacle, and then it comes back into 
-the boundaries. 
 The difference between these two examples is in the values of the weights 
 about the obstacle avoidance. In particular, in the former we considered a weight $W_{obs}=10$ 
 (the same situation shown in the example \ref{obs1}), while in the latter the weight is
@@ -1349,19 +1349,11 @@ second configuration handles these type of situations better.
 
 \subsection{Longer track with steeper curves}
 
-We experimented also on a different and longer (more realistically) track that
-has also steeper curves.
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.95\textwidth]{assets/obstacles_shoe.png}
-    \label{shoe}
-    \caption{Cascaded controller on longer track with obstacles}
-\end{figure}
-The laptime difference is even more exaggerated, more than 1 second. Also, it is
-interesting to notice that the computational efficiency is pretty much the same
-for the cascaded controller (under 50 ms), while for the singletrack it is even
-worse than before. In particular, in figure \ref{singletrack_shoe}, we can
+We experimented also on a different and (more realistically) longer track that
+has also steeper curves. The laptime difference is even more exaggerated, more
+than 1 second. Also, it is interesting to notice that the computational
+efficiency is pretty much the same for the cascaded controller (under 50 ms),
+while for the singletrack it is even worse than before. In particular, we can
 observe a spike in the computational time, corresponding to the first (the
 steepest one) curve. Since the car has to recover the track without crossing the
 boundaries, the optimizer takes much more to find a solution. Moreover, again,
@@ -1370,9 +1362,17 @@ tries to brake too much while steering, impressing too much lateral force. These
 issues don't presente themselves in the cascaded controller. 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.95\textwidth]{assets/singletrack_obstacles_shoe.png}
-    \label{singletrack_shoe}
-    \caption{Singletrack controller on longer track with obstacles}
+    \begin{subfigure}{0.9\textwidth}
+        \centering
+        \includegraphics[width=0.95\textwidth]{assets/obstacles_shoe.png}
+        \subcaption{Cascaded controller}
+    \end{subfigure}
+    \begin{subfigure}{0.9\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{assets/singletrack_obstacles_shoe.png}
+        \subcaption{Singletrack controller}
+    \end{subfigure}
+    \caption{Longer track with obstacles}
 \end{figure}
 
 
@@ -1392,8 +1392,6 @@ sufficient speed, we could switch to the dynamic model.
 
 
 
-
-\newpage
 \section{Conclusion}
 
 In this work we proposed the implementation and experimentation of the cascaded
