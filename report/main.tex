@@ -1414,13 +1414,16 @@ sufficient speed, we could switch to the dynamic model.
 
 In this work we proposed the implementation and experimentation of the cascaded
 MPC algorithm. We showed through the experiments that the algorithm effectively
-works and the premises are right. Of course, there are still some limitations to
-this approach. One could be that the manual tuning of the MPC weights is not
-easy. It requires domain expertise about the dynamical model and the task at
-hand. Thus, a possible extension to this work could be to use a learning
-approach that lifts the programmer from hardcoding the model and the weights.
-This could be done maybe with an iterative learning approach and where both
-models, the singletrack and the pointmass can be predicted by two neural networks.
+works and the premises are right. As stated before, this particular MPC
+architecture is particularly useful for achieving good real-time performances,
+and can be extended to other types of robots, like legged robots or flying
+robots. Of course, there are still some limitations to this approach. One could
+be that the manual tuning of the MPC weights is not easy. It requires domain
+expertise about the dynamical model and the task at hand. Thus, a possible
+extension to this work could be to use a learning approach that lifts the
+programmer from hardcoding the model and the weights. This could be done maybe
+with an iterative learning approach and where both models, the singletrack and
+the pointmass can be predicted by two neural networks.
 
 \bibliographystyle{unsrt}
 \bibliography{references}
