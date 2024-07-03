@@ -41,8 +41,9 @@ class Simulator(ABC):
         
     def save_animation(self):
         plt.gcf().clear()
-        animation: FuncAnimation = self.init_animation(func=self.plot,frames=self.state_len-1)
-        animation.save(f"{self.src_dir}/videos/{self.name}.gif",fps=20, dpi=100, bitrate=1800, writer='pillow')
+        figure = plt.figure(figsize=(20,10))
+        animation: FuncAnimation = self.init_animation(func=self.plot, fig=figure, frames=self.state_len-1)
+        animation.save(f"{self.src_dir}/videos/{self.name}.gif",fps=20, dpi=200, bitrate=1800, writer='pillow')
         print("Animation saved!")
         
     @property
