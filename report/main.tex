@@ -384,14 +384,7 @@ Substituting ${U}_x$ with $\bar{V}$, we can use some of the equations introduced
 in particular for the drag force ${F}_d$ (eq. \ref{drag_force}), for ${F}_b$ (eq. \ref{lateral_force}) and for the normal loads ${F}_{z_f}$ and ${F}_{z_r}$ (eq. \ref{normal}).
 Following the basic intuition of having to simplify the model, the tire forces are not modeled.
 
-The inputs to this model are the longitudinal force $\bar{F}_x$ and the lateral force $\bar{F}_y$, that are limited by friction limits
-according to the following rules:
-\begin{subequations}
-    \begin{eqnarray} 
-        \left(\frac{b}{L}\bar{F}_y\right)^2 + \left(\tilde{\chi_f}\bar{F}_x\right)^2 \leq \left(\mu_f F_{z_f}\right)^2 \\
-        \left(\frac{a}{L}\bar{F}_y\right)^2 + \left(\tilde{\chi_r}\bar{F}_x\right)^2 \leq \left(\mu_r F_{z_r}\right)^2
-    \end{eqnarray}
-\end{subequations}
+The inputs to this model are the longitudinal force $\bar{F}_x$ and the lateral force $\bar{F}_y$.
 Thus the equations that describe the motion of the point-mass model are the following:
 \begin{subequations}
     \begin{eqnarray}
@@ -598,7 +591,7 @@ steps for the singletrack model and $M$ steps for the pointmass model.
         0, & \text{otherwise}
         \end{cases}
         \end{equation}
-        \[  + W_{a}\sum_{l=1}^{M} 
+        \[  + W_{a}\sum_{k=1}^{N} 
         \begin{cases}
         \left(|\tan \alpha_{r_k}|-\tan \alpha_{r_k}^{\text{mod}}\right)^2, & \text{if } |\tan \alpha_{r_k}| \geq  \tan \alpha_{r_k}^{\text{mod}}\\
         0, & \text{otherwise}
