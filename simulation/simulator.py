@@ -30,11 +30,11 @@ class Simulator(ABC):
         if self.config.load:
             self.animation = self.init_animation(func=self.plot,frames=self.state_len-1)
         else:
-            if self.config.logging:
-                logfile_path = f'{self.src_dir}/logs/{self.name}.log'
-                self.logfile = open(logfile_path, "w") 
-                sys.stdout = self.logfile
             self.animation = self.init_animation(func=self.update)
+        if self.config.logging:
+            logfile_path = f'{self.src_dir}/logs/{self.name}.log'
+            self.logfile = open(logfile_path, "w") 
+            sys.stdout = self.logfile
         fig_manager = plt.get_current_fig_manager()
         fig_manager.window.showMaximized()
         plt.show()
