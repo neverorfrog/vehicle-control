@@ -1,8 +1,8 @@
 track_name: 'ippodromo'
 
 controller_names:
-  # - 'singletrack'
-  - 'cascaded'
+  - 'singletrack'
+  # - 'cascaded'
 
 obstacles: False
 
@@ -10,7 +10,7 @@ obstacles: False
 # there is one controller
 slip_angle_plot: True
 
-name: 'cascaded_slip_angle'
+name: 'singletrack_slip_angle2'
 
 save_gif: True
 save_images: False
