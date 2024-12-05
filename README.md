@@ -29,16 +29,23 @@ _Libraries have been installed in:
 3. Install dependencies
 ```pip install -r requirements.txt```
 
+### Pixi Enironment
+1. Install [pixi](https://pixi.sh/latest/)
+2. Install the env with `pixi install`
+3. Run the scripts defined in the pixi tasks
+
+
 ## Project Structure
 
 - config: Contains configuration files encoded in a yaml format for different controllers, models and environments (track or trajectory). 
-- controllers: Python modules related to controllers.
-  - feedback_linearization: Module containing feedback linearization controllers.
-  - mpc: Module containing model predictive controllers.
-- environment: Python modules related to code for constructing the track and some trajectories.
-- models: Classes representing different models (dynamic, kinematic, etc.)
-- simulation: Python modules defining the simulation cycle 
 - thirdparty: Third-party libraries (for now hsl libraries which deliver fast linear solvers for ipopt)
+- vehicle_control
+  - controllers: Python modules related to controllers.
+    - feedback_linearization: Module containing feedback linearization controllers.
+    - mpc: Module containing model predictive controllers.
+  - environment: Python modules related to code for constructing the track and some trajectories.
+  - models: Classes representing different models (dynamic, kinematic, etc.)
+  - simulation: Python modules defining the simulation cycle 
 
 ## Usage
 
@@ -62,25 +69,25 @@ In the gifs below we show some results on a test track. The plots on the right i
 - Commanded steering velocity $\omega$
 
 ### Cascaded (blue) with 20+15 steps vs Singletrack (orange) with 50 steps
-![alt](simulation/videos/race1_ippodromo.gif)
+![alt](experiments/videos/race1_ippodromo.gif)
 
 ### Cascaded (blue) with 20+35 steps vs Singletrack (orange) with 50 steps
-![alt](simulation/videos/race3_ippodromo.gif)
+![alt](experiments/videos/race3_ippodromo.gif)
 
 ### Cascaded is able to sustain higher maximal speeds
-![alt](simulation/videos/race4_ippodromo.gif)
+![alt](experiments/videos/race4_ippodromo.gif)
 
 ### Cascaded with obstacles (higher weight on obstacles)
-![alt](simulation/videos/cascaded_obstacles1_ippodromo.gif)
+![alt](experiments/videos/cascaded_obstacles1_ippodromo.gif)
 
 ### Cascaded with obstacles (lower weight on obstacles)
-![alt](simulation/videos/cascaded_obstacles2_ippodromo.gif)
+![alt](experiments/videos/cascaded_obstacles2_ippodromo.gif)
 
 ## Longer track with steeper curves
-![alt](simulation/videos/race2_shoe.gif)
+![alt](experiments/videos/race2_shoe.gif)
 
 ## Longer track with steeper curves and obstacles
-![alt](simulation/videos/cascaded_obstacles_shoe.gif)
+![alt](experiments/videos/cascaded_obstacles_shoe.gif)
 
 
 ## References
@@ -93,3 +100,4 @@ In the gifs below we show some results on a test track. The plots on the right i
 - Learning-based MPC
 - Observers for the state
 - More realistic track
+- Pygame

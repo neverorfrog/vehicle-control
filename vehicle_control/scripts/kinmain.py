@@ -1,6 +1,7 @@
-import utils.common_utils as utils
 from omegaconf import OmegaConf
-from simulation import KinematicRacingSimulator
+
+import vehicle_control.utils.common_utils as utils
+from vehicle_control.simulation import KinematicRacingSimulator
 
 simconfig = OmegaConf.create(utils.load_config("config/simconfig.yaml"))
 trackconfig = OmegaConf.create(

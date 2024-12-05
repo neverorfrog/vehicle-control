@@ -22,3 +22,5 @@ vehicle_control = { path = ".", editable = true }
 
 [tool.pixi.tasks]
 main = "python vehicle_control/scripts/main.py"
+traj-tracking = "python vehicle_control/scripts/traj_tracking_main.py"
+kinmain = "python vehicle_control/scripts/kinmain.py"

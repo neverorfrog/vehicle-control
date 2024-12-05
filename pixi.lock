@@ -667,7 +667,7 @@ packages:
   name: vehicle-control
   version: 0.1.0
   path: .
-  sha256: 1198a1cacd8aaacd1d919a6ccb676f6d890b12f1464e334773fda0a0ff463655
+  sha256: 1dec5e87479c7896759eaf4c5fdd7cb1b2c6c8b6bba145e56325a071d083939b
   requires_dist:
   - casadi>=3.6.7,<4
   - matplotlib>=3.9.3,<4

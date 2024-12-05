@@ -3,12 +3,14 @@ from itertools import count, cycle
 
 import matplotlib.pyplot as plt
 import numpy as np
-from controllers.controller import Controller
-from environment.trajectory import Trajectory
 from matplotlib.animation import FuncAnimation
 from matplotlib.backend_bases import FigureManagerBase
 from matplotlib.gridspec import GridSpec
-from models.robot import Robot
+
+from vehicle_control.controllers.controller import Controller
+from vehicle_control.environment.trajectory import Trajectory
+from vehicle_control.models.robot import Robot
+from vehicle_control.utils.common_utils import project_root
 
 
 class TrajectoryTrackingSimulation:
@@ -163,7 +165,10 @@ class TrajectoryTrackingSimulation:
         )
         plt.ioff()  # interactive mode off
         animation.save(
-            f"simulation/videos/{self.name}.gif", writer="pillow", fps=20, dpi=180
+            f"{project_root()}/experiments/videos/{self.name}.gif",
+            writer="pillow",
+            fps=20,
+            dpi=180,
         )
         plt.ion()  # interactive mode on
         fig_manager: FigureManagerBase = plt.get_current_fig_manager()
