@@ -21,3 +21,4 @@ platforms = ["linux-64"]
 vehicle_control = { path = ".", editable = true }
 
 [tool.pixi.tasks]
+main = "python vehicle_control/scripts/main.py"

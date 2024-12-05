@@ -7,14 +7,17 @@ from matplotlib.animation import FuncAnimation
 from matplotlib.figure import Figure
 from omegaconf import OmegaConf
 
+from vehicle_control.utils.common_utils import project_root
+
 
 class Simulator(ABC):
 
     def __init__(self, config: OmegaConf):
         self.init_containers()
         self.config = config
-        self.src_dir = os.path.dirname(os.path.abspath(__file__))
-        self.data_path = f"{self.src_dir}/data/{self.name}"
+        self.root = project_root()
+        self.data_path = f"{self.root}/experiments/data/{self.name}"
+        os.makedirs(self.data_path, exist_ok=True)
         self.loaded = False
 
         # Loading simulation data if needed
@@ -24,9 +27,8 @@ class Simulator(ABC):
             print(f"State trajectory length: {self.state_len}")
 
     def run(self):
-        self.images_path = f"{self.src_dir}/images/{self.name}"
-        if self.config.save_images:
-            os.makedirs(self.images_path, exist_ok=True)
+        self.images_path = f"{self.root}/experiments/images/{self.name}"
+        os.makedirs(self.images_path, exist_ok=True)
 
         if self.config.load:
             self.animation = self.init_animation(
@@ -35,8 +37,9 @@ class Simulator(ABC):
         else:
             self.animation = self.init_animation(func=self.update)
         if self.config.logging:
-            logfile_path = f"{self.src_dir}/logs/{self.name}.log"
-            self.logfile = open(logfile_path, "w")
+            self.logfile_path = f"{self.root}/experiments/logs/{self.name}.log"
+            os.makedirs(self.logfile_path, exist_ok=True)
+            self.logfile = open(self.logfile_path, "w")
             sys.stdout = self.logfile
         fig_manager = plt.get_current_fig_manager()
         fig_manager.window.showMaximized()
@@ -45,11 +48,13 @@ class Simulator(ABC):
     def save_animation(self):
         plt.gcf().clear()
         figure = plt.figure(figsize=(20, 10))
+        animation_path = f"{self.root}/experiments/videos"
+        os.makedirs(animation_path, exist_ok=True)
         animation: FuncAnimation = self.init_animation(
             func=self.plot, fig=figure, frames=self.state_len - 1
         )
         animation.save(
-            f"{self.src_dir}/videos/{self.name}.gif",
+            f"{animation_path}/{self.name}.gif",
             fps=20,
             dpi=200,
             bitrate=1800,
