@@ -1,0 +1,36 @@
+horizon: 20
+mpc_dt: 0.03
+horizon_pm: 25
+ds_pm: 3
+obstacles: false
+color: '#007CFF'
+cost_weights:
+  time: 5
+  speed: 1
+  ey: 1
+  epsi: 2
+  w: 4
+  Fx: 1.0e-05
+  Fy: 1.0e-05
+  deviation_st: 0.001
+  deviation_pm: 0.001
+  boundary: 10
+  slip: 1500
+  obstacles: 10
+  obstacles_pm: 10
+  switch_F: 1.0e-05
+input_constraints:
+  w_min: -0.4
+  w_max: 0.4
+  mu_lim: 0.95
+state_constraints:
+  Ux_min: 3
+  max_speed: 18
+  delta_min: -0.45
+  delta_max: 0.45
+  ey_min: -3
+  ey_max: 3
+state_pm_constraints:
+  V_min: 3
+  ey_min: -3
+  ey_max: 3

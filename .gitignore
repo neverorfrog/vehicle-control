@@ -1,4 +1,12 @@
 __pycache__
+*/images
+
+# coinhsl
 thirdparty/coinhsl/coinhsl
 thirdparty/coinhsl/config.log
-*/images
+thirdparty/coinhsl/config.status
+thirdparty/coinhsl/Makefile
+thirdparty/coinhsl/libtool
+# pixi environments
+.pixi
+*.egg-info

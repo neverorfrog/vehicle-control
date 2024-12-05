@@ -1,0 +1,26 @@
+default_language_version:
+  python: python3
+
+exclude: ^3rdparty/|3rdparty|^external/|
+
+repos:
+
+  - repo: https://github.com/psf/black
+    rev: 24.10.0
+    hooks:
+      - id: black
+        files: '^.*\.py'
+        args: ["--line-length", "90"]
+
+  - repo: https://github.com/pycqa/isort
+    rev: 5.13.2
+    hooks:
+      - id: isort
+        name: isort (python)
+        args: ["--profile", "black", "--line-length", "80"]
+
+  - repo: https://github.com/PyCQA/flake8
+    rev: 7.1.1
+    hooks:
+      - id: flake8
+        args: ["--extend-ignore", "E501, W503"]
