@@ -1,3 +1,4 @@
-from .racing import RacingSimulator
-from .simulator import Simulator
 from .kinracing import KinematicRacingSimulator
+from .racing import RacingSimulator
+
+__all__ = ["RacingSimulator", "KinematicRacingSimulator"]

@@ -1,35 +1,42 @@
-from typing import Union
-from abc import abstractmethod
 from abc import ABC
+from typing import Union
+
 import numpy as np
+
 
 class FancyVector(ABC):
     """
     Abstract Base Class for States and Actions
     In general it holds values and casadi variables (that's why it's fancy)
     """
-    
+
     @classmethod
     def create(cls, *args, **kwargs):
         return cls(*args, **kwargs)
-    
+
     @property
-    def values(self) -> np.ndarray: return self._values #redefined by subclass
-    
+    def values(self) -> np.ndarray:
+        return self._values  # redefined by subclass
+
     @property
-    def keys(self) -> list: return self._keys #redefined by subclass
-    
+    def keys(self) -> list:
+        return self._keys  # redefined by subclass
+
     @property
-    def syms(self): return self._syms #redefined by subclass
-    
+    def syms(self):
+        return self._syms  # redefined by subclass
+
     @property
-    def labels(self): return self._labels #redefined by subclass
-    
+    def labels(self):
+        return self._labels  # redefined by subclass
+
     @property
-    def variables(self): return [self.syms[i] for i in range(len(self.values))]
-    
-    def index(self, key): return self.keys.index(key)
-    
+    def variables(self):
+        return [self.syms[i] for i in range(len(self.values))]
+
+    def index(self, key):
+        return self.keys.index(key)
+
     def __getitem__(self, key: Union[int, str]):
         if isinstance(key, int):
             return self.values[key]
@@ -45,10 +52,15 @@ class FancyVector(ABC):
 
     def __len__(self):
         return len(self.values)
-    
+
     def __str__(self):
-        return str({key: f"{value:.2f}" for key,value in dict(zip(self.keys, self.values)).items()})
-    
+        return str(
+            {
+                key: f"{value:.2f}"
+                for key, value in dict(zip(self.keys, self.values)).items()
+            }
+        )
+
     def __add__(self, other):
         """
         Overload + operator.

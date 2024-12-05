@@ -1,2 +1,4 @@
 from .track import Track
-from .trajectory import Trajectory
+from .trajectory import Circle
+
+__all__ = ["Track", "Circle"]
